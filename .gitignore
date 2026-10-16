@@ -1,0 +1,53 @@
+# Kaggle credentials and tokens
+kaggle.json
+access_token
+.kaggle/
+
+# Outputs and models
+out/
+outputs/
+*.pt
+*.pth
+*.bin
+*.onnx
+
+# Data directories (keep directory structure via .gitkeep)
+data/raw/*
+!data/raw/.gitkeep
+data/bonafide_ref/*
+!data/bonafide_ref/.gitkeep
+data/spoof_f5tts/*
+!data/spoof_f5tts/.gitkeep
+data/spoof_vieneu/*
+!data/spoof_vieneu/.gitkeep
+data/spoof_unseen/*
+!data/spoof_unseen/.gitkeep
+data/real_app_test/*
+!data/real_app_test/.gitkeep
+
+# Audio formats (ignore heavy media files)
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+*.opus
+*.amr
+
+# Benchmarks logs
+benchmarks/latency_log.json
+
+# Python cache & testing
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS files
+.DS_Store
+Thumbs.db
