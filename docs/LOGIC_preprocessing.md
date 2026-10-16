@@ -1,43 +1,44 @@
-# LOGIC_preprocessing — Audio Signal Normalization & Augmentation
+# LOGIC_preprocessing — Chuẩn Hóa Tín Hiệu & Tăng Cường Âm Thanh
 
 ---
 
-## 1. Preprocessing Pipeline (`src/preprocessing/audio_processor.py`)
+## 1. Đường Ống Tiền Xử Lý Âm Thanh (`src/preprocessing/audio_processor.py`)
 
-### Step 1: Mono Conversion & Resampling
-- Audio channels averaged to mono: $x_{mono}[n] = \frac{1}{C} \sum_{c=1}^C x_c[n]$.
-- Sampling rate resampled to exactly **16,000 Hz** (standard for Wav2Vec 2.0 and AASIST).
+### Bước 1: Chuyển Về Kênh Đơn (Mono) & Tái Lấy Mẫu (16.000 Hz)
+- Các kênh âm thanh đa kênh (Stereo) được lấy trung bình cộng về 1 kênh duy nhất:
+  $$x_{mono}[n] = \frac{1}{C} \sum_{c=1}^C x_c[n]$$
+- Đưa toàn bộ mẫu âm thanh từ các tần số 24kHz / 44.1kHz / 48kHz về chuẩn **16.000 Hz (16-bit PCM)** — yêu cầu bắt buộc của Wav2Vec 2.0 và AASIST.
 
-### Step 2: Silence Trimming
-- RMS energy calculated with `frame_length=512`, `hop_length=160`.
-- Threshold set at the **20th percentile** of the frame energies:
+### Bước 2: Cắt Bỏ Khoảng Lặng Đầu & Cuối (Silence Trimming)
+- Tính toán đường bao năng lượng hiệu dụng (RMS) với `frame_length=512, hop_length=160`.
+- Ngưỡng cắt đặt tại **phân vị thứ 20 (20th percentile)** của năng lượng các khung:
   $$\text{threshold} = P_{20}(\text{RMS})$$
-- Frames with $\text{RMS} > \text{threshold}$ are retained; leading and trailing silence frames are sliced off.
-- Eliminates technical bias caused by silence artifacts in recording tools.
+- Các khung có $\text{RMS} > \text{threshold}$ được giữ lại; phần khoảng lặng ở đầu và cuối file bị cắt bỏ.
+- Mục đích: Triệt tiêu hiện tượng rò rỉ nhãn do khoảng lặng của người thật tạo ra.
 
-### Step 3: Fixed Duration (64,000 Samples = 4.0s)
-- **If length < 64,000 samples**: Repeat padding is applied using `np.tile(wav, repeats)[:64000]`.
-  > STUBBORN_FACT: Repeat padding is strictly preferred over zero-padding to maintain spectral-temporal continuity for convolutional and graph filters.
-- **If length >= 64,000 samples**: Crop to the first 64,000 samples (or center crop during inference).
+### Bước 3: Cố Định Độ Dài 4 Giây (64.000 Mẫu Điểm)
+- **Nếu file ngắn hơn 4 giây (< 64.000 mẫu)**: Thực hiện nối lặp lại chính tín hiệu đó (`Repeat Padding`) bằng `np.tile(wav, num_repeats)[:64000]`.
+  > STUBBORN_FACT: Bắt buộc dùng Repeat Padding thay vì đệm số 0 (Zero-padding) nhằm giữ tính liên tục phổ - thời gian cho các bộ lọc tích chập và đồ thị chú ý.
+- **Nếu file dài hơn 4 giây (>= 64.000 mẫu)**: Cắt lấy 64.000 mẫu đầu tiên (lúc huấn luyện có thể cắt ngẫu nhiên, lúc suy luận cắt chính giữa hoặc trượt cửa sổ).
 
-### Step 4: Amplitude Z-Score Normalization
-- Signal normalized to zero-mean and unit-variance:
+### Bước 4: Chuẩn Hóa Biên Độ Z-Score
+- Chuẩn hóa tín hiệu về trung bình bằng 0, phương sai bằng 1:
   $$x_{norm}[n] = \frac{x[n] - \mu}{\sigma + 10^{-8}}$$
 
 ---
 
-## 2. Augmentation Algorithms
+## 2. Các Thuật Toán Tăng Cường Dữ Liệu (Augmentation)
 
-### RawBoost (Domain: Time-Domain Waveform)
-- **Branch 1**: Signal-dependent additive noise (ISD).
-- **Branch 2**: Signal-independent impulsive noise (SSI).
-- **Branch 3**: Linear and non-linear convolutional filtering (LnL - Algo 3/5).
-- Injected on-the-fly during training with 50% probability.
+### Thuật Toán RawBoost (Miền Thời Gian Waveform)
+- **Nhánh 1**: Nhiễu cộng tính phụ thuộc tín hiệu (ISD).
+- **Nhánh 2**: Nhiễu xung không phụ thuộc tín hiệu (SSI).
+- **Nhánh 3**: Lọc tích chập tuyến tính và phi tuyến (LnL - Algo 3/5).
+- Áp dụng ngẫu nhiên trong DataLoader lúc huấn luyện với xác suất 50%.
 
-### Codec & Bandwidth Simulation
-- **Opus**: Low-bitrate simulation (16–32 kbps, simulating Zalo / Telegram voice notes).
-- **AMR / GSM**: Narrowband telephony codecs.
-- **8kHz Downsampling & Filtering**: Resample to 8kHz and back to 16kHz with 300Hz–3400Hz bandpass filter (simulating PSTN / VoIP calls).
+### Mô Phỏng Nén Kênh Truyền Viễn Thông & Mạng Xã Hội (Codec Simulation)
+- **Chuẩn nén Opus**: Bitrate thấp 16–32 kbps (mô phỏng tin nhắn thoại Zalo, Telegram).
+- **Chuẩn nén viễn thông**: AMR-NB, AMR-WB, GSM.
+- **Hạ tần số 8 kHz & Bộ lọc dải thông**: Hạ tần số xuống 8 kHz và nội suy ngược lên 16 kHz kết hợp bộ lọc Bandpass 300Hz–3400Hz (mô phỏng cuộc gọi thoại PSTN/VoIP).
 
 ---
 

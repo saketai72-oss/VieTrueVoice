@@ -1,15 +1,15 @@
-# STANDARDS_api-benchmarks — API Specifications & Benchmark Schemas
+# STANDARDS_api-benchmarks — Đặc Tả API & Định Dạng Benchmark
 
 ---
 
-## 1. REST API Specification (`src/app/server.py`)
+## 1. Đặc Tả REST API Suy Luận (`src/app/server.py`)
 
-- **Base URL**: `/api/v1`
+- **Đường dẫn cơ sở (Base URL)**: `/api/v1`
 - **Endpoint**: `POST /api/v1/predict`
-- **Content-Type**: `multipart/form-data`
-- **Request Body**: `file: UploadFile` (audio formats: `.wav`, `.mp3`, `.m4a`, `.ogg`)
+- **Kiểu nội dung (Content-Type)**: `multipart/form-data`
+- **Dữ liệu đầu vào**: `file: UploadFile` (hỗ trợ các định dạng âm thanh: `.wav`, `.mp3`, `.m4a`, `.ogg`, `.opus`)
 
-### Response Schema (`200 OK`)
+### Cấu Trúc Phản Hồi Thành Công (`200 OK`)
 ```json
 {
   "request_id": "req_20261016_001",
@@ -23,9 +23,9 @@
 
 ---
 
-## 2. Benchmark Log Schema (`benchmarks/latency_log.json`)
+## 2. Cấu Trúc Log Đo Độ Trễ Ẩn Danh (`benchmarks/latency_log.json`)
 
-All runtime evaluation and bot requests must append an anonymous JSON entry:
+Mọi yêu cầu suy luận qua Web Demo, Bot Telegram hoặc script kiểm thử đều phải tự động nối thêm bản ghi JSON ẩn danh:
 
 ```json
 {
@@ -42,9 +42,9 @@ All runtime evaluation and bot requests must append an anonymous JSON entry:
 
 ---
 
-## 3. Evaluation Metrics Table (`benchmarks/eval_metrics.csv`)
+## 3. Cấu Trúc Bảng Kết Quả Đánh Giá (`benchmarks/eval_metrics.csv`)
 
-Columns required for tracking experiments:
+Các cột bắt buộc để theo dõi tiến độ thực nghiệm và đối sánh trước/sau:
 
 ```csv
 experiment_id,model_name,augmentation,test_condition,tts_generator,eer_percent,min_dcf,date_evaluated
@@ -52,13 +52,13 @@ experiment_id,model_name,augmentation,test_condition,tts_generator,eer_percent,m
 
 ---
 
-## 4. Latency Benchmark Protocol (`scripts/benchmark_latency.py`)
+## 4. Giao Thức Đo Độ Trễ Chuẩn (`scripts/benchmark_latency.py`)
 
-- Input audio: 5.0–10.0s clip.
-- Iterations: Exactly 30 consecutive inferences.
-- Metric: **Median latency**.
-- Threshold: **<= 3.0 seconds**.
-- Output: `benchmarks/latency_benchmark.csv`.
+- **Tệp âm thanh đầu vào**: Đoạn thoại thực tế dài từ 5,0 đến 10,0 giây.
+- **Số lần lặp**: Đo liên tiếp đúng **30 lần**.
+- **Chỉ số tổng hợp**: Lấy giá trị **Trung vị (Median Latency)**.
+- **Ngưỡng đạt yêu cầu**: **<= 3,0 giây**.
+- **Đầu ra**: Tự động lưu bảng kết quả vào `benchmarks/latency_benchmark.csv`.
 
 ---
 

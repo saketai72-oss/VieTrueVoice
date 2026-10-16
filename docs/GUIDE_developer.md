@@ -1,104 +1,93 @@
-# GUIDE_developer — Implementation rules for ViTrueVoice
+# GUIDE_developer — Tiêu Chuẩn Thực Thi & Lập Trình Cho ViTrueVoice
 
 ---
 
-## Rules
+## 1. Các Quy Tắc Cốt Lõi
 
-> Hard constraints. AI must follow unconditionally.
+> Ràng buộc cứng. AI bắt buộc phải tuân thủ vô điều kiện.
 
-| Rule | Detail |
-|------|--------|
-| No unsolicited refactor | Never refactor working code unless explicitly asked |
-| Git operations | Prefix all AI commit messages with `[AI]`. Do not push without user consent |
-| TDD | Write or update tests before implementation for anything affecting audio processing, data loaders, models, loss, evaluation, or API endpoints |
-| PII / Biometrics Ethics | Never log, store, or output real names, phone numbers, or raw voice data. Use SPK_XXXX and SHA-256 |
-| RAM-Only Inference | Read audio stream directly from RAM in API/Bot; delete temporary files immediately |
-
----
-
-## Refactoring Standards
-
-| Rule | Detail |
-|------|--------|
-| No unsolicited refactor | Never refactor working code unless explicitly asked — even if it violates standards below |
-
-### When to Extract a Function
-
-| Trigger | Action |
-|---------|--------|
-| Logic or template appears **2+ times** | Extract immediately — no exceptions |
-| Function body exceeds **20 lines** | Extract inner logic into named helpers |
-| Inline expression requires a comment to understand | Extract into a named function instead |
-| Repeated signal transformation | Extract into a separate preprocessing helper |
-
-### When to Split a File
-
-| Trigger | Action |
-|---------|--------|
-| File exceeds **200 lines** | Review — split if multiple responsibilities |
-| File exceeds **400 lines** | Split mandatory — one responsibility per file |
-| File contains 2+ unrelated concept groups | Split regardless of line count |
-| A function is reused across 2+ files | Move to a shared helper file |
-
-### Module Structure Rules
-
-| Rule | Detail |
-|------|--------|
-| One responsibility per file | A file does one thing: processes audio signals, defines a neural architecture, runs training loop, or computes metrics |
-| Orchestrators stay thin | Entry-point files (`train.py`, `manage_kaggle.py`, `src/app/server.py`) contain orchestration only, not core business algorithms |
-| Helpers are stateless | Helper functions must be pure — no side effects, no global state mutations |
-| Shared helpers live in one place | If 2+ files need the same helper, extract to a shared module — never duplicated |
-| Import direction is one-way | Preprocessing never imports from models. Models never import from app |
-
-### Zero-Loss Refactor Protocol
-
-Use for any file split, large refactor, or move:
-
-1. **Audit** first.
-2. **Create targets** before removing old code.
-3. **Bridge** with re-exports or adapters.
-4. **Verify** with typecheck and `pytest tests/ -v`.
-5. **Cut** only after behavior is verified stable.
-6. **Verify again** after cleanup.
-
-Do not skip the bridge phase for large moves.
-
-### Anti-Patterns (Banned)
-
-| Pattern | Why it fails | Fix |
-|---------|-------------|-----|
-| Zero padding audio clips | Discontinuous frequency spectrum breaks AASIST / SincConv | Use repeat padding (`np.tile`) to 64,000 samples |
-| Equal loss weights for imbalanced classes | High false alarms on genuine speakers | Use `weight=torch.FloatTensor([0.1, 0.9])` |
-| Writing uploaded voice files to disk permanently | Violates privacy laws (Law 91/2025/QH15 & Decree 356/2025/NĐ-CP) | Process via `io.BytesIO` in RAM; wipe temp files immediately |
-| Logging raw filenames in benchmark logs | Exposes volunteer/speaker identity | Hash audio payload with SHA-256 |
-| Logic duplicated across files | Conflicts when one is updated | Extract to shared helper |
+| Quy tắc | Chi tiết thực tế |
+|---------|------------------|
+| Không tự ý refactor | Tuyệt đối không tái cấu trúc mã đang hoạt động nếu người dùng không yêu cầu rõ ràng |
+| Quy ước Git Commit | Mọi bản commit do AI sinh ra bắt buộc gắn tiền tố `[AI]`. Không tự ý push khi chưa có sự đồng ý |
+| Bắt buộc TDD | Viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn cho mọi logic liên quan đến tiền xử lý, mô hình, mất mát, đánh giá và API |
+| Đạo đức Dữ liệu & PII | Tuyệt đối không lưu tên thật, số điện thoại hoặc giọng nói định danh cá nhân. Bắt buộc dùng mã `SPK_XXXX` và băm `SHA-256` |
+| Xử lý trực tiếp trên RAM | Đọc file âm thanh qua stream `io.BytesIO` trên RAM trong API/Bot; xóa hủy file tạm ngay lập tức sau khi trả kết quả |
 
 ---
 
-## Architectural Defaults
+## 2. Tiêu Chuẩn Tái Cấu Trúc (Refactoring Standards)
 
-### 3-Layer Separation
-- **Data/Signal Layer**: `src/preprocessing/` (raw signal -> normalized 16kHz mono 64k tensor).
-- **Model/Representation Layer**: `src/models/` & `src/training/` (SSL Wav2Vec2 + AASIST HS-GAL graph back-end).
-- **Service/Presentation Layer**: `src/app/` (FastAPI / Gradio / Telegram bot orchestrators).
+### Khi Nào Cần Tách Hàm (Extract Function)
 
-### State & Storage Registry
-- **Kaggle Input State**: `/kaggle/input/<dataset-name>` (Read-only source).
-- **Kaggle Working State**: `/kaggle/working/best_model.pt` (Checkpoint storage).
-- **Local Artifacts**: `./out/` (Downloaded weights and logs).
-- **Benchmarks**: `benchmarks/eval_metrics.csv` and `benchmarks/latency_log.json`.
+| Điều kiện kích hoạt | Hành động bắt buộc |
+|---------------------|-------------------|
+| Đoạn mã hoặc mẫu xử lý xuất hiện từ **2 lần trở lên** | Trích xuất thành hàm dùng chung ngay lập tức — không ngoại lệ |
+| Thân hàm vượt quá **20 dòng** | Tách các đoạn logic bên trong thành các hàm trợ giúp (helpers) có tên tường minh |
+| Biểu thức cần chú thích (comment) mới hiểu | Thay thế biểu thức bằng một hàm có tên mô tả rõ ý đồ |
+| Thao tác biến đổi tín hiệu lặp lại | Trích xuất thành hàm tiền xử lý riêng biệt |
 
-### Namespace & Collision Governance
-- **Audio manifests**: `data/manifests/{train,dev,test_indomain,test_unseen}.csv` with columns `audio_path,label,speaker_id`.
-- **Labels**: `0` = Spoof (Giả), `1` = Bona fide (Thật).
+### Khi Nào Cần Tách Tệp (Split File)
+
+| Điều kiện kích hoạt | Hành động bắt buộc |
+|---------------------|-------------------|
+| Tệp vượt quá **200 dòng** | Xem xét phân tách nếu tệp đảm nhận từ 2 trách nhiệm trở lên |
+| Tệp vượt quá **400 dòng** | Bắt buộc chia tách — mỗi tệp chỉ giữ một trách nhiệm duy nhất |
+| Tệp chứa từ 2 nhóm khái niệm không liên quan | Chia tách bất kể số lượng dòng mã |
+| Một hàm được tái sử dụng ở 2 tệp khác nhau | Chuyển hàm đó vào tệp helper dùng chung |
+
+### Quy Tắc Cấu Trúc Module
+
+| Quy tắc | Chi tiết thực tế |
+|---------|------------------|
+| Một trách nhiệm cho mỗi tệp | Mỗi tệp làm đúng một việc: xử lý tín hiệu, định nghĩa kiến trúc mạng, điều khiển vòng lặp huấn luyện, hoặc tính toán chỉ số |
+| File điều phối (Orchestrator) phải gọn | Các tệp entry-point (`train.py`, `manage_kaggle.py`, `src/app/server.py`) chỉ giữ vai trò kết nối, không chứa thuật toán lõi |
+| Hàm trợ giúp (Helper) phi trạng thái | Các hàm helper phải là hàm thuần túy (pure function) — không gây side-effect, không đọc/ghi biến toàn cục |
+| Chiều import một chiều | Preprocessing không import Models. Models không import App. Helpers không import Orchestrators |
+
+### Giao Thức Tái Cấu Trúc Không Mất Mát (Zero-Loss Refactor Protocol)
+
+Áp dụng cho mọi lần chia tách tệp hoặc tái cấu trúc lớn:
+
+1. **Khảo sát (Audit)**: Đọc toàn bộ module và các nơi đang gọi trước khi chỉnh sửa.
+2. **Tạo đích đến (Create targets)**: Tạo các tệp/hàm mới trước khi xóa mã cũ.
+3. **Cầu nối (Bridge)**: Dùng re-export hoặc adapter để các module gọi cũ không bị gãy import đột ngột.
+4. **Xác minh (Verify)**: Chạy `pytest tests/ -v` để đảm bảo mọi bài kiểm thử đều vượt qua.
+5. **Cắt bỏ (Cut)**: Xóa bỏ mã nguồn cũ chỉ sau khi hành vi mới đã hoàn toàn ổn định.
+6. **Kiểm tra lại (Verify again)**: Chạy lại toàn bộ test suite lần cuối.
 
 ---
 
-## Edge Cases
+## 3. Các Phản Mẫu Bị Nghiêm Cấm (Anti-Patterns)
 
-- **Audio file with pure silence**: Handled by falling back to zero array of length 64,000 to prevent division by zero in std normalization.
-- **Audio duration < 0.2s**: Repeat padded until >= 64,000 samples.
-- **Audio duration > 10s**: Inference uses sliding window / center crop (4.0s) and averages confidence scores.
+| Phản mẫu | Hậu quả kỹ thuật | Cách xử lý đúng |
+|----------|------------------|-----------------|
+| Đệm số 0 (Zero-padding) cho âm thanh ngắn | Gây đứt gãy phổ tín hiệu, làm hỏng đặc trưng SincConv / AASIST | Dùng nối lặp `Repeat Padding` (`np.tile`) cho đủ 64.000 mẫu |
+| Trọng số bằng nhau trong hàm mất mát CE | Tỷ lệ báo động giả (False Alarm) cao trên người dùng thật | Dùng trọng số cố định `weights = [0.1, 0.9]` cho `[Spoof, Bona fide]` |
+| Lưu file ghi âm người dùng lâu dài trên ổ cứng | Vi phạm Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 & Nghị định 356/2025/NĐ-CP | Đọc qua RAM stream (`io.BytesIO`) và xóa hủy tệp tạm ngay lập tức |
+| Ghi tên tệp gốc vào log đánh giá | Rò rỉ danh tính người đóng góp giọng nói | Băm ẩn danh toàn bộ bằng mã `SHA-256` |
+| Lặp lại logic biến đổi tín hiệu ở nhiều file | Không đồng bộ khi cập nhật giải thuật | Tập trung tại `src/preprocessing/audio_processor.py` |
+
+---
+
+## 4. Các Mặc Định Về Kiến Trúc
+
+### Phân Tách 3 Lớp (3-Layer Separation)
+- **Lớp Tín Hiệu & Dữ Liệu**: `src/preprocessing/` (nhận âm thanh thô → tensor 16kHz mono 64.000 mẫu đã chuẩn hóa).
+- **Lớp Biểu Diễn & Mô Hình**: `src/models/` và `src/training/` (trích xuất đặc trưng tự giám sát Wav2Vec2 + đồ thị chú ý HS-GAL).
+- **Lớp Dịch Vụ & Trình Diễn**: `src/app/` (API FastAPI, giao diện Gradio, Bot Telegram).
+
+### Không Gian Tên & Định Danh (Namespace Governance)
+- **File Manifests**: Lưu tại `data/manifests/{train,dev,test_indomain,test_unseen}.csv` gồm các cột `audio_path,label,speaker_id`.
+- **Quy ước Nhãn**: `0` = Giả mạo (`Spoof`), `1` = Giọng thật (`Bona fide`).
+
+---
+
+## 5. Xử Lý Các Trường Hợp Biên (Edge Cases)
+
+- **File âm thanh hoàn toàn im lặng**: Tự động trả về mảng zero kích thước 64.000 mẫu kèm xử lý tránh chia cho 0 trong chuẩn hóa độ lệch chuẩn (`std < 1e-8`).
+- **File âm thanh cực ngắn (< 0,2 giây)**: Nối lặp tuần hoàn cho đến khi đạt `>= 64.000 mẫu`.
+- **File âm thanh dài (> 10 giây)**: Khi suy luận cắt cửa sổ trượt 4,0 giây (64.000 mẫu) và lấy trung bình cộng điểm tin cậy.
 
 ---
 

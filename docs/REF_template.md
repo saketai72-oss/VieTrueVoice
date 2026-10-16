@@ -1,31 +1,31 @@
-# [PREFIX_filename] — [One-line purpose]
+# [TIỀN_TỐ_tên_tệp] — [Mục đích của tệp trong 1 dòng]
 
-> **Compact, not incomplete.** Remove sections with no content. Never remove rules, edge cases, or reference rows to save space.
-
----
-
-## Rules
-> Hard constraints. AI must follow these unconditionally.
-
-| Rule | Detail |
-|------|--------|
-| [rule] | [what it means in practice] |
+> **Ngắn gọn nhưng không thiếu.** Xóa các phần không có nội dung. Tuyệt đối không xóa quy tắc, trường hợp biên hoặc bảng tham chiếu để tiết kiệm diện tích.
 
 ---
 
-## Reference
-> Lookup tables. No prose.
+## Các Quy Tắc
+> Ràng buộc cứng. AI bắt buộc phải tuân thủ vô điều kiện.
 
-| Item | Value | Notes |
-|------|-------|-------|
-| [item] | [value] | [notes] |
+| Quy tắc | Chi tiết thực tế |
+|---------|------------------|
+| [quy tắc] | [ý nghĩa trong thực tế] |
 
 ---
 
-## Edge Cases
-> Only document cases that are non-obvious or have caused bugs.
+## Bảng Tra Cứu Tham Chiếu
+> Bảng tra cứu dữ liệu. Không viết văn xuôi dài dòng.
 
-- **[case]**: [what to do]
+| Mục | Giá trị | Ghi chú |
+|-----|---------|---------|
+| [mục] | [giá trị] | [ghi chú] |
+
+---
+
+## Các Trường Hợp Biên (Edge Cases)
+> Chỉ ghi nhận các trường hợp không hiển nhiên hoặc từng gây ra lỗi/hồi quy.
+
+- **[tình huống biên]**: [hướng xử lý cụ thể]
 
 ---
 

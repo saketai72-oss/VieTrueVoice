@@ -1,39 +1,41 @@
-# REF_developer-reference — Developer reference tables
+# REF_developer-reference — Bảng Tra Cứu Dành Cho Nhà Phát Triển
 
-> Reference only. Rules live in `docs/GUIDE_developer.md`.
+> Tài liệu chỉ dùng để tra cứu tham chiếu. Quy tắc chuẩn mực chính thức nằm tại `docs/GUIDE_developer.md`.
 
 ---
 
-## Reference
+## 1. Bảng Quy Ước Đặt Tên (Naming Conventions)
 
-### Naming Conventions
+| Đối tượng | Quy tắc | Nên dùng | Không nên dùng |
+|-----------|---------|----------|----------------|
+| Hàm (Functions) | `snake_case`, động từ + danh từ | `preprocess_audio`, `calculate_eer` | `doStuff`, `thing` |
+| Biến (Variables) | Đặt tên theo ý đồ, tránh tên chung chung | `waveform`, `sample_rate`, `labels` | `data`, `tmp` |
+| Biến logic (Booleans) | Bắt đầu bằng `is_` / `has_` / `can_` / `should_` | `is_spoof`, `has_silence` | `flag`, `state` |
+| Hàm kiểm thử Pytest | Bắt đầu bằng `test_` + đối tượng + tình huống | `test_preprocess_crop_long_audio` | `test1`, `my_test` |
+| Tệp âm thanh | `SPK_XXXX_sampleYY.wav` | `SPK_0001_utt01.wav` | `NguyenVanA.wav` |
+| Checkpoint trọng số | `best_model.pt`, `checkpoint_epochN.pt` | `best_model.pt` | `model_final_v2_moi.pt` |
 
-| Type | Rule | Do | Don't |
-|------|------|----|-------|
-| Functions | `camelCase` / `snake_case`, verb + noun | `preprocess_audio`, `calculate_eer` | `doStuff`, `thing` |
-| Variables | intent first, avoid generic names | `waveform`, `sample_rate`, `labels` | `data`, `tmp` |
-| Booleans | prefix `is_` / `has_` / `can_` / `should_` | `is_spoof`, `has_silence` | `flag`, `state` |
-| Pytest functions | prefix `test_` + unit + scenario | `test_preprocess_crop_long_audio` | `test1`, `my_test` |
-| Audio files | `SPK_XXXX_sampleYY.wav` | `SPK_0001_utt01.wav` | `John_Doe.wav` |
-| Model checkpoints | `best_model.pt`, `checkpoint_epochN.pt` | `best_model.pt` | `model_final_v2_new.pt` |
+---
 
-### Commands
+## 2. Bảng Tra Cứu Các Lệnh CLI Thường Dùng
 
-| Command | Purpose |
-|---------|---------|
-| `pytest tests/ -v` | Run full test suite |
-| `python manage_kaggle.py push` | Push code to Kaggle GPU |
-| `python manage_kaggle.py status` | Check Kaggle GPU kernel status |
-| `python manage_kaggle.py output` | Download model checkpoints to `./out/` |
-| `python scripts/eval_eer.py` | Run EER evaluation across test manifests |
-| `python scripts/benchmark_latency.py` | Benchmark 30-run median inference latency |
+| Lệnh CLI | Mục đích sử dụng |
+|----------|------------------|
+| `pytest tests/ -v` | Chạy toàn bộ bộ kiểm thử tự động |
+| `python manage_kaggle.py push` | Đẩy mã nguồn lên Kaggle GPU để chạy huấn luyện |
+| `python manage_kaggle.py status` | Kiểm tra trạng thái kernel trên Kaggle (queued -> running -> complete) |
+| `python manage_kaggle.py output` | Tải trọng số huấn luyện và log từ Kaggle về thư mục `./out/` |
+| `python scripts/eval_eer.py` | Chạy đánh giá tự động EER trên các tập manifest kiểm thử |
+| `python scripts/benchmark_latency.py` | Bấm giờ tự động 30 lần liên tiếp để đo trung vị thời gian phản hồi |
 
-### Version
+---
 
-| Item | Detail |
-|------|--------|
-| Current version | `0.1.0` |
-| Source of truth | `src/__init__.py` |
+## 3. Quản Lý Phiên Bản (Version Governance)
+
+| Hạng mục | Chi tiết |
+|----------|----------|
+| Phiên bản hiện tại | `0.1.0` |
+| Nguồn chân lý phiên bản | `src/__init__.py` |
 
 ---
 
