@@ -74,7 +74,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 
 ## Các Cột Mốc Nghiệm Thu (Milestones)
 - [x] v0.1.0: Khởi tạo khung dự án, requirements, pipeline CI xanh, module tiền xử lý kèm unit tests TDD.
-- [ ] v0.2.0: Must #1 (W4) — Chuẩn bị dữ liệu, lọc chất lượng ASR WER, script chia tập độc lập người nói (Speaker-Disjoint).
+- [x] v0.2.0: Must #1 (W4) — Chuẩn bị dữ liệu, lọc chất lượng ASR WER, script chia tập độc lập người nói (Speaker-Disjoint), thuật toán RawBoost & mô phỏng Codec.
 - [ ] v0.3.0: Must #2 (W5) — Đường ống huấn luyện Baseline AASIST và SSL-AASIST trên Kaggle GPU.
 - [ ] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio), Telegram Bot (độ trễ <= 3s).
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker, CI/CD, bảo mật nâng cao, báo cáo đối sánh chính thức.

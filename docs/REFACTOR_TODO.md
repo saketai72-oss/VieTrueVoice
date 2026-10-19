@@ -4,23 +4,32 @@
 
 ---
 
-## ✅ Đã Hoàn Thành (v0.1.0)
+## ✅ Đã Hoàn Thành (v0.1.0 & v0.2.0 - Must #1)
 - [x] Khởi tạo cấu trúc khung dự án chuẩn và pipeline kiểm thử tự động GitHub Actions CI.
-- [x] Cài đặt module tiền xử lý âm thanh 16kHz Mono, cắt khoảng lặng RMS phân vị 20, repeat padding 64.000 mẫu kèm 4 bài kiểm thử TDD trong `tests/test_preprocessing.py`.
-- [x] Thiết lập hoàn chỉnh kiến trúc Living Docs (`AGENTS.md`, `docs/ARCH_documentation-governance.md`, `docs/GUIDE_developer.md`, `docs/ARCH_technical-specs.md`...) 100% bằng tiếng Việt.
+- [x] Cài đặt module tiền xử lý âm thanh 16kHz Mono, cắt khoảng lặng RMS phân vị 20, repeat padding 64.000 mẫu (`src/preprocessing/audio_processor.py`).
+- [x] Thiết lập hoàn chỉnh kiến trúc Living Docs 100% bằng tiếng Việt.
+- [x] Kịch bản phân chia tập dữ liệu độc lập người nói (`scripts/split_dataset.py`) đảm bảo 0% trùng lặp speaker giữa Train/Dev/Test sets.
+- [x] Thuật toán tăng cường dữ liệu RawBoost miền thời gian (`src/preprocessing/rawboost.py`) gồm ISD, SSI, LnL.
+- [x] Bộ mô phỏng nén kênh truyền viễn thông & mạng xã hội (`src/preprocessing/codec_simulator.py`) gồm Opus 16kbps, điện thoại 8kHz lọc dải thông 300Hz–3400Hz.
+- [x] Kịch bản lọc chất lượng giọng giả bằng ASR WER (`scripts/filter_asr_wer.py`).
+- [x] Kịch bản tự động sinh giọng giả (`scripts/generate_spoof.py`).
+- [x] Bộ kiểm thử unit tests TDD đạt 21/21 bài kiểm thử vượt qua thành công.
 
 ---
 
-## 🚀 Đang Triển Khai (v0.2.0 - Must #1 / W3–W4)
-Mục tiêu: Xây dựng đường ống sinh mẫu giả và kịch bản phân chia tập dữ liệu độc lập người nói (Speaker-Disjoint).
+## 🚀 Đang Triển Khai (v0.3.0 - Must #2 / W5)
+Mục tiêu: Xây dựng kiến trúc mô hình Baseline AASIST & SSL-AASIST và vòng lặp huấn luyện 2 pha trên Kaggle GPU.
 
-- [ ] **1. Kịch bản phân chia tập dữ liệu độc lập người nói (`scripts/split_dataset.py`)**
-  - [ ] Viết unit test trước trong `tests/test_split.py` để đảm bảo 0% trùng lặp người nói giữa tập Train, Dev và Test.
-  - [ ] Cài đặt tỷ lệ chia 70% Train / 15% Dev / 15% Test và xuất ra `data/manifests/`.
-- [ ] **2. Kịch bản lọc chất lượng giọng giả bằng ASR WER (`scripts/filter_asr_wer.py`)**
-  - [ ] Lọc bỏ các mẫu âm thanh bị vấp từ, lặp tiếng dựa trên ngưỡng WER của PhoWhisper / Wav2Vec2.
-- [ ] **3. Kịch bản tự động sinh giọng giả (`scripts/generate_spoof.py`)**
-  - [ ] Tích hợp lệnh CLI sinh mẫu từ F5-TTS và VieNeu-TTS theo kịch bản mạo danh.
+- [ ] **1. Kiến trúc mô hình Baseline AASIST & SSL-AASIST (`src/models/`)**
+  - [ ] Cài đặt SincConv, ResNet và mô-đun HS-GAL trong `src/models/aasist.py`.
+  - [ ] Cài đặt backbone Wav2Vec 2.0 tiếng Việt kết hợp AASIST graph trong `src/models/ssl_aasist.py`.
+- [ ] **2. Dataset, DataLoader & Hàm mất mát Weighted Cross-Entropy (`src/training/`)**
+  - [ ] PyTorch Dataset tích hợp RawBoost và Codec simulation on-the-fly.
+  - [ ] Weighted Cross-Entropy Loss `[0.1, 0.9]`.
+- [ ] **3. Vòng lặp huấn luyện 2 pha & Entry-point Kaggle (`train.py`)**
+  - [ ] Pha 1: Warm-up đóng băng Wav2Vec2.
+  - [ ] Pha 2: Tinh chỉnh toàn mạng với lr=1e-6.
+  - [ ] Lưu checkpoint `best_model.pt` theo EER thấp nhất trên tập Dev.
 
 ---
 
