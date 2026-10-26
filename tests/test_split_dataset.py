@@ -79,3 +79,58 @@ def test_save_manifests(tmp_path, sample_dataset_df):
     loaded_train = pd.read_csv(train_csv)
     assert list(loaded_train.columns) == ["audio_path", "speaker_id", "label", "source_tool"]
     assert len(loaded_train) == len(train_df)
+
+
+def test_fixed_speaker_split():
+    """Verify fixed speaker split assigns SPK_0001,4,5 to train, 6 to dev, 7 to test."""
+    from scripts.split_dataset import split_dataset_by_speaker, SPEAKER_SPLIT
+    df = pd.DataFrame([
+        {"speaker_id": "SPK_0001", "audio_path": "a1.wav"},
+        {"speaker_id": "SPK_0004", "audio_path": "a4.wav"},
+        {"speaker_id": "SPK_0005", "audio_path": "a5.wav"},
+        {"speaker_id": "SPK_0006", "audio_path": "a6.wav"},
+        {"speaker_id": "SPK_0007", "audio_path": "a7.wav"},
+    ])
+    train_df, dev_df, test_df = split_dataset_by_speaker(df, speaker_split_map=SPEAKER_SPLIT)
+    assert set(train_df["speaker_id"]) == {"SPK_0001", "SPK_0004", "SPK_0005"}
+    assert set(dev_df["speaker_id"]) == {"SPK_0006"}
+    assert set(test_df["speaker_id"]) == {"SPK_0007"}
+
+
+def test_save_manifests_17_columns(tmp_path):
+    """Verify manifests with 17 columns are preserved correctly upon save."""
+    from scripts.split_dataset import save_manifests, MANIFEST_COLUMNS
+    assert len(MANIFEST_COLUMNS) == 17
+    df = pd.DataFrame([{col: f"val_{col}" for col in MANIFEST_COLUMNS}])
+    df["speaker_id"] = "SPK_0001"
+    save_manifests(df, df, df, output_dir=tmp_path)
+    loaded = pd.read_csv(tmp_path / "train.csv")
+    assert list(loaded.columns) == MANIFEST_COLUMNS
+
+
+def test_dataset_partitioner_disjoint():
+    """Verify DatasetPartitioner strictly maintains disjoint sets (Ref, Enroll, Test) with zero leakage."""
+    from vitruevoice.batch_processor import DatasetPartitioner
+
+    files = [f"speaker_sample_{i:02d}.wav" for i in range(15)]
+    ref_pool, enroll_pool, test_pool = DatasetPartitioner.partition_speaker_files(
+        files, n_ref_cands=3, n_enroll=4
+    )
+
+    set_ref = set(ref_pool)
+    set_enr = set(enroll_pool)
+    set_tst = set(test_pool)
+
+    # 1. Tuyệt đối không giao nhau
+    assert len(set_ref & set_enr) == 0, "Ref và Enroll bị rò rỉ dữ liệu!"
+    assert len(set_ref & set_tst) == 0, "Ref và Test bị rò rỉ dữ liệu!"
+    assert len(set_enr & set_tst) == 0, "Enroll và Test bị rò rỉ dữ liệu!"
+
+    # 2. Bảo toàn số lượng mẫu
+    assert len(ref_pool) + len(enroll_pool) + len(test_pool) == len(files)
+    assert len(ref_pool) == 3
+    assert len(enroll_pool) == 4
+    assert len(test_pool) == 8
+
+
+

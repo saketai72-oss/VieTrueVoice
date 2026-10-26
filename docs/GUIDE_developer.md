@@ -72,14 +72,17 @@
 
 ## 4. Các Mặc Định Về Kiến Trúc
 
-### Phân Tách 3 Lớp (3-Layer Separation)
-- **Lớp Tín Hiệu & Dữ Liệu**: `src/preprocessing/` (nhận âm thanh thô → tensor 16kHz mono 64.000 mẫu đã chuẩn hóa).
-- **Lớp Biểu Diễn & Mô Hình**: `src/models/` và `src/training/` (trích xuất đặc trưng tự giám sát Wav2Vec2 + đồ thị chú ý HS-GAL).
-- **Lớp Dịch Vụ & Trình Diễn**: `src/app/` (API FastAPI, giao diện Gradio, Bot Telegram).
+### Phân Tách 3 Lớp (3-Layer Separation) & Khung Sinh Kép
+- **Lớp Tín Hiệu & Sinh Mẫu Giả**: `src/vitruevoice/` (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo, SpeakerProfiler, MultiGateEvaluator 4 cổng, DialectEvaluator, TelephonyCompressor) và `src/preprocessing/` (chuẩn hóa 16kHz mono 64.000 mẫu, EBU R128, Z-score, RawBoost).
+- **Lớp Biểu Diễn & Mô Hình**: `src/models/` và `src/training/` (trích xuất đặc trưng tự giám sát wav2vec 2.0 + đồ thị chú ý HS-GAL, Weighted CE [0.1, 0.9]).
+- **Lớp Dịch Vụ & Trình Diễn**: `src/app/` (API FastAPI, giao diện Gradio $\le 3$ thao tác, Bot Telegram).
+- **Đồng bộ SSOT**: Toàn bộ logic lõi của `src/vitruevoice/` phải được đồng bộ chính xác sang `out/vitruevoice` và notebook `train.ipynb`.
 
 ### Không Gian Tên & Định Danh (Namespace Governance)
-- **File Manifests**: Lưu tại `data/manifests/{train,dev,test_indomain,test_unseen}.csv` gồm các cột `audio_path,label,speaker_id`.
+- **5 File Manifests 17 Cột**: Lưu tại `data/manifests/` (`train_manifest.csv`, `dev_manifest.csv`, `test_manifest.csv`, `spoof_manifest.csv`, `full_manifest.csv`).
+  - Cấu trúc 17 cột chuẩn: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed`.
 - **Quy ước Nhãn**: `0` = Giả mạo (`Spoof`), `1` = Giọng thật (`Bona fide`).
+- **Phân Vùng Người Nói**: Độc lập tuyệt đối (`Speaker-Disjoint`): Train (`SPK_0001, 0004, 0005`), Dev (`SPK_0006`), Test In-domain (`SPK_0007`).
 
 ---
 
@@ -88,7 +91,8 @@
 - **File âm thanh hoàn toàn im lặng**: Tự động trả về mảng zero kích thước 64.000 mẫu kèm xử lý tránh chia cho 0 trong chuẩn hóa độ lệch chuẩn (`std < 1e-8`).
 - **File âm thanh cực ngắn (< 0,2 giây)**: Nối lặp tuần hoàn cho đến khi đạt `>= 64.000 mẫu`.
 - **File âm thanh dài (> 10 giây)**: Khi suy luận cắt cửa sổ trượt 4,0 giây (64.000 mẫu) và lấy trung bình cộng điểm tin cậy.
+- **Không có transcript mẫu tham chiếu**: Tự động nhận diện từ sóng âm bằng ASR trong 0.2s (**Label-Free ASR Auto-Fallback**).
 
 ---
 
-*v0.1.0 — 2026-10-16*
+*v0.2.3 — 2026-10-26 (Frozen Pipeline V14)*

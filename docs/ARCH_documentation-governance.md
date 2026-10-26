@@ -12,6 +12,7 @@
 | `docs/GUIDE_developer.md` | Tiêu chuẩn viết code, quy tắc đặt tên, mẫu thiết kế, quy trình TDD, quy trình tái cấu trúc | Logic nghiệp vụ tính năng cụ thể, cấu trúc dữ liệu | Khi thực hiện công việc kỹ thuật/code |
 | `docs/ARCH_documentation-governance.md` | Nguồn chân lý quản trị tài liệu, bảng điều hướng | Chi tiết thuật toán và mã nguồn | Khi quản trị/cập nhật tài liệu |
 | `docs/ARCH_technical-specs.md` | Kiến trúc hệ thống tổng thể, luồng dữ liệu âm thanh, ranh giới hệ thống, đạo đức sinh trắc học | Quy tắc định dạng chi tiết, token giao diện | Khi làm việc với cấu trúc và dữ liệu |
+| `docs/LOGIC_data-generation.md` | Quy trình sinh mẫu giọng giả (F5-TTS, VieNeu-TTS v3 Turbo), kiểm định 4 cổng (MultiGateEvaluator), phân hoạch V12/V14, 5 manifests 17 cột | Tiền xử lý tensor đầu vào mô hình | Khi làm việc với dữ liệu & pipeline sinh mẫu giả |
 | `docs/LOGIC_preprocessing.md` | Chuẩn hóa tín hiệu (16kHz Mono), cắt khoảng lặng RMS phân vị 20, repeat padding 64k, RawBoost, Codec | Tiêu chuẩn lập trình chung | Khi làm việc với tiền xử lý âm thanh |
 | `docs/LOGIC_models.md` | Baseline AASIST, SSL-AASIST (Wav2Vec2 + HS-GAL), hàm mất mát Weighted CE [0.1, 0.9], huấn luyện 2 pha | Công thức toán xử lý tín hiệu thuần túy | Khi làm việc với kiến trúc mô hình & training |
 | `docs/STANDARDS_api-benchmarks.md` | Schema API FastAPI, giao diện Gradio, Bot Telegram, cấu trúc log ẩn danh SHA-256, eval_metrics.csv | Thuật toán đồ thị và mô hình | Khi làm việc với API & benchmark độ trễ |
@@ -28,6 +29,7 @@ Agent chỉ nạp các tệp liên quan đến tác vụ hiện tại — không
 | Loại tác vụ | Tài liệu cần nạp |
 |-------------|------------------|
 | Phát triển chung | `AGENTS.md` |
+| Sinh mẫu giả & Quản lý dữ liệu / Manifests | `AGENTS.md` + `docs/GUIDE_developer.md` + `docs/LOGIC_data-generation.md` |
 | Thay đổi Tính năng / Thuật toán (Tiền xử lý âm thanh) | `AGENTS.md` + `docs/GUIDE_developer.md` + `docs/LOGIC_preprocessing.md` |
 | Thay đổi Tính năng / Thuật toán (Mô hình & Huấn luyện) | `AGENTS.md` + `docs/GUIDE_developer.md` + `docs/LOGIC_models.md` |
 | Thay đổi Kiến trúc / Luồng dữ liệu / Bảo mật | `AGENTS.md` + `docs/ARCH_technical-specs.md` |
@@ -47,7 +49,8 @@ Mỗi nhóm quy tắc chỉ có DUY NHẤT MỘT TỆP làm nguồn chân lý. K
 | Quy tắc phiên làm việc & Siêu dữ liệu | `AGENTS.md` |
 | Tiêu chuẩn lập trình & Quy trình TDD | `docs/GUIDE_developer.md` |
 | Sổ đăng bạ tài liệu & Điều hướng nạp | `docs/ARCH_documentation-governance.md` |
-| Kiến trúc hệ thống, Đạo đức sinh trắc học, Kaggle Hybrid | `docs/ARCH_technical-specs.md` |
+| Kiến trúc hệ thống, Đạo đức sinh trắc học, Kaggle Hybrid, AWS Pilot | `docs/ARCH_technical-specs.md` |
+| Thu thập giọng thật, sinh mẫu giả, lọc 4 cổng, manifests | `docs/LOGIC_data-generation.md` |
 | Tiền xử lý tín hiệu, Cắt khoảng lặng, RawBoost, Codec | `docs/LOGIC_preprocessing.md` |
 | Kiến trúc mô hình (AASIST, SSL-AASIST), Hàm mất mát, Huấn luyện | `docs/LOGIC_models.md` |
 | Đặc tả API, Giao diện Demo/Bot, Chỉ số đánh giá & Log ẩn danh | `docs/STANDARDS_api-benchmarks.md` |
@@ -81,4 +84,4 @@ Mỗi nhóm quy tắc chỉ có DUY NHẤT MỘT TỆP làm nguồn chân lý. K
 
 ---
 
-*v0.1.0 — 2026-10-16*
+*v0.2.3 — 2026-10-26*

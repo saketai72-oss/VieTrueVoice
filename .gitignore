@@ -10,8 +10,13 @@ outputs/
 *.pth
 *.bin
 *.onnx
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.log
 
-# Data directories (keep directory structure via .gitkeep)
+# Data directories (keep directory structure via .gitkeep only)
 data/raw/*
 !data/raw/.gitkeep
 data/bonafide_ref/*
@@ -24,6 +29,8 @@ data/spoof_unseen/*
 !data/spoof_unseen/.gitkeep
 data/real_app_test/*
 !data/real_app_test/.gitkeep
+data/manifests/*
+!data/manifests/.gitkeep
 
 # Audio formats (ignore heavy media files)
 *.wav
@@ -37,7 +44,14 @@ data/real_app_test/*
 # Benchmarks logs
 benchmarks/latency_log.json
 
-# Python cache & testing
+# Office documents & temporary docs
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+
+# Python cache, testing & notebooks
 __pycache__/
 *.py[cod]
 *$py.class
@@ -47,7 +61,11 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+.ipynb_checkpoints/
 
-# OS files
+# IDE & OS files
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+

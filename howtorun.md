@@ -55,8 +55,32 @@ python manage_kaggle.py status
 ```
 *(Trạng thái sẽ hiển thị: `queued` -> `running` -> `complete`)*
 
-### Bước 5: Tải weights / logs về máy
+## 4. Các Lệnh Thực Thi & Kiểm Thử Thường Dùng
+
+### Chạy Kiểm Thử Tự Động (TDD Unit Tests)
 ```bash
-python manage_kaggle.py output
+pytest tests/ -v
 ```
-Toàn bộ file kết quả trong `/kaggle/working/` sẽ được tải về thư mục `./out/` tại máy của bạn.
+*(Yêu cầu: 31/31 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle)*
+
+### Chạy Batch Dataset Processor (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo)
+```bash
+python -c "
+from src.vitruevoice.pipeline import ViTrueVoiceDualPipeline, PipelineMode
+from src.vitruevoice.batch_processor import BatchDatasetProcessor
+
+pipeline = ViTrueVoiceDualPipeline()
+processor = BatchDatasetProcessor(pipeline=pipeline, mode=PipelineMode.DUAL_OUTPUT, only_pass=True, min_dur=3.5, max_dur=7.5, allow_stitching=False)
+processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'SPK_0007'], seeds=[100, 200, 300], codecs=['clean_16khz', 'g711_alaw', 'amr_nb'])
+"
+```
+
+### Chạy Máy Chủ API Phát Triển (FastAPI)
+```bash
+uvicorn src.app.server:app --reload --port 8000
+```
+
+### Chạy Đo Lường Độ Trễ (30 lần lặp)
+```bash
+python scripts/benchmark_latency.py
+```

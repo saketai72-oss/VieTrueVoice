@@ -51,13 +51,16 @@ def cmd_status():
     print(f"📊 Kiểm tra trạng thái kernel: {meta['id']}")
     run_cmd(["kaggle", "kernels", "status", meta["id"]])
 
-def cmd_output():
+def cmd_output(force: bool = False):
     meta = load_metadata()
     if not check_username(meta):
         return
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     print(f"📥 Đang tải kết quả từ Kaggle ({meta['id']}) về thư mục ./{OUTPUT_DIR}...")
-    run_cmd(["kaggle", "kernels", "output", meta["id"], "-p", str(OUTPUT_DIR)])
+    cmd = ["kaggle", "kernels", "output", meta["id"], "-p", str(OUTPUT_DIR)]
+    if force:
+        cmd.append("--force")
+    run_cmd(cmd)
 
 def cmd_set_user(username):
     meta = load_metadata()
@@ -103,7 +106,8 @@ def main():
     elif action == "status":
         cmd_status()
     elif action == "output":
-        cmd_output()
+        force = ("--force" in sys.argv) or ("-f" in sys.argv)
+        cmd_output(force=force)
     elif action == "set-user" and len(sys.argv) >= 3:
         cmd_set_user(sys.argv[2])
     elif action == "add-dataset" and len(sys.argv) >= 3:

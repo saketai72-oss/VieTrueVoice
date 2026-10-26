@@ -1,14 +1,16 @@
 {
-  "id": "NguyenThanhTai/vietrue-model-training",
+  "id": "nguyenthanhtai1959/vietrue-model-training",
   "title": "Vietrue Model Training",
-  "code_file": "train.py",
+  "code_file": "train.ipynb",
   "language": "python",
-  "kernel_type": "script",
+  "kernel_type": "notebook",
   "is_private": "true",
   "enable_gpu": "true",
   "enable_tpu": "false",
   "enable_internet": "true",
-  "dataset_sources": [],
+  "dataset_sources": [
+    "nguyenthanhtai1959/vitruevoice-raw-bonafide"
+  ],
   "competition_sources": [],
   "kernel_sources": []
 }

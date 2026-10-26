@@ -1,422 +1,259 @@
 # TÀI LIỆU ĐẶC TẢ & KẾ HOẠCH THỰC THI CHO ANTIGRAVITY AGENT (PLAN.md)
 
-## 0\. TỔNG QUAN BÀI TOÁN & QUY TẮC BẮT BUỘC CHO AGENT (SYSTEM RULES)
+## 0. TỔNG QUAN BÀI TOÁN & QUY TẮC BẮT BUỘC CHO AGENT (SYSTEM RULES)
 
-### 0.1. Bài toán cốt lõi & Mục tiêu nghiệm thu (Target KPIs)
+### 0.1. Bài toán Cốt Lõi & Mục Tiêu Nghiệm Thu (Target KPIs & Giả Thuyết)
 
-- **Tên dự án:** ViTrueVoice – Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát.  
-- **Bài toán cốt lõi:** Phân loại nhị phân độc lập từng mẫu âm thanh tiếng Việt (độ dài thực tế 5–10 giây) thành **Giọng thật (`Bona fide` \- nhãn `1`)** hoặc **Giọng giả (`Spoof` \- nhãn `0`)** được sinh từ các công cụ TTS/Voice Cloning và truyền qua kênh nén viễn thông hoặc mạng xã hội (Opus, AMR, lọc băng tần 8 kHz).  
-- **Chỉ số nghiệm thu đích (Target KPIs):**  
-  1. **Độ chính xác nội bộ (In-domain EER):** `EER <= 8%` trên tập kiểm thử nội bộ (mẫu thật và mẫu giả từ F5-TTS, VieNeu-TTS).  
-  2. **Độ bền nén kênh thoại (Giả thuyết H1):** Giảm ít nhất `30% tương đối` chỉ số EER trên tập kiểm thử đã nén (Opus, AMR, 8 kHz) nhờ tăng cường dữ liệu mô phỏng kênh thoại so với baseline không tăng cường.  
-  3. **Độ bền trước công cụ lạ (Unseen TTS EER \- Giả thuyết H2):** Duy trì `EER <= 15%` khi kiểm thử trên công cụ TTS/Voice Conversion thứ 3 chưa từng xuất hiện trong lúc huấn luyện.  
-  4. **Thời gian phản hồi (Inference Latency):** `<= 3 giây` cho một đoạn thoại dài 5–10 giây (đo lặp 30 lần liên tiếp, lấy trung vị).
+- **Tên đề tài**: Phát triển ViTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (SV: Nguyễn Thành Tài – MSSV: 2380601959).
+- **Định vị & Giả thuyết**: Phân loại thật/giả đoạn thoại 5–10s qua kênh nén (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$) cho phụ huynh và người lớn tuổi. Kiểm chứng:
+  1. **Giả thuyết H1 (Độ bền nén kênh thoại - CH1)**: Giảm ít nhất $\ge 30\%$ EER tương đối trên tập kiểm thử nén (Opus, AMR-NB, G.711, $8\text{ kHz}$) nhờ tăng cường nén kênh thoại so với baseline không tăng cường.
+  2. **Giả thuyết H2 (Độ bền công cụ lạ - CH2 / NFR2)**: Duy trì $\text{EER} \le 15\%$ trên công cụ tổng hợp giọng chưa từng thấy khi huấn luyện (Seen: `F5-TTS` vs. Unseen: `VieNeu-TTS v3 Turbo`).
+  3. **Độ chính xác nội bộ (In-domain EER)**: `EER <= 8%` trên tập kiểm thử nội bộ người nói chưa từng thấy (`SPK_0007`).
+  4. **Thời gian phản hồi (Latency - NFR1)**: Trung vị thời gian phản hồi $\le 3,0$ giây cho đoạn thoại 5–10 giây (bấm giờ lặp 30 lần).
 
-### 0.2. Quy tắc Phát triển & Vận hành dành cho Antigravity Agent
+### 0.2. Quy Tắc Phát Triển & Vận Hành Bắt Buộc Cho Agent
 
-1. **Quy tắc TDD (Test-Driven Development):** Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi (tối thiểu 3 unit tests viết trước ở Giai đoạn 1–2 và nâng lên `>= 10 test cases`, trong đó có `>= 5 tests tự động` chạy trên CI ở Giai đoạn 4).  
-2. **Quy ước Git Commit:** Mọi bản commit có sự hỗ trợ sinh mã của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit (ví dụ: `[AI] feat(preprocessing): add 16kHz mono silence trimming and repeat padding`).  
-3. **Quy trình Huấn luyện Hybrid (Local Code \<-\> Kaggle GPU):**  
-   - Phát triển mã nguồn, viết unit test và quản lý toàn bộ dự án tại máy Local.  
-   - Đẩy dữ liệu và kịch bản `train.py` lên GPU miễn phí của Kaggle thông qua CLI `manage_kaggle.py`:  
-     - Đường dẫn đọc dữ liệu trên Kaggle: `/kaggle/input/<ten-dataset>`  
-     - Đường dẫn lưu trọng số (`best_model.pt`) và log trên Kaggle: `/kaggle/working/`  
-     - Đường dẫn tải kết quả về máy Local: `./out/`  
-4. **Đạo đức Dữ liệu & Bảo mật Sinh trắc học (Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 & Nghị định 356/2025/NĐ-CP):**  
-   - Tuyệt đối không lưu tên thật hoặc thông tin định danh cá nhân (PII) của người đóng góp giọng nói trên repo; bắt buộc dùng mã ẩn danh `SPK_XXXX`.  
-   - Khi suy luận qua API/Bot, đọc luồng byte trực tiếp trên RAM và xóa hủy ngay tệp âm thanh tạm sau khi trả kết quả.  
-   - Mọi bản ghi log đánh giá (`benchmarks/latency_log.json`) phải băm ẩn danh tệp âm thanh bằng mã `SHA-256` thay cho tên tệp gốc.
+1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **31/31 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
+2. **Quy ước Git Commit**: Mọi bản commit có sự hỗ trợ của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit.
+3. **Quy trình Huấn luyện Hybrid (Local Code <-> Kaggle GPU)**:
+   - Phát triển mã nguồn, viết unit tests và quản lý toàn bộ dự án tại máy Local.
+   - Điều khiển đẩy dữ liệu và kịch bản `train.py` / `train.ipynb` lên GPU miễn phí của Kaggle (Tesla T4 16GB) qua CLI `manage_kaggle.py`:
+     - Dữ liệu đọc từ: `/kaggle/input/<ten-dataset>`
+     - Checkpoint và log lưu tại: `/kaggle/working/best_model.pt`
+     - Tải kết quả về máy Local: `./out/`
+4. **Đạo đức Dữ liệu & Bảo mật Sinh trắc học (Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP)**:
+   - Triệt tiêu PII: Tuyệt đối không lưu tên thật hoặc thông tin định danh cá nhân; bắt buộc mã hóa ẩn danh `SPK_XXXX`.
+   - Xử lý in-memory trên RAM: Đọc luồng byte trực tiếp (`io.BytesIO`) và xóa hủy ngay tệp âm thanh tạm sau khi suy luận.
+   - Băm ẩn danh SHA-256: Mọi bản ghi trong `benchmarks/latency_log.json` bắt buộc băm SHA-256 nội dung âm thanh.
+   - Cam kết xóa hủy: Toàn bộ dữ liệu sinh trắc học gốc sẽ được xóa hủy vĩnh viễn sau khi bảo vệ đồ án (12/2026).
 
-### 0.3. Cấu trúc Thư mục Chuẩn của Dự án
+### 0.3. Cấu Trúc Thư Mục Chuẩn Của Dự Án
 
+```
 VieTrueVoice/
-
-├── PLAN.md                        \# Kế hoạch thực thi chi tiết cho Antigravity Agent
-
-├── README.md                      \# Tài liệu hướng dẫn và bảng chỉ số Trước \- Sau
-
-├── manage\_kaggle.py               \# CLI điều khiển đẩy code/dataset và tải kết quả từ Kaggle GPU
-
-├── train.py                       \# Entry-point huấn luyện mô hình trên Kaggle GPU
-
-├── requirements.txt               \# Danh sách thư viện phụ thuộc
-
-├── Dockerfile                     \# Đóng gói dịch vụ suy luận FastAPI / Gradio
-
-├── .github/workflows/ci.yml       \# Pipeline GitHub Actions tự động chạy pytest
-
+├── PLAN.md                        # Kế hoạch thực thi chi tiết cho Antigravity Agent
+├── README.md                      # Bảng chỉ số Trước - Sau & thông tin đề tài
+├── howtorun.md                    # Hướng dẫn chạy Kaggle Hybrid, test & server
+├── AGENTS.md                      # Bối cảnh agent, quy tắc phiên, stubborn facts
+├── manage_kaggle.py               # CLI điều khiển Kaggle GPU (push/status/output)
+├── train.py / train.ipynb         # Entry-point huấn luyện mô hình 2 pha trên Kaggle GPU
+├── requirements.txt               # Thư viện phụ thuộc
+├── Dockerfile                     # Đóng gói container Docker (EC2 / ECR)
+├── .github/workflows/ci.yml       # Pipeline CI tự động chạy 31/31 unit tests
 ├── data/
-
-│   ├── raw/                       \# Dữ liệu gốc (VIVOS, CommonVoice, tình nguyện viên SPK\_XXXX)
-
-│   ├── bonafide\_ref/              \# Mẫu tham chiếu sạch 3-5s kèm transcript dùng để clone giọng
-
-│   ├── spoof\_f5tts/               \# Mẫu giả sinh từ F5-TTS-Vietnamese (Seen TTS \#1)
-
-│   ├── spoof\_vieneu/              \# Mẫu giả sinh từ VieNeu-TTS (Seen TTS \#2)
-
-│   ├── spoof\_unseen/              \# Mẫu giả sinh từ công cụ thứ 3 / RVC (Unseen Test)
-
-│   ├── real\_app\_test/             \# Mẫu gửi/nhận thực tế qua Zalo, Telegram
-
-│   └── manifests/                 \# File chia tập train.csv, dev.csv, test\_indomain.csv, test\_unseen.csv
-
+│   ├── raw/                       # Giọng thật gốc 5 tình nguyện viên SPK_XXXX + VIVOS + Common Voice
+│   ├── bonafide_ref/              # Mẫu tham chiếu 3.5s-7.5s (allow_stitching=False)
+│   ├── spoof_f5tts/               # Mẫu giả F5-TTS-Vietnamese (Seen TTS #1)
+│   ├── spoof_vieneu/              # Mẫu giả VieNeu-TTS v3 Turbo 48kHz (Seen #2 / Unseen TTS)
+│   ├── spoof_unseen/              # Mẫu giả công cụ thứ 3 / RVC (OOD Eval)
+│   ├── real_app_test/             # Mẫu gửi/nhận thực tế qua Zalo, Telegram
+│   └── manifests/                 # 5 file manifest 17 cột: train, dev, test, spoof, full
 ├── src/
-
-│   ├── preprocessing/             \# Chuẩn hóa 16kHz Mono, cắt khoảng lặng, RawBoost, nén Codec
-
-│   ├── models/                    \# Kiến trúc Baseline AASIST và SSL-AASIST (Wav2Vec 2.0 \+ HS-GAL)
-
-│   ├── training/                  \# Dataset, DataLoader, Weighted CE Loss, Vòng lặp huấn luyện 2 pha
-
-│   ├── evaluation/                \# Tính toán EER, minDCF, ROC-AUC, Confusion Matrix
-
-│   └── app/                       \# FastAPI server, Gradio Web UI, Telegram Bot handler
-
+│   ├── vitruevoice/               # Pipeline sinh mẫu giả kép, 4 cổng lọc, profiler, batch processor
+│   ├── preprocessing/             # Chuẩn hóa 16kHz mono, EBU R128, P20 silence trim, RawBoost, Codec
+│   ├── models/                    # Baseline LFCC+GMM, AASIST SincConv, SSL-AASIST (wav2vec 2.0 + HS-GAL)
+│   ├── training/                  # Dataset, DataLoader, Weighted CE Loss [0.1, 0.9], Vòng lặp 2 pha
+│   ├── evaluation/                # Tính toán EER, minDCF, ROC-AUC, DET Curve, Confusion Matrix
+│   └── app/                       # FastAPI server (/api/v1/predict), Gradio UI (<=3 thao tác), Telegram Bot
 ├── scripts/
-
-│   ├── generate\_spoof.py          \# Script tự động sinh mẫu giả từ F5-TTS & VieNeu-TTS
-
-│   ├── filter\_asr\_wer.py          \# Script lọc mẫu giả lỗi bằng ASR (PhoWhisper / Wav2Vec2)
-
-│   ├── split\_dataset.py           \# Chia tập Speaker-Disjoint (70% Train / 15% Dev / 15% Test)
-
-│   ├── eval\_eer.py                \# Script chạy đánh giá tự động và xuất benchmarks/eval\_metrics.csv
-
-│   └── benchmark\_latency.py       \# Script bấm giờ 30 lần xuất benchmarks/latency\_benchmark.csv
-
+│   ├── generate_spoof.py          # Script sinh mẫu giả
+│   ├── filter_asr_wer.py          # Script lọc ASR WER
+│   ├── split_dataset.py           # Chia tập Speaker-Disjoint & xuất manifest 17 cột
+│   ├── eval_eer.py                # Đánh giá EER/minDCF xuất benchmarks/eval_metrics.csv
+│   └── benchmark_latency.py       # Bấm giờ 30 lần xuất benchmarks/latency_benchmark.csv
 ├── benchmarks/
-
-│   ├── eval\_metrics.csv           \# Lưu kết quả EER, minDCF tự động qua các thí nghiệm
-
-│   ├── latency\_log.json           \# Lưu log thời gian phản hồi ẩn danh (SHA-256)
-
-│   └── latency\_benchmark.csv      \# Kết quả bấm giờ độ trễ 30 lần lấy trung vị
-
-├── out/                           \# Thư mục nhận weights/logs tải về từ Kaggle (/kaggle/working/)
-
-└── tests/                         \# Bộ unit tests & integration tests (\>= 10 tests)
+│   ├── eval_metrics.csv           # Bảng theo dõi EER, minDCF có/không tăng cường nén
+│   ├── latency_log.json           # Log độ trễ ẩn danh băm SHA-256
+│   └── latency_benchmark.csv      # Bảng 30 lần bấm giờ lấy trung vị
+├── out/                           # Trọng số best_model.pt và logs tải từ Kaggle về
+└── tests/                         # Bộ kiểm thử TDD (31/31 tests xanh)
+```
 
 ---
 
-## GIAI ĐOẠN 01: CHUẨN BỊ DỮ LIỆU GỐC & SINH MẪU GIỌNG GIẢ (DATA & SPOOF GENERATION \- MUST \#1 / W3–W4)
+## BẢNG TỔNG QUAN KIẾN TRÚC PIPELINE KỸ THUẬT (4 CHẶNG)
 
-**Mục tiêu Giai đoạn 1:** Xây dựng bộ dữ liệu tiếng Việt chuẩn hóa gồm tối thiểu **1.000 mẫu giọng thật (`Bona fide`)** và **2.000 mẫu giọng giả (`Spoof`)**, kiểm soát chất lượng bằng ASR và phân chia độc lập theo người nói (`Speaker-Disjoint`).
+| Chặng Kỹ Thuật | Đầu Vào (Input) | Xử Lý Cốt Lõi (Core Process) | Đầu Ra (Output) |
+| :--- | :--- | :--- | :--- |
+| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Giọng thật (5 tình nguyện viên `SPK_0001`..`0007` có Phiếu đồng ý + VIVOS & Common Voice) + Văn bản kịch bản | Phân hoạch chuẩn V12/V14 (`ref_pool[:3]`, `enroll_pool[3:7]`); clip đơn 3.5–7.5s (`allow_stitching=False`) qua LOO + Probe; sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo $48\text{ kHz}$); lọc 4 cổng (Gate 1–4 Label-Free Prosody) + Multi-Seed Retry; nén G.711/AMR-NB/Opus | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (đã sinh 200 mẫu gốc V8–V14) + 5 file Manifest 17 cột chia Speaker-Disjoint |
+| **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng ($24\text{ kHz}$ / $48\text{ kHz}$ / $16\text{ kHz}$, Stereo/Mono) | Chuyển Mono, Resample $16\text{ kHz}$, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc $8\text{ kHz}$ | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
+| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Fine-tune wav2vec 2.0 (có vs. không tăng cường nén kênh; Seen F5-TTS vs. Unseen VieNeu-TTS) & Baseline LFCC+GMM / AASIST với Weighted CE Loss [0.1, 0.9] | Trọng số `best_model.pt` + Bảng so sánh EER & minDCF có/không tăng cường nén kênh |
+| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (31/31 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
-### Bước 1.1. Thu thập và Tuyển chọn Tập dữ liệu Giọng thật (`Bona fide Audio`)
+---
 
-- **Nguồn thu thập trực tiếp có sự đồng ý (Consent):**  
-  - Tổ chức tối thiểu 1.000 mẫu giọng thật (10–20 câu ngắn/người) từ các thành viên và tình nguyện viên theo mã ẩn danh `SPK_XXXX`.  
-  - Đảm bảo liên kết metadata với Phiếu đồng ý (Consent Form) tách bạch 4 mục đích: (1) thu âm, (2) huấn luyện AI, (3) làm giọng tham chiếu (`reference audio`) nhân bản giọng giả nghiên cứu, (4) lưu trữ/đánh giá ẩn danh và xóa hủy sau khi bảo vệ đồ án.  
-- **Nguồn dữ liệu mở tiếng Việt sạch (`Clean Speech Corpora`):**  
-  - Tích hợp bộ dữ liệu **VIVOS** (15 giờ, 65 người nói, thu âm môi trường yên tĩnh, giấy phép CC0/CC-BY-SA) và **CommonVoice tiếng Việt** (\~6–50 giờ, đa vùng miền Bắc – Trung – Nam) làm nguồn giọng thật chuẩn và mẫu tham chiếu.  
-- **Quy tắc loại trừ dữ liệu nhiễu nền cao:**  
-  - Tuyệt đối không dùng các bộ dữ liệu thu thập từ mạng xã hội chứa nhiều tạp âm hoặc nhạc nền (như Vietnam-Celeb) làm đầu vào cho TTS/Voice Cloning để tránh hiện tượng mô hình học lệch (`shortcut learning`) dựa trên nhiễu nền tái tạo.
+## GIAI ĐOẠN 01: CHUẨN BỊ DỮ LIỆU GỐC & QUY TRÌNH SINH MẪU GIỌNG GIẢ (DATA & SPOOF GENERATION – FROZEN PIPELINE v0.2.3 / KAGGLE V14)
 
-### Bước 1.2. Sinh Tập dữ liệu Giọng giả (`Spoofed Audio`) từ F5-TTS, VieNeu-TTS và Công cụ Unseen
+*Thực hiện Must #1 (W3–W4): Xây dựng bộ dữ liệu tiếng Việt chuẩn hóa $\ge 1.000$ mẫu thật, $\ge 2.000$ mẫu giả qua kiến trúc Hai Engine Song Song (`src/vitruevoice/`), kiểm định 4 cổng (Multi-Gate Label-Free Prosody) và tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP.*
 
-- **Chuẩn bị Mẫu tham chiếu (`Reference Clips` \- `data/bonafide_ref/`):**  
-  - Trích xuất các đoạn âm thanh sạch dài từ **3 đến 5 giây**, phát âm rõ ràng kèm bản phiên âm văn bản (`transcript`) chính xác.  
-  - Nếu mẫu nguồn có nhạc nền, bắt buộc chạy mô hình **Facebook Demucs** để tách sạch phần vocal trước khi đưa vào TTS.  
-- **Pipeline 1 – Sinh mẫu bằng `F5-TTS-Vietnamese` (Seen TTS \#1):**  
-  - Sử dụng kho mã `nguyenthienhy/F5-TTS-Vietnamese` (checkpoint `F5-TTS-Vietnamese-ViVoice` hoặc `danhtran2mind/Vi-F5-TTS`) với bộ vocoder `Vocos`.  
-  - Chuẩn hóa văn bản đầu vào về chữ thường (`lowercase`), giữ nguyên dấu câu tiếng Việt, sinh các câu thoại theo kịch bản lừa đảo tài chính/mạo danh người thân.  
-  - Giới hạn độ dài đầu ra từ **3 đến 15 giây** (tự động loại bỏ mọi file `< 1 giây` hoặc `> 30 giây`).  
-  - Lệnh CLI mẫu tích hợp vào `scripts/generate_spoof.py`:  
-      
-    f5-tts\_infer-cli \\  
-      
-      \--model "F5TTS\_Base" \\  
-      
-      \--ref\_audio data/bonafide\_ref/spk01\_ref.wav \\  
-      
-      \--ref\_text "cả hai bên hãy cố gắng hiểu cho nhau" \\  
-      
-      \--gen\_text "alo mẹ ơi chuyển gấp cho con mười lăm triệu vào số tài khoản này nhé" \\  
-      
-      \--speed 1.0 \--vocoder\_name vocos \\  
-      
-      \--vocab\_file checkpoints/F5-TTS-ViVoice/vocab.txt \\  
-      
-      \--ckpt\_file checkpoints/F5-TTS-ViVoice/model\_last.pt
+### [BƯỚC 1.1] Thu thập Giọng thật (Bona fide), Phân hoạch Chuẩn V12/V14 & Đạo đức Dữ liệu Sinh trắc học
 
-    
-- **Pipeline 2 – Sinh mẫu bằng `VieNeu-TTS` (Seen TTS \#2):**  
-  - Sử dụng `pnnbao97/VieNeu-TTS` (kiến trúc Qwen 0.5B/0.3B kết hợp bộ mã hóa âm thanh NeuCodec 24kHz hoặc bản `v3turbo` dùng MOSS-Audio-Tokenizer-Nano 48kHz và bộ chuyển đổi âm vị `sea-g2p`).  
-  - Thực hiện Instant Voice Cloning với mẫu tham chiếu 3–5 giây, giới hạn văn bản đầu vào `<= 250 ký tự` mỗi lượt gọi để đảm bảo độ tự nhiên cao nhất:  
-      
-    from vieneu import Vieneu  
-      
-    tts \= Vieneu(mode="v3turbo")  
-      
-    audio \= tts.infer(  
-      
-        text="Mình đang có việc gấp, chuyển khoản giúp mình ngay nhé\!",  
-      
-        ref\_audio="data/bonafide\_ref/spk01\_ref.wav"  
-      
-    )
+- **Thu thập trực tiếp có Phiếu đồng ý (Consent Form – Phụ lục C.2)**: Chuẩn hóa **5 tình nguyện viên chính thức**: `SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007` (79 câu thoại gốc, loại bỏ hoàn toàn `SPK_0003` và chuyển đổi `SPK_0005` gồm 20 câu từ `.m4a` sang PCM 16-bit $48\text{ kHz}$ Mono WAV; mở rộng $\ge 30$ người nói). Mã hóa ẩn danh `SPK_XXXX`. Tách bạch 3 mục đích trong Phiếu đồng ý: (1) mẫu thật, (2) mẫu tham chiếu nhân bản giọng nghiên cứu, (3) trích xuất chỉ số EER/minDCF ẩn danh. Cam kết xóa hủy vĩnh viễn sau bảo vệ (12/2026).
+- **Nguồn dữ liệu mở tiếng Việt đúng giấy phép**: VIVOS (15 giờ, 65 người, CC BY-NC 4.0) và Mozilla Common Voice tiếng Việt (~6–50 giờ, CC0 1.0) tích hợp qua `BatchDatasetProcessor`.
+- **Phân hoạch 3 tập con độc lập chống rò rỉ dữ liệu (`DatasetPartitioner` – Chuẩn V12/V14)**:
+  1. **Tập ứng viên tham chiếu** $\mathcal{D}_{\text{ref\_cands}}$ (`ref_pool = files[:3]`): Dùng để chọn clip reference cho TTS.
+  2. **Tập đăng ký sinh trắc** $\mathcal{D}_{\text{enroll}}$ (`enroll_pool = files[3:7]`): Gồm đúng $K=4$ câu sạch tính vector **Enrollment Centroid chuẩn hóa $L_2$** bằng SpeechBrain `spkrec-ecapa-voxceleb` (192 chiều):
+     $$\mathbf{e}_{\text{enroll}} = \frac{\sum_{i=1}^4 \mathbf{e}_i}{\left\|\sum_{i=1}^4 \mathbf{e}_i\right\|_2}$$
+  3. **Tập kiểm thử** $\mathcal{D}_{\text{eval}}$: Gồm các câu held-out còn lại, bảo toàn câu hội thoại tự nhiên `SPK_0004_02.wav` ($4.76\text{s}$) thay vì trượt vào câu kịch bản tổng đài.
+- **Chống học lệch (Anti-Shortcut Learning)**: Không dùng dữ liệu mạng xã hội nhiều tạp âm (như Vietnam-Celeb) làm đầu vào TTS; chuẩn hóa độ to **EBU R128** (target $-23\text{ LUFS}$) và tắt watermark ngầm (`apply_watermark=False`).
 
-    
-- **Pipeline 3 – Sinh mẫu từ công cụ thứ 3 để kiểm thử độc lập (`Unseen TTS / VC`):**  
-  - Tạo tập kiểm thử riêng biệt (`data/spoof_unseen/`) hoàn toàn không xuất hiện trong lúc huấn luyện bằng công cụ Voice Conversion (như **RVC** kết hợp **UVR5 \+ HuBERT**, chọn cặp người nói có độ tương đồng Cosine giữa các vector **ECAPA-TDNN** vượt ngưỡng) hoặc một họ TTS tiếng Việt khác để đo khả năng tổng quát hóa ngoài miền (`Out-of-distribution`).
+### [BƯỚC 1.2] Tuyển chọn Clip đơn Dải vàng ($3.5\text{s}$–$7.5\text{s}$) & Sinh Giọng giả Kép (`ViTrueVoiceDualPipeline`)
 
-### Bước 1.3. Kiểm soát Chất lượng Mẫu giả & Phân chia Tập dữ liệu (`Speaker-Disjoint Split`)
+- **Tuyển chọn mẫu tham chiếu 2 tầng không ghép nối (`allow_stitching=False`)**: Cố định dải vàng `min_dur=3.5s`, `max_dur=7.5s`. Tắt ghép nối nhân tạo để tránh chèn 0.2s khoảng lặng làm gãy token âm học của NeuCodec + Qwen LLM.
+  1. *LOO Centroid Proximity*: Lọc top-3 clip điển hình trong `ref_pool`.
+  2. *Output Probe Ranking*: Sinh thử đầu ra thực tế chọn `best_ref`.
+- **Chế độ Sinh Kép Toàn Diện (`PipelineMode.DUAL_OUTPUT`)**: Hỗ trợ `BEST_QUALITY`, `ADAPTIVE` (GPU 4GB VRAM $< 2.5\text{ GB}$), và `DUAL_OUTPUT` (Kaggle T4 16GB kích hoạt cả F5-TTS và VieNeu-TTS, đã sinh **200 mẫu spoof gốc** V8–V14: 106 F5-TTS + 94 VieNeu-TTS).
+- **Đặc tả Engine #1 – `F5-TTS-Vietnamese` (Flow Matching + Vocos)**: Chuẩn hóa chữ thường, giữ dấu câu, kịch bản chuyển tiền gấp 5–10s (loại $< 1\text{s}$ hoặc $> 30\text{s}$). Nhận cặp `(ref_audio, ref_text)` động; tự động nhận diện từ sóng âm bằng ASR trong 0.2s (**Label-Free ASR Auto-Fallback**). Peak Headroom Scaling $\le 0.95$. Đạt 5/5 speaker $100\%$, Mean WER $6.26\%$, Mean Sim $0.8008$, Gate 3 Pass $100\%$.
+- **Đặc tả Engine #2 – `VieNeu-TTS v3 Turbo` (Qwen LLM + `MOSS_48kHz`)**: Chốt cố định v3 Turbo ($48\text{ kHz}$ PCM), nhanh hơn v2 GPU 6.7 lần ($2.7\text{s}$ vs $18.1\text{s}$) và Sim Ref cao hơn ($0.7231$ vs $0.6556$). Preset A (`use_ref_codes=True`), `denoise=False`, `apply_watermark=False`, `temperature=0.60`, `top_p=0.90`, Headroom $\le 0.95$, văn bản $\le 250$ ký tự. Đạt 4/5 speaker $100\%$, Mean WER $8.47\%$, Mean Sim $0.7108$.
+- **Đánh giá Khả năng Tổng quát hóa (Seen vs. Unseen TTS – CH2 / H2 & ADR-3)**:
+  1. *Seen TTS (In-Domain)*: Mẫu giả sinh từ `F5-TTS-Vietnamese`.
+  2. *Unseen TTS (Out-of-Distribution)*: Mẫu giả sinh từ `VieNeu-TTS v3 Turbo` (kèm công cụ thứ 3 ở mức Could – W6).
 
-- **Lọc chất lượng âm thanh tổng hợp bằng ASR (`scripts/filter_asr_wer.py`):**  
-  - Chạy mô hình nhận dạng giọng nói tiếng Việt (`PhoWhisper` hoặc `vietai/ASR wav2vec2-base-vietnamese-250h`) trên toàn bộ các file giả vừa sinh để tính tỷ lệ lỗi từ (**WER**).  
-  - Loại bỏ các mẫu bị lặp từ, nuốt chữ hoặc nhiễu hỏng có WER vượt ngưỡng cho phép.  
-- **Phân chia tập dữ liệu độc lập người nói (`scripts/split_dataset.py`):**  
-  - Chia dữ liệu thành 3 tập: **Train (70%)**, **Dev/Validation (15%)**, và **Eval/Test (15%)**.  
-  - **Ràng buộc bắt buộc:** Chia theo `Speaker ID` — một người nói đã xuất hiện trong tập Train (dù là mẫu thật hay mẫu giả nhân bản từ người đó) tuyệt đối không được xuất hiện trong tập Dev và Test.
+```python
+# Thực thi Pipeline Sinh Kép (DUAL_OUTPUT) Chuẩn Version 14 (v0.2.3) trên Kaggle GPU
+from src.vitruevoice.pipeline import ViTrueVoiceDualPipeline, PipelineMode
+from src.vitruevoice.batch_processor import BatchDatasetProcessor
+
+pipeline = ViTrueVoiceDualPipeline(
+    f5_config={"vocoder": "vocos", "sample_rate": 24000, "headroom_limit": 0.95},
+    vieneu_config={
+        "model_id": "pnnbao-ump/VieNeu-TTS-v3-Turbo", "sample_rate": 48000,
+        "use_ref_codes": True, "denoise": False, "apply_watermark": False,
+        "temperature": 0.60, "top_p": 0.90, "headroom_limit": 0.95
+    }
+)
+processor = BatchDatasetProcessor(
+    pipeline=pipeline, mode=PipelineMode.DUAL_OUTPUT, only_pass=True,
+    min_dur=3.5, max_dur=7.5, allow_stitching=False
+)
+processor.run_batch(
+    speakers=["SPK_0001", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"],
+    seeds=[100, 200, 300],
+    codecs=["clean_16khz", "g711_alaw", "amr_nb"],
+    manifest_dir="data/manifests/"
+)
+```
+
+### [BƯỚC 1.3] Kiểm soát Chất lượng 4 Cổng, Nén Viễn thông & Manifest 17 Cột (ADR-3)
+
+- **Bộ lọc chất lượng 4 cổng nghiêm ngặt (`MultiGateEvaluator`) & `Multi-Seed Retry`**:
+  1. *Gate 1 – Nội dung ASR (`wav2vec2-base-vietnamese-250h`)*: Clean WER $\le 15\%$, CER $\le 8\%$, `is_catastrophic = False`.
+  2. *Gate 2 – Sinh trắc học người nói (`spkrec-ecapa-voxceleb`)*: Cosine Sim so với Centroid ($K=4$) đạt $\text{Sim} \ge T_{\text{spk}}$ (sàn $\ge 0.4905$, shrinkage $\sigma_{\text{pooled}} = 0.08$, trần $0.62$).
+  3. *Gate 3 – Sanity tín hiệu*: Không NaN/Inf, $\text{RMS} \ge 0.01$, thời lượng $\ge 1.0\text{s}$, $\text{Peak} \le 0.999$.
+  4. *Gate 4 – Ngữ điệu & Phương ngữ Thuần Âm học (`dialect_evaluator.py`)*: YIN $F_0$ trên $[65\text{ Hz} - 400\text{ Hz}]$:
+     $$\frac{|F_{0,\text{synth}} - F_{0,\text{ref}}|}{F_{0,\text{ref}}} \le 0.30, \quad |\Delta CV_{F0}| \le 0.12, \quad |dF_0/dt| > 25\text{ Hz} \le 0.18, \quad \text{dialect\_score} \ge 0.65$$
+  Nếu trượt, `Multi-Seed Retry` tự động thử seed kế tiếp (`200`, `300`) — trung bình 1.4 lần thử/mẫu.
+- **Chuỗi mô phỏng suy giảm kênh thoại (`TelephonyCompressor`) & Dịch chuyển Ngưỡng**:
+  - `clean_16khz`: 16kHz Mono phòng thu.
+  - `g711_alaw`: 8kHz Mono, 64kbps (PSTN/ISDN, 300–3400Hz).
+  - `amr_nb`: 8kHz Mono, 12.2kbps (2G/3G GSM) + `opus` (16–32kbps).
+  - Băng hẹp 8kHz triệt tiêu hài âm $> 3.4\text{ kHz}$ làm phương sai Impostor tăng ($0.0875 \rightarrow 0.1011$), độ nhạy $d'$ giảm mạnh: G.711 giảm $22.8\%$ ($d'=4.02$) và AMR-NB giảm $25.5\%$ ($d'=3.89$) so với Studio ($d'=5.21$); gây **Narrowband Upward Shift** đẩy $T_{\text{FAR 1\%}}$ từ $0.4800 \rightarrow 0.5958$ (G.711) và $0.6195$ (AMR-NB).
+- **Cấu trúc 5 Tệp Manifest 17 Cột & Phân Vùng Speaker-Disjoint**:
+  - Lưu tại `data/manifests/` (`train_manifest.csv`, `dev_manifest.csv`, `test_manifest.csv`, `spoof_manifest.csv`, `full_manifest.csv`).
+  - 17 cột: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed`.
+  - Phân vùng: Train (`SPK_0001, 0004, 0005`), Dev (`SPK_0006`), Test In-domain (`SPK_0007`). Tỷ lệ 70% / 15% / 15% khi mở rộng.
+  - Toàn bộ **31/31 unit tests** (`pytest tests/ -v`) vượt qua $100\%$.
 
 ---
 
 ## GIAI ĐOẠN 02: TIỀN XỬ LÝ TÍN HIỆU ÂM THANH & MÔ PHỎNG KÊNH TRUYỀN (PREPROCESSING & AUGMENTATION)
 
-**Mục tiêu Giai đoạn 2:** Loại bỏ hoàn toàn sai lệch kỹ thuật (`Technical Bias`) về tần số lấy mẫu (24kHz/48kHz vs 16kHz) và khoảng lặng đầu/cuối câu giữa các nguồn thu và công cụ TTS, đồng thời huấn luyện độ bền của mô hình trước nén mạng xã hội / viễn thông.
+*Loại bỏ sai lệch kỹ thuật (Technical Bias) và giải quyết bài toán lệch miền (Domain Shift – ADR-2) qua kênh thoại nén Opus, AMR-NB, G.711 A-law, băng tần $8\text{ kHz}$.*
 
-### Bước 2.1. Chuẩn hóa Kênh (`Mono`), Tần số lấy mẫu (`16kHz`) và Định dạng Biên độ
+### [BƯỚC 2.1] Chuẩn hóa Kênh (Mono), Tần số Lấy Mẫu (16 kHz) và Biên Độ
 
-- **Chuyển đổi về Kênh đơn (`Mono Channel Conversion`):** Dùng `librosa` hoặc `torchaudio` chuyển toàn bộ file âm thanh nhiều kênh (Stereo) về 1 kênh duy nhất (Mono) bằng cách lấy trung bình cộng các kênh.  
-- **Đồng bộ tần số lấy mẫu về `16.000 Hz` (`Resampling`):** Đưa toàn bộ mẫu âm thanh từ 24 kHz / 44.1 kHz / 48 kHz về đúng chuẩn **16.000 Hz (16-bit PCM WAV/FLAC)** — chuẩn bắt buộc của bộ trích xuất đặc trưng Wav2Vec 2.0 và kiến trúc AASIST.  
-- **Chuẩn hóa biên độ (`Z-score / Peak Normalization`):** Chuẩn hóa tín hiệu waveform về trung bình bằng 0, phương sai bằng 1 (`Zero-mean Unit-variance`) hoặc miền giá trị `[-1.0, 1.0]` trên từng đoạn thoại.
+- **Chuyển về Mono**: Lấy trung bình cộng các kênh Stereo về 1 kênh duy nhất.
+- **Tái lấy mẫu 16.000 Hz**: Đưa mọi mẫu từ 24kHz / 44.1kHz / 48kHz về 16.000 Hz PCM.
+- **Chuẩn hóa EBU R128 & Z-score**: Đưa về target $-23\text{ LUFS}$ và chuẩn hóa Z-score trung bình 0, phương sai 1 trên từng đoạn thoại. Tắt watermark âm học.
 
-### Bước 2.2. Cắt bỏ Khoảng lặng Đầu/Cuối (`Silence Removal`) & Cố định Độ dài 4 giây (`64.000 mẫu`)
+### [BƯỚC 2.2] Cắt Bỏ Khoảng Lặng Đầu/Cuối & Cố Định Độ Dài 4 Giây (64.000 Mẫu)
 
-- **Loại bỏ khoảng lặng đầu và cuối (`Energy-based Silence Trimming`):** Tính đường bao năng lượng RMS (`frame_length=512, hop_length=160`) và cắt bỏ các đoạn nằm dưới **phân vị thứ 20 (`20th percentile`)** ở phần đầu và phần cuối file để triệt tiêu hiện tượng rò rỉ nhãn do khoảng lặng của người thật tạo ra.  
-- **Chuẩn hóa độ dài cố định 4 giây (`64.000 sample points` tại 16 kHz):**  
-  - Nếu file sau khi cắt khoảng lặng dài hơn 4 giây (`> 64.000 mẫu`): lấy mẫu ngẫu nhiên một đoạn 4 giây (`Random Crop`) trong quá trình Train, và lấy đoạn chính giữa hoặc trượt cửa sổ (`Sliding Window`) khi Inference.  
-  - Nếu file ngắn hơn 4 giây (`< 64.000 mẫu`): thực hiện nối lặp lại chính tín hiệu đó (`Repeat Padding`) cho đủ 64.000 mẫu thay vì đệm số 0 (`Zero-padding`) để giữ tính liên tục phổ-thời gian.  
-- **Cài đặt chuẩn trong `src/preprocessing/audio_processor.py`:**  
-    
-  import torch, torchaudio, librosa, numpy as np  
-    
-  def preprocess\_audio(file\_path, target\_sr=16000, max\_len=64000):  
-    
-      \# 1\. Load & chuyển về Mono, chuẩn hóa tần số lấy mẫu 16kHz  
-    
-      wav, sr \= librosa.load(file\_path, sr=target\_sr, mono=True)  
-    
-        
-    
-      \# 2\. Cắt khoảng lặng đầu/cuối dựa trên phân vị thứ 20 của năng lượng  
-    
-      energy \= librosa.feature.rms(y=wav, frame\_length=512, hop\_length=160)\[0\]  
-    
-      threshold \= np.percentile(energy, 20\)  
-    
-      valid\_frames \= np.where(energy \> threshold)\[0\]  
-    
-      if len(valid\_frames) \> 0:  
-    
-          start \= max(0, valid\_frames\[0\] \* 160\)  
-    
-          end \= min(len(wav), (valid\_frames\[-1\] \+ 1\) \* 160\)  
-    
-          wav \= wav\[start:end\]  
-    
-            
-    
-      \# 3\. Cố định độ dài 64.000 mẫu (4 giây) bằng Repeat Padding hoặc Crop  
-    
-      if len(wav) \< max\_len:  
-    
-          num\_repeats \= int(np.ceil(max\_len / len(wav)))  
-    
-          wav \= np.tile(wav, num\_repeats)\[:max\_len\]  
-    
-      else:  
-    
-          wav \= wav\[:max\_len\]  
-    
-            
-    
-      \# 4\. Chuẩn hóa Z-score biên độ  
-    
-      wav \= (wav \- np.mean(wav)) / (np.std(wav) \+ 1e-8)  
-    
-      return torch.tensor(wav, dtype=torch.float32)
+- **Cắt khoảng lặng phân vị 20**: Tính RMS (`frame_length=512, hop_length=160`), cắt bỏ phần nằm dưới phân vị thứ 20 ở đầu và cuối file.
+- **Cố định 64.000 mẫu**:
+  - Dài hơn 4s: Lấy ngẫu nhiên 4s (`Random Crop`) khi Train; cắt chính giữa hoặc trượt cửa sổ (`Sliding Window`) khi Inference.
+  - Ngắn hơn 4s: Nối lặp lại chính tín hiệu đó (`Repeat Padding`) bằng `np.tile(wav, num_repeats)[:64000]` thay vì đệm số 0.
 
-### Bước 2.3. Tăng cường Dữ liệu (`RawBoost`) & Mô phỏng Nén Codec Zalo / Điện thoại
+### [BƯỚC 2.3] Tăng Cường Nén Kênh Thoại & RawBoost (ADR-2)
 
-- **Tăng cường miền thời gian bằng `RawBoost`:** Tích hợp trực tiếp thuật toán RawBoost (gồm 3 nhánh: nhiễu cộng tính phụ thuộc tín hiệu **ISD**, nhiễu xung không phụ thuộc tín hiệu **SSI**, và lọc tích chập tuyến tính/phi tuyến **LnL** \- Algo 3/5) ngay trong `DataLoader` lúc huấn luyện.  
-- **Mô phỏng nén Codec mạng xã hội & kênh thoại (`Codec & Bandwidth Simulation`):** Sử dụng `ffmpeg` / `torchaudio` biến đổi ngẫu nhiên (xác suất 50% on-the-fly lúc Train) các mẫu huấn luyện qua các bộ mã hóa nén suy hao:  
-  1. Chuẩn nén **Opus** ở bitrate thấp (`16–32 kbps`, mô phỏng luồng tin nhắn thoại Zalo/Telegram).  
-  2. Chuẩn nén viễn thông **AMR-NB / AMR-WB** và **GSM**.  
-  3. Hạ tần số xuống **8 kHz** rồi nội suy ngược lên **16 kHz** (kết hợp Bandpass filter `300Hz–3400Hz`) để mô phỏng cuộc gọi PSTN/VoIP.  
-- **Tách biệt dữ liệu mô phỏng và dữ liệu truyền thực tế:** Quản lý thư mục `data/real_app_test/` chứa tập mẫu kiểm thử được gửi và tải về thực tế qua tính năng tin nhắn thoại của Zalo và Telegram.
+- **Mô phỏng Codec**: Nén Opus 16–32kbps, AMR-NB 12.2kbps, G.711 A-law 64kbps (bandpass 300–3400Hz) rồi nội suy ngược lên 16kHz.
+- **Tăng cường RawBoost**: Áp dụng ngẫu nhiên xác suất 50% trong DataLoader (ISD, SSI, LnL - Algo 3/5).
+- **Mở rộng Codec thực tế (Should – W7–W8)**: Thu thập tin nhắn thoại thực tế qua Bot Telegram/Zalo (`data/real_app_test/`).
 
 ---
 
-## GIAI ĐOẠN 03: KIẾN TRÚC MÔ HÌNH & QUY TRÌNH HUẤN LUYỆN CHI TIẾT (MODEL TRAINING PIPELINE \- MUST \#2 / W5)
+## GIAI ĐOẠN 03: KIẾN TRÚC MÔ HÌNH, THIẾT KẾ ĐỐI CHỨNG & QUY TRÌNH HUẤN LUYỆN (MODEL TRAINING PIPELINE)
 
-**Mục tiêu Giai đoạn 3:** Triển khai từ mô hình cơ sở **Baseline AASIST** đến kiến trúc chủ lực **SSL-AASIST (Wav2Vec 2.0 \+ Graph Attention)**, huấn luyện trên GPU Kaggle thông qua `manage_kaggle.py` và lưu checkpoint đạt EER thấp nhất trên tập Dev.
+*Thực hiện Must #2 (W5): Fine-tune wav2vec 2.0 đối chứng Có vs. Không tăng cường nén kênh và so sánh với Baseline LFCC + GMM / AASIST (ADR-1, Bảng 2.2).*
 
-### Bước 3.1. Thiết kế Kiến trúc Mô hình (`src/models/`)
+### [BƯỚC 3.1] Thiết Kế Kiến Trúc Mô Hình & Các Nhánh Đối Chứng (ADR-1, ADR-2)
 
-- **Mô hình Cơ sở (`Baseline 1 - AASIST nguyên bản` \- `clovaai/aasist`):**  
-  - Đầu vào: Tín hiệu waveform thô kích thước `(batch_size, 1, 64000)`.  
-  - Kiến trúc: Lớp tích chập `SincConv` trích xuất đặc trưng phổ-thời gian cấp thấp \-\> mạng `ResNet` 6 khối \-\> mô-đun Mạng chú ý đồ thị không đồng nhất phổ-thời gian (`HS-GAL`) cùng nút `Master Node` \-\> lớp `Fully Connected` xuất 2 logit (`0: Spoof`, `1: Bona fide`).  
-- **Mô hình Chủ lực (`Main Model - SSL-AASIST`):**  
-  - Thay thế lớp `SincConv` của AASIST bằng bộ trích xuất đặc trưng tự giám sát (`Self-Supervised Learning`) **Wav2Vec 2.0 Front-end** kết hợp phần thân đồ thị **HS-GAL của AASIST Back-end**.  
-  - Hỗ trợ cấu hình chạy 2 nhánh thực nghiệm đối chứng:  
-    1. Sử dụng `Wav2Vec2-XLS-R` (300M tham số, đa ngôn ngữ).  
-    2. Sử dụng backbone tiếng Việt `nguyenvulebinh/wav2vec2-base-vietnamese-250h` (cắt bỏ lớp phân loại ký tự `lm_head` ở cuối, chỉ giữ khối `Wav2Vec2Model`).  
-  - Chiếu biểu diễn đầu ra từ tầng Transformer cuối cùng qua lớp `Linear` và đưa thẳng vào phần thân đồ thị `HS-GAL` của AASIST để bắt các dấu vết giả mạo vi mô (`micro-artefacts`).  
-- **Tối ưu hóa kiến trúc cho suy luận nhanh (`Student / Compression`):**  
-  - Hỗ trợ xuất mô hình sang định dạng **ONNX / TorchScript FP16** hoặc áp dụng Knowledge Distillation nén khối Transformer xuống 8 tầng để đảm bảo thời gian phản hồi `<= 3 giây`.
+- **Baseline Cơ sở**: LFCC + GMM (trên CPU) và AASIST nguyên bản (`SincConv` + ResNet 6 khối + `HS-GAL` + `Master Node`).
+- **Mô hình Đối chứng cho CH1 / H1**: SSL-AASIST huấn luyện chỉ trên âm thanh sạch (`clean_16khz`).
+- **Mô hình Chủ lực ViTrueVoice**: SSL-AASIST (backbone `nguyenvulebinh/wav2vec2-base-vietnamese-250h` hoặc `Wav2Vec2-XLS-R` kết hợp đồ thị `HS-GAL`) huấn luyện với tăng cường nén kênh thoại (Opus, AMR-NB, G.711, 8kHz + RawBoost) để kiểm chứng giả thuyết **H1** (giảm $\ge 30\%$ EER tương đối).
+- **Nhánh Đánh giá Khả năng Tổng quát hóa (CH2 / H2)**: Kiểm chứng chuyển giao từ **Seen TTS (F5-TTS)** sang **Unseen TTS (VieNeu-TTS v3 Turbo)** để đạt $\text{EER} \le 15\%$.
 
-### Bước 3.2. Thiết lập Hàm mất mát, Bộ tối ưu hóa và Siêu tham số (`Hyperparameters`)
+### [BƯỚC 3.2] Bảng Thiết Lập Hàm Mất Mát, Bộ Tối Ưu Hóa & Siêu Tham Số
 
-| Thành phần Huấn luyện | Cấu hình Tham số Chi tiết | Mục đích Kỹ thuật |
-| :---- | :---- | :---- |
-| **Hàm mất mát (Loss Function)** | `Weighted Cross-Entropy Loss` với trọng số `W = [0.1, 0.9]` (`Spoof: 0.1`, `Bona fide: 0.9`) | Xử lý mất cân bằng số lượng mẫu khi tập Spoof (`>= 2.000 mẫu`) gấp đôi tập Bona fide (`>= 1.000 mẫu`), giảm báo động giả. |
-| **Bộ tối ưu (Optimizer)** | `Adam` / `AdamW` (`betas=(0.9, 0.98)`, `eps=1e-8`, `weight_decay=1e-4`) | Giữ ổn định đạo hàm khi tinh chỉnh đồng thời cả khối Transformer lớn và mạng đồ thị phía sau. |
-| **Tốc độ học (Learning Rate)** | \- Baseline AASIST: `lr = 1e-4` (`Cosine Annealing`) \- SSL-AASIST Fine-tune: `lr = 1e-6` (Cố định / Warm-up) | Learning rate cực nhỏ (`1e-6`) ngăn hiện tượng quên thảm khốc (`catastrophic forgetting`) các biểu diễn âm học đã học của Wav2Vec 2.0. |
-| **Batch Size & Epochs** | `Batch Size = 16` hoặc `32` (kèm `Gradient Accumulation`); `Epochs = 50–100` (`Early Stopping = 10 epochs`) | Đảm bảo hội tụ ổn định trên GPU Kaggle, dừng sớm ngay khi EER trên tập Dev ngừng giảm. |
-| **Augmentation lúc Train** | `RawBoost (Algo 3/5)` \+ Xác suất `50%` nén Opus/AMR/8kHz on-the-fly | Buộc mô hình nhận diện đúng ngay cả khi âm thanh bị bóp méo qua Zalo/Telegram/VoIP. |
+| Thành phần Huấn luyện | Cấu hình Tham số Chi tiết | Mục đích Kỹ thuật trong Đề tài |
+| :--- | :--- | :--- |
+| **Biến kiểm soát thí nghiệm (Mục 3.5)** | $\bullet$ Biến thay đổi: (a) Có/Không nén kênh thoại; (b) Seen F5-TTS vs. Unseen VieNeu-TTS<br>$\bullet$ Giữ cố định: Kiến trúc mô hình, tập Test, số bước huấn luyện | Đảm bảo tính đối chứng khoa học nghiêm ngặt khi trả lời câu hỏi CH1 và CH2. |
+| **Hàm mất mát (Loss Function)** | Weighted Cross-Entropy Loss<br>Trọng số lớp: $W = [0.1, 0.9]$ (Spoof: $0.1$, Bona fide: $0.9$) | Bù đắp mất cân bằng số lượng mẫu giữa tập Spoof ($\ge 2.000$) và Bona fide ($\ge 1.000$), giảm thiểu báo động giả trên người thật. |
+| **Bộ tối ưu (Optimizer)** | Adam / AdamW<br>$\beta_1 = 0.9$, $\beta_2 = 0.98$, $\epsilon = 10^{-8}$, $\text{Weight Decay} = 10^{-4}$ | Giữ ổn định đạo hàm khi tinh chỉnh đồng thời cả khối Transformer lớn và đồ thị HS-GAL. |
+| **Tốc độ học (Learning Rate)** | $\bullet$ Warm-up 3–5 epochs: $lr = 10^{-4}$<br>$\bullet$ Fine-tune wav2vec 2.0: $lr = 10^{-6}$ | Learning rate cực nhỏ ($10^{-6}$) ngăn hiện tượng quên thảm khốc (catastrophic forgetting) các biểu diễn âm học tiền huấn luyện. |
+| **Batch Size & Bước huấn luyện** | $\text{Batch Size} = 16$ hoặc $32$ (kèm Gradient Accumulation); cố định 50–100 epochs | Hội tụ ổn định trên GPU Kaggle; lưu `best_model.pt` tại điểm EER + minDCF tối ưu trên tập Dev (`SPK_0006`). |
 
-### Bước 3.3. Vòng lặp Huấn luyện 2 Pha & Điều khiển Huấn luyện trên Kaggle GPU
+### [BƯỚC 3.3] Quy Trình Vòng Lặp Huấn Luyện 2 Pha
 
-- **Quy trình 2 pha trong `train.py`:**  
-  1. **Giai đoạn Khởi động (`Warm-up Phase` – 3 đến 5 Epoch đầu):** Đóng băng (`Freeze`) toàn bộ trọng số của khối Front-end Wav2Vec 2.0, chỉ mở khóa huấn luyện phần Back-end đồ thị AASIST và lớp phân loại cuối với `lr = 1e-4`.  
-  2. **Giai đoạn Tinh chỉnh Toàn mạng (`Joint Fine-tuning Phase`):** Mở khóa (`Unfreeze`) toàn bộ các tầng Transformer của Wav2Vec 2.0, hạ Learning Rate toàn cục xuống `lr = 1e-6` và huấn luyện đồng thời cả Front-end lẫn Back-end kết hợp `RawBoost` \+ `Codec Augmentation`.  
-  3. **Kiểm định & Lưu Checkpoint theo EER:** Sau mỗi epoch, chạy `model.eval()` trên tập Dev (không bật RawBoost), tính chỉ số `EER`. Chỉ lưu đè file `/kaggle/working/best_model.pt` khi EER trên tập Dev đạt mức thấp kỷ lục mới.  
-- **Khung mã chuẩn trong `train.py`:**  
-    
-  import os, torch, torch.nn as nn  
-    
-  from torch.optim import Adam  
-    
-  device \= torch.device('cuda' if torch.cuda.is\_available() else 'cpu')  
-    
-  model \= SSLAASISTModel(ssl\_pretrained='nguyenvulebinh/wav2vec2-base-vietnamese-250h').to(device)  
-    
-  weights \= torch.FloatTensor(\[0.1, 0.9\]).to(device)  \# \[Spoof, Bona fide\]  
-    
-  criterion \= nn.CrossEntropyLoss(weight=weights)  
-    
-  optimizer \= Adam(model.parameters(), lr=1e-6, betas=(0.9, 0.98), eps=1e-8, weight\_decay=1e-4)  
-    
-  best\_eer \= float('inf')  
-    
-  for epoch in range(1, num\_epochs \+ 1):  
-    
-      model.train()  
-    
-      for batch\_x, batch\_y in train\_loader:  
-    
-          batch\_x, batch\_y \= batch\_x.to(device), batch\_y.to(device)  
-    
-          optimizer.zero\_grad()  
-    
-          logits \= model(batch\_x)           \# Output shape: (batch\_size, 2\)  
-    
-          loss \= criterion(logits, batch\_y)  
-    
-          loss.backward()  
-    
-          optimizer.step()  
-    
-        
-    
-      \# Đánh giá EER trên tập Dev cuối mỗi Epoch  
-    
-      dev\_eer \= evaluate\_eer(model, dev\_loader, device)  
-    
-      if dev\_eer \< best\_eer:  
-    
-          best\_eer \= dev\_eer  
-    
-          torch.save(model.state\_dict(), '/kaggle/working/best\_model.pt')  
-    
-- **Quy trình thực thi qua `manage_kaggle.py`:**  
-    
-  \# 1\. Cài đặt username Kaggle & thêm dataset  
-    
-  python manage\_kaggle.py set-user \<username\_kaggle\_cua\_ban\>  
-    
-  python manage\_kaggle.py add-dataset \<username\_so\_huu\>/\<ten\_dataset\>  
-    
-  \# 2\. Đẩy code lên Kaggle GPU để huấn luyện  
-    
-  python manage\_kaggle.py push  
-    
-  \# 3\. Kiểm tra trạng thái (queued \-\> running \-\> complete)  
-    
-  python manage\_kaggle.py status  
-    
-  \# 4\. Tải weights (best\_model.pt) và logs về thư mục ./out/ tại máy local  
-    
-  python manage\_kaggle.py output
+1. **Pha 1 (Warm-up — 3 đến 5 Epoch đầu)**: Đóng băng (`Freeze`) khối front-end wav2vec 2.0, chỉ mở khóa huấn luyện phần back-end đồ thị AASIST với $lr = 10^{-4}$.
+2. **Pha 2 (Joint Fine-tuning — Epoch 6 đến 50–100)**: Mở khóa (`Unfreeze`) toàn bộ các tầng Transformer của wav2vec 2.0, hạ $lr = 10^{-6}$, bật tăng cường nén kênh thoại và RawBoost.
+3. **Kiểm định & Checkpoint**: Đánh giá `model.eval()` trên tập Dev (`dev_manifest.csv`) cuối mỗi epoch; chỉ lưu đè `/kaggle/working/best_model.pt` khi EER đạt kỷ lục thấp mới.
 
 ---
 
-## GIAI ĐOẠN 04: ĐÁNH GIÁ CHÉO, TRIỂN KHAI HỆ THỐNG & NGHIỆM THU ĐỀ TÀI (EVALUATION & DEPLOYMENT \- MUST \#3 / W6–W8)
+## GIAI ĐOẠN 04: ĐÁNH GIÁ THỰC NGHIỆM, TRIỂN KHAI AWS/DOCKER, KIỂM THỬ & PILOT (GOALS & DELIVERABLES)
 
-**Mục tiêu Giai đoạn 4:** Kiểm định theo chuẩn ASVspoof trên 3 kịch bản, đóng gói dịch vụ suy luận thời gian thực qua **FastAPI \+ Gradio Web Demo \+ Bot Telegram**, thiết lập **Docker \+ CI**, và xuất đầy đủ bằng chứng nghiệm thu.
+*Thực hiện Must #2, #3 & CP6–CP10 (W5–W10): Kiểm định EER/minDCF, triển khai FastAPI + Gradio + Bot Telegram, bảo mật AWS và Pilot với CLB ATTT HUTECH.*
 
-### Bước 4.1. Quy trình Đánh giá Chéo 3 Kịch bản (`scripts/eval_eer.py`)
+### [BƯỚC 4.1] Giao Thức Đo Lường Trước–Sau, Script Tái Lập & Bộ AI Eval $\ge 30$ Ca
 
-- **Cách tính điểm quyết định và ngưỡng EER:**  
-  - Từ vector đầu ra 2 chiều `[s_spoof, s_bonafide]`, tính điểm tin cậy (`Confidence Score / CM Score`) bằng xác suất Softmax của lớp Bona fide hoặc hiệu số LLR.  
-  - Quét ngưỡng quyết định `theta` để tìm điểm giao nhau mà tại đó `FAR` (`False Acceptance Rate`) bằng với `FRR` (`False Rejection Rate`) \-\> suy ra **EER (%)**, kết hợp tính **minDCF**, **ROC-AUC** và **Confusion Matrix**.  
-- **3 Kịch bản đánh giá bắt buộc:**  
-  1. **Kịch bản 1 – Đánh giá Nội bộ (`In-Domain Evaluation`):** Kiểm thử trên tập Test (người nói chưa từng xuất hiện trong tập Train) với mẫu giả từ F5-TTS và VieNeu-TTS ở điều kiện chuẩn (Đích: `EER <= 8%`).  
-  2. **Kịch bản 2 – Đánh giá Độ bền Kênh truyền & Nén (`Codec / Social Media Robustness`):** Kiểm thử trên các mẫu đã qua nén Opus, AMR, lọc băng thông 8kHz và tập gửi/nhận thực tế qua Zalo, Telegram; đối sánh mô hình có và không có tăng cường dữ liệu (Đích H1: giảm `>= 30% EER tương đối`).  
-  3. **Kịch bản 3 – Đánh giá Công cụ Mới chưa từng thấy (`Out-of-Domain / Unseen TTS`):** Kiểm thử trên tập mẫu giả sinh từ công cụ thứ 3 / RVC (Đích H2: `EER <= 15%`).  
-- **Tự động xuất kết quả ra file `benchmarks/eval_metrics.csv` theo đúng cấu trúc cột:**  
-    
-  experiment\_id,model\_name,augmentation,test\_condition,tts\_generator,eer\_percent,min\_dcf,date\_evaluated
+- **Đo mốc 'Trước' ở Tuần W2 (17–23/10/2026)**:
+  - *Blind Listening Package*: $\ge 10$ người nghe 20 đoạn thoại thật/giả kèm file khóa giải mã `blind_key_private.csv` để đo tỷ lệ phân biệt thực tế bằng tai người.
+  - *Xác minh thủ công*: Bấm giờ $\ge 3$ lần cách xác minh truyền thống (gọi lại / hỏi câu bí mật: 2–5 phút).
+- **Script Tái Lập EER & Đường Cong DET (`scripts/eval_eer.py` – US8)**: Quét ngưỡng quyết định $\theta$, xuất EER (%), minDCF và đường DET ra `benchmarks/eval_metrics.csv` cho cả 2 kịch bản:
+  1. Đánh giá có vs. không tăng cường nén trên tập nén Opus/AMR-NB/G.711/8kHz (CH1/H1).
+  2. Đánh giá chuyển giao từ Seen TTS (F5-TTS) sang Unseen TTS (VieNeu-TTS) (CH2/H2).
+- **Bộ AI Eval $\ge 30$ Tình Huống & Kiểm Thử TDD (31/31 Tests)**: Thiết lập bộ đánh giá $\ge 30$ tình huống (trong đó $\ge 10$ tình huống từng nhận diện sai, báo cáo tỷ lệ đạt trước và sau khi sửa); duy trì bộ unit tests 31/31 bài xanh $100\%$ trên CI.
 
-### Bước 4.2. Đóng gói Suy luận Thời gian thực (`FastAPI` / `Gradio` / `Bot Telegram`)
+### [BƯỚC 4.2] Triển Khai Dịch Vụ, Hạ Tầng AWS & Bảo Mật
 
-- **Luồng xử lý Inference `<= 3 giây` cho đoạn thoại 5–10 giây (`src/app/`):**  
-  1. Khi người dùng tải file ghi âm (5–10s) lên Web Demo (Gradio) hoặc chuyển tiếp tin nhắn thoại vào **Bot Telegram**, đọc luồng byte trực tiếp trên **RAM** (tránh ghi/đọc ổ cứng nhiều lần).  
-  2. Chạy tiền xử lý chuẩn hóa 16kHz Mono \+ cắt khoảng lặng (`< 0.2 giây`).  
-  3. Chia đoạn thoại thành 1–2 cửa sổ 4 giây (`64.000 mẫu`) đưa vào mô hình chạy song song ở chế độ `torch.inference_mode()` (hoặc `ONNX Runtime`).  
-  4. Trung bình cộng điểm số các cửa sổ, so sánh với ngưỡng `theta_EER` để trả về nhãn **`THẬT (BONA FIDE)`** hoặc **`GIẢ (SPOOF)`** kèm **% Độ tin cậy** và báo cáo cảnh báo rủi ro.  
-- **Ghi nhận bằng chứng tự động & Ẩn danh 100% (`benchmarks/latency_log.json`):**  
-  - Mọi lượt kiểm thử qua API/Bot phải tự động băm nội dung âm thanh bằng `SHA-256` và ghi log theo đúng chuẩn JSON sau:  
-      
-    {  
-      
-      "request\_id": "req\_20261016\_001",  
-      
-      "audio\_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",  
-      
-      "duration\_sec": 6.5,  
-      
-      "codec\_detected": "opus\_16kbps\_8khz",  
-      
-      "predicted\_label": "GIA (SPOOF)",  
-      
-      "confidence\_score": 0.942,  
-      
-      "latency\_sec": 1.48,  
-      
-      "timestamp": "2026-11-20T14:30:00Z"  
-      
-    }  
-      
-  - Viết script `scripts/benchmark_latency.py` chạy đo tự động **30 lần liên tiếp**, lấy trung vị thời gian phản hồi và xuất ra `benchmarks/latency_benchmark.csv`.
+- **Dịch vụ Suy luận Thời Gian Thực $\le 3$ Giây (Must #2, #3 – W5, W6)**:
+  - **FastAPI (`/api/v1/predict`)**: Đọc file qua RAM stream, cắt cửa sổ 4s, suy luận song song `torch.inference_mode()`, xóa file tạm ngay.
+  - **Web Gradio (US4, NFR4)**: Giao diện tối giản $\le 3$ thao tác cho người lớn tuổi, hiển thị nhãn `THẬT` / `GIẢ MẠO` to rõ kèm thang độ tin cậy.
+  - **Bot Telegram**: Tiếp nhận tin nhắn thoại chuyển tiếp, xử lý in-memory và phản hồi trực tiếp trong chat.
+  - **Đo Độ Trễ 30 Lần**: Script `scripts/benchmark_latency.py` đo 30 lần liên tiếp lấy trung vị $\le 3,0$ giây lưu `benchmarks/latency_benchmark.csv`. Log ẩn danh SHA-256 ghi nhận vào `benchmarks/latency_log.json`.
+- **Hạ Tầng Đám Mây AWS & 2 Biện Pháp Bảo Mật (Gói khóa học A – Bảng 2.3 / CP7 – W7)**:
+  1. *Biện pháp 1*: Mã hóa HTTPS/TLS và Server-Side Encryption kèm **Amazon S3 Lifecycle** tự động xóa file tạm ngay sau khi xử lý.
+  2. *Biện pháp 2*: Quản lý quyền tối thiểu (**IAM Least Privilege**), giới hạn tần suất gọi (**Rate Limiting**) và kiểm tra định dạng MIME/kích thước file.
+  - Ước tính chi phí vận hành cho 100 / 1.000 / 10.000 người dùng qua AWS Pricing Calculator (Bảng 3.4).
+- **Kiểm Thử Độc Lập Với Đơn Vị Pilot (CLB An Toàn Thông Tin HUTECH – W7, W8)**:
+  - Đơn vị Pilot chính: CLB An toàn thông tin HUTECH (Người liên hệ: Thầy Nguyễn Trọng Minh Hồng Phước; dự phòng: CLB AI HUTECH & ChongLuaDao.vn).
+  - Từ W7–W8 (04/12/2026), CLB đóng vai trò Red Team kiểm thử độc lập, tự tạo mẫu giọng giả (có đồng ý) để thử thách hệ thống và ký xác nhận Bảng trước–sau (Bảng 3.3).
 
-### Bước 4.3. Bảo mật, Kiểm thử Tự động (CI/CD), Docker & Bàn giao Red Team Pilot
+### [BƯỚC 4.3] Bảng Tổng Hợp Mục Tiêu Hoàn Thành Đề Tài (Target KPIs, NFRs & Deliverables)
 
-- **Áp dụng `>= 2` biện pháp bảo mật bắt buộc (W7):**  
-  1. **Mã hóa truyền tải & Tự động xóa file tạm:** Cấu hình TLS/HTTPS và cơ chế tự động xóa hủy dữ liệu âm thanh tạm ngay sau khi suy luận (kết hợp quy tắc **Amazon S3 Lifecycle** khi triển khai trên AWS).  
-  2. **Kiểm soát truy cập & Chống lạm dụng API:** Áp dụng **IAM Least Privilege**, giới hạn tần suất gọi API (**Rate Limiting**), và kiểm tra nghiêm ngặt định dạng MIME/kích thước file đầu vào.  
-- **Kiểm thử Tự động & Đóng gói:**  
-  - Hoàn thiện bộ `pytest` gồm `>= 10 test cases` (`>= 5 tests tự động` chạy trên GitHub Actions CI) và bộ đánh giá `>= 30 tình huống` (trong đó có `>= 10 tình huống` lấy từ các trường hợp hệ thống từng nhận diện sai).  
-  - Đóng gói toàn bộ ứng dụng bằng `Dockerfile` sẵn sàng triển khai trên **Amazon EC2 / Amazon ECR** và giám sát qua **AWS CloudWatch**.  
-  - Bàn giao đường dẫn Web Demo và Bot Telegram cho **CLB An toàn thông tin HUTECH** đóng vai trò Red Team độc lập kiểm thử thực tế.
+| Hạng mục Mục tiêu | Chỉ số Trước (Baseline ban đầu) | Mục tiêu Hoàn thành (Đích phải đạt) | Bằng chứng Nghiệm thu (Artifacts) |
+| :--- | :--- | :--- | :--- |
+| **1. Độ bền trên âm thanh đã nén (CH1 / H1)** | $\bullet$ Tai người: đo $\ge 10$ người $\times$ 20 đoạn ở W2<br>$\bullet$ Baseline không tăng cường nén (W4–W6) | **Giảm ít nhất $30\%$ EER tương đối** trên tập nén (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$) nhờ tăng cường nén kênh thoại | Script `scripts/eval_eer.py`, bảng đối sánh EER/minDCF trong `benchmarks/eval_metrics.csv` |
+| **2. Độ bền trước công cụ TTS chưa thấy (CH2 / H2 / NFR2)** | Mô hình giảm chất lượng khi gặp công cụ tổng hợp giọng mới ngoài tập huấn luyện | Duy trì **$\text{EER} \le 15\%$** trên giọng giả sinh từ Unseen TTS (`VieNeu-TTS v3 Turbo` / công cụ thứ 3) kèm minDCF & DET curve | Báo cáo đánh giá chéo TTS (W6) và tệp kết quả `benchmarks/eval_metrics.csv` |
+| **3. Thời gian phản hồi (Latency - NFR1)** | Xác minh thủ công (gọi lại / hỏi câu bí mật): 2–5 phút (bấm giờ $\ge 3$ lần ở W2) | **Trung vị thời gian phản hồi $\le 3,0$ giây** cho đoạn thoại 5–10 giây (đo lặp 30 lần) | File log ẩn danh SHA-256 `benchmarks/latency_log.json` và bảng 30 lần đo `benchmarks/latency_benchmark.csv` |
+| **4. Bộ dữ liệu & Đạo đức Sinh trắc học (Must #1 - NFR3)** | Dữ liệu rời rạc, giọng nói sinh trắc học nhạy cảm cần bảo vệ theo Luật 91/2025/QH15 | $\ge 5$–$30$ người nói có Phiếu đồng ý (`SPK_XXXX`) + VIVOS/Common Voice ($\ge 1.000$ thật, $\ge 2.000$ giả đạt 4 cổng); $100\%$ log ẩn danh; xóa dữ liệu sau bảo vệ | Mẫu Phiếu đồng ý (Phụ lục C.2), 5 file manifest 17 cột (W4), cấu hình S3 Lifecycle tự xóa file tạm |
+| **5. Sản phẩm MVP, Tái lập & Pilot (Must #2, #3 - NFR4, NFR5)** | Chưa có công cụ kiểm tra tự động tin nhắn thoại tiếng Việt qua kênh nén cho người cao tuổi | FastAPI + Web Gradio ($\le 3$ thao tác) + Bot Telegram; chạy 1 lệnh Docker; CI chạy 31/31 TDD tests xanh; AI Eval $\ge 30$ ca; Pilot CLB ATTT | Repo GitHub hoàn chỉnh, `Dockerfile`, GitHub Actions CI, Bảng chi phí AWS (100/1k/10k user) & Biên bản xác nhận Pilot (W8) |
 
 ---
 
 ## DANH SÁCH NGHIỆM THU ĐẦU RA (DEFINITION OF DONE CHECKLIST)
 
-- [ ] **Must \#1 (W4):** Hoàn tất bộ dữ liệu `>= 1.000` mẫu thật (có phiếu Consent \+ VIVOS/CommonVoice) & `>= 2.000` mẫu giả (F5-TTS, VieNeu-TTS) \+ bản nén Opus/AMR/8kHz; chia tập Speaker-Disjoint; viết 3 unit tests trước khi code.  
-- [ ] **Must \#2 (W5):** Huấn luyện thành công Baseline AASIST và SSL-AASIST trên Kaggle GPU qua `manage_kaggle.py`; tải `best_model.pt` về `./out/`; xuất bảng đối sánh EER có/không tăng cường vào `benchmarks/eval_metrics.csv`; khởi chạy API FastAPI.  
-- [ ] **Must \#3 (W6):** Hoàn thiện giao diện Gradio và Bot Telegram trả nhãn Thật/Giả \+ độ tin cậy trong `<= 3 giây`; ghi log ẩn danh SHA-256 vào `benchmarks/latency_log.json`; vượt qua `>= 10 tests` trên CI và bộ eval `>= 30 tình huống`.  
-- [ ] **Pilot & Nghiệm thu (W7–W8):** Đóng gói Docker \+ CI xanh; áp dụng `>= 2` biện pháp bảo mật; đạt đích **In-domain EER \<= 8%**, **Unseen TTS EER \<= 15%**, và **Latency trung vị (30 lần) \<= 3 giây**.
+- [x] **Must #1 (W3–W4 / Frozen Pipeline V14)**: Hoàn tất bộ dữ liệu 5 tình nguyện viên (`SPK_0001`..`0007`) có Phiếu đồng ý + VIVOS/Common Voice; sinh kép F5-TTS và VieNeu-TTS v3 Turbo (đã sinh 200 mẫu spoof gốc); lọc 4 cổng (Gate 1–4 Label-Free Prosody); TelephonyCompressor; xuất 5 tệp manifest 17 cột chia Speaker-Disjoint; 31/31 unit tests TDD xanh 100%.
+- [ ] **Must #2 (W5)**: Huấn luyện thành công Baseline LFCC+GMM / AASIST và SSL-AASIST trên Kaggle GPU qua `manage_kaggle.py`; tải `best_model.pt` về `./out/`; kiểm chứng 2 nhánh đối chứng (H1: có vs. không nén kênh; H2: Seen F5-TTS vs. Unseen VieNeu-TTS); xuất kết quả vào `benchmarks/eval_metrics.csv`; khởi chạy API FastAPI.
+- [ ] **Must #3 (W6)**: Hoàn thiện giao diện Gradio ($\le 3$ thao tác) và Bot Telegram trả nhãn Thật/Giả + độ tin cậy trong $\le 3$ giây; ghi log ẩn danh SHA-256 vào `benchmarks/latency_log.json`; vượt qua 31/31 tests trên CI và bộ eval $\ge 30$ tình huống.
+- [ ] **Pilot & Nghiệm thu (W7–W8)**: Đóng gói Docker trên AWS EC2, S3 Lifecycle tự xóa, IAM least privilege, CloudWatch; đạt đích **In-domain EER <= 8%**, **H1: Giảm >= 30% EER trên tập nén**, **H2: Unseen TTS EER <= 15%**, và **Latency trung vị (30 lần) <= 3,0 giây**; ký biên bản xác nhận nghiệm thu Pilot cùng CLB An toàn thông tin HUTECH.

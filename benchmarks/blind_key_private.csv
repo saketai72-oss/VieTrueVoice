@@ -1,0 +1,13 @@
+sample_id,true_label,generator,speaker_id,codec,duration_sec,audio_sha256,source_file
+s01,spoof,F5-TTS,SPK_0004,amr_nb_12.2kbps,4.0,9b5e7906eadd9e30618ee2efaf2422ee9f6f54fdc4fbc2dfc84810807304b16f,out/data/spoof_f5tts/SPK_0004/SPK_0004_prompt_000.wav
+s02,bonafide,natural_voice,SPK_0007,amr_nb_12.2kbps,3.328,7251fd24528bfed1e4664214950966d029b000d2a2e429217bd1fface65bbec6,data/raw/SPK_0007/SPK_0007_02.wav
+s03,bonafide,natural_voice,SPK_0005,amr_nb_12.2kbps,4.0,97168fae2ffc35755a744b9abd0f6f2f4edff5a30fcfdec7243840f261c6f1c9,data/raw/SPK_0005/SPK_0005_01.wav
+s04,spoof,F5-TTS,SPK_0006,amr_nb_12.2kbps,4.0,fc4c747abbbb34e9e24f3a9714021a672ce88d4eb637c00691cff2e0359a5349,out/data/spoof_f5tts/SPK_0006/SPK_0006_prompt_000.wav
+s05,spoof,VieNeu-TTS,SPK_0005,amr_nb_12.2kbps,4.0,6c590e9caa5a17de305c221f455d710b817b3eae8e59d95b2a7c824337a07868,out/data/spoof_vieneu/SPK_0005/SPK_0005_prompt_000.wav
+s06,spoof,F5-TTS,SPK_0001,amr_nb_12.2kbps,4.0,e58a8cbb22146808afef3cc5f381ddd5b0c3e883ac7ad411a790ff0fa162ff8a,out/data/spoof_f5tts/SPK_0001/SPK_0001_prompt_000.wav
+s07,spoof,VieNeu-TTS,SPK_0007,amr_nb_12.2kbps,4.0,3299bb564fec034f3d012ee838b3c87682924324148f874394fa2aee9424176b,out/data/spoof_vieneu/SPK_0007/SPK_0007_prompt_001.wav
+s08,bonafide,natural_voice,SPK_0006,amr_nb_12.2kbps,4.0,3db42cf0f0bbc9e282f610dc9e665fdecefd024cb27bfa28ce3660a6422d8c59,data/raw/SPK_0006/SPK_0006_01.wav
+s09,bonafide,natural_voice,SPK_0007,amr_nb_12.2kbps,3.648,10afdf078b6b7d39e23535d356a35eabd27eb1f887943137b1db5033481f9021,data/raw/SPK_0007/SPK_0007_01.wav
+s10,bonafide,natural_voice,SPK_0001,amr_nb_12.2kbps,3.563,3da8022b1a463bde3d3b8dbe06c117c3d884a00b403a5d09754392522484e77a,data/raw/SPK_0001/SPK_0001_01.wav
+s11,bonafide,natural_voice,SPK_0004,amr_nb_12.2kbps,4.0,5fe51988acd6c36ad9f4b9c724be3a9e861c7556ef9503c7b1abf1446b5ffbe7,data/raw/SPK_0004/SPK_0004_01.wav
+s12,spoof,VieNeu-TTS,SPK_0007,amr_nb_12.2kbps,4.0,78fcde7f43f2c16e58fec2ba3516f2f355074a97950c0894f8242b19e4257f36,out/data/spoof_vieneu/SPK_0007/SPK_0007_prompt_000.wav
