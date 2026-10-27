@@ -10,7 +10,8 @@
   "enable_internet": "true",
   "dataset_sources": [
     "nguyenthanhtai1959/vitruevoice-raw-bonafide",
-    "kynthesis/vivos-vietnamese-speech-corpus-for-asr"
+    "kynthesis/vivos-vietnamese-speech-corpus-for-asr",
+    "tuannguyenvananh/vi-common-voice"
   ],
   "competition_sources": [],
   "kernel_sources": []
