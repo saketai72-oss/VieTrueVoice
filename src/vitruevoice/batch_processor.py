@@ -140,6 +140,7 @@ class BatchDatasetProcessor:
         max_retries: int = 2,
         out_f5_dir: Optional[Path] = None,
         out_vn_dir: Optional[Path] = None,
+        ref_cands: Optional[List[str]] = None,
     ) -> List[ManifestRecord]:
         """
         Xử lý hoàn chỉnh cho 1 speaker:
@@ -158,15 +159,17 @@ class BatchDatasetProcessor:
         # 1. Enrollment Centroid K câu thật
         enroll_centroid = self.evaluator.compute_enrollment_centroid(enroll_pool, k=len(enroll_pool))
 
-        # 2. Chọn reference clip từ ref_pool (Ưu tiên clip đơn tự nhiên 3.5s - 7.5s)
-        ref_cands = self.profiler.prepare_reference_clip(
-            ref_pool, str(out_synth_dir / "refs"), speaker_id, min_dur=3.5, max_dur=7.5, allow_stitching=False
-        )
+        # 2. Chọn reference clip từ ref_pool (hoặc sử dụng ref_cands đã truyền)
         if not ref_cands:
             ref_cands = self.profiler.prepare_reference_clip(
-                ref_pool, str(out_synth_dir / "refs"), speaker_id, min_dur=3.0, max_dur=8.5, allow_stitching=True
+                ref_pool, str(out_synth_dir / "refs"), speaker_id, min_dur=3.5, max_dur=7.5, allow_stitching=False
             )
             if not ref_cands:
+                ref_cands = self.profiler.prepare_reference_clip(
+                    ref_pool, str(out_synth_dir / "refs"), speaker_id, min_dur=3.0, max_dur=8.5, allow_stitching=True
+                )
+                if not ref_cands:
+                    ref_cands = ref_pool
                 ref_cands = ref_pool[:1]
 
         loo_res = self.profiler.select_best_reference_loo(speaker_id, ref_cands, enroll_pool)
