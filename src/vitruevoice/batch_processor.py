@@ -52,7 +52,27 @@ class DatasetPartitioner:
             enroll_pool = files[n_ref_cands : n_ref_cands + n_enroll]
             test_pool = files[n_ref_cands + n_enroll :]
 
+        # Ràng buộc nghiêm ngặt chống rò rỉ dữ liệu giữa 3 tập
+        set_ref = set(ref_pool)
+        set_enr = set(enroll_pool)
+        set_tst = set(test_pool)
+        assert len(set_ref & set_enr) == 0, f"Rò rỉ dữ liệu: ref_pool và enroll_pool giao nhau! {set_ref & set_enr}"
+        assert len(set_ref & set_tst) == 0, f"Rò rỉ dữ liệu: ref_pool và test_pool giao nhau! {set_ref & set_tst}"
+        assert len(set_enr & set_tst) == 0, f"Rò rỉ dữ liệu: enroll_pool và test_pool giao nhau! {set_enr & set_tst}"
+
         return ref_pool, enroll_pool, test_pool
+
+    @staticmethod
+    def assign_utterance_role(file_path: str, ref_pool: List[str], enroll_pool: List[str]) -> str:
+        """Xác định vai trò rõ ràng của utterance: 'ref', 'enroll' hoặc 'eval'."""
+        p_str = str(file_path)
+        ref_strs = {str(f) for f in ref_pool}
+        enr_strs = {str(f) for f in enroll_pool}
+        if p_str in ref_strs:
+            return "ref"
+        elif p_str in enr_strs:
+            return "enroll"
+        return "eval"
 
 
 
@@ -169,13 +189,20 @@ class BatchDatasetProcessor:
                 if sim_to_enroll is None and metrics is not None:
                     sim_to_enroll = getattr(metrics, "speaker_sim", 0.0)
 
-            passed = getattr(metrics, "overall_pass", False) if metrics else False
+            gate1_pass = getattr(metrics, "gate1_pass", True) if metrics else True
+            gate3_pass = getattr(metrics, "gate3_pass", True) if metrics else True
+            is_catastrophic = getattr(metrics, "is_catastrophic", False) if metrics else False
+
+            # Lọc cứng CHỈ trên Gate 1 (WER/độ rõ) và Gate 3 (Sanity/clipping/duration)
+            # Gate 2 (độ giống giọng) và Gate 4 (prosody) chỉ dùng để ghi điểm và gán tầng tấn công
+            hard_gate_pass = gate1_pass and gate3_pass and (not is_catastrophic)
+
             d_score = getattr(metrics, "dialect_score", 1.0) if metrics else 1.0
             d_match = getattr(metrics, "dialect_match", True) if metrics else True
             d_drift = getattr(metrics, "dialect_drift", False) if metrics else False
 
-            if only_pass and not passed:
-                print(f"  ⏭️ Bỏ qua {file_prefix} ({eng_name}): không đạt chuẩn 4 cổng (WER={clean_wer*100:.1f}%, Sim={sim_to_enroll:.4f}, Dialect={d_score:.2f}, Drift={d_drift})")
+            if only_pass and not hard_gate_pass:
+                print(f"  ⏭️ Bỏ qua {file_prefix} ({eng_name}): không đạt chuẩn Hard Gate 1/3 (WER={clean_wer*100:.1f}%, Catastrophic={is_catastrophic})")
                 return []
 
             dest_dir.mkdir(parents=True, exist_ok=True)
@@ -190,7 +217,10 @@ class BatchDatasetProcessor:
                 ecapa_sim=round(sim_to_enroll, 4) if sim_to_enroll is not None else 0.0,
                 raw_wer=round(clean_wer, 4),
                 raw_cer=round(clean_cer, 4),
-                codec="studio",
+                source="vivos",
+                role="eval",
+                codec="clean_16khz",
+                tts_generator=eng_name,
                 engine_name=eng_name,
                 ref_audio_path=best_ref,
                 seed=synth_res.metadata.get("seed", 100) if hasattr(synth_res, "metadata") else 100,
@@ -220,7 +250,10 @@ class BatchDatasetProcessor:
                         ecapa_sim=round(sim_g, 4),
                         raw_wer=round(clean_wer, 4),
                         raw_cer=round(clean_cer, 4),
+                        source="vivos",
+                        role="eval",
                         codec="g711_alaw",
+                        tts_generator=eng_name,
                         engine_name=eng_name,
                         ref_audio_path=best_ref,
                         seed=synth_res.metadata.get("seed", 100) if hasattr(synth_res, "metadata") else 100,
@@ -242,7 +275,10 @@ class BatchDatasetProcessor:
                         ecapa_sim=round(sim_a, 4),
                         raw_wer=round(clean_wer, 4),
                         raw_cer=round(clean_cer, 4),
+                        source="vivos",
+                        role="eval",
                         codec="amr_nb",
+                        tts_generator=eng_name,
                         engine_name=eng_name,
                         ref_audio_path=best_ref,
                         seed=synth_res.metadata.get("seed", 100) if hasattr(synth_res, "metadata") else 100,
@@ -299,21 +335,28 @@ class BatchDatasetProcessor:
         rows = []
         for r in records:
             row = {
+                "utt_id": Path(r.audio_path).stem,
                 "audio_path": r.audio_path,
                 "speaker_id": r.speaker_id,
-                "is_bonafide": r.is_bonafide,
+                "source": getattr(r, "source", "vivos"),
+                "label": "bonafide" if r.is_bonafide else "spoof",
+                "role": getattr(r, "role", "eval"),
+                "tts_generator": r.tts_generator or (r.engine_name if not r.is_bonafide else "none"),
                 "codec": r.codec,
-                "ecapa_sim": r.ecapa_sim,
+                "split": r.metadata.get("split", "train"),
+                "duration_sec": r.metadata.get("duration_sec", 4.0),
+                "transcript": r.metadata.get("transcript", ""),
                 "raw_wer": r.raw_wer,
                 "raw_cer": r.raw_cer,
+                "ecapa_sim": r.ecapa_sim,
+                "wavlm_sim": getattr(r, "wavlm_sim", None),
                 "derived_tier": r.derive_attack_tier(),
-                "engine_name": r.engine_name,
-                "ref_audio_path": r.ref_audio_path,
-                "seed": r.seed,
+                "seed": r.seed if r.seed is not None else 100,
             }
             if r.metadata:
                 for k, v in r.metadata.items():
-                    row[f"meta_{k}"] = v
+                    if k not in row:
+                        row[f"meta_{k}"] = v
             rows.append(row)
         df = pd.DataFrame(rows)
         df.to_csv(csv_path, index=False, encoding="utf-8-sig")

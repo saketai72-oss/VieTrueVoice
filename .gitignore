@@ -31,6 +31,8 @@ data/real_app_test/*
 !data/real_app_test/.gitkeep
 data/manifests/*
 !data/manifests/.gitkeep
+data/volunteers_5spk/*
+!data/volunteers_5spk/README.md
 
 # Audio formats (ignore heavy media files)
 *.wav

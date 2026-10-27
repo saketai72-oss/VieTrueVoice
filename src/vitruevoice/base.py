@@ -76,8 +76,12 @@ class ManifestRecord:
     ecapa_sim: float
     raw_wer: float
     raw_cer: float
-    codec: str = "studio"  # "studio", "g711_alaw", "amr_nb"
+    source: str = "vivos"  # "vivos", "common_voice", "volunteer"
+    role: str = "eval"  # "ref", "enroll", "eval"
+    codec: str = "clean_16khz"  # "clean_16khz", "g711_alaw", "amr_nb"
+    tts_generator: Optional[str] = None
     engine_name: Optional[str] = None
+    wavlm_sim: Optional[float] = None
     ref_audio_path: Optional[str] = None
     seed: Optional[int] = None
     metadata: Dict[str, Any] = field(default_factory=dict)

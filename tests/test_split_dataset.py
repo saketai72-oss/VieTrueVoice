@@ -133,4 +133,42 @@ def test_dataset_partitioner_disjoint():
     assert len(test_pool) == 8
 
 
+def test_dataset_partitioner_role_assignment():
+    """Verify role assignment tags 'ref', 'enroll', or 'eval' correctly without ambiguity."""
+    from vitruevoice.batch_processor import DatasetPartitioner
+
+    ref = ["a.wav", "b.wav"]
+    enr = ["c.wav", "d.wav"]
+    assert DatasetPartitioner.assign_utterance_role("a.wav", ref, enr) == "ref"
+    assert DatasetPartitioner.assign_utterance_role("c.wav", ref, enr) == "enroll"
+    assert DatasetPartitioner.assign_utterance_role("x.wav", ref, enr) == "eval"
+
+
+def test_soft_filtering_tier_derivation():
+    """Verify Gate 2 soft-filtering allows varied attack tiers to be preserved rather than dropped."""
+    from vitruevoice.base import ManifestRecord
+
+    # Strong clone
+    rec_strong = ManifestRecord(
+        audio_path="s1.wav", speaker_id="SPK_0001", is_bonafide=False,
+        ecapa_sim=0.75, raw_wer=0.05, raw_cer=0.02
+    )
+    assert rec_strong.derive_attack_tier() == "Tier 1 (Strong)"
+
+    # Medium clone
+    rec_med = ManifestRecord(
+        audio_path="s2.wav", speaker_id="SPK_0001", is_bonafide=False,
+        ecapa_sim=0.48, raw_wer=0.18, raw_cer=0.08
+    )
+    assert rec_med.derive_attack_tier() == "Tier 2 (Medium)"
+
+    # Weak clone (must NOT be dropped, assigned Tier 3)
+    rec_weak = ManifestRecord(
+        audio_path="s3.wav", speaker_id="SPK_0001", is_bonafide=False,
+        ecapa_sim=0.35, raw_wer=0.25, raw_cer=0.12
+    )
+    assert rec_weak.derive_attack_tier() == "Tier 3 (Weak)"
+
+
+
 

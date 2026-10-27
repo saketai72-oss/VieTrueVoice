@@ -41,16 +41,14 @@ def preprocess_audio(
     else:
         raise TypeError(f"Unsupported audio input type: {type(audio_input)}")
 
-    # 2. Trim silence at start/end based on 20th percentile RMS energy
+    # 2. Trim silence at start/end using top_db (relative to peak) with 150ms safety margin
     if len(wav) > 512:
-        energy = librosa.feature.rms(y=wav, frame_length=512, hop_length=160)[0]
-        threshold = np.percentile(energy, 20)
-        valid_frames = np.where(energy > threshold)[0]
-        if len(valid_frames) > 0:
-            start = max(0, valid_frames[0] * 160)
-            end = min(len(wav), (valid_frames[-1] + 1) * 160)
-            if end > start:
-                wav = wav[start:end]
+        margin_samples = int(target_sr * 0.15)  # 150ms buffer
+        _, index = librosa.effects.trim(wav, top_db=25, frame_length=512, hop_length=160)
+        start = max(0, index[0] - margin_samples)
+        end = min(len(wav), index[1] + margin_samples)
+        if end > start:
+            wav = wav[start:end]
 
     # 3. Fixed length: 64,000 samples (4 seconds) via Repeat Padding or Crop
     if len(wav) < max_len:
