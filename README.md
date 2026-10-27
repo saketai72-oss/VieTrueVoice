@@ -1,38 +1,22 @@
 # VieTrueVoice
 
-## 1. Tên Đề Tài & Thông Tin Thực Hiện
-**Phát triển ViTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát**
+## 1. Tên đề tài
+**Hệ thống phát hiện giọng nói giả tiếng Việt hỗ trợ phòng chống lừa đảo mạo danh cuộc gọi và tin nhắn thoại**
 
 - **Mã đề tài:** LD-07 (Ngân hàng đề tài)
 - **Sinh viên thực hiện:** Nguyễn Thành Tài – MSSV: 2380601959 – Lớp: 23DTHD5
-- **Chuyên ngành:** Máy học và Ứng dụng – Đồ án chuyên ngành CNTT (HK1 2026–2027), Đại học HUTECH
-- **Đơn vị Pilot độc lập:** CLB An toàn thông tin HUTECH (GVHD / Liên hệ: Thầy Nguyễn Trọng Minh Hồng Phước)
+- **Chuyên ngành:** Máy học và Ứng dụng – Đồ án chuyên ngành CNTT (HK1 2026–2027), HUTECH
 
 ---
 
-## 2. Câu Định Vị & Giả Thuyết Nghiên Cứu
-> **“Phân loại thật/giả đoạn thoại 5–10s qua kênh nén (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$) cho phụ huynh và người lớn tuổi. Kiểm chứng H1 (giảm $\ge 30\%$ EER tương đối trên tập nén nhờ tăng cường nén kênh), H2 ($\text{EER} \le 15\%$ trên công cụ TTS chưa thấy: Seen F5-TTS vs. Unseen VieNeu-TTS) và thời gian phản hồi trung vị $\le 3$ giây.”**
+## 2. Câu định vị
+> **“Đồ án giải quyết bẫy lừa đảo bằng giọng nói giả cho người dùng mạng xã hội, đo bằng tỷ lệ nhận diện sai dưới 8% và tốc độ xử lý dưới 3 giây.”**
 
 ---
 
-## 3. Bảng Tổng Hợp Chỉ Số Trước – Sau (Target KPIs & Nghiệm Thu)
+## 3. Bảng hai chỉ số trước – sau
 
-| Hạng mục Mục tiêu | Chỉ số Trước (Baseline ban đầu) | Mục tiêu Hoàn thành (Đích phải đạt) | Ngày đo | Bằng chứng Nghiệm thu (Artifacts) |
-| :--- | :--- | :--- | :--- | :--- |
-| **1. Độ bền trên âm thanh đã nén (CH1 / H1)** | $\bullet$ Tai người: đo $\ge 10$ người $\times$ 20 đoạn ở W2 qua Blind Listening Package<br>$\bullet$ Baseline wav2vec 2.0 không tăng cường nén | **Giảm ít nhất $30\%$ EER tương đối** trên tập kiểm thử nén (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$) nhờ tăng cường nén kênh thoại | **W2** *(đo tai người)* & **W5–W8** *(đo mô hình)* | Script tái lập [`scripts/eval_eer.py`](scripts/eval_eer.py), bảng đối sánh EER/minDCF tại [`benchmarks/eval_metrics.csv`](benchmarks/eval_metrics.csv) |
-| **2. Độ bền công cụ TTS chưa thấy (CH2 / H2 / NFR2)** | Mô hình phân loại giảm mạnh độ chính xác khi gặp vocoder và kiến trúc sinh giọng lạ ngoài tập train | Duy trì **$\text{EER} \le 15\%$** trên giọng giả sinh từ Unseen TTS (`VieNeu-TTS v3 Turbo` / công cụ thứ 3) kèm báo cáo minDCF & DET curve | **W5–W6** *(đánh giá chéo TTS)* | Báo cáo đánh giá chéo TTS và kết quả thực nghiệm tại [`benchmarks/eval_metrics.csv`](benchmarks/eval_metrics.csv) |
-| **3. Thời gian phản hồi (Latency - NFR1)** | Xác minh thủ công (gọi lại người thân / hỏi câu hỏi bí mật): **2–5 phút** (bấm giờ $\ge 3$ lần ở W2) | **Trung vị thời gian phản hồi $\le 3,0$ giây** cho đoạn thoại 5–10 giây (bấm giờ lặp 30 lần) | **W2** *(thủ công)* & **W6–W8** *(API/Bot demo)* | File log ẩn danh SHA-256 [`benchmarks/latency_log.json`](benchmarks/latency_log.json) và bảng 30 lần đo [`benchmarks/latency_benchmark.csv`](benchmarks/latency_benchmark.csv) |
-| **4. Bộ dữ liệu & Đạo đức Sinh trắc học (Must #1 - NFR3)** | Dữ liệu giọng nói rời rạc, nhạy cảm cần bảo vệ theo Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP | $\ge 5$–$30$ người nói có Phiếu đồng ý (`SPK_XXXX`) + VIVOS & Common Voice ($\ge 1.000$ thật, $\ge 2.000$ giả đạt 4 cổng); xóa hủy dữ liệu gốc sau bảo vệ | **W3–W4** *(Frozen V14)* | Phiếu đồng ý (Phụ lục C.2), 5 file manifest 17 cột tại [`data/manifests/`](data/manifests/), cấu hình S3 Lifecycle tự xóa |
-| **5. Sản phẩm MVP, Tái lập & Pilot (Must #2, #3 - NFR4, NFR5)** | Chưa có công cụ kiểm tra tự động tin nhắn thoại tiếng Việt qua kênh nén cho người lớn tuổi | FastAPI + Web Gradio ($\le 3$ thao tác) + Bot Telegram; đóng gói 1 lệnh Docker; CI chạy 31/31 unit tests xanh; AI Eval $\ge 30$ ca; Pilot CLB ATTT | **W6–W8** | Repo GitHub, `Dockerfile`, GitHub Actions CI, Bảng chi phí AWS (100/1k/10k user), Biên bản xác nhận Pilot CLB ATTT HUTECH |
-
----
-
-## 4. Cấu Trúc Tài Liệu Chuẩn (Living Docs)
-Hệ thống tài liệu tuân thủ quản trị tài liệu nghiêm ngặt tại [`docs/ARCH_documentation-governance.md`](docs/ARCH_documentation-governance.md):
-- **Kiến trúc Kỹ thuật**: [`docs/ARCH_technical-specs.md`](docs/ARCH_technical-specs.md)
-- **Quy trình Sinh Dữ Liệu**: [`docs/LOGIC_data-generation.md`](docs/LOGIC_data-generation.md)
-- **Tiền Xử Lý Âm Thanh**: [`docs/LOGIC_preprocessing.md`](docs/LOGIC_preprocessing.md)
-- **Kiến Trúc Mô Hình & Huấn Luyện**: [`docs/LOGIC_models.md`](docs/LOGIC_models.md)
-- **Đặc Tả API & Benchmark**: [`docs/STANDARDS_api-benchmarks.md`](docs/STANDARDS_api-benchmarks.md)
-- **Tiêu Chuẩn Lập Trình**: [`docs/GUIDE_developer.md`](docs/GUIDE_developer.md)
-
+| Chỉ số | Cách đo | Trước | Sau (mục tiêu) | Ngày đo | Bằng chứng |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Tỷ lệ nhận diện sai lệch EER** *(Equal Error Rate)* | Đánh giá mô hình trên tập kiểm thử giọng thật / giả tiếng Việt (gồm mẫu gốc và mẫu sinh từ F5-TTS, VieNeu-TTS; có mô phỏng nén kênh truyền) | **34.72%** *(95% Wilson CI: [24.75%, 46.24%], đo tai người trên 72 lượt)* | **EER ≤ 8%** trên tập test nội bộ; duy trì **EER ≤ 15%** khi gặp công cụ TTS chưa từng thấy (*unseen TTS*) | **W2** *(đo tai người / baseline)* & **W8** *(đo mô hình)* | File bảng tính tính toán EER, confusion matrix và script đánh giá lưu tại [`/benchmarks/eval_metrics.csv`](file:///c:/Codes/VieTrueVoice/benchmarks/eval_metrics.csv) |
+| **Thời gian phản hồi phân tích đoạn thoại** *(Latency)* | Bấm giờ từ lúc tải lên file âm thanh (đoạn thoại 3–5s) đến khi trả về nhãn Thật/Giả và độ tin cậy | **5.31 giây** *(thực đo nghe tai trực tiếp; thủ công gọi người thân: 2–5 phút)* | **≤ 3 giây** trên môi trường GPU/CPU tiêu chuẩn | **W2** *(đo quy trình thủ công)* & **W8** *(đo API demo)* | File log request và benchmark độ trễ tại [`/benchmarks/latency_log.json`](file:///c:/Codes/VieTrueVoice/benchmarks/latency_log.json) |

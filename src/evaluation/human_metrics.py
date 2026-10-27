@@ -80,7 +80,7 @@ def evaluate_human_responses(responses_df: pd.DataFrame, key_df: pd.DataFrame) -
     accuracy = correct_count / total if total > 0 else 0.0
     w_low, w_high = compute_wilson_interval(error_count, total, confidence=0.95)
 
-    return {
+    result: Dict[str, Any] = {
         "total_trials": total,
         "correct_count": correct_count,
         "error_count": error_count,
@@ -89,6 +89,18 @@ def evaluate_human_responses(responses_df: pd.DataFrame, key_df: pd.DataFrame) -
         "wilson_95_lower": float(w_low),
         "wilson_95_upper": float(w_high),
     }
+
+    # Integrate latency metrics if present
+    lat_col = "latency_sec" if "latency_sec" in merged.columns else ("total_sec" if "total_sec" in merged.columns else None)
+    if lat_col:
+        valid_lat = pd.to_numeric(merged[lat_col], errors="coerce").dropna()
+        if len(valid_lat) > 0:
+            result["median_latency_sec"] = float(valid_lat.median())
+            result["mean_latency_sec"] = float(valid_lat.mean())
+            result["min_latency_sec"] = float(valid_lat.min())
+            result["max_latency_sec"] = float(valid_lat.max())
+
+    return result
 
 
 def summarize_manual_trials(trials_df: pd.DataFrame) -> Dict[str, Dict[str, Any]]:

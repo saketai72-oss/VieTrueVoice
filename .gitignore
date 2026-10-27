@@ -62,6 +62,7 @@ env/
 .coverage
 htmlcov/
 .ipynb_checkpoints/
+.gradio/
 
 # IDE & OS files
 .vscode/

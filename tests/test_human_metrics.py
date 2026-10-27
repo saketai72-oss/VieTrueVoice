@@ -13,10 +13,8 @@ from src.evaluation.human_metrics import (
 
 def test_wilson_interval_bounds():
     """Verify Wilson interval returns bounds in [0, 1] and contains empirical mean."""
-    # 36 errors out of 72 trials (p_hat = 0.5)
     lower, upper = compute_wilson_interval(errors=36, total=72, confidence=0.95)
     assert 0.0 <= lower <= 0.5 <= upper <= 1.0
-    # For p=0.5, n=72, Wilson interval is roughly [0.386, 0.614]
     assert pytest.approx(lower, abs=0.02) == 0.386
     assert pytest.approx(upper, abs=0.02) == 0.614
 
@@ -32,8 +30,8 @@ def test_wilson_interval_extremes():
     assert high_n <= 1.0
 
 
-def test_evaluate_human_responses():
-    """Verify human response evaluation calculates accuracy, error rate and balanced metrics."""
+def test_evaluate_human_responses_with_latency():
+    """Verify human response evaluation calculates error rate and integrated latency."""
     key_df = pd.DataFrame({
         "sample_id": ["s01", "s02", "s03", "s04"],
         "true_label": ["bonafide", "bonafide", "spoof", "spoof"],
@@ -46,6 +44,7 @@ def test_evaluate_human_responses():
             "bonafide", "spoof", "spoof", "bonafide",  # P01: 2 wrong out of 4
             "bonafide", "bonafide", "spoof", "spoof",  # P02: 4 correct out of 4
         ],
+        "latency_sec": [4.2, 5.0, 6.1, 4.8, 5.5, 4.0, 6.5, 5.9],
     })
 
     metrics = evaluate_human_responses(responses_df, key_df)
@@ -54,6 +53,9 @@ def test_evaluate_human_responses():
     assert metrics["error_rate"] == 0.25
     assert metrics["accuracy"] == 0.75
     assert metrics["wilson_95_lower"] <= 0.25 <= metrics["wilson_95_upper"]
+    assert "median_latency_sec" in metrics
+    assert metrics["median_latency_sec"] == pytest.approx(5.25, abs=0.1)
+    assert "mean_latency_sec" in metrics
 
 
 def test_summarize_manual_trials():

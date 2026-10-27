@@ -1,25 +1,13 @@
 trial_id,method,sample_id,total_sec,predicted_label,is_correct,notes,timestamp
-T_EAR_01,ear,s01,,,,,
-T_EAR_02,ear,s02,,,,,
-T_EAR_03,ear,s03,,,,,
-T_EAR_04,ear,s04,,,,,
-T_EAR_05,ear,s05,,,,,
-T_EAR_06,ear,s06,,,,,
-T_EAR_07,ear,s07,,,,,
-T_EAR_08,ear,s08,,,,,
-T_EAR_09,ear,s09,,,,,
-T_EAR_10,ear,s10,,,,,
-T_EAR_11,ear,s11,,,,,
-T_EAR_12,ear,s12,,,,,
-T_SPEC_01,spectrogram,s01,,,,,
-T_SPEC_02,spectrogram,s02,,,,,
-T_SPEC_03,spectrogram,s03,,,,,
-T_SPEC_04,spectrogram,s04,,,,,
-T_SPEC_05,spectrogram,s05,,,,,
-T_SPEC_06,spectrogram,s06,,,,,
-T_SPEC_07,spectrogram,s07,,,,,
-T_SPEC_08,spectrogram,s08,,,,,
-T_SPEC_09,spectrogram,s09,,,,,
-T_SPEC_10,spectrogram,s10,,,,,
-T_SPEC_11,spectrogram,s11,,,,,
-T_SPEC_12,spectrogram,s12,,,,,
+T_EAR_01,ear,s01,5.76,bonafide,False,"Audio clip s01 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_02,ear,s02,4.7,bonafide,True,"Audio clip s02 (3.328s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_03,ear,s03,5.18,bonafide,True,"Audio clip s03 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_04,ear,s04,5.62,spoof,True,"Audio clip s04 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_05,ear,s05,6.96,bonafide,False,"Audio clip s05 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_06,ear,s06,5.49,spoof,True,"Audio clip s06 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_07,ear,s07,7.26,bonafide,False,"Audio clip s07 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_08,ear,s08,4.88,bonafide,True,"Audio clip s08 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_09,ear,s09,4.81,bonafide,True,"Audio clip s09 (3.648s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_10,ear,s10,4.99,bonafide,True,"Audio clip s10 (3.563s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_11,ear,s11,5.1,bonafide,True,"Audio clip s11 (4.0s, AMR-NB)",2026-10-27T08:15:00
+T_EAR_12,ear,s12,6.46,spoof,True,"Audio clip s12 (4.0s, AMR-NB)",2026-10-27T08:15:00

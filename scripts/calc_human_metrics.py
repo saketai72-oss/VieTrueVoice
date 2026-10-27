@@ -43,17 +43,26 @@ def run_calculations(
             print(f"Tỷ lệ sai (Error Rate / Tai người): {metrics['error_rate'] * 100:.2f}%")
             print(f"Khoảng tin cậy 95% Wilson CI: [{metrics['wilson_95_lower'] * 100:.2f}%, {metrics['wilson_95_upper'] * 100:.2f}%]")
 
+            if "median_latency_sec" in metrics:
+                print(f"Trung vị thời gian nghe & chọn (Median Latency): {metrics['median_latency_sec']:.2f} giây")
+                print(f"Thời gian trung bình (Mean Latency): {metrics['mean_latency_sec']:.2f} giây (Min: {metrics['min_latency_sec']:.2f}s, Max: {metrics['max_latency_sec']:.2f}s)")
+
             # Save summary metrics
-            out_df = pd.DataFrame([{
-                "metric": "human_blind_error_rate",
+            out_row = {
+                "metric": "human_blind_listening_integrated",
                 "trials": metrics["total_trials"],
                 "error_count": metrics["error_count"],
                 "error_rate_percent": round(metrics["error_rate"] * 100, 2),
                 "wilson_95_lower_percent": round(metrics["wilson_95_lower"] * 100, 2),
                 "wilson_95_upper_percent": round(metrics["wilson_95_upper"] * 100, 2),
-            }])
+            }
+            if "median_latency_sec" in metrics:
+                out_row["median_latency_sec"] = round(metrics["median_latency_sec"], 2)
+                out_row["mean_latency_sec"] = round(metrics["mean_latency_sec"], 2)
+
+            out_df = pd.DataFrame([out_row])
             out_df.to_csv(output_metrics_csv, index=False, encoding="utf-8")
-            print(f"Đã lưu kết quả chỉ số tai người vào {output_metrics_csv}")
+            print(f"Đã lưu kết quả chỉ số tích hợp vào {output_metrics_csv}")
         else:
             print(f"\n[INFO] {responses_csv} chưa có dữ liệu phản hồi.")
     else:

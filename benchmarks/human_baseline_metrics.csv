@@ -1,0 +1,2 @@
+metric,trials,error_count,error_rate_percent,wilson_95_lower_percent,wilson_95_upper_percent,median_latency_sec,mean_latency_sec
+human_blind_listening_integrated,72,25,34.72,24.75,46.24,5.31,5.59
