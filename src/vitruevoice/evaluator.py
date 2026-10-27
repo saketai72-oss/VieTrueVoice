@@ -36,7 +36,7 @@ class MultiGateEvaluator:
         self.asr_pipe = pipeline(
             "automatic-speech-recognition",
             model="nguyenvulebinh/wav2vec2-base-vietnamese-250h",
-            device=0 if device == "cuda" else -1
+            device=0 if "cuda" in str(device).lower() else -1
         )
         
         self.spk_classifier = EncoderClassifier.from_hparams(

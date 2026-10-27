@@ -32,25 +32,37 @@ class DatasetPartitioner:
     def partition_speaker_files(
         files: List[str],
         n_ref_cands: int = 3,
-        n_enroll: int = 4
+        n_enroll: int = 4,
+        file_durations: Optional[Dict[str, float]] = None
     ) -> Tuple[List[str], List[str], List[str]]:
         """
         Chia danh sách file của 1 speaker thành 3 tập không giao nhau:
-        - ref_pool: các file ứng viên để chọn clip tham chiếu (thường 2-3 file 4-8s)
+        - ref_pool: các file ứng viên để chọn clip tham chiếu (ưu tiên dải vàng 3.5s - 7.5s)
         - enroll_pool: các file để tính enrollment centroid sinh trắc (3-5 file)
         - test_pool: các câu thật độc lập dùng để test hoặc câu held-out
         """
-        if len(files) < (n_ref_cands + n_enroll + 1):
-            # Nếu số file ít, phân bổ theo tỷ lệ tối thiểu
-            n_ref = max(1, len(files) // 3)
-            n_enr = max(1, (len(files) - n_ref) // 2)
-            ref_pool = files[:n_ref]
-            enroll_pool = files[n_ref : n_ref + n_enr]
-            test_pool = files[n_ref + n_enr :]
+        if file_durations:
+            def _sort_key(f):
+                d = file_durations.get(str(f), file_durations.get(Path(f).stem, 0.0))
+                if 3.5 <= d <= 7.5:
+                    return (0, -d)
+                elif d > 7.5:
+                    return (1, d)
+                return (2, -d)
+            ordered_files = sorted(files, key=_sort_key)
         else:
-            ref_pool = files[:n_ref_cands]
-            enroll_pool = files[n_ref_cands : n_ref_cands + n_enroll]
-            test_pool = files[n_ref_cands + n_enroll :]
+            ordered_files = list(files)
+
+        if len(ordered_files) < (n_ref_cands + n_enroll + 1):
+            n_ref = max(1, len(ordered_files) // 3)
+            n_enr = max(1, (len(ordered_files) - n_ref) // 2)
+            ref_pool = ordered_files[:n_ref]
+            enroll_pool = ordered_files[n_ref : n_ref + n_enr]
+            test_pool = ordered_files[n_ref + n_enr :]
+        else:
+            ref_pool = ordered_files[:n_ref_cands]
+            enroll_pool = ordered_files[n_ref_cands : n_ref_cands + n_enroll]
+            test_pool = ordered_files[n_ref_cands + n_enroll :]
 
         # Ràng buộc nghiêm ngặt chống rò rỉ dữ liệu giữa 3 tập
         set_ref = set(ref_pool)
@@ -167,8 +179,14 @@ class BatchDatasetProcessor:
         # Trích xuất transcript thật của clip tham chiếu được chọn (kèm ASR Label-Free fallback cho dataset lớn không nhãn)
         ref_stem = Path(best_ref).stem
         ref_text = transcript_map.get(ref_stem, "") if transcript_map else ""
+        if not ref_text and "stitched" in ref_stem and transcript_map:
+            parts = [p for p in ref_stem.split("_") if p in transcript_map]
+            if parts:
+                ref_text = " ".join([transcript_map[p] for p in parts])
         if not ref_text and hasattr(self.evaluator, "transcribe_audio"):
             ref_text = self.evaluator.transcribe_audio(best_ref)
+
+        print(f"  📝 [Ref Audio] {Path(best_ref).name} -> ref_text: '{ref_text[:60]}' (len={len(ref_text)})")
 
         def _process_one_candidate(synth_res, metrics, eng_name, dest_dir, file_prefix):
 

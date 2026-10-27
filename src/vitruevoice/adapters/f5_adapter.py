@@ -73,6 +73,17 @@ class F5TTSAdapter(BaseTTSAdapter):
             tgt_text += "."
 
         ref_text = req.extra_params.get("ref_text", "").strip()
+        if not ref_text:
+            try:
+                from transformers import pipeline as hf_pipeline
+                dev_idx = 0 if "cuda" in str(self.device).lower() else -1
+                asr = hf_pipeline("automatic-speech-recognition", model="nguyenvulebinh/wav2vec2-base-vietnamese-250h", device=dev_idx)
+                asr_out = asr(req.ref_audio)
+                ref_text = asr_out.get("text", "").strip()
+                print(f"  🎙️ [F5TTSAdapter Auto-ASR fallback] Đã nhận diện transcript: '{ref_text[:50]}...'")
+            except Exception as e:
+                print(f"  ⚠️ [F5TTSAdapter] Auto-ASR không khả dụng: {e}")
+
         if ref_text and not ref_text.endswith((".", "!", "?")):
             ref_text += "."
 
