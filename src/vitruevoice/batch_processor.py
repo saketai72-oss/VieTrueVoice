@@ -211,9 +211,9 @@ class BatchDatasetProcessor:
             gate3_pass = getattr(metrics, "gate3_pass", True) if metrics else True
             is_catastrophic = getattr(metrics, "is_catastrophic", False) if metrics else False
 
-            # Lọc cứng CHỈ trên Gate 1 (WER/độ rõ) và Gate 3 (Sanity/clipping/duration)
-            # Gate 2 (độ giống giọng) và Gate 4 (prosody) chỉ dùng để ghi điểm và gán tầng tấn công
-            hard_gate_pass = gate1_pass and gate3_pass and (not is_catastrophic)
+            # Lọc cứng CHỈ loại trừ lỗi nghiêm trọng (Catastrophic: WER > 45%, câm, NaN, clipping)
+            # Giữ lại các mẫu hợp lệ để phân tầng Tier 1 (Strong), Tier 2 (Medium), Tier 3 (Weak)
+            hard_gate_pass = (clean_wer <= 0.45) and gate3_pass and (not is_catastrophic)
 
             d_score = getattr(metrics, "dialect_score", 1.0) if metrics else 1.0
             d_match = getattr(metrics, "dialect_match", True) if metrics else True

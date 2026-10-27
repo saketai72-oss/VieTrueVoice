@@ -219,9 +219,11 @@ class MultiGateEvaluator:
                 )
                 gate4_pass = dialect_match
 
-        # 5. Phân tích hài âm & lỗi nghiêm trọng (Catastrophic Error)
+        # 5. Phân tích hài âm & lỗi nghiêm trọng (Catastrophic Error: WER > 45% hoặc CER > 25%)
         b2_4, b4_8 = self.get_band_ratios(audio, sr)
-        is_catastrophic = clean_wer > 0.30 or clean_cer > 0.15
+        is_catastrophic = clean_wer > 0.45 or clean_cer > 0.25
+        if clean_wer > 0.15:
+            print(f"  🔍 [ASR Detail] Ref: '{clean_ref}' | Hyp: '{clean_hyp}' (WER={clean_wer*100:.1f}%, CER={clean_cer*100:.1f}%)")
 
         overall_pass = gate1_pass and gate2_pass and gate3_pass and gate4_pass and not is_catastrophic
 

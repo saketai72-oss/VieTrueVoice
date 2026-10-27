@@ -67,19 +67,19 @@ class F5TTSAdapter(BaseTTSAdapter):
 
         t0 = time.perf_counter()
         
-        # Văn bản mục tiêu (đảm bảo dấu câu kết thúc)
-        tgt_text = req.text.strip()
+        # Văn bản mục tiêu (bắt buộc chuẩn hóa chữ thường lowercase theo vocab F5-TTS, bảo tồn dấu câu)
+        tgt_text = req.text.strip().lower()
         if not tgt_text.endswith((".", "!", "?")):
             tgt_text += "."
 
-        ref_text = req.extra_params.get("ref_text", "").strip()
+        ref_text = req.extra_params.get("ref_text", "").strip().lower()
         if not ref_text:
             try:
                 from transformers import pipeline as hf_pipeline
                 dev_idx = 0 if "cuda" in str(self.device).lower() else -1
                 asr = hf_pipeline("automatic-speech-recognition", model="nguyenvulebinh/wav2vec2-base-vietnamese-250h", device=dev_idx)
                 asr_out = asr(req.ref_audio)
-                ref_text = asr_out.get("text", "").strip()
+                ref_text = asr_out.get("text", "").strip().lower()
                 print(f"  🎙️ [F5TTSAdapter Auto-ASR fallback] Đã nhận diện transcript: '{ref_text[:50]}...'")
             except Exception as e:
                 print(f"  ⚠️ [F5TTSAdapter] Auto-ASR không khả dụng: {e}")
