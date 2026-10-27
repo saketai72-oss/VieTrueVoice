@@ -2,11 +2,16 @@ import time
 import random
 import numpy as np
 import torch
-from vieneu import Vieneu
+try:
+    from vieneu import Vieneu
+except ImportError:
+    Vieneu = None
 from ..base import BaseTTSAdapter, SynthesisRequest, SynthesisResult
 
 class VieNeuAdapter(BaseTTSAdapter):
     def __init__(self, mode: str = "v3turbo"):
+        if Vieneu is None:
+            raise ImportError("Vieneu is not installed. Please install it on Kaggle/GPU environment.")
         self._mode = mode
         self._engine = Vieneu(mode=mode)
         self.sample_rate = 48000

@@ -4,10 +4,34 @@ CMP436 - Synthetic Voice Detection in Compressed Telephony.
 """
 
 from .base import SynthesisRequest, SynthesisResult, QualityMetrics, BaseTTSAdapter, ManifestRecord
-from .evaluator import MultiGateEvaluator
-from .speaker_profiler import SpeakerProfiler
-from .pipeline import ViTrueVoiceDualPipeline, PipelineMode
-from .batch_processor import DatasetPartitioner, TelephonyCompressor, BatchDatasetProcessor
+from .dialect_evaluator import (
+    compute_pitch_dynamics,
+    evaluate_prosodic_consistency,
+    evaluate_dialect_consistency,
+)
+
+try:
+    from .evaluator import MultiGateEvaluator
+except Exception:
+    MultiGateEvaluator = None
+
+try:
+    from .speaker_profiler import SpeakerProfiler
+except Exception:
+    SpeakerProfiler = None
+
+try:
+    from .pipeline import ViTrueVoiceDualPipeline, PipelineMode
+except Exception:
+    ViTrueVoiceDualPipeline = None
+    PipelineMode = None
+
+try:
+    from .batch_processor import DatasetPartitioner, TelephonyCompressor, BatchDatasetProcessor
+except Exception:
+    DatasetPartitioner = None
+    TelephonyCompressor = None
+    BatchDatasetProcessor = None
 
 __all__ = [
     "SynthesisRequest",
@@ -15,6 +39,9 @@ __all__ = [
     "QualityMetrics",
     "BaseTTSAdapter",
     "ManifestRecord",
+    "compute_pitch_dynamics",
+    "evaluate_prosodic_consistency",
+    "evaluate_dialect_consistency",
     "MultiGateEvaluator",
     "SpeakerProfiler",
     "ViTrueVoiceDualPipeline",

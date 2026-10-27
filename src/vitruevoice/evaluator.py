@@ -4,11 +4,17 @@ import numpy as np
 import soundfile as sf
 import librosa
 import torch
-import jiwer
+try:
+    import jiwer
+except ImportError:
+    jiwer = None
 from typing import Tuple, Dict, Optional, List, Union
 from pathlib import Path
 from transformers import pipeline
-from speechbrain.inference.speaker import EncoderClassifier
+try:
+    from speechbrain.inference.speaker import EncoderClassifier
+except ImportError:
+    EncoderClassifier = None
 from .base import QualityMetrics
 from .dialect_evaluator import evaluate_dialect_consistency, evaluate_prosodic_consistency
 
@@ -16,6 +22,10 @@ from .dialect_evaluator import evaluate_dialect_consistency, evaluate_prosodic_c
 class MultiGateEvaluator:
     def __init__(self, device: str = "cuda" if torch.cuda.is_available() else "cpu"):
         self.device = device
+        if jiwer is None:
+            raise ImportError("jiwer is required for MultiGateEvaluator. Install it via pip install jiwer")
+        if EncoderClassifier is None:
+            raise ImportError("speechbrain is required for MultiGateEvaluator. Install it via pip install speechbrain")
         self.normalizer = jiwer.Compose([
             jiwer.ToLowerCase(),
             jiwer.RemovePunctuation(),
