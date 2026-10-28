@@ -29,6 +29,7 @@ MANIFEST_COLUMNS = [
     "role",
     "tts_generator",
     "codec",
+    "pre_codec",
     "split",
     "duration_sec",
     "transcript",

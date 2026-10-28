@@ -97,10 +97,10 @@ def test_fixed_speaker_split():
     assert set(test_df["speaker_id"]) == {"SPK_0007"}
 
 
-def test_save_manifests_17_columns(tmp_path):
-    """Verify manifests with 17 columns are preserved correctly upon save."""
+def test_save_manifests_standard_columns(tmp_path):
+    """Verify manifests with standard columns (including pre_codec) are preserved correctly upon save."""
     from scripts.split_dataset import save_manifests, MANIFEST_COLUMNS
-    assert len(MANIFEST_COLUMNS) == 17
+    assert len(MANIFEST_COLUMNS) == 18
     df = pd.DataFrame([{col: f"val_{col}" for col in MANIFEST_COLUMNS}])
     df["speaker_id"] = "SPK_0001"
     save_manifests(df, df, df, output_dir=tmp_path)

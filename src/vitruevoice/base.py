@@ -79,6 +79,8 @@ class ManifestRecord:
     source: str = "vivos"  # "vivos", "common_voice", "volunteer"
     role: str = "eval"  # "ref", "enroll", "eval"
     codec: str = "clean_16khz"  # "clean_16khz", "g711_alaw", "amr_nb"
+    pre_codec: str = "none"  # "none", "mp3_source", "mp3_64k"
+    transcript: str = ""
     tts_generator: Optional[str] = None
     engine_name: Optional[str] = None
     wavlm_sim: Optional[float] = None
@@ -96,6 +98,8 @@ class ManifestRecord:
         """Suy ra tầng tấn công hậu nghiệm (post-hoc) - tách riêng danh tính & độ rõ, không đưa vào feature mô hình."""
         if self.is_bonafide:
             return "BonaFide"
+        if self.ecapa_sim is None or self.raw_wer is None:
+            return "Tier 3 (Weak)"
         if self.ecapa_sim >= t_strong and self.raw_wer <= max_wer_strong:
             return "Tier 1 (Strong)"
         elif self.ecapa_sim >= t_medium and self.raw_wer <= max_wer_medium:

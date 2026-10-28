@@ -17,6 +17,7 @@ except ImportError:
     EncoderClassifier = None
 from .base import QualityMetrics
 from .dialect_evaluator import evaluate_dialect_consistency, evaluate_prosodic_consistency
+from .text_utils import normalize_for_eval
 
 
 class MultiGateEvaluator:
@@ -172,8 +173,8 @@ class MultiGateEvaluator:
         try:
             asr_res = self.asr_pipe({"raw": audio_float, "sampling_rate": sr})
             raw_hyp = asr_res["text"].strip()
-            clean_ref = self.normalizer(target_text)
-            clean_hyp = self.normalizer(raw_hyp)
+            clean_ref = normalize_for_eval(target_text)
+            clean_hyp = normalize_for_eval(raw_hyp)
             clean_wer = float(jiwer.wer(clean_ref, clean_hyp)) if clean_ref else 1.0
             clean_cer = float(jiwer.cer(clean_ref, clean_hyp)) if clean_ref else 1.0
             gate1_pass = clean_wer <= 0.15

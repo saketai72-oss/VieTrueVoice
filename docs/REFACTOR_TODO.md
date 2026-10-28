@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ Đã Hoàn Thành (v0.1.0 & v0.2.0/v0.2.3 - Must #1 / Frozen Pipeline V14)
+## ✅ Đã Hoàn Thành (v0.1.0 & v0.2.0/v0.2.4 - Must #1 / Frozen Pipeline V14 & V20)
 - [x] Khởi tạo cấu trúc khung dự án chuẩn và pipeline kiểm thử tự động GitHub Actions CI.
 - [x] Module tiền xử lý âm thanh 16kHz Mono, cắt khoảng lặng RMS phân vị 20, repeat padding 64.000 mẫu (`src/preprocessing/audio_processor.py`), EBU R128 (-23 LUFS) và Z-score.
 - [x] Thuật toán tăng cường dữ liệu RawBoost miền thời gian (`src/preprocessing/rawboost.py`) gồm ISD, SSI, LnL.
@@ -14,8 +14,12 @@
 - [x] Bộ lọc chất lượng 4 cổng `MultiGateEvaluator`: Gate 1 ASR WER $\le 15\%$, Gate 2 ECAPA-TDNN Sim $\ge T_{\text{spk}}$, Gate 3 Sanity RMS $\ge 0.01$/Peak $\le 0.999$, Gate 4 Prosody YIN F0 dev $\le 0.30$/score $\ge 0.65$; Multi-Seed Retry.
 - [x] Sinh thành công 200 mẫu spoof gốc (106 F5-TTS + 94 VieNeu-TTS) từ 5 tình nguyện viên (`SPK_0001, 0004, 0005, 0006, 0007`).
 - [x] Phân hoạch chuẩn V12/V14 (`DatasetPartitioner`): Ref[:3], Enroll[3:7] (K=4 ECAPA-TDNN Centroid), Test held-out (0% data leakage).
-- [x] Xuất 5 tệp Manifest 17 cột chuẩn tắc: train, dev, test, spoof, full manifests chia Speaker-Disjoint (Train: SPK 1,4,5; Dev: SPK 6; Test: SPK 7).
-- [x] Bộ kiểm thử unit tests TDD đạt **31/31 bài kiểm thử vượt qua thành công 100%**.
+- [x] Mở rộng toàn bộ 65 người nói VIVOS và Common Voice 8.0 (22.97h, 419 người nói) với bộ nén MP3 round-trip tương đương bitrate OOD.
+- [x] Chuẩn hóa văn bản âm tiết dấu thanh (`_fix_tone_token`), loại bỏ câu chứa chữ số (`has_digits`), NFC cho Gate 1 và lọc trùng lặp; bảo tồn văn bản thô cho prompt TTS.
+- [x] Ràng buộc Hard Text-Disjoint ưu tiên (Test $\rightarrow$ Dev $\rightarrow$ Train) và Intra-speaker Ref/Enroll vs Eval hoàn toàn tách biệt.
+- [x] Quy tắc Paired Triplets 1:1:1 cho tập Eval (`count_clean == count_g711 == count_amr`).
+- [x] Cấu trúc 18 cột manifest chuẩn tắc (`pre_codec`) và bộ dò shortcut quang phổ (`scripts/detect_shortcuts.py`).
+- [x] Bộ kiểm thử unit tests TDD nâng cấp đạt **44/44 bài kiểm thử vượt qua thành công 100%**.
 
 ---
 
@@ -28,7 +32,7 @@ Mục tiêu: Xây dựng kiến trúc mô hình Baseline LFCC+GMM / AASIST & SSL
   - [ ] Cài đặt backbone wav2vec 2.0 tiếng Việt kết hợp AASIST graph trong `src/models/ssl_aasist.py`.
 - [ ] **2. Dataset, DataLoader & Hàm mất mát Weighted Cross-Entropy (`src/training/`)**
   - [ ] PyTorch Dataset tích hợp RawBoost và Codec simulation on-the-fly.
-  - [ ] Weighted Cross-Entropy Loss `[0.1, 0.9]` (Spoof: 0.1, Bona fide: 0.9).
+  - [ ] Dynamic Weighted Cross-Entropy Loss $w_c = \frac{N}{2 \cdot N_c}$ (tương ứng $\approx [0.33, 0.67]$ cho tỷ lệ Spoof:Bona 2:1; không dùng đồng thời sampler).
 - [ ] **3. Vòng lặp huấn luyện 2 pha & Entry-point Kaggle (`train.py` / `train.ipynb`)**
   - [ ] Pha 1: Warm-up 3–5 epochs đóng băng wav2vec 2.0 (lr=1e-4).
   - [ ] Pha 2: Tinh chỉnh toàn mạng với lr=1e-6, kiểm chứng đối chứng:

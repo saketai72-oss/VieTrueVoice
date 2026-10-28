@@ -36,12 +36,12 @@
 
 | Thành phần Huấn luyện | Cấu hình Tham số Chi tiết | Mục đích Kỹ thuật trong Đề tài |
 | :--- | :--- | :--- |
-| **Hàm mất mát (Loss Function)** | Weighted Cross-Entropy Loss<br>Trọng số lớp: $W = [0.1, 0.9]$ (Spoof: $0.1$, Bona fide: $0.9$) | Bù đắp mất cân bằng số lượng mẫu giữa tập Spoof ($\ge 2.000$) và Bona fide ($\ge 1.000$), giảm thiểu báo động giả trên người dùng thật. |
+| **Hàm mất mát (Loss Function)** | Weighted Cross-Entropy Loss Động<br>Công thức: $w_c = \frac{N}{2 \cdot N_c}$ chuẩn hóa<br>(Spoof:Bona $\approx 2:1 \implies W \approx [0.33, 0.67]$) | Bù đắp chính xác tỷ lệ mất cân bằng giữa Spoof ($\approx 2/3$) và Bona fide ($\approx 1/3$). Tuyệt đối tránh gán cứng [0.1, 0.9] (vốn tương ứng lệch 9:1 làm tăng vọt tỷ lệ bỏ sót spoof). |
 | **Bộ tối ưu (Optimizer)** | Adam / AdamW<br>$\beta_1 = 0.9$, $\beta_2 = 0.98$, $\epsilon = 10^{-8}$, $\text{Weight Decay} = 10^{-4}$ | Giữ ổn định đạo hàm khi tinh chỉnh đồng thời cả khối Transformer wav2vec 2.0 và lớp đồ thị HS-GAL. |
 | **Tốc độ học (Learning Rate)** | $\bullet$ Khởi động (Warm-up 3–5 epochs): $lr = 10^{-4}$<br>$\bullet$ Tinh chỉnh wav2vec 2.0 (Fine-tune): $lr = 10^{-6}$ | Learning rate cực nhỏ ($10^{-6}$) ngăn hiện tượng quên thảm khốc (catastrophic forgetting) các biểu diễn âm học đã học của wav2vec 2.0. |
 | **Batch Size & Bước huấn luyện** | $\text{Batch Size} = 16$ hoặc $32$ (kèm Gradient Accumulation); cố định 50–100 epochs | Đảm bảo hội tụ ổn định trên GPU Kaggle; dừng sớm (`Early Stopping = 10 epochs`) khi EER trên tập Dev ngừng giảm. |
 
-> STUBBORN_FACT: Trọng số bắt buộc là [0.1, 0.9] để triệt tiêu hiện tượng mô hình thiên vị lớp giả do tập Spoof (>= 2.000 mẫu) gấp đôi tập Bona fide (>= 1.000 mẫu), đồng thời phạt nặng lỗi nhận diện nhầm người dùng thật thành giả mạo.
+> STUBBORN_FACT: Trọng số Loss Cross-Entropy bắt buộc tính động từ tần suất nghịch của tập Train theo công thức $w_c = \frac{N}{2 \cdot N_c}$ và chuẩn hóa tổng bằng 1.0 (hoặc 2.0). Tuyệt đối KHÔNG sử dụng đồng thời `WeightedRandomSampler` cùng Weighted Loss để tránh lỗi bù trừ kép (double penalty).
 
 ---
 
@@ -66,13 +66,22 @@ graph TD
    - Chỉ lưu đè file checkpoint `/kaggle/working/best_model.pt` khi EER trên tập Dev đạt mức thấp nhất mới.
 
 ```python
-# Vòng lặp huấn luyện PyTorch chuẩn
-import torch, torch.nn as nn
+# Vòng lặp huấn luyện PyTorch chuẩn với trọng số động
+import numpy as np
+import torch
+import torch.nn as nn
 from torch.optim import Adam
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = SSLAASISTModel(ssl_pretrained='nguyenvulebinh/wav2vec2-base-vietnamese-250h').to(device)
-weights = torch.FloatTensor([0.1, 0.9]).to(device)  # [Spoof, Bona fide]
+
+# 1. Tính toán trọng số nghịch tần suất động từ train_df
+labels = train_df["label"].map({"spoof": 0, "bonafide": 1}).values
+counts = np.bincount(labels, minlength=2)
+raw_weights = len(labels) / (2.0 * counts.astype(float))
+norm_weights = raw_weights / np.sum(raw_weights) * 2.0
+weights = torch.FloatTensor(norm_weights).to(device)  # [Spoof: ~0.67, Bona: ~1.33 hoặc tỷ lệ tương ứng]
+
 criterion = nn.CrossEntropyLoss(weight=weights)
 optimizer = Adam(model.parameters(), lr=1e-6, betas=(0.9, 0.98), eps=1e-8, weight_decay=1e-4)
 
@@ -96,4 +105,4 @@ for epoch in range(1, num_epochs + 1):
 
 ---
 
-*v0.2.3 — 2026-10-26 (Frozen Pipeline V14)*
+*v0.2.4 — 2026-10-28 (Frozen Pipeline V20)*

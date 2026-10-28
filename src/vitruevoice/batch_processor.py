@@ -191,7 +191,7 @@ class BatchDatasetProcessor:
 
         print(f"  📝 [Ref Audio] {Path(best_ref).name} -> ref_text: '{ref_text[:60]}' (len={len(ref_text)})")
 
-        def _process_one_candidate(synth_res, metrics, eng_name, dest_dir, file_prefix):
+        def _process_one_candidate(synth_res, metrics, eng_name, dest_dir, file_prefix, prompt_text: str = ""):
 
             if synth_res is None or synth_res.audio is None:
                 return []
@@ -241,11 +241,13 @@ class BatchDatasetProcessor:
                 source="vivos",
                 role="eval",
                 codec="clean_16khz",
+                transcript=prompt_text,
                 tts_generator=eng_name,
                 engine_name=eng_name,
                 ref_audio_path=best_ref,
                 seed=synth_res.metadata.get("seed", 100) if hasattr(synth_res, "metadata") else 100,
                 metadata={
+                    "prompt": prompt_text,
                     "attempts_needed": synth_res.metadata.get("attempts_needed", 1) if hasattr(synth_res, "metadata") else 1,
                     "selection_status": synth_res.metadata.get("selection_status", "") if hasattr(synth_res, "metadata") else "",
                     "composite_score": comp_score,
@@ -254,11 +256,14 @@ class BatchDatasetProcessor:
                     "dialect_drift": d_drift
                 }
             )
-            cand_records.append(rec_studio)
 
             if apply_telephony:
                 g711_wav = dest_dir / f"{file_prefix}_g711.wav"
-                if TelephonyCompressor.compress_g711_alaw(str(out_wav), str(g711_wav)):
+                amr_wav = dest_dir / f"{file_prefix}_amrnb.wav"
+                ok_g711 = TelephonyCompressor.compress_g711_alaw(str(out_wav), str(g711_wav))
+                ok_amr = TelephonyCompressor.compress_amr_nb(str(out_wav), str(amr_wav))
+
+                if ok_g711 and ok_amr:
                     w_g, sr_g = sf.read(str(g711_wav), dtype="float32")
                     emb_g = self.evaluator.extract_embedding(w_g, sr_g)
                     sim_g = float(torch.nn.functional.cosine_similarity(
@@ -274,16 +279,14 @@ class BatchDatasetProcessor:
                         source="vivos",
                         role="eval",
                         codec="g711_alaw",
+                        transcript=prompt_text,
                         tts_generator=eng_name,
                         engine_name=eng_name,
                         ref_audio_path=best_ref,
                         seed=synth_res.metadata.get("seed", 100) if hasattr(synth_res, "metadata") else 100,
-                        metadata={"parent_studio_wav": str(out_wav)}
+                        metadata={"parent_studio_wav": str(out_wav), "prompt": prompt_text}
                     )
-                    cand_records.append(rec_g711)
 
-                amr_wav = dest_dir / f"{file_prefix}_amrnb.wav"
-                if TelephonyCompressor.compress_amr_nb(str(out_wav), str(amr_wav)):
                     w_a, sr_a = sf.read(str(amr_wav), dtype="float32")
                     emb_a = self.evaluator.extract_embedding(w_a, sr_a)
                     sim_a = float(torch.nn.functional.cosine_similarity(
@@ -299,13 +302,19 @@ class BatchDatasetProcessor:
                         source="vivos",
                         role="eval",
                         codec="amr_nb",
+                        transcript=prompt_text,
                         tts_generator=eng_name,
                         engine_name=eng_name,
                         ref_audio_path=best_ref,
                         seed=synth_res.metadata.get("seed", 100) if hasattr(synth_res, "metadata") else 100,
-                        metadata={"parent_studio_wav": str(out_wav)}
+                        metadata={"parent_studio_wav": str(out_wav), "prompt": prompt_text}
                     )
-                    cand_records.append(rec_amr)
+
+                    cand_records.extend([rec_studio, rec_g711, rec_amr])
+                else:
+                    print(f"  ⚠️ Cảnh báo: Lỗi nén codec cho {file_prefix} (g711={ok_g711}, amr={ok_amr}). Bỏ qua bộ ba này.")
+            else:
+                cand_records.append(rec_studio)
 
             return cand_records
 
@@ -329,10 +338,10 @@ class BatchDatasetProcessor:
                 f5_dir = (out_f5_dir or (out_synth_dir / "spoof_f5tts" / speaker_id))
                 vn_dir = (out_vn_dir or (out_synth_dir / "spoof_vieneu" / speaker_id))
                 records.extend(_process_one_candidate(
-                    res["f5"]["result"], res["f5"]["metrics"], "F5-TTS-Vietnamese", f5_dir, file_prefix
+                    res["f5"]["result"], res["f5"]["metrics"], "F5-TTS-Vietnamese", f5_dir, file_prefix, prompt_text=text
                 ))
                 records.extend(_process_one_candidate(
-                    res["vieneu"]["result"], res["vieneu"]["metrics"], "VieNeu-TTS", vn_dir, file_prefix
+                    res["vieneu"]["result"], res["vieneu"]["metrics"], "VieNeu-TTS", vn_dir, file_prefix, prompt_text=text
                 ))
             else:
                 if isinstance(res, dict) and "winner_result" in res:
@@ -345,7 +354,7 @@ class BatchDatasetProcessor:
                     engine_name = res.get("engine_name") or getattr(synth_res, "engine_name", None)
 
                 records.extend(_process_one_candidate(
-                    synth_res, metrics, engine_name, out_synth_dir, file_prefix
+                    synth_res, metrics, engine_name, out_synth_dir, file_prefix, prompt_text=text
                 ))
 
         return records

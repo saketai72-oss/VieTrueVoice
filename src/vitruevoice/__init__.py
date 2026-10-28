@@ -4,6 +4,7 @@ CMP436 - Synthetic Voice Detection in Compressed Telephony.
 """
 
 from .base import SynthesisRequest, SynthesisResult, QualityMetrics, BaseTTSAdapter, ManifestRecord
+from .text_utils import normalize_for_eval, fix_tone_token, has_digits
 from .dialect_evaluator import (
     compute_pitch_dynamics,
     evaluate_prosodic_consistency,
@@ -39,6 +40,9 @@ __all__ = [
     "QualityMetrics",
     "BaseTTSAdapter",
     "ManifestRecord",
+    "normalize_for_eval",
+    "fix_tone_token",
+    "has_digits",
     "compute_pitch_dynamics",
     "evaluate_prosodic_consistency",
     "evaluate_dialect_consistency",

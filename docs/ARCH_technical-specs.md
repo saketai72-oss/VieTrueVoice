@@ -18,10 +18,10 @@ graph TD
 
 | Chặng Kỹ Thuật | Đầu Vào (Input) | Xử Lý Cốt Lõi (Core Process) | Đầu Ra (Output) |
 | :--- | :--- | :--- | :--- |
-| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Giọng thật (5 tình nguyện viên `SPK_0001`..`0007` có Phiếu đồng ý + VIVOS & Common Voice) + Văn bản kịch bản | Phân hoạch chuẩn V12/V14 (`ref_pool[:3]`, `enroll_pool[3:7]`); clip đơn 3.5–7.5s (`allow_stitching=False`) qua LOO + Probe; sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo 48kHz); lọc 4 cổng (Gate 1–4 Label-Free Prosody) + Multi-Seed Retry; nén G.711/AMR-NB/Opus | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (đã sinh 200 mẫu gốc V8–V14) + 5 file Manifest 17 cột chia Speaker-Disjoint |
+| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Giọng thật (5 tình nguyện viên `SPK_0001`..`0007` + VIVOS 65 spk & Common Voice 8.0 419 spk) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
 | **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng (24kHz / 48kHz / 16kHz, Stereo/Mono) | Chuyển Mono, Resample 16kHz, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc 8kHz | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
-| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Fine-tune wav2vec 2.0 (có vs. không tăng cường nén kênh; Seen F5-TTS vs. Unseen VieNeu-TTS) & Baseline LFCC+GMM / AASIST với Weighted CE Loss [0.1, 0.9] | Trọng số `best_model.pt` + Bảng so sánh EER & minDCF có/không tăng cường nén kênh |
-| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (31/31 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
+| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Fine-tune wav2vec 2.0 (có vs. không tăng cường nén kênh; Seen F5-TTS vs. Unseen VieNeu-TTS) & Baseline LFCC+GMM / AASIST với Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$ | Trọng số `best_model.pt` + Bảng so sánh EER & minDCF có/không tăng cường nén kênh |
+| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (44/44 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
 ---
 
@@ -39,7 +39,7 @@ graph TD
 ## 3. Kiến Trúc Huấn Luyện Hybrid & Môi Trường Đám Mây AWS
 
 ### Kiến Trúc Hybrid (Local Code <-> Kaggle GPU)
-1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (31/31 unit tests xanh), quản lý tệp dữ liệu mẫu.
+1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (44/44 unit tests xanh), quản lý tệp dữ liệu mẫu.
 2. **Kaggle GPU (Tesla T4 16GB VRAM)**: Điều khiển tự động qua CLI `manage_kaggle.py`:
    - Dữ liệu đầu vào: `/kaggle/input/<ten-dataset>`
    - Trọng số và log: `/kaggle/working/best_model.pt`
