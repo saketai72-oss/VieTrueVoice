@@ -1,0 +1,18 @@
+{
+  "id": "nguyenthanhtai1959/vietrue-model-training",
+  "title": "Vietrue Model Training",
+  "code_file": "train.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [
+    "nguyenthanhtai1959/vitruevoice-raw-bonafide",
+    "kynthesis/vivos-vietnamese-speech-corpus-for-asr",
+    "tuannguyenvananh/vi-common-voice"
+  ],
+  "competition_sources": [],
+  "kernel_sources": []
+}

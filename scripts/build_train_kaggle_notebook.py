@@ -20,7 +20,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
     b64_payload = base64.b64encode(compressed).decode("ascii")
 
     cells = [
-        # Cell 0: Markdown
+        # Cell 0: Markdown Title & Abstract
         {
             "cell_type": "markdown",
             "metadata": {},
@@ -133,10 +133,9 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "    if zip_candidates:\n",
                 "        zip_path = zip_candidates[0]\n",
                 "        print(f'📦 Tìm thấy file nén dữ liệu: {zip_path}. Đang giải nén...')\n",
-                "        target_dir = working_dir / 'data'\n",
                 "        with zipfile.ZipFile(zip_path, 'r') as zf:\n",
                 "            zf.extractall(working_dir)\n",
-                "        data_dir = target_dir\n",
+                "        data_dir = working_dir / 'data'\n",
                 "        print(f'✅ Đã giải nén vào {data_dir}')\n",
                 "\n",
                 "if data_dir and (data_dir / 'manifests' / 'train.csv').exists():\n",
@@ -164,12 +163,21 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "source": [
                 "# 4. Huấn luyện Mô hình A (Không tăng cường - Baseline SSL-AASIST)\n",
                 "# mode='clean' (10.699 mẫu sạch), transform=None, Phase 1 = 4 ep, Phase 2 = 60 ep\n",
-                "!python scripts/train.py \\\n",
-                "    --branch A \\\n",
-                "    --manifest-dir \"{manifest_dir}\" \\\n",
-                "    --audio-root \"{audio_root}\" \\\n",
-                "    --out-dir out/run_A \\\n",
-                "    --batch-size 16\n"
+                "import subprocess\n",
+                "import sys\n",
+                "\n",
+                "cmd_A = [\n",
+                "    sys.executable, 'scripts/train.py',\n",
+                "    '--branch', 'A',\n",
+                "    '--manifest-dir', str(manifest_dir),\n",
+                "    '--audio-root', str(audio_root),\n",
+                "    '--out-dir', 'out/run_A',\n",
+                "    '--batch-size', '16',\n",
+                "]\n",
+                "print(f'🚀 Bắt đầu huấn luyện Nhánh A...\\nLệnh: {\" \".join(cmd_A)}')\n",
+                "res = subprocess.run(cmd_A)\n",
+                "assert res.returncode == 0, f'❌ Huấn luyện Nhánh A thất bại với mã lỗi {res.returncode}'\n",
+                "print('✅ Huấn luyện Nhánh A hoàn tất!')\n"
             ]
         },
         # Cell 5: Train Branch B0
@@ -181,12 +189,21 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "source": [
                 "# 5. Huấn luyện Mô hình B0 (Chỉ nén Codec, không RawBoost)\n",
                 "# mode='augmented' (31.327 mẫu), transform=None, Phase 1 = 4 ep, Phase 2 = 20 ep\n",
-                "!python scripts/train.py \\\n",
-                "    --branch B0 \\\n",
-                "    --manifest-dir \"{manifest_dir}\" \\\n",
-                "    --audio-root \"{audio_root}\" \\\n",
-                "    --out-dir out/run_B0 \\\n",
-                "    --batch-size 16\n"
+                "import subprocess\n",
+                "import sys\n",
+                "\n",
+                "cmd_B0 = [\n",
+                "    sys.executable, 'scripts/train.py',\n",
+                "    '--branch', 'B0',\n",
+                "    '--manifest-dir', str(manifest_dir),\n",
+                "    '--audio-root', str(audio_root),\n",
+                "    '--out-dir', 'out/run_B0',\n",
+                "    '--batch-size', '16',\n",
+                "]\n",
+                "print(f'🚀 Bắt đầu huấn luyện Nhánh B0...\\nLệnh: {\" \".join(cmd_B0)}')\n",
+                "res = subprocess.run(cmd_B0)\n",
+                "assert res.returncode == 0, f'❌ Huấn luyện Nhánh B0 thất bại với mã lỗi {res.returncode}'\n",
+                "print('✅ Huấn luyện Nhánh B0 hoàn tất!')\n"
             ]
         },
         # Cell 6: Train Branch B
@@ -198,12 +215,21 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "source": [
                 "# 6. Huấn luyện Mô hình B (ViTrueVoice Đầy Đủ: Codec + RawBoost Online)\n",
                 "# mode='augmented' (31.327 mẫu), transform=make_rawboost(), Phase 1 = 4 ep, Phase 2 = 20 ep\n",
-                "!python scripts/train.py \\\n",
-                "    --branch B \\\n",
-                "    --manifest-dir \"{manifest_dir}\" \\\n",
-                "    --audio-root \"{audio_root}\" \\\n",
-                "    --out-dir out/run_B \\\n",
-                "    --batch-size 16\n"
+                "import subprocess\n",
+                "import sys\n",
+                "\n",
+                "cmd_B = [\n",
+                "    sys.executable, 'scripts/train.py',\n",
+                "    '--branch', 'B',\n",
+                "    '--manifest-dir', str(manifest_dir),\n",
+                "    '--audio-root', str(audio_root),\n",
+                "    '--out-dir', 'out/run_B',\n",
+                "    '--batch-size', '16',\n",
+                "]\n",
+                "print(f'🚀 Bắt đầu huấn luyện Nhánh B...\\nLệnh: {\" \".join(cmd_B)}')\n",
+                "res = subprocess.run(cmd_B)\n",
+                "assert res.returncode == 0, f'❌ Huấn luyện Nhánh B thất bại với mã lỗi {res.returncode}'\n",
+                "print('✅ Huấn luyện Nhánh B hoàn tất!')\n"
             ]
         },
         # Cell 7: Automated Evaluation on Test Sets
@@ -215,24 +241,30 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "source": [
                 "# 7. Đánh giá tự động các mô hình trên Test Sets (In-domain & OOD)\n",
                 "import os\n",
+                "import subprocess\n",
+                "import sys\n",
                 "\n",
-                "manifest_args = f\"in_domain={manifest_dir}/test_indomain.csv\"\n",
-                "if (manifest_dir / \"test_ood.csv\").exists():\n",
-                "    manifest_args += f\" ood={manifest_dir}/test_ood.csv\"\n",
+                "manifest_args = [f'in_domain={manifest_dir}/test_indomain.csv']\n",
+                "if (manifest_dir / 'test_ood.csv').exists():\n",
+                "    manifest_args.append(f'ood={manifest_dir}/test_ood.csv')\n",
                 "\n",
-                "for branch in [\"A\", \"B0\", \"B\"]:\n",
-                "    ckpt = f\"out/run_{branch}/best_model.pt\"\n",
+                "for branch in ['A', 'B0', 'B']:\n",
+                "    ckpt = f'out/run_{branch}/best_model.pt'\n",
                 "    if os.path.exists(ckpt):\n",
-                "        print(f\"\\n{'='*60}\\n🔍 Đang chấm điểm Model {branch} ({ckpt})...\\n{'='*60}\")\n",
-                "        !python scripts/eval_ssl_aasist.py \\\n",
-                "            --ckpt \"{ckpt}\" \\\n",
-                "            --manifest {manifest_args} \\\n",
-                "            --audio-root \"{audio_root}\" \\\n",
-                "            --role eval \\\n",
-                "            --out \"out/eval_metrics_{branch}.csv\" \\\n",
-                "            --scores-out \"out/scores_{branch}.csv\"\n",
+                "        print(f'\\n{\"=\"*60}\\n🔍 Đang chấm điểm Model {branch} ({ckpt})...\\n{\"=\"*60}')\n",
+                "        cmd_eval = [\n",
+                "            sys.executable, 'scripts/eval_ssl_aasist.py',\n",
+                "            '--ckpt', ckpt,\n",
+                "            '--manifest', *manifest_args,\n",
+                "            '--audio-root', str(audio_root),\n",
+                "            '--role', 'eval',\n",
+                "            '--out', f'out/eval_metrics_{branch}.csv',\n",
+                "            '--scores-out', f'out/scores_{branch}.csv',\n",
+                "        ]\n",
+                "        res = subprocess.run(cmd_eval)\n",
+                "        assert res.returncode == 0, f'❌ Đánh giá Model {branch} thất bại'\n",
                 "    else:\n",
-                "        print(f\"⚠️ Checkpoint không tồn tại: {ckpt}\")\n"
+                "        print(f'⚠️ Checkpoint không tồn tại: {ckpt}')\n"
             ]
         },
         # Cell 8: Hypothesis Verification (H1 and H2)
@@ -244,24 +276,32 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "source": [
                 "# 8. Kiểm chứng giả thuyết khoa học H1 & H2\n",
                 "import os\n",
+                "import subprocess\n",
+                "import sys\n",
                 "\n",
-                "if os.path.exists(\"out/eval_metrics_A.csv\") and os.path.exists(\"out/eval_metrics_B.csv\"):\n",
+                "if os.path.exists('out/eval_metrics_A.csv') and os.path.exists('out/eval_metrics_B.csv'):\n",
                 "    print('=' * 75)\n",
                 "    print('📊 ĐỐI CHỨNG GIẢ THUYẾT H1 & H2 (MÔ HÌNH A vs MÔ HÌNH B):')\n",
                 "    print('=' * 75)\n",
-                "    !python scripts/compare_h1.py \\\n",
-                "        --a out/eval_metrics_A.csv \\\n",
-                "        --b out/eval_metrics_B.csv \\\n",
-                "        --out-dir out/comparison_A_B\n",
+                "    cmd_h1 = [\n",
+                "        sys.executable, 'scripts/compare_h1.py',\n",
+                "        '--a', 'out/eval_metrics_A.csv',\n",
+                "        '--b', 'out/eval_metrics_B.csv',\n",
+                "        '--out-dir', 'out/comparison_A_B',\n",
+                "    ]\n",
+                "    subprocess.run(cmd_h1, check=True)\n",
                 "\n",
-                "if os.path.exists(\"out/eval_metrics_B0.csv\") and os.path.exists(\"out/eval_metrics_B.csv\"):\n",
+                "if os.path.exists('out/eval_metrics_B0.csv') and os.path.exists('out/eval_metrics_B.csv'):\n",
                 "    print('\\n' + '=' * 75)\n",
                 "    print('📊 ĐỐI CHỨNG BÓC TÁCH ĐÓNG GÓP RAWBOOST (MÔ HÌNH B0 vs MÔ HÌNH B):')\n",
                 "    print('=' * 75)\n",
-                "    !python scripts/compare_h1.py \\\n",
-                "        --a out/eval_metrics_B0.csv \\\n",
-                "        --b out/eval_metrics_B.csv \\\n",
-                "        --out-dir out/comparison_B0_B\n"
+                "    cmd_b0 = [\n",
+                "        sys.executable, 'scripts/compare_h1.py',\n",
+                "        '--a', 'out/eval_metrics_B0.csv',\n",
+                "        '--b', 'out/eval_metrics_B.csv',\n",
+                "        '--out-dir', 'out/comparison_B0_B',\n",
+                "    ]\n",
+                "    subprocess.run(cmd_b0, check=True)\n"
             ]
         },
         # Cell 9: Display Markdown Summary
@@ -278,6 +318,35 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "rep = Path('out/comparison_A_B/h1_h2_summary.md')\n",
                 "if rep.exists():\n",
                 "    display(Markdown(rep.read_text(encoding='utf-8')))\n"
+            ]
+        },
+        # Cell 10: Copy artifacts to working dir for easy Kaggle output download
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "# 10. Đóng gói kết quả đầu ra cho Kaggle Output\n",
+                "import shutil\n",
+                "from pathlib import Path\n",
+                "\n",
+                "working_dir = Path('/kaggle/working') if Path('/kaggle/working').exists() else Path('.')\n",
+                "out_dir = Path('out')\n",
+                "\n",
+                "# Copy các file báo cáo và metrics ra root working_dir để dễ tải\n",
+                "for f in out_dir.rglob('*.csv'):\n",
+                "    shutil.copy(f, working_dir / f.name)\n",
+                "for f in out_dir.rglob('*.md'):\n",
+                "    shutil.copy(f, working_dir / f.name)\n",
+                "\n",
+                "for branch in ['A', 'B0', 'B']:\n",
+                "    ckpt = out_dir / f'run_{branch}' / 'best_model.pt'\n",
+                "    if ckpt.exists():\n",
+                "        shutil.copy(ckpt, working_dir / f'best_model_{branch}.pt')\n",
+                "\n",
+                "print('🎉 ĐÃ HOÀN TẤT TOÀN BỘ PIPELINE HUẤN LUYỆN VÀ ĐÁNH GIÁ ĐỐI CHỨNG!')\n",
+                "print(f'Tải kết quả về máy local: python manage_kaggle.py output')\n"
             ]
         }
     ]
