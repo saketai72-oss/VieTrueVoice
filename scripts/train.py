@@ -118,9 +118,15 @@ def main():
     validate_manifest(dev_df,   "dev")
 
     if args.limit > 0:
-        print(f"⚡ Giới hạn số mẫu (--limit {args.limit}) cho kiểm thử nhanh.")
-        train_df = train_df.head(args.limit)
-        dev_df = dev_df.head(args.limit)
+        print(f"⚡ Giới hạn số mẫu (--limit {args.limit}) cho kiểm thử nhanh (cân bằng 2 lớp).")
+        half = max(1, args.limit // 2)
+        sp_tr = train_df[train_df["label"] == "spoof"].head(half)
+        bo_tr = train_df[train_df["label"] == "bonafide"].head(args.limit - len(sp_tr))
+        train_df = pd.concat([sp_tr, bo_tr], ignore_index=True)
+
+        sp_dv = dev_df[dev_df["label"] == "spoof"].head(half)
+        bo_dv = dev_df[dev_df["label"] == "bonafide"].head(args.limit - len(sp_dv))
+        dev_df = pd.concat([sp_dv, bo_dv], ignore_index=True)
 
     # ── Cấu hình nhánh ──────────────────────────────────────────────────────
     cfg, mode, transform = build_branch_config(args.branch, out_dir=out_dir)

@@ -28,13 +28,14 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "# ViTrueVoice — Pipeline Huấn Luyện SSL-AASIST & Đánh Giá Đối Chứng H1/H2 Trên Kaggle GPU\n",
                 "\n",
                 "**Mục tiêu thí nghiệm (Must #2 - W5)**:\n",
-                "1. **Chạy thử nhanh (Smoke Test)**: 100 mẫu, 1 epoch để xác nhận đường ống, tải mô hình và đường dẫn âm thanh.\n",
-                "2. **Huấn luyện 3 nhánh thí nghiệm chính thức**:\n",
-                "   - **Nhánh A (Không tăng cường)**: `mode=\"clean\"` (10.699 mẫu), không transform, Phase 1 = 4 epochs, Phase 2 = 60 epochs (nhân 3 để cân bằng optimizer steps).\n",
-                "   - **Nhánh B0 (Chỉ nén Codec, không RawBoost)**: `mode=\"augmented\"` (31.327 mẫu), không transform, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
-                "   - **Nhánh B (ViTrueVoice Đầy đủ: Codec + RawBoost)**: `mode=\"augmented\"` (31.327 mẫu), `make_rawboost()`, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
-                "3. **Đánh giá tự động trên Test In-domain và Test OOD** qua `scripts/eval_ssl_aasist.py`.\n",
-                "4. **Kiểm chứng giả thuyết khoa học** qua `scripts/compare_h1.py`:\n",
+                "1. **Khử trùng lặp Unseen TTS**: Loại bỏ toàn bộ `VieNeu-TTS` khỏi tập Train và Dev để đảm bảo tính hợp lệ học thuật của Giả thuyết H2 (Unseen TTS generalization).\n",
+                "2. **Chạy thử nhanh (Smoke Test)**: 100 mẫu, 1 epoch để xác nhận đường ống, tải mô hình và đường dẫn âm thanh.\n",
+                "3. **Huấn luyện 3 nhánh thí nghiệm chính thức**:\n",
+                "   - **Nhánh A (Không tăng cường)**: `mode=\"clean\"` (khoảng 9.971 mẫu), không transform, Phase 1 = 4 epochs, Phase 2 = 60 epochs (nhân 3 để cân bằng optimizer steps).\n",
+                "   - **Nhánh B0 (Chỉ nén Codec, không RawBoost)**: `mode=\"augmented\"` (khoảng 29.143 mẫu), không transform, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
+                "   - **Nhánh B (ViTrueVoice Đầy đủ: Codec + RawBoost)**: `mode=\"augmented\"` (khoảng 29.143 mẫu), `make_rawboost()`, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
+                "4. **Đánh giá tự động trên Test In-domain và Test OOD** qua `scripts/eval_ssl_aasist.py`.\n",
+                "5. **Kiểm chứng giả thuyết khoa học** qua `scripts/compare_h1.py`:\n",
                 "   - **H1**: Giảm $\\ge 30\\%$ EER tương đối trên kênh nén (G.711 A-law, AMR-NB) so với Mô hình A.\n",
                 "   - **H2**: EER $\\le 15\\%$ trên công cụ TTS chưa từng thấy (`VieNeu-TTS`).\n",
                 "   - **Phân rã biến**: So sánh B0 vs B để bóc tách chính xác đóng góp của RawBoost (đọc `delta_rel_pct` và `ci_overlap`).\n"
@@ -192,15 +193,53 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "print('✅ Đã khởi tạo hàm run() với PYTHONPATH =', ENV['PYTHONPATH'])\n"
             ]
         },
-        # Cell 5: Smoke Test (Quick 1-epoch dry-run on 100 samples)
+        # Cell 5: Create manifests_seen_only (Excluding VieNeu from train and dev to preserve H2 validity)
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 5. Kiểm thử nhanh (Smoke Test) xác nhận toàn bộ đường ống trước khi chạy chính thức\n",
-                "# Chạy 100 mẫu, Phase 1 = 1 epoch, Phase 2 = 0 epoch\n",
+                "# 5. Khử trùng lặp Unseen TTS (VieNeu-TTS) khỏi Train và Dev để đảm bảo tính hợp lệ của Giả thuyết H2\n",
+                "import shutil\n",
+                "import pandas as pd\n",
+                "from pathlib import Path\n",
+                "\n",
+                "src = Path(manifest_dir)\n",
+                "dst = WORK / 'data' / 'manifests_seen_only'\n",
+                "dst.mkdir(parents=True, exist_ok=True)\n",
+                "for f in src.glob('*.csv'):\n",
+                "    shutil.copy(f, dst / f.name)          # test_* giữ nguyên, vẫn có VieNeu để đo H2\n",
+                "\n",
+                "for name in ['train', 'dev']:\n",
+                "    f_path = src / f'{name}.csv'\n",
+                "    if not f_path.exists():\n",
+                "        continue\n",
+                "    df = pd.read_csv(f_path, keep_default_na=False)\n",
+                "    hit = df['tts_generator'].astype(str).str.lower().str.contains('vieneu', regex=False)\n",
+                "    kept = df[~hit]\n",
+                "    kept.to_csv(dst / f'{name}.csv', index=False)\n",
+                "    n_sp = int((kept['label'] == 'spoof').sum())\n",
+                "    n_bo = int((kept['label'] == 'bonafide').sum())\n",
+                "    raw = [1 / max(1, n_sp), 1 / max(1, n_bo)]\n",
+                "    w = [r / sum(raw) for r in raw]\n",
+                "    print(f'{name}: bỏ {int(hit.sum())} hàng VieNeu, còn {len(kept)} '\n",
+                "          f'(spoof {n_sp}, bonafide {n_bo}) -> class_weights [spoof, bonafide] = '\n",
+                "          f'[{w[0]:.4f}, {w[1]:.4f}]')\n",
+                "\n",
+                "manifest_dir = dst   # Các cell sau (smoke test, train A/B0/B) đều dùng thư mục này\n",
+                "print(f'✅ Đã chuyển manifest_dir sang thư mục chuẩn: {manifest_dir}')\n"
+            ]
+        },
+        # Cell 6: Smoke Test (Quick 1-epoch dry-run on 100 balanced samples)
+        {
+            "cell_type": "code",
+            "execution_count": None,
+            "metadata": {},
+            "outputs": [],
+            "source": [
+                "# 6. Kiểm thử nhanh (Smoke Test) xác nhận toàn bộ đường ống trước khi chạy chính thức\n",
+                "# Chạy 100 mẫu (50 spoof, 50 bona), Phase 1 = 1 epoch, Phase 2 = 0 epoch\n",
                 "run([\n",
                 "    sys.executable, '-u', 'scripts/train.py',\n",
                 "    '--branch', 'A',\n",
@@ -214,15 +253,15 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "], 'Smoke Test (100 mẫu, 1 epoch)')\n"
             ]
         },
-        # Cell 6: Train Branch A (Full)
+        # Cell 7: Train Branch A (Full)
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 6. Huấn luyện Mô hình A (Không tăng cường - Baseline SSL-AASIST)\n",
-                "# mode='clean' (10.699 mẫu sạch), transform=None, Phase 1 = 4 ep, Phase 2 = 60 ep\n",
+                "# 7. Huấn luyện Mô hình A (Không tăng cường - Baseline SSL-AASIST)\n",
+                "# mode='clean' (khoảng 9.971 mẫu sạch), transform=None, Phase 1 = 4 ep, Phase 2 = 60 ep\n",
                 "run([\n",
                 "    sys.executable, '-u', 'scripts/train.py',\n",
                 "    '--branch', 'A',\n",
@@ -233,15 +272,15 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "], 'Huấn luyện Nhánh A (Clean Baseline)')\n"
             ]
         },
-        # Cell 7: Train Branch B0 (Full)
+        # Cell 8: Train Branch B0 (Full)
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 7. Huấn luyện Mô hình B0 (Chỉ nén Codec, không RawBoost)\n",
-                "# mode='augmented' (31.327 mẫu), transform=None, Phase 1 = 4 ep, Phase 2 = 20 ep\n",
+                "# 8. Huấn luyện Mô hình B0 (Chỉ nén Codec, không RawBoost)\n",
+                "# mode='augmented' (khoảng 29.143 mẫu), transform=None, Phase 1 = 4 ep, Phase 2 = 20 ep\n",
                 "run([\n",
                 "    sys.executable, '-u', 'scripts/train.py',\n",
                 "    '--branch', 'B0',\n",
@@ -252,15 +291,15 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "], 'Huấn luyện Nhánh B0 (Codec only)')\n"
             ]
         },
-        # Cell 8: Train Branch B (Full)
+        # Cell 9: Train Branch B (Full)
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 8. Huấn luyện Mô hình B (ViTrueVoice Đầy Đủ: Codec + RawBoost Online)\n",
-                "# mode='augmented' (31.327 mẫu), transform=make_rawboost(), Phase 1 = 4 ep, Phase 2 = 20 ep\n",
+                "# 9. Huấn luyện Mô hình B (ViTrueVoice Đầy Đủ: Codec + RawBoost Online)\n",
+                "# mode='augmented' (khoảng 29.143 mẫu), transform=make_rawboost(), Phase 1 = 4 ep, Phase 2 = 20 ep\n",
                 "run([\n",
                 "    sys.executable, '-u', 'scripts/train.py',\n",
                 "    '--branch', 'B',\n",
@@ -271,14 +310,14 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "], 'Huấn luyện Nhánh B (ViTrueVoice Đầy Đủ)')\n"
             ]
         },
-        # Cell 9: Automated Evaluation on Test Sets
+        # Cell 10: Automated Evaluation on Test Sets
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 9. Đánh giá tự động các mô hình trên Test Sets (In-domain & OOD)\n",
+                "# 10. Đánh giá tự động các mô hình trên Test Sets (In-domain & OOD)\n",
                 "manifest_args = [f'in_domain={manifest_dir}/test_indomain.csv']\n",
                 "if (manifest_dir / 'test_ood.csv').exists():\n",
                 "    manifest_args.append(f'ood={manifest_dir}/test_ood.csv')\n",
@@ -302,15 +341,15 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "        print(f'⚠️ Checkpoint không tồn tại: {ckpt}')\n"
             ]
         },
-        # Cell 10: Hypothesis Verification (H1 and H2)
+        # Cell 11: Hypothesis Verification (H1 and H2)
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 10. Kiểm chứng giả thuyết khoa học H1 & H2\n",
-                "# 10a. Đối chứng chính thức H1 & H2 giữa Mô hình A (Không tăng cường) và B (ViTrueVoice)\n",
+                "# 11. Kiểm chứng giả thuyết khoa học H1 & H2\n",
+                "# 11a. Đối chứng chính thức H1 & H2 giữa Mô hình A (Không tăng cường) và B (ViTrueVoice)\n",
                 "if Path('out/eval_metrics_A.csv').exists() and Path('out/eval_metrics_B.csv').exists():\n",
                 "    run([\n",
                 "        sys.executable, '-u', 'scripts/compare_h1.py',\n",
@@ -319,7 +358,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "        '--out-dir', 'out/comparison_A_B',\n",
                 "    ], 'H1/H2 A vs B')\n",
                 "\n",
-                "# 10b. Đối chứng bóc tách đóng góp của RawBoost (B0 vs B)\n",
+                "# 11b. Đối chứng bóc tách đóng góp của RawBoost (B0 vs B)\n",
                 "# Lưu ý: Đọc delta_rel_pct và ci_overlap để đo lường RawBoost, không trích verdict H1 từ cặp này.\n",
                 "if Path('out/eval_metrics_B0.csv').exists() and Path('out/eval_metrics_B.csv').exists():\n",
                 "    run([\n",
@@ -330,14 +369,14 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "    ], 'B0 vs B (Phân rã RawBoost: đọc delta_rel_pct & ci_overlap)')\n"
             ]
         },
-        # Cell 11: Display Markdown Summary
+        # Cell 12: Display Markdown Summary
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 11. Hiển thị báo cáo tóm tắt Markdown trên Notebook\n",
+                "# 12. Hiển thị báo cáo tóm tắt Markdown trên Notebook\n",
                 "from IPython.display import display, Markdown\n",
                 "\n",
                 "rep_ab = Path('out/comparison_A_B/h1_h2_summary.md')\n",
@@ -355,14 +394,14 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "    display(Markdown(rep_b0b.read_text(encoding='utf-8')))\n"
             ]
         },
-        # Cell 12: Package outputs to working dir for easy Kaggle output download
+        # Cell 13: Package outputs to working dir for easy Kaggle output download
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 12. Đóng gói kết quả đầu ra cho Kaggle Output\n",
+                "# 13. Đóng gói kết quả đầu ra cho Kaggle Output\n",
                 "import shutil\n",
                 "from pathlib import Path\n",
                 "\n",
