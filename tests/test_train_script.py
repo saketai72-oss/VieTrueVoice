@@ -242,3 +242,32 @@ def test_branch_B_dataset_has_all_codecs(tmp_path):
     from src.training.dataset import ViTrueVoiceDataset
     ds = ViTrueVoiceDataset(train_df, audio_root=str(tmp_path), mode=mode, target_len=SR)
     assert {"clean_16khz", "g711_alaw", "amr_nb"}.issubset(set(ds.df["codec"]))
+
+
+def test_cli_args_override_epochs_and_limit(monkeypatch, tmp_path):
+    train = _import_train()
+    df = _make_manifest(tmp_path)
+    manifest_dir = tmp_path / "manifests"
+    manifest_dir.mkdir()
+    df.to_csv(manifest_dir / "train.csv", index=False)
+    df.to_csv(manifest_dir / "dev.csv", index=False)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "train.py",
+            "--branch", "A",
+            "--manifest-dir", str(manifest_dir),
+            "--audio-root", str(tmp_path),
+            "--out-dir", str(tmp_path / "out"),
+            "--limit", "6",
+            "--phase1-epochs", "1",
+            "--phase2-epochs", "2",
+        ],
+    )
+    args = train._parse_args()
+    assert args.limit == 6
+    assert args.phase1_epochs == 1
+    assert args.phase2_epochs == 2
+

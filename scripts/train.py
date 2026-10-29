@@ -90,6 +90,13 @@ def _parse_args():
     p.add_argument("--batch-size", type=int, default=16)
     p.add_argument("--num-workers", type=int, default=2)
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    # Tùy chọn kiểm thử nhanh và điều chỉnh epoch
+    p.add_argument("--limit", type=int, default=0,
+                   help="Giới hạn số mẫu train/dev để kiểm thử nhanh (0 = toàn bộ)")
+    p.add_argument("--phase1-epochs", type=int, default=None,
+                   help="Ghi đè số epoch Pha 1 (mặc định theo nhánh: 4)")
+    p.add_argument("--phase2-epochs", type=int, default=None,
+                   help="Ghi đè số epoch Pha 2 (mặc định theo nhánh: 60 cho A, 20 cho B0/B)")
     # Siêu tham số kiến trúc (giữ mặc định để tái lập từ model_kwargs)
     p.add_argument("--d-graph", type=int, default=64)
     p.add_argument("--conv-channels", nargs=2, type=int, default=[64, 128])
@@ -110,8 +117,17 @@ def main():
     validate_manifest(train_df, "train")
     validate_manifest(dev_df,   "dev")
 
+    if args.limit > 0:
+        print(f"⚡ Giới hạn số mẫu (--limit {args.limit}) cho kiểm thử nhanh.")
+        train_df = train_df.head(args.limit)
+        dev_df = dev_df.head(args.limit)
+
     # ── Cấu hình nhánh ──────────────────────────────────────────────────────
     cfg, mode, transform = build_branch_config(args.branch, out_dir=out_dir)
+    if args.phase1_epochs is not None:
+        cfg.phase1_epochs = args.phase1_epochs
+    if args.phase2_epochs is not None:
+        cfg.phase2_epochs = args.phase2_epochs
 
     # ── Trọng số loss động ──────────────────────────────────────────────────
     cfg.class_weights = tuple(compute_weights(train_df, args.branch))
