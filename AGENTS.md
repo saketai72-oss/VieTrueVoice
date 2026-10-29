@@ -1,10 +1,10 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.2.4) — 2026-10-28
+# Bối Cảnh Agent — ViTrueVoice (v0.2.5) — 2026-10-29
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.2.4 (Frozen Pipeline V20) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.2.5 (SSL-AASIST Pipeline & H1/H2 Evaluation) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md)
@@ -26,8 +26,9 @@
 
 ## Các Quyết Định Có Chủ Đích (STUBBORN_FACTs)
 > STUBBORN_FACT: Sử dụng kỹ thuật nối lặp (Repeat Padding) thay cho đệm số 0 (Zero-padding) khi độ dài < 64.000 mẫu — nhằm duy trì tính liên tục phổ - thời gian cho bộ lọc AASIST / Wav2Vec 2.0.
-> STUBBORN_FACT: Hàm mất mát Weighted Cross-Entropy bắt buộc tính động theo tỷ lệ nghịch tần suất thực tế của tập Train: $w_c = \frac{N}{2 \cdot N_c}$ (với tỷ lệ Spoof:Bona fide $\approx 2:1 \implies W \approx [0.33, 0.67]$). Tuyệt đối KHÔNG dùng đồng thời `WeightedRandomSampler` cùng Weighted Loss để tránh bù trừ kép (double penalty).
+> STUBBORN_FACT: Hàm mất mát Weighted Cross-Entropy bắt buộc tính động theo tỷ lệ nghịch tần suất thực tế của tập Train: $w_c = \frac{N}{2 \cdot N_c}$ qua `loss_weights_from_counts` (sau khi lọc VieNeu khỏi train, spoof chiếm $\approx 7.5\% \implies W \approx [0.925, 0.075]$). Tuyệt đối KHÔNG dùng đồng thời `WeightedRandomSampler` cùng Weighted Loss để tránh bù trừ kép (double penalty).
 > STUBBORN_FACT: Ràng buộc Hard Text-Disjoint áp dụng bắt buộc giữa mọi cặp split (Test giữ nguyên $\rightarrow$ Dev lọc trùng $\rightarrow$ Train lọc trùng) và giữa các vai trò cùng người nói (ref/enroll hoàn toàn tách biệt khỏi eval).
+> STUBBORN_FACT: Công cụ Unseen TTS (`VieNeu-TTS`) bắt buộc loại bỏ 100% khỏi tập Train và Dev (`manifests_seen_only`), chỉ giữ lại trong tập Test để đảm bảo giá trị khoa học của Giả thuyết H2.
 > STUBBORN_FACT: Chuẩn hóa văn bản `normalize_for_eval` (NFC, chuẩn hóa dấu thanh cuối từ `_fix_tone_token`, loại câu có chữ số `has_digits`) CHỈ dùng cho Gate 1 WER/CER và lọc trùng lặp — prompt TTS bắt buộc giữ nguyên văn bản thô để bảo toàn ngữ âm.
 > STUBBORN_FACT: Mọi bản ghi âm thanh trong benchmarks/latency_log.json phải dùng mã băm SHA-256 thay cho tên file hoặc ID người dùng — tuân thủ Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP.
 > STUBBORN_FACT: Luồng âm thanh trong API/Bot phải được xử lý trực tiếp trên RAM (stream in-memory) và xóa hủy file tạm ngay lập tức sau khi suy luận — ngăn chặn tuyệt đối nguy cơ rò rỉ giọng nói sinh trắc học.
@@ -71,7 +72,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
-1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 47 bài test phải pass 100%.
+1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 137 bài test phải pass 100%.
 2. **Tài liệu**: Cập nhật tệp `docs/LOGIC_*.md` hoặc `docs/ARCH_*.md` liên quan nếu logic thay đổi (thông qua yêu cầu doc sweep rõ ràng).
 3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
 4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
@@ -79,20 +80,23 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 ## Các Cột Mốc Nghiệm Thu (Milestones)
 - [x] v0.1.0: Khởi tạo khung dự án, requirements, pipeline CI xanh, module tiền xử lý kèm unit tests TDD.
 - [x] v0.2.0 / v0.2.3: Must #1 (W3-W4) — Frozen Pipeline V14: Chuẩn bị dữ liệu 5 tình nguyện viên (`SPK_0001`..`0007`), Dual Pipeline sinh 200 mẫu spoof gốc, lọc 4 cổng (Gate 1-4 Label-Free Prosody), TelephonyCompressor, 5 tệp Manifest 17 cột chia Speaker-Disjoint, 31/31 unit tests xanh 100%.
-- [x] v0.2.4: Mở rộng toàn bộ VIVOS (65 người nói) & Mozilla Common Voice 8.0 (22.97h, 419 người nói), cấu trúc manifest chuẩn 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho eval, Hard Text-Disjoint, kiểm định âm tiết dấu thanh & 47/47 unit tests xanh 100%. Đang chạy sinh dữ liệu & tiền xử lý trên Kaggle GPU (Version 21/22).
-- [ ] v0.3.0: Must #2 (W5) — Đường ống huấn luyện Baseline LFCC+GMM / AASIST và SSL-AASIST trên Kaggle GPU (đối chứng nén H1 và Seen/Unseen H2).
+- [x] v0.2.4: Mở rộng toàn bộ VIVOS (65 người nói) & Mozilla Common Voice 8.0 (22.97h, 419 người nói), cấu trúc manifest chuẩn 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho eval, Hard Text-Disjoint, kiểm định âm tiết dấu thanh. Đã hoàn tất sinh 49.038 mẫu trên Kaggle GPU (Version 22).
+- [ ] v0.2.5 / v0.3.0: Must #2 (W5) — Hoàn thành toàn bộ mã nguồn huấn luyện: Baseline LFCC+GMM, SSL-AASIST 3 nhánh (A, B0, B), scripts eval/compare H1/H2, 137/137 unit tests xanh 100%. Đang chạy huấn luyện trên Kaggle GPU qua `train_kaggle.ipynb` (Version 3).
 - [ ] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio $\le 3$ thao tác), Telegram Bot (độ trễ $\le 3$s), AI Eval $\ge 30$ ca.
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
-- `pytest tests/ -v`: Chạy toàn bộ 47 bài kiểm thử unit test.
+- `pytest tests/ -v`: Chạy toàn bộ 137 bài kiểm thử unit test.
 - `python manage_kaggle.py push`: Đẩy mã huấn luyện lên Kaggle GPU.
 - `python manage_kaggle.py status`: Kiểm tra trạng thái thực thi của kernel Kaggle.
-- `python manage_kaggle.py output`: Tải trọng số (`best_model.pt`) và manifests về thư mục `./out/`.
+- `python manage_kaggle.py output`: Tải trọng số (`best_model_*.pt`) và báo cáo H1/H2 về `./out/`.
+- `python scripts/train.py --branch B --manifest-dir data/manifests`: Huấn luyện CLI 3 nhánh A/B0/B.
+- `python scripts/eval_ssl_aasist.py --ckpt out/best_model_B.pt --manifest in_domain=...`: Đánh giá SSL-AASIST xuất 14 cột.
+- `python scripts/compare_h1.py --a out/eval_metrics_A.csv --b out/eval_metrics_B.csv`: Đối chứng giả thuyết H1 và H2.
 - `python scripts/verify_kaggle_output.py`: Kiểm tra toàn diện speaker-disjoint, text-disjoint, paired triplets và 18 cột manifest.
 - `python scripts/detect_shortcuts.py`: Chạy bộ dò shortcut phổ âm thanh (>7kHz, silence ratio).
 - `uvicorn src.app.server:app --reload`: Khởi động máy chủ phát triển FastAPI.
 
 ---
 
-*v0.2.4 — 2026-10-28*
+*v0.2.5 — 2026-10-29*

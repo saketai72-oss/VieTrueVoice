@@ -20,8 +20,8 @@ graph TD
 | :--- | :--- | :--- | :--- |
 | **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Giọng thật (5 tình nguyện viên `SPK_0001`..`0007` + VIVOS 65 spk & Common Voice 8.0 419 spk) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
 | **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng (24kHz / 48kHz / 16kHz, Stereo/Mono) | Chuyển Mono, Resample 16kHz, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc 8kHz | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
-| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Fine-tune wav2vec 2.0 (có vs. không tăng cường nén kênh; Seen F5-TTS vs. Unseen VieNeu-TTS) & Baseline LFCC+GMM / AASIST với Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$ | Trọng số `best_model.pt` + Bảng so sánh EER & minDCF có/không tăng cường nén kênh |
-| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (44/44 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
+| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Huấn luyện Baseline LFCC+GMM (`scripts/eval_gmm.py`) và 3 nhánh SSL-AASIST trên Kaggle GPU (`train_kaggle.ipynb`): Nhánh A (Clean, 4+60ep), Nhánh B0 (Codec, 4+20ep), Nhánh B (ViTrueVoice: Codec+RawBoost, 4+20ep). Weighted CE động $w_c = \frac{N}{2 \cdot N_c}$ sau khi loại VieNeu khỏi train. | Checkpoint `best_model_{A,B0,B}.pt` + Bảng đối chứng `h1_comparison.csv` ($\Delta\text{EER} \ge 30\%$) & `h2_unseen_tts.csv` ($\text{EER} \le 15\%$) |
+| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; 137/137 unit tests xanh 100%, bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
 ---
 
@@ -29,9 +29,10 @@ graph TD
 
 | Chỉ số | Mục tiêu KPI | Phương pháp & Bằng chứng nghiệm thu |
 |--------|--------------|-----------------------------------|
-| **Độ bền nén kênh thoại (CH1 / Giả thuyết H1)** | `Giảm >= 30% EER tương đối` trên tập nén | So sánh mô hình wav2vec 2.0 có tăng cường nén (Opus, AMR-NB, G.711, 8kHz) với baseline không tăng cường; script `scripts/eval_eer.py` xuất `benchmarks/eval_metrics.csv` |
-| **Độ bền công cụ lạ (CH2 / Giả thuyết H2)** | `EER <= 15%` trên Unseen TTS | Đánh giá tổng quát hóa ngoài miền trên công cụ TTS chưa từng xuất hiện lúc huấn luyện (VieNeu-TTS / công cụ thứ 3); báo cáo kèm minDCF & DET curve |
-| **Độ chính xác nội bộ (In-domain EER)** | `EER <= 8%` | Đánh giá trên tập kiểm thử nội bộ người nói chưa từng thấy (`SPK_0007`) |
+| **Độ bền nén kênh thoại (CH1 / Giả thuyết H1)** | `Giảm >= 30% EER tương đối` trên tập nén | So sánh mô hình B (ViTrueVoice) với mô hình A (không tăng cường) trên G.711 A-law & AMR-NB; script `scripts/compare_h1.py` xuất `out/comparison_A_B/h1_comparison.csv` |
+| **Độ bền công cụ lạ (CH2 / Giả thuyết H2)** | `EER <= 15%` trên Unseen TTS | Đánh giá mô hình B trên `VieNeu-TTS` (đã lọc sạch khỏi Train/Dev); script `scripts/compare_h1.py` xuất `out/comparison_A_B/h2_unseen_tts.csv` |
+| **Bóc tách đóng góp RawBoost (CH1 bổ trợ)** | Định lượng $\Delta\text{EER}$ và `ci_overlap` | So sánh mô hình B (Codec + RawBoost) với mô hình B0 (chỉ Codec) qua `scripts/compare_h1.py` |
+| **Độ chính xác nội bộ (In-domain EER)** | `EER <= 8%` | Đánh giá trên tập kiểm thử nội bộ người nói chưa từng thấy (`test_indomain.csv`) |
 | **Thời gian phản hồi (Latency - NFR1)** | `<= 3,0 giây (trung vị 30 lần)` | Đo độ trễ suy luận 30 lần liên tiếp trên đoạn thoại 5–10s; log ẩn danh SHA-256 lưu `benchmarks/latency_log.json` và bảng `benchmarks/latency_benchmark.csv` |
 
 ---
@@ -39,11 +40,12 @@ graph TD
 ## 3. Kiến Trúc Huấn Luyện Hybrid & Môi Trường Đám Mây AWS
 
 ### Kiến Trúc Hybrid (Local Code <-> Kaggle GPU)
-1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (44/44 unit tests xanh), quản lý tệp dữ liệu mẫu.
+1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (137/137 unit tests xanh 100%), đóng gói mã nguồn vào `train_kaggle.ipynb`.
 2. **Kaggle GPU (Tesla T4 16GB VRAM)**: Điều khiển tự động qua CLI `manage_kaggle.py`:
-   - Dữ liệu đầu vào: `/kaggle/input/<ten-dataset>`
-   - Trọng số và log: `/kaggle/working/best_model.pt`
-   - Tải kết quả về máy Local: Thư mục `./out/`
+   - Kernel sinh dữ liệu: `nguyenthanhtai1959/vietrue-model-training` (V22) tạo ra `vitruevoice_data_processed.zip` (3.26 GB).
+   - Kernel huấn luyện: `nguyenthanhtai1959/vietrue-ssl-training` nạp dữ liệu qua `kernel_sources: ["nguyenthanhtai1959/vietrue-model-training"]`.
+   - Quá trình chạy: Tự động giải nén dữ liệu, lọc VieNeu vào `manifests_seen_only`, chạy Smoke Test (100 mẫu), huấn luyện 3 nhánh A/B0/B, đánh giá tự động trên test set và xuất báo cáo H1/H2 Markdown.
+   - Tải kết quả về máy Local: `python manage_kaggle.py output` (lưu vào `./out/`).
 
 ### Hạ Tầng Đám Mây AWS & 2 Biện Pháp Bảo Mật (Course Package A)
 - **Kiến trúc triển khai**: Container Docker trên **Amazon EC2** (G4dn/T3), lưu image trên **Amazon ECR**, lưu log ẩn danh trên **Amazon S3**, giám sát qua **AWS CloudWatch**.
@@ -73,4 +75,4 @@ Tuân thủ nghiêm ngặt Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 
 
 ---
 
-*v0.2.3 — 2026-10-26 (Frozen Pipeline V14)*
+*v0.2.5 — 2026-10-29*
