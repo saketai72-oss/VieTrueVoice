@@ -22,6 +22,8 @@ uvicorn>=0.22.0
 python-multipart>=0.0.6
 gradio>=4.0.0
 python-telegram-bot>=20.0
+httpx>=0.24.0
+anyio>=3.7.0
 
 # Kaggle Management & Utilities
 kaggle>=1.5.16
