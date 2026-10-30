@@ -78,7 +78,7 @@ def build_zalo_train_notebook(
                 "Notebook này thực thi quá trình tinh chỉnh (fine-tuning) nhánh **`B_zalo`** từ Checkpoint B (`best_model_B.pt`).\n",
                 "\n",
                 "### 5 Cổng Kiểm Soát Chất Lượng Bắt Buộc:\n",
-                "1. **Cổng 1 — Khóa Artifacts & Hash**: Checkpoint B (`a921c339…`), `train_zalo.csv` (`0e2f42e4…`), `dev_zalo.csv` (`730937e8…`) khớp 100%.\n",
+                f"1. **Cổng 1 — Khóa Artifacts & Hash**: Checkpoint B (`a921c339…`), `train_zalo.csv` (`{expected_train_sha[:8]}…`), `dev_zalo.csv` (`{expected_dev_sha[:8]}…`) khớp 100%.\n",
                 "2. **Cổng 2 — Cách Ly Tuyệt Đối**: 0% dữ liệu tình nguyện viên `SPK_xxxx`, 0% công cụ unseen `VieNeu-TTS` trong Train và Dev.\n",
                 "3. **Cổng 3 — Bảo Toàn Backbone (Pha 1)**: Đóng băng 100% backbone Wav2Vec2 (`frontend.encoder`), chỉ cập nhật đồ thị HS-GAL & projection layer.\n",
                 "4. **Cổng 4 — Trọng Số Loss Động**: Tính $w_c = \\frac{N}{2 \\cdot N_c}$ trên phân bố thực tế của `train_zalo.csv`.\n",

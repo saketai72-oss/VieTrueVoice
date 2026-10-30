@@ -8,6 +8,7 @@ and sets up deploy_zalo_eval/kernel-metadata.json.
 
 from __future__ import annotations
 import base64
+import hashlib
 import json
 from pathlib import Path
 import zlib
@@ -33,6 +34,7 @@ def build_zalo_eval_notebook(
 
     # 2. Package dev_zalo.csv payload
     manifest_bytes = manifest_path.read_bytes()
+    expected_manifest_sha = hashlib.sha256(manifest_bytes).hexdigest()
     compressed_manifest = zlib.compress(manifest_bytes, level=9)
     b64_manifest_payload = base64.b64encode(compressed_manifest).decode("ascii")
 
@@ -68,7 +70,7 @@ def build_zalo_eval_notebook(
                 "Notebook này thực thi quy trình chấm điểm độc lập (inference-only) trên toàn bộ **11.450 mẫu Dev Zalo** bằng Checkpoint B (`best_model_B.pt`).\n",
                 "\n",
                 "### 5 Cổng Kiểm Soát Chất Lượng Bắt Buộc:\n",
-                "1. **Cổng 1 — Khóa Artifacts & Hash**: Mount 2 kernel source; SHA-256 Checkpoint B (`a921c339…`) và `dev_zalo.csv` (`730937e8…`) khớp 100%.\n",
+                f"1. **Cổng 1 — Khóa Artifacts & Hash**: Mount 2 kernel source; SHA-256 Checkpoint B (`a921c339…`) và `dev_zalo.csv` (`{expected_manifest_sha[:8]}…`) khớp 100%.\n",
                 "2. **Cổng 2 — Giải nén Chọn Lọc (Bijective Selective Unzip)**: Giải nén đủ 6.786 file gốc từ `vitruevoice_data_processed.zip`; 0 file thiếu, 0 file ghi đè.\n",
                 "3. **Cổng 3 — Khóa Mô hình (strict=True)**: Nạp 295/295 keys Checkpoint B; đặt `model.eval()`, `torch.inference_mode()`; tuyệt đối không train.\n",
                 "4. **Cổng 4 — Suy luận Toàn Bộ 11.450 Mẫu (Zero Silent Skip)**: Chấm đủ 11.450 mẫu 5 codec (AAC: 2.332, Opus: 2.332, Clean: 2.332, AMR: 2.227, G.711: 2.227); fail-fast nếu thiếu bất kỳ mẫu nào.\n",
@@ -146,7 +148,7 @@ def build_zalo_eval_notebook(
                 "manifest_dest = working_dir / 'dev_zalo.csv'\n",
                 "manifest_dest.write_bytes(manifest_raw)\n",
                 "\n",
-                "EXPECTED_MANIFEST_SHA = '730937e8fe982b51c899753cd2a9aff198ff545d8d0b9fd41a9511025884f77e'\n",
+                f"EXPECTED_MANIFEST_SHA = '{expected_manifest_sha}'\n",
                 "actual_manifest_sha = hashlib.sha256(manifest_dest.read_bytes()).hexdigest()\n",
                 "print(f'📄 Manifest: {manifest_dest}')\n",
                 "print(f'   - SHA-256 thực tế:  {actual_manifest_sha}')\n",
