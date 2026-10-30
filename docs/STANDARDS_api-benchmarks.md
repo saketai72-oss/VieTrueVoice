@@ -16,11 +16,19 @@
   "request_id": "req_20261016_001",
   "prediction": "BONA_FIDE",
   "label": 1,
-  "confidence": 0.942,
+  "raw_score": 10.9324,
+  "threshold": 0.0,
+  "confidence": null,
+  "confidence_calibrated": false,
   "latency_sec": 1.48,
   "audio_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 }
 ```
+
+> **Quy ước Quyết định & Độ Tin Cậy (STUBBORN_FACT)**:
+> - Ngưỡng mặc định: $\theta = 0.0$. `raw_score >= threshold` $\implies$ `BONA_FIDE` (nhãn 1), ngược lại $\implies$ `SPOOF` (nhãn 0).
+> - Khi chưa huấn luyện bộ hiệu chuẩn xác suất (Isotonic / Platt Scaling trên tập Dev độc lập), trường `confidence` bắt buộc trả về `null` và `confidence_calibrated = false`.
+> - Tuyệt đối không dùng `sigmoid(abs(raw_score))` để tạo xác suất giả mạo 100%.
 
 ---
 

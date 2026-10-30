@@ -3,15 +3,36 @@ kaggle.json
 access_token
 .kaggle/
 
-# Outputs and models
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Kaggle outputs, temporary runs & meta
+kaggle_*_meta/
+kaggle_*_output/
+kaggle_meta/
+kaggle_output/
+temp_log/
+temp/
+tmp/
+logs/
+
+# Outputs, checkpoints and models
 out/
 outputs/
 *.pt
 *.pth
 *.bin
 *.onnx
+*.safetensors
+*.ckpt
+*.h5
+*.pkl
 *.zip
+*.tar
 *.tar.gz
+*.gz
 *.rar
 *.7z
 *.log
@@ -33,6 +54,8 @@ data/manifests/*
 !data/manifests/.gitkeep
 data/volunteers_5spk/*
 !data/volunteers_5spk/README.md
+data/processed*/
+data/cache/
 
 # Audio formats (ignore heavy media files)
 *.wav
@@ -42,6 +65,10 @@ data/volunteers_5spk/*
 *.m4a
 *.opus
 *.amr
+*.aac
+*.wma
+*.aiff
+*.aif
 
 # Benchmarks logs
 benchmarks/latency_log.json
@@ -57,11 +84,16 @@ benchmarks/latency_log.json
 __pycache__/
 *.py[cod]
 *$py.class
+build/
+dist/
+*.egg-info/
 .venv/
 venv/
 env/
 .pytest_cache/
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
 .ipynb_checkpoints/
 .gradio/
@@ -71,4 +103,3 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
-

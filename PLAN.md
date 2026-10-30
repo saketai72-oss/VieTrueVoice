@@ -8,12 +8,12 @@
 - **Định vị & Giả thuyết**: Phân loại thật/giả đoạn thoại 5–10s qua kênh nén (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$) cho phụ huynh và người lớn tuổi. Kiểm chứng:
   1. **Giả thuyết H1 (Độ bền nén kênh thoại - CH1)**: Giảm ít nhất $\ge 30\%$ EER tương đối trên tập kiểm thử nén (Opus, AMR-NB, G.711, $8\text{ kHz}$) nhờ tăng cường nén kênh thoại so với baseline không tăng cường.
   2. **Giả thuyết H2 (Độ bền công cụ lạ - CH2 / NFR2)**: Duy trì $\text{EER} \le 15\%$ trên công cụ tổng hợp giọng chưa từng thấy khi huấn luyện (Seen: `F5-TTS` vs. Unseen: `VieNeu-TTS v3 Turbo`).
-  3. **Độ chính xác nội bộ (In-domain EER)**: `EER <= 8%` trên tập kiểm thử nội bộ người nói chưa từng thấy (`SPK_0007`).
+  3. **Độ chính xác nội bộ (In-domain EER)**: `EER <= 8%` trên tập kiểm thử nội bộ người nói chưa từng thấy (15 người nói VIVOS held-out; toàn bộ 5 tình nguyện viên `SPK_xxxx` được giữ làm bộ nghiệm thu riêng).
   4. **Thời gian phản hồi (Latency - NFR1)**: Trung vị thời gian phản hồi $\le 3,0$ giây cho đoạn thoại 5–10 giây (bấm giờ lặp 30 lần).
 
 ### 0.2. Quy Tắc Phát Triển & Vận Hành Bắt Buộc Cho Agent
 
-1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **44/44 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
+1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **193/193 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
 2. **Quy ước Git Commit**: Mọi bản commit có sự hỗ trợ của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit.
 3. **Quy trình Huấn luyện Hybrid (Local Code <-> Kaggle GPU)**:
    - Phát triển mã nguồn, viết unit tests và quản lý toàn bộ dự án tại máy Local.
@@ -68,7 +68,7 @@ VieTrueVoice/
 │   ├── latency_log.json           # Log độ trễ ẩn danh băm SHA-256
 │   └── latency_benchmark.csv      # Bảng 30 lần bấm giờ lấy trung vị
 ├── out/                           # Trọng số best_model.pt và manifests tải từ Kaggle về
-└── tests/                         # Bộ kiểm thử TDD (44/44 tests xanh 100%)
+└── tests/                         # Bộ kiểm thử TDD (193/193 tests xanh 100%)
 ```
 
 ---
@@ -77,10 +77,10 @@ VieTrueVoice/
 
 | Chặng Kỹ Thuật | Đầu Vào (Input) | Xử Lý Cốt Lõi (Core Process) | Đầu Ra (Output) |
 | :--- | :--- | :--- | :--- |
-| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Giọng thật (5 tình nguyện viên `SPK_0001`..`0007` + VIVOS 65 spk & Common Voice 8.0 419 spk) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo $48\text{ kHz}$); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
+| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Dữ liệu khoa học VIVOS (65 spk) & Common Voice 8.0 (419 spk) + Bộ nghiệm thu độc lập 5 tình nguyện viên `SPK_xxxx` (cô lập 100% khỏi train/dev/test) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo $48\text{ kHz}$); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
 | **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng ($24\text{ kHz}$ / $48\text{ kHz}$ / $16\text{ kHz}$, Stereo/Mono) | Chuyển Mono, Resample $16\text{ kHz}$, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc $8\text{ kHz}$ | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
 | **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Fine-tune wav2vec 2.0 (có vs. không tăng cường nén kênh; Seen F5-TTS vs. Unseen VieNeu-TTS) & Baseline LFCC+GMM / AASIST với Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$ | Trọng số `best_model.pt` + Bảng so sánh EER & minDCF có/không tăng cường nén kênh |
-| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (44/44 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
+| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (193/193 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
 ---
 
@@ -90,7 +90,7 @@ VieTrueVoice/
 
 ### [BƯỚC 1.1] Thu thập Giọng thật (Bona fide), Phân hoạch Chuẩn V12/V14 & Đạo đức Dữ liệu Sinh trắc học
 
-- **Thu thập trực tiếp có Phiếu đồng ý (Consent Form – Phụ lục C.2)**: Chuẩn hóa **5 tình nguyện viên chính thức**: `SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007` (79 câu thoại gốc, loại bỏ hoàn toàn `SPK_0003` và chuyển đổi `SPK_0005` gồm 20 câu từ `.m4a` sang PCM 16-bit $48\text{ kHz}$ Mono WAV; mở rộng $\ge 30$ người nói). Mã hóa ẩn danh `SPK_XXXX`. Tách bạch 3 mục đích trong Phiếu đồng ý: (1) mẫu thật, (2) mẫu tham chiếu nhân bản giọng nghiên cứu, (3) trích xuất chỉ số EER/minDCF ẩn danh. Cam kết xóa hủy vĩnh viễn sau bảo vệ (12/2026).
+- **Thu thập trực tiếp có Phiếu đồng ý (Consent Form – Phụ lục C.2)**: Chuẩn hóa **5 tình nguyện viên chính thức**: `SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007` (79 câu thoại gốc, loại bỏ hoàn toàn `SPK_0003` và chuyển đổi `SPK_0005` gồm 20 câu từ `.m4a` sang PCM 16-bit $48\text{ kHz}$ Mono WAV; mở rộng $\ge 30$ người nói). Mã hóa ẩn danh `SPK_XXXX`. Khóa làm **BỘ NGHIỆM THU TÁCH BIỆT HOÀN TOÀN (Isolated Acceptance Test Set)** theo STUBBORN_FACT — nghiêm cấm 100% đưa vào Train, Dev, Calibration, chọn threshold, chọn checkpoint hoặc fine-tuning. Tách bạch 3 mục đích trong Phiếu đồng ý: (1) mẫu thật, (2) mẫu tham chiếu nhân bản giọng nghiên cứu, (3) trích xuất chỉ số EER/minDCF ẩn danh. Cam kết xóa hủy vĩnh viễn sau bảo vệ (12/2026).
 - **Nguồn dữ liệu mở tiếng Việt đúng giấy phép**: VIVOS (15 giờ, 65 người, CC BY-NC 4.0) và Mozilla Common Voice tiếng Việt (~6–50 giờ, CC0 1.0) tích hợp qua `BatchDatasetProcessor`.
 - **Phân hoạch 3 tập con độc lập chống rò rỉ dữ liệu (`DatasetPartitioner` – Chuẩn V12/V14)**:
   1. **Tập ứng viên tham chiếu** $\mathcal{D}_{\text{ref\_cands}}$ (`ref_pool = files[:3]`): Dùng để chọn clip reference cho TTS.
@@ -150,11 +150,11 @@ processor.run_batch(
   - `g711_alaw`: 8kHz Mono, 64kbps (PSTN/ISDN, 300–3400Hz).
   - `amr_nb`: 8kHz Mono, 12.2kbps (2G/3G GSM) + `opus` (16–32kbps).
   - Băng hẹp 8kHz triệt tiêu hài âm $> 3.4\text{ kHz}$ làm phương sai Impostor tăng ($0.0875 \rightarrow 0.1011$), độ nhạy $d'$ giảm mạnh: G.711 giảm $22.8\%$ ($d'=4.02$) và AMR-NB giảm $25.5\%$ ($d'=3.89$) so với Studio ($d'=5.21$); gây **Narrowband Upward Shift** đẩy $T_{\text{FAR 1\%}}$ từ $0.4800 \rightarrow 0.5958$ (G.711) và $0.6195$ (AMR-NB).
-- **Cấu trúc 5 Tệp Manifest 17 Cột & Phân Vùng Speaker-Disjoint**:
-  - Lưu tại `data/manifests/` (`train_manifest.csv`, `dev_manifest.csv`, `test_manifest.csv`, `spoof_manifest.csv`, `full_manifest.csv`).
-  - 17 cột: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed`.
-  - Phân vùng: Train (`SPK_0001, 0004, 0005`), Dev (`SPK_0006`), Test In-domain (`SPK_0007`). Tỷ lệ 70% / 15% / 15% khi mở rộng.
-  - Toàn bộ **31/31 unit tests** (`pytest tests/ -v`) vượt qua $100\%$.
+- **Cấu trúc Manifests 18 Cột & Phân Vùng Speaker-Disjoint**:
+  - Lưu tại `data/manifests/` và `data/manifests_zalo/`.
+  - 18 cột chuẩn: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed, pre_codec`.
+  - Phân vùng: Train (50 người nói VIVOS + 350+ Common Voice), Dev (người nói độc lập), Test In-domain (15 người nói VIVOS chưa từng thấy), Test OOD (Common Voice). Toàn bộ 5 tình nguyện viên `SPK_0001`..`0007` được cô lập 100% thành bộ nghiệm thu riêng (Acceptance Test Set).
+  - Toàn bộ unit tests vượt qua $100\%$.
 
 ---
 
@@ -202,7 +202,7 @@ processor.run_batch(
 | **Hàm mất mát (Loss Function)** | Weighted Cross-Entropy Loss Động<br>Công thức: $w_c = \frac{N}{2 \cdot N_c}$ chuẩn hóa<br>(Spoof:Bona $\approx 2:1 \implies W \approx [0.33, 0.67]$) | Bù đắp chính xác mất cân bằng số lượng mẫu giữa Spoof và Bona fide. Không dùng đồng thời `WeightedRandomSampler`. |
 | **Bộ tối ưu (Optimizer)** | Adam / AdamW<br>$\beta_1 = 0.9$, $\beta_2 = 0.98$, $\epsilon = 10^{-8}$, $\text{Weight Decay} = 10^{-4}$ | Giữ ổn định đạo hàm khi tinh chỉnh đồng thời cả khối Transformer lớn và đồ thị HS-GAL. |
 | **Tốc độ học (Learning Rate)** | $\bullet$ Warm-up 3–5 epochs: $lr = 10^{-4}$<br>$\bullet$ Fine-tune wav2vec 2.0: $lr = 10^{-6}$ | Learning rate cực nhỏ ($10^{-6}$) ngăn hiện tượng quên thảm khốc (catastrophic forgetting) các biểu diễn âm học tiền huấn luyện. |
-| **Batch Size & Bước huấn luyện** | $\text{Batch Size} = 16$ hoặc $32$ (kèm Gradient Accumulation); cố định 50–100 epochs | Hội tụ ổn định trên GPU Kaggle; lưu `best_model.pt` tại điểm EER + minDCF tối ưu trên tập Dev (`SPK_0006`). |
+| **Batch Size & Bước huấn luyện** | $\text{Batch Size} = 16$ hoặc $32$ (kèm Gradient Accumulation); cố định 50–100 epochs | Hội tụ ổn định trên GPU Kaggle; lưu `best_model.pt` tại điểm EER + minDCF tối ưu trên tập Dev (người nói độc lập, không chứa `SPK_xxxx`). |
 
 ### [BƯỚC 3.3] Quy Trình Vòng Lặp Huấn Luyện 2 Pha
 
@@ -224,7 +224,7 @@ processor.run_batch(
 - **Script Tái Lập EER & Đường Cong DET (`scripts/eval_eer.py` – US8)**: Quét ngưỡng quyết định $\theta$, xuất EER (%), minDCF và đường DET ra `benchmarks/eval_metrics.csv` cho cả 2 kịch bản:
   1. Đánh giá có vs. không tăng cường nén trên tập nén Opus/AMR-NB/G.711/8kHz (CH1/H1).
   2. Đánh giá chuyển giao từ Seen TTS (F5-TTS) sang Unseen TTS (VieNeu-TTS) (CH2/H2).
-- **Bộ AI Eval $\ge 30$ Tình Huống & Kiểm Thử TDD (44/44 Tests)**: Thiết lập bộ đánh giá $\ge 30$ tình huống (trong đó $\ge 10$ tình huống từng nhận diện sai, báo cáo tỷ lệ đạt trước và sau khi sửa); duy trì bộ unit tests 44/44 bài xanh $100\%$ trên CI.
+- **Bộ AI Eval $\ge 30$ Tình Huống & Kiểm Thử TDD (193/193 Tests)**: Thiết lập bộ đánh giá $\ge 30$ tình huống (trong đó $\ge 10$ tình huống từng nhận diện sai, báo cáo tỷ lệ đạt trước và sau khi sửa); duy trì bộ unit tests 193/193 bài xanh $100\%$ trên CI.
 
 ### [BƯỚC 4.2] Triển Khai Dịch Vụ, Hạ Tầng AWS & Bảo Mật
 
@@ -249,13 +249,14 @@ processor.run_batch(
 | **2. Độ bền trước công cụ TTS chưa thấy (CH2 / H2 / NFR2)** | Mô hình giảm chất lượng khi gặp công cụ tổng hợp giọng mới ngoài tập huấn luyện | Duy trì **$\text{EER} \le 15\%$** trên giọng giả sinh từ Unseen TTS (`VieNeu-TTS v3 Turbo` / công cụ thứ 3) kèm minDCF & DET curve | Báo cáo đánh giá chéo TTS (W6) và tệp kết quả `benchmarks/eval_metrics.csv` |
 | **3. Thời gian phản hồi (Latency - NFR1)** | Xác minh thủ công (gọi lại / hỏi câu bí mật): 2–5 phút (bấm giờ $\ge 3$ lần ở W2) | **Trung vị thời gian phản hồi $\le 3,0$ giây** cho đoạn thoại 5–10 giây (đo lặp 30 lần) | File log ẩn danh SHA-256 `benchmarks/latency_log.json` và bảng 30 lần đo `benchmarks/latency_benchmark.csv` |
 | **4. Bộ dữ liệu & Đạo đức Sinh trắc học (Must #1 - NFR3)** | Dữ liệu rời rạc, giọng nói sinh trắc học nhạy cảm cần bảo vệ theo Luật 91/2025/QH15 | $\ge 5$–$30$ người nói có Phiếu đồng ý (`SPK_XXXX`) + VIVOS 65 spk & Common Voice 8.0 419 spk ($\ge 1.000$ thật, $\ge 2.000$ giả đạt 4 cổng, tỷ lệ $\approx 2:1$); $100\%$ log ẩn danh; xóa dữ liệu sau bảo vệ | Mẫu Phiếu đồng ý (Phụ lục C.2), 5 file manifest 18 cột (W4), cấu hình S3 Lifecycle tự xóa file tạm |
-| **5. Sản phẩm MVP, Tái lập & Pilot (Must #2, #3 - NFR4, NFR5)** | Chưa có công cụ kiểm tra tự động tin nhắn thoại tiếng Việt qua kênh nén cho người cao tuổi | FastAPI + Web Gradio ($\le 3$ thao tác) + Bot Telegram; chạy 1 lệnh Docker; CI chạy 44/44 TDD tests xanh; AI Eval $\ge 30$ ca; Pilot CLB ATTT | Repo GitHub hoàn chỉnh, `Dockerfile`, GitHub Actions CI, Bảng chi phí AWS (100/1k/10k user) & Biên bản xác nhận Pilot (W8) |
+| **5. Sản phẩm MVP, Tái lập & Pilot (Must #2, #3 - NFR4, NFR5)** | Chưa có công cụ kiểm tra tự động tin nhắn thoại tiếng Việt qua kênh nén cho người cao tuổi | FastAPI + Web Gradio ($\le 3$ thao tác) + Bot Telegram; chạy 1 lệnh Docker; CI chạy 202/202 TDD tests xanh; AI Eval $\ge 30$ ca; Pilot CLB ATTT | Repo GitHub hoàn chỉnh, `Dockerfile`, GitHub Actions CI, Bảng chi phí AWS (100/1k/10k user) & Biên bản xác nhận Pilot (W8) |
 
 ---
 
 ## DANH SÁCH NGHIỆM THU ĐẦU RA (DEFINITION OF DONE CHECKLIST)
 
 - [x] **Must #1 (W3–W4 / Frozen Pipeline V14 & V20)**: Hoàn tất bộ dữ liệu 5 tình nguyện viên (`SPK_0001`..`0007`) có Phiếu đồng ý + VIVOS (65 người nói) & Common Voice 8.0 (22.97h, 419 người nói); sinh kép F5-TTS và VieNeu-TTS v3 Turbo; lọc 4 cổng (Gate 1–4 Label-Free Prosody); TelephonyCompressor; xuất 5 tệp manifest 18 cột (`pre_codec`) chia Speaker-Disjoint & Hard Text-Disjoint; Paired Triplets 1:1:1 cho eval; 137/137 unit tests TDD xanh 100%. Đã sinh và đóng gói 49.038 mẫu tại Kaggle V22.
-- [/] **Must #2 (W5)**: Hoàn thành 100% mã nguồn huấn luyện: Baseline LFCC+GMM (`scripts/eval_gmm.py`), SSL-AASIST 3 nhánh A/B0/B (`scripts/train.py`), kịch bản đánh giá Bootstrap CI & minDCF (`scripts/eval_ssl_aasist.py`), và đối chứng H1/H2 tự động (`scripts/compare_h1.py`). Đang chạy huấn luyện thực tế trên Kaggle GPU qua `train_kaggle.ipynb` (Version 3) để tải trọng số `best_model_*.pt` và bảng kiểm chứng H1/H2 về `./out/`.
-- [ ] **Must #3 (W6)**: Hoàn thiện giao diện Gradio ($\le 3$ thao tác) và Bot Telegram trả nhãn Thật/Giả + độ tin cậy trong $\le 3$ giây; ghi log ẩn danh SHA-256 vào `benchmarks/latency_log.json`; vượt qua 137/137 tests trên CI và bộ eval $\ge 30$ tình huống.
-- [ ] **Pilot & Nghiệm thu (W7–W8)**: Đóng gói Docker trên AWS EC2, S3 Lifecycle tự xóa, IAM least privilege, CloudWatch; đạt đích **In-domain EER <= 8%**, **H1: Giảm >= 30% EER trên tập nén**, **H2: Unseen TTS EER <= 15%**, và **Latency trung vị (30 lần) <= 3,0 giây**; ký biên bản xác nhận nghiệm thu Pilot cùng CLB An toàn thông tin HUTECH.
+- [x] **Must #2 (W5)**: Hoàn tất toàn bộ mã nguồn huấn luyện và đánh giá thực nghiệm 3 nhánh A/B0/B trên Kaggle GPU (Version 3 & 4): Đã tải về máy local các checkpoint `best_model_A.pt` (Phase 1 Ep 4, Dev EER 20.66%), `best_model_B0.pt` (Phase 2 Ep 24, Dev EER 1.93%), và `best_model_B.pt` (Phase 2 Ep 20, Dev EER 2.95%). Kết quả đối chứng thực nghiệm: H1 đạt **PASS trên tập nội bộ** ($\Delta\text{EER}_{\text{rel}} = +40.46\%$ trên AMR-NB và $+47.55\%$ trên G.711 A-law; OOD G.711 chưa qua); In-domain Seen TTS (F5) EER đạt $3.28\%$ (vượt mục tiêu $\le 8\%$); H2 Unseen TTS (VieNeu) đạt $21.88\%–26.34\%$ (**chưa đạt** mục tiêu $\le 15\%$ do bảo toàn ràng buộc 100% Unseen); RawBoost đóng góp giảm thêm $13.79\%–22.06\%$ EER. 138/138 unit tests TDD xanh 100%. Giữ nguyên kết quả thực nghiệm và chuyển sang Must #3.
+- [/] **Must #3 (W6)**: Triển khai dịch vụ suy luận thời gian thực: FastAPI endpoint `/api/v1/predict` (xử lý RAM stream, tensor 64.000 mẫu, xóa file tạm ngay), Web Demo Gradio ($\le 3$ thao tác cho người cao tuổi), Bot Telegram nhận voice message, và log ẩn danh SHA-256 vào `benchmarks/latency_log.json` với trung vị độ trễ 30 lần $\le 3,0$ giây; AI Eval $\ge 30$ ca; kiểm thử TDD API. Chuẩn hóa quyết định ngưỡng $\theta=0.0$, loại bỏ confidence giả mạo $\sigma(|s|)$. 193/193 unit tests TDD xanh 100%.
+- [x] **Zalo Dual-Profile & Tinh Chỉnh B_zalo Sẵn Sàng Đẩy Kaggle (v0.4.1)**: Chuẩn hóa nạp âm thanh in-memory đa định dạng (`audio_loader.py`); khóa cấu hình Dual Profile Zalo (Profile A: AAC-LC 76kbps @ 48kHz, Profile B: Opus 24kbps); sinh manifest ghép cặp `data/manifests_zalo/` (49.085 train, 11.450 dev, 15.980 test, 0% rò rỉ); hoàn tất đo lường và khóa mốc baseline Checkpoint B chính thức trên toàn bộ 11.450 mẫu Dev Zalo (`out/zalo_baseline/dev_zalo_scores.csv` — AAC: EER 2.62%, FAR@0 7.81%; Opus: EER 2.10%, FAR@0 3.65%; Clean: EER 2.60%; 0% rò rỉ SPK_xxxx / VieNeu-TTS; Bootstrap 95% CI & Paired Deltas đầy đủ); hoàn tất giải quyết đường dẫn manifest tường minh qua TDD trong `scripts/train.py`, chạy smoke test 6 cổng bảo toàn backbone Wav2Vec2; đóng gói hoàn chỉnh notebook và metadata tại `deploy_zalo_train/` kèm test kiểm thử syntax tự động. 202/202 unit tests xanh 100%. Đang chờ quota Kaggle reset để đẩy kernel.
+- [ ] **Pilot & Nghiệm thu (W7–W8)**: Đóng gói Docker trên AWS EC2, S3 Lifecycle tự xóa, IAM least privilege, CloudWatch; đạt đích **In-domain EER <= 8%**, **H1: Giảm >= 30% EER trên tập nén nội bộ**, báo cáo trung thực hạn chế H2 Unseen TTS, và **Latency trung vị (30 lần) <= 3,0 giây**; ký biên bản xác nhận nghiệm thu Pilot cùng CLB An toàn thông tin HUTECH.

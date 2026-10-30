@@ -38,7 +38,7 @@ Mục tiêu: Xây dựng kiến trúc mô hình Baseline LFCC+GMM / AASIST & SSL
   - [ ] Pha 2: Tinh chỉnh toàn mạng với lr=1e-6, kiểm chứng đối chứng:
     - Nhánh đối chứng nén (CH1/H1): Có vs Không tăng cường nén kênh thoại.
     - Nhánh tổng quát hóa (CH2/H2): Seen TTS (F5-TTS) vs Unseen TTS (VieNeu-TTS).
-  - [ ] Lưu checkpoint `best_model.pt` theo EER và minDCF thấp nhất trên tập Dev (`SPK_0006`).
+  - [ ] Lưu checkpoint `best_model.pt` theo EER và minDCF thấp nhất trên tập Dev (tập người nói độc lập, không chứa `SPK_xxxx`).
 
 ---
 

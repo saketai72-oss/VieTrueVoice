@@ -1,10 +1,10 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.2.5) — 2026-10-29
+# Bối Cảnh Agent — ViTrueVoice (v0.4.1) — 2026-10-30
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.2.5 (SSL-AASIST Pipeline & H1/H2 Evaluation) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.4.1 (Zalo Dual-Profile Paired Pipeline & B_zalo Fine-Tuning) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md)
@@ -34,6 +34,9 @@
 > STUBBORN_FACT: Luồng âm thanh trong API/Bot phải được xử lý trực tiếp trên RAM (stream in-memory) và xóa hủy file tạm ngay lập tức sau khi suy luận — ngăn chặn tuyệt đối nguy cơ rò rỉ giọng nói sinh trắc học.
 > STUBBORN_FACT: Độ dài đầu vào mô hình cố định chính xác 64.000 mẫu (4,0 giây ở tần số 16kHz) — đây là kích thước tensor đầu vào bắt buộc của khối front-end AASIST / Wav2Vec2.
 > STUBBORN_FACT: Mọi bản commit Git do AI tạo ra BẮT BUỘC có tiền tố `[AI]` ở đầu thông điệp commit và chỉ commit khi code đã thực nghiệm thành công.
+> STUBBORN_FACT: Toàn bộ tập dữ liệu tình nguyện viên `SPK_xxxx` là BỘ NGHIỆM THU TÁCH BIỆT HOÀN TOÀN — nghiêm cấm 100% đưa vào Train, Dev, Calibration, chọn threshold, chọn checkpoint hoặc fine-tuning.
+> STUBBORN_FACT: Chuẩn hóa nạp âm thanh đa định dạng (WAV, M4A, AAC, MP3, OPUS, AMR) qua `load_audio` bắt buộc nhận diện theo magic bytes và giải mã in-memory qua FFmpeg stream, tuyệt đối không phụ thuộc phần mở rộng tệp (`.wav`/`.m4a`).
+> STUBBORN_FACT: Kênh Zalo mục tiêu khóa cấu hình Dual Profile: Profile A (`aac_zalo_76k`, AAC-LC 76kbps @ 48kHz mono) và Profile B (`opus_zalo_24k`, Opus 24kbps OGG) liên kết đồng bộ qua trường `base_utt` và bảo toàn ranh giới split.
 
 ## Nguyên Tắc Kỹ Thuật Cho AI (TỐI QUAN TRỌNG)
 - **Ưu tiên Thảo luận (Discussion Precedence)**: Nghiêm cấm tự ý tạo mới, chỉnh sửa hoặc xóa mã nguồn/tệp tin khi kế hoạch chưa được thảo luận và thống nhất hoàn toàn với người dùng.
@@ -72,7 +75,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
-1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 137 bài test phải pass 100%.
+1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 202 bài test phải pass 100%.
 2. **Tài liệu**: Cập nhật tệp `docs/LOGIC_*.md` hoặc `docs/ARCH_*.md` liên quan nếu logic thay đổi (thông qua yêu cầu doc sweep rõ ràng).
 3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
 4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
@@ -81,22 +84,24 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - [x] v0.1.0: Khởi tạo khung dự án, requirements, pipeline CI xanh, module tiền xử lý kèm unit tests TDD.
 - [x] v0.2.0 / v0.2.3: Must #1 (W3-W4) — Frozen Pipeline V14: Chuẩn bị dữ liệu 5 tình nguyện viên (`SPK_0001`..`0007`), Dual Pipeline sinh 200 mẫu spoof gốc, lọc 4 cổng (Gate 1-4 Label-Free Prosody), TelephonyCompressor, 5 tệp Manifest 17 cột chia Speaker-Disjoint, 31/31 unit tests xanh 100%.
 - [x] v0.2.4: Mở rộng toàn bộ VIVOS (65 người nói) & Mozilla Common Voice 8.0 (22.97h, 419 người nói), cấu trúc manifest chuẩn 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho eval, Hard Text-Disjoint, kiểm định âm tiết dấu thanh. Đã hoàn tất sinh 49.038 mẫu trên Kaggle GPU (Version 22).
-- [ ] v0.2.5 / v0.3.0: Must #2 (W5) — Hoàn thành toàn bộ mã nguồn huấn luyện: Baseline LFCC+GMM, SSL-AASIST 3 nhánh (A, B0, B), scripts eval/compare H1/H2, 137/137 unit tests xanh 100%. Đang chạy huấn luyện trên Kaggle GPU qua `train_kaggle.ipynb` (Version 3).
-- [ ] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio $\le 3$ thao tác), Telegram Bot (độ trễ $\le 3$s), AI Eval $\ge 30$ ca.
+- [x] v0.2.5 / v0.3.0: Must #2 (W5) — Hoàn tất huấn luyện & đánh giá thực nghiệm: Baseline LFCC+GMM, SSL-AASIST 3 nhánh (A, B0, B), 138/138 unit tests xanh 100%. Checkpoints A/B0/B đã lưu tại `./out/`. Kết quả thực nghiệm: H1 PASS trên tập nội bộ (giảm 40.46% AMR-NB, 47.55% G.711); In-domain Seen TTS EER = 3.28% (đạt mục tiêu <= 8%); H2 Unseen TTS EER = 21.88%–26.34% (chưa đạt mục tiêu <= 15%); RawBoost giúp giảm thêm 13.8%–22.1% EER.
+- [/] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio $\le 3$ thao tác), Telegram Bot (độ trễ $\le 3$s), AI Eval $\ge 30$ ca. Đã hoàn tất chuẩn hóa quyết định ngưỡng, loại bỏ confidence giả mạo, đồng bộ toàn diện API/UI/Bot và khóa quy trình đánh giá Dev độc lập.
+- [/] v0.4.1: Kênh Zalo & Fine-Tuning B_zalo — Hoàn tất chuẩn hóa loader đa định dạng in-memory qua FFmpeg (`audio_loader.py`); khóa cấu hình Dual Profile Zalo (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps); sinh 3 manifest ghép cặp `base_utt` tại `data/manifests_zalo/` (0% rò rỉ, 100% cô lập `SPK_xxxx` và `VieNeu-TTS`); đo lường và khóa baseline Checkpoint B chính thức trên 11.450 mẫu Dev Zalo (AAC EER 2.62%, Opus EER 2.10%, Clean EER 2.60%, AMR EER 3.13%, G.711 EER 3.13%; 10.490 bona fide, 960 spoof, paired deltas đầy đủ); giải quyết đường dẫn manifest qua TDD trong `scripts/train.py`, hoàn tất smoke test CPU nội bộ xác nhận đóng băng 211 tensors Wav2Vec2 và cập nhật 84 tensors HS-GAL/proj; đóng gói hoàn chỉnh kernel `deploy_zalo_train/` sẵn sàng đẩy Kaggle khi quota reset. 202/202 unit tests xanh 100%.
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
-- `pytest tests/ -v`: Chạy toàn bộ 137 bài kiểm thử unit test.
-- `python manage_kaggle.py push`: Đẩy mã huấn luyện lên Kaggle GPU.
-- `python manage_kaggle.py status`: Kiểm tra trạng thái thực thi của kernel Kaggle.
-- `python manage_kaggle.py output`: Tải trọng số (`best_model_*.pt`) và báo cáo H1/H2 về `./out/`.
-- `python scripts/train.py --branch B --manifest-dir data/manifests`: Huấn luyện CLI 3 nhánh A/B0/B.
-- `python scripts/eval_ssl_aasist.py --ckpt out/best_model_B.pt --manifest in_domain=...`: Đánh giá SSL-AASIST xuất 14 cột.
-- `python scripts/compare_h1.py --a out/eval_metrics_A.csv --b out/eval_metrics_B.csv`: Đối chứng giả thuyết H1 và H2.
-- `python scripts/verify_kaggle_output.py`: Kiểm tra toàn diện speaker-disjoint, text-disjoint, paired triplets và 18 cột manifest.
-- `python scripts/detect_shortcuts.py`: Chạy bộ dò shortcut phổ âm thanh (>7kHz, silence ratio).
+- `pytest tests/ -v`: Chạy toàn bộ 202 bài kiểm thử unit test.
+- `python manage_kaggle.py push deploy_zalo_train`: Đẩy kernel huấn luyện B_zalo fine-tuning lên Kaggle GPU.
+- `python manage_kaggle.py status deploy_zalo_train`: Kiểm tra trạng thái kernel huấn luyện B_zalo.
+- `python manage_kaggle.py output deploy_zalo_train out/zalo_b_zalo --force`: Tải kết quả checkpoint và báo cáo B_zalo về máy local.
+- `python manage_kaggle.py push deploy_zalo_eval`: Đẩy kernel đo baseline Zalo lên Kaggle GPU.
+- `python manage_kaggle.py status deploy_zalo_eval`: Kiểm tra trạng thái kernel đo baseline Zalo.
+- `python manage_kaggle.py output deploy_zalo_eval`: Tải 11.450 scores và baseline report về `out/zalo_baseline/`.
+- `python scripts/train.py --branch B_zalo --init-ckpt out/kaggle_ssl_out/best_model_B.pt --manifest-dir data/manifests_zalo`: Huấn luyện nhánh fine-tune Zalo.
+- `python scripts/eval_zalo_baseline.py --ckpt out/kaggle_ssl_out/best_model_B.pt --manifest data/manifests_zalo/dev_zalo.csv`: Đo lường baseline kênh Zalo.
+- `python scripts/generate_zalo_paired_manifests.py`: Sinh manifest ghép cặp Zalo Profiles A & B.
 - `uvicorn src.app.server:app --reload`: Khởi động máy chủ phát triển FastAPI.
 
 ---
 
-*v0.2.5 — 2026-10-29*
+*v0.4.1 — 2026-10-30*

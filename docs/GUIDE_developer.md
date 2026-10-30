@@ -63,7 +63,7 @@
 | Phản mẫu | Hậu quả kỹ thuật | Cách xử lý đúng |
 |----------|------------------|-----------------|
 | Đệm số 0 (Zero-padding) cho âm thanh ngắn | Gây đứt gãy phổ tín hiệu, làm hỏng đặc trưng SincConv / AASIST | Dùng nối lặp `Repeat Padding` (`np.tile`) cho đủ 64.000 mẫu |
-| Trọng số bằng nhau trong hàm mất mát CE | Tỷ lệ báo động giả (False Alarm) cao trên người dùng thật | Dùng trọng số cố định `weights = [0.1, 0.9]` cho `[Spoof, Bona fide]` |
+| Trọng số bằng nhau trong hàm mất mát CE | Tỷ lệ báo động giả (False Alarm) cao trên người dùng thật | Tính động $w_c = \frac{N}{2 \cdot N_c}$ qua `loss_weights_from_counts` (không dùng đồng thời sampler) |
 | Lưu file ghi âm người dùng lâu dài trên ổ cứng | Vi phạm Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 & Nghị định 356/2025/NĐ-CP | Đọc qua RAM stream (`io.BytesIO`) và xóa hủy tệp tạm ngay lập tức |
 | Ghi tên tệp gốc vào log đánh giá | Rò rỉ danh tính người đóng góp giọng nói | Băm ẩn danh toàn bộ bằng mã `SHA-256` |
 | Lặp lại logic biến đổi tín hiệu ở nhiều file | Không đồng bộ khi cập nhật giải thuật | Tập trung tại `src/preprocessing/audio_processor.py` |
@@ -74,15 +74,15 @@
 
 ### Phân Tách 3 Lớp (3-Layer Separation) & Khung Sinh Kép
 - **Lớp Tín Hiệu & Sinh Mẫu Giả**: `src/vitruevoice/` (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo, SpeakerProfiler, MultiGateEvaluator 4 cổng, DialectEvaluator, TelephonyCompressor) và `src/preprocessing/` (chuẩn hóa 16kHz mono 64.000 mẫu, EBU R128, Z-score, RawBoost).
-- **Lớp Biểu Diễn & Mô Hình**: `src/models/` và `src/training/` (trích xuất đặc trưng tự giám sát wav2vec 2.0 + đồ thị chú ý HS-GAL, Weighted CE [0.1, 0.9]).
+- **Lớp Biểu Diễn & Mô Hình**: `src/models/` và `src/training/` (trích xuất đặc trưng tự giám sát wav2vec 2.0 + đồ thị chú ý HS-GAL, Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$).
 - **Lớp Dịch Vụ & Trình Diễn**: `src/app/` (API FastAPI, giao diện Gradio $\le 3$ thao tác, Bot Telegram).
 - **Đồng bộ SSOT**: Toàn bộ logic lõi của `src/vitruevoice/` phải được đồng bộ chính xác sang `out/vitruevoice` và notebook `train.ipynb`.
 
 ### Không Gian Tên & Định Danh (Namespace Governance)
-- **5 File Manifests 17 Cột**: Lưu tại `data/manifests/` (`train_manifest.csv`, `dev_manifest.csv`, `test_manifest.csv`, `spoof_manifest.csv`, `full_manifest.csv`).
-  - Cấu trúc 17 cột chuẩn: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed`.
+- **Manifests 18 Cột Chuẩn**: Lưu tại `data/manifests/` và `data/manifests_zalo/`.
+  - Cấu trúc 18 cột chuẩn: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed, pre_codec`.
 - **Quy ước Nhãn**: `0` = Giả mạo (`Spoof`), `1` = Giọng thật (`Bona fide`).
-- **Phân Vùng Người Nói**: Độc lập tuyệt đối (`Speaker-Disjoint`): Train (`SPK_0001, 0004, 0005`), Dev (`SPK_0006`), Test In-domain (`SPK_0007`).
+- **Phân Vùng Người Nói**: Độc lập tuyệt đối (`Speaker-Disjoint`) trên VIVOS (50 Train, 15 Test In-domain) và Mozilla Common Voice (Dev & Test OOD). Toàn bộ 5 tình nguyện viên `SPK_0001`..`0007` là **bộ nghiệm thu độc lập tách biệt hoàn toàn**, nghiêm cấm 100% đưa vào Train, Dev, Calibration hoặc Fine-tuning.
 
 ---
 
@@ -95,4 +95,4 @@
 
 ---
 
-*v0.2.3 — 2026-10-26 (Frozen Pipeline V14)*
+*v0.4.1 — 2026-10-30*

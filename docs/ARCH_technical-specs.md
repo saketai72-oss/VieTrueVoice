@@ -18,10 +18,10 @@ graph TD
 
 | Chặng Kỹ Thuật | Đầu Vào (Input) | Xử Lý Cốt Lõi (Core Process) | Đầu Ra (Output) |
 | :--- | :--- | :--- | :--- |
-| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Giọng thật (5 tình nguyện viên `SPK_0001`..`0007` + VIVOS 65 spk & Common Voice 8.0 419 spk) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
+| **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Dữ liệu khoa học VIVOS (65 spk) & Common Voice 8.0 (419 spk) + Bộ nghiệm thu độc lập 5 tình nguyện viên `SPK_xxxx` (cô lập 100% khỏi train/dev/test) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
 | **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng (24kHz / 48kHz / 16kHz, Stereo/Mono) | Chuyển Mono, Resample 16kHz, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc 8kHz | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
 | **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Huấn luyện Baseline LFCC+GMM (`scripts/eval_gmm.py`) và 3 nhánh SSL-AASIST trên Kaggle GPU (`train_kaggle.ipynb`): Nhánh A (Clean, 4+60ep), Nhánh B0 (Codec, 4+20ep), Nhánh B (ViTrueVoice: Codec+RawBoost, 4+20ep). Weighted CE động $w_c = \frac{N}{2 \cdot N_c}$ sau khi loại VieNeu khỏi train. | Checkpoint `best_model_{A,B0,B}.pt` + Bảng đối chứng `h1_comparison.csv` ($\Delta\text{EER} \ge 30\%$) & `h2_unseen_tts.csv` ($\text{EER} \le 15\%$) |
-| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; 137/137 unit tests xanh 100%, bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
+| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; 190/190 unit tests xanh 100%, bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
 ---
 
@@ -40,7 +40,7 @@ graph TD
 ## 3. Kiến Trúc Huấn Luyện Hybrid & Môi Trường Đám Mây AWS
 
 ### Kiến Trúc Hybrid (Local Code <-> Kaggle GPU)
-1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (137/137 unit tests xanh 100%), đóng gói mã nguồn vào `train_kaggle.ipynb`.
+1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (190/190 unit tests xanh 100%), đóng gói mã nguồn vào `train_kaggle.ipynb`.
 2. **Kaggle GPU (Tesla T4 16GB VRAM)**: Điều khiển tự động qua CLI `manage_kaggle.py`:
    - Kernel sinh dữ liệu: `nguyenthanhtai1959/vietrue-model-training` (V22) tạo ra `vitruevoice_data_processed.zip` (3.26 GB).
    - Kernel huấn luyện: `nguyenthanhtai1959/vietrue-ssl-training` nạp dữ liệu qua `kernel_sources: ["nguyenthanhtai1959/vietrue-model-training"]`.
@@ -75,4 +75,4 @@ Tuân thủ nghiêm ngặt Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 
 
 ---
 
-*v0.2.5 — 2026-10-29*
+*v0.4.1 — 2026-10-30*

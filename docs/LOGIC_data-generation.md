@@ -5,10 +5,11 @@
 ## 1. Nguồn Dữ Liệu Giọng Thật (Bona fide) & Phân Hoạch Chuẩn V12/V14/V20
 
 ### Nguồn Thu Âm Trực Tiếp & Đạo Đức Dữ Liệu
-- **5 tình nguyện viên chính thức**: `SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007` (79 câu thoại gốc; loại bỏ hoàn toàn `SPK_0003`; chuyển đổi `SPK_0005` từ `.m4a` sang PCM 16-bit 48kHz Mono WAV).
+- **Bộ nghiệm thu độc lập 5 tình nguyện viên**: `SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007` (79 câu thoại gốc; loại bỏ hoàn toàn `SPK_0003`; chuyển đổi `SPK_0005` từ `.m4a` sang PCM 16-bit 48kHz Mono WAV).
+  > STUBBORN_FACT: Toàn bộ tập dữ liệu tình nguyện viên `SPK_xxxx` là BỘ NGHIỆM THU TÁCH BIỆT HOÀN TOÀN — nghiêm cấm 100% đưa vào Train, Dev, Calibration, chọn threshold, chọn checkpoint hoặc fine-tuning.
 - **Mã hóa PII**: Toàn bộ định danh ẩn danh dưới dạng `SPK_XXXX`.
 - **Phiếu đồng ý (Consent Form - Phụ lục C.2)** tuân thủ Luật 91/2025/QH15 và Nghị định 356/2025/NĐ-CP, tách bạch 3 mục đích: (1) mẫu thật, (2) mẫu tham chiếu nhân bản giọng nghiên cứu, (3) trích xuất chỉ số EER/minDCF ẩn danh. Cam kết xóa hủy dữ liệu gốc sau bảo vệ (12/2026).
-- **Dữ liệu mở sạch**:
+- **Dữ liệu mở sạch cho Huấn luyện & Đánh giá Khoa học**:
   - **VIVOS** (15 giờ, 65 người nói, CC BY-NC 4.0, `kynthesis/vivos-vietnamese-speech-corpus-for-asr` trên Kaggle).
   - **Mozilla Common Voice tiếng Việt 8.0** (2022-01-19, 22.97 giờ, 419 người nói, CC0 1.0, `tuannguyenvananh/vi-common-voice` trên Kaggle).
   - Mục tiêu quy mô: $\ge 1.000$ mẫu thật độc lập và $\ge 2.000$ mẫu giả độc lập (tỷ lệ $\approx 2:1$).
@@ -32,8 +33,9 @@
 ### Ràng Buộc Phân Hoạch Triệt Để Chống Rò Rỉ (Speaker & Text Disjoint)
 1. **Speaker-Disjoint**:
    - VIVOS: 50 người Train, 15 người Test In-Domain.
-   - Tập Dev: Tình nguyện viên nội bộ (`SPK_0006`).
+   - Tập Dev: Phân định người nói độc lập từ VIVOS Dev và Common Voice (loại bỏ 100% `SPK_xxxx`).
    - Common Voice: Phân định người nói độc lập cho tập Test OOD.
+   - Bộ nghiệm thu `SPK_xxxx`: Cô lập 100% khỏi toàn bộ Train, Dev, Test khoa học và calibration.
 2. **Hard Text-Disjoint**:
    - Ràng buộc cứng giữa mọi cặp split trên tập văn bản chuẩn hóa (`assert isdisjoint`).
    - Ưu tiên giữ câu theo thứ tự: Giữ trọn vẹn ở Test $\rightarrow$ Lọc bỏ câu trùng khỏi Dev $\rightarrow$ Lọc bỏ câu trùng khỏi Train.
