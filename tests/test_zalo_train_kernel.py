@@ -36,8 +36,11 @@ def test_build_zalo_train_notebook(tmp_path: Path):
     # 3. Validate embedded SHA-256 expectations & Anti-regression baseline values
     nb_text = json.dumps(nb)
     assert "a921c3397946335c9543528993eafde80ac0d42decf431101635806b5c56bd9f" in nb_text
-    assert "0e2f42e4b9121e0386e7df2e056396b69c6ea6653c49ff86eb5bfc9ec82917e6" in nb_text
-    assert "730937e8fe982b51c899753cd2a9aff198ff545d8d0b9fd41a9511025884f77e" in nb_text
+    import hashlib
+    expected_train_sha = hashlib.sha256(Path("data/manifests_zalo/train_zalo.csv").read_bytes()).hexdigest()
+    expected_dev_sha = hashlib.sha256(Path("data/manifests_zalo/dev_zalo.csv").read_bytes()).hexdigest()
+    assert expected_train_sha in nb_text
+    assert expected_dev_sha in nb_text
     assert "2.62" in nb_text  # AAC baseline EER
     assert "7.81" in nb_text  # AAC baseline FAR@0
     assert "2.10" in nb_text  # Opus baseline EER

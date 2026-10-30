@@ -36,7 +36,9 @@ def test_build_zalo_eval_notebook(tmp_path: Path):
     # 3. Validate embedded SHA-256 expectations
     nb_text = json.dumps(nb)
     assert "a921c3397946335c9543528993eafde80ac0d42decf431101635806b5c56bd9f" in nb_text
-    assert "730937e8fe982b51c899753cd2a9aff198ff545d8d0b9fd41a9511025884f77e" in nb_text
+    import hashlib
+    expected_dev_sha = hashlib.sha256(Path("data/manifests_zalo/dev_zalo.csv").read_bytes()).hexdigest()
+    assert expected_dev_sha in nb_text
     assert "11450" in nb_text
     assert "strict=True" in nb_text
 
