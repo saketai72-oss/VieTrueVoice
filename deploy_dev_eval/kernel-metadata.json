@@ -1,0 +1,17 @@
+{
+  "id": "nguyenthanhtai1959/vietrue-dev-evaluation-full",
+  "title": "Vietrue Dev Evaluation Full",
+  "code_file": "eval_dev.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [
+    "nguyenthanhtai1959/vietrue-ssl-training",
+    "nguyenthanhtai1959/vietrue-model-training"
+  ]
+}
