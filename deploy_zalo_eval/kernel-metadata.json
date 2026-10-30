@@ -1,0 +1,17 @@
+{
+  "id": "nguyenthanhtai1959/vietrue-zalo-baseline-evaluation",
+  "title": "Vietrue Zalo Baseline Evaluation",
+  "code_file": "eval_zalo_baseline.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [
+    "nguyenthanhtai1959/vietrue-ssl-training",
+    "nguyenthanhtai1959/vietrue-model-training"
+  ]
+}
