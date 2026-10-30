@@ -50,13 +50,13 @@ def _make_manifest(tmp_path: Path, n_speakers=4, clips_per_spk=4) -> pd.DataFram
                 rows.append({
                     "utt_id": f"u{idx}_{codec}",
                     "audio_path": fname,
-                    "speaker_id": f"SPK_{spk:04d}",
+                    "speaker_id": f"VIVOS_{spk:04d}",
                     "label": "spoof" if is_spoof else "bonafide",
                     "codec": codec,
                     "tts_generator": "F5-TTS-Vietnamese" if is_spoof else "none",
                     "split": "train",
                     "role": "eval",
-                    "source": "volunteer",
+                    "source": "vivos",
                     "duration_sec": 1.0,
                     "transcript": "test",
                     "raw_wer": 0.0, "raw_cer": 0.0,
@@ -111,6 +111,16 @@ def test_branch_config_B():
     assert cfg.branch == "B"
     assert mode == "augmented"
     assert transform is not None          # make_rawboost() callable
+
+
+def test_branch_config_B_zalo():
+    train = _import_train()
+    cfg, mode, transform = train.build_branch_config("B_zalo", out_dir="out/B_zalo")
+    assert cfg.phase1_epochs == 5
+    assert cfg.phase2_epochs == 0          # Conservative fine-tuning: keep backbone frozen
+    assert cfg.branch == "B_zalo"
+    assert mode == "augmented"
+    assert transform is not None
 
 
 def test_invalid_branch_raises():
@@ -270,4 +280,84 @@ def test_cli_args_override_epochs_and_limit(monkeypatch, tmp_path):
     assert args.limit == 6
     assert args.phase1_epochs == 1
     assert args.phase2_epochs == 2
+
+
+# ─────────────────────────────────────────────
+# 6. Giai đoạn 3: Kiểm thử đường dẫn manifest & loại trừ SPK_xxxx / VieNeu
+# ─────────────────────────────────────────────
+
+def test_resolve_manifest_paths_legacy_branches(tmp_path: Path):
+    train = _import_train()
+    (tmp_path / "train.csv").write_text("utt_id\nu1\n", encoding="utf-8")
+    (tmp_path / "dev.csv").write_text("utt_id\nu2\n", encoding="utf-8")
+
+    for br in ["A", "B0", "B"]:
+        tr, dv = train.resolve_manifest_paths(tmp_path, branch=br)
+        assert tr == tmp_path / "train.csv"
+        assert dv == tmp_path / "dev.csv"
+
+
+def test_resolve_manifest_paths_b_zalo_auto(tmp_path: Path):
+    train = _import_train()
+    (tmp_path / "train_zalo.csv").write_text("utt_id\nu1\n", encoding="utf-8")
+    (tmp_path / "dev_zalo.csv").write_text("utt_id\nu2\n", encoding="utf-8")
+
+    tr, dv = train.resolve_manifest_paths(tmp_path, branch="B_zalo")
+    assert tr == tmp_path / "train_zalo.csv"
+    assert dv == tmp_path / "dev_zalo.csv"
+
+
+def test_resolve_manifest_paths_explicit_priority(tmp_path: Path):
+    train = _import_train()
+    (tmp_path / "train_zalo.csv").write_text("utt_id\nu1\n", encoding="utf-8")
+    (tmp_path / "dev_zalo.csv").write_text("utt_id\nu2\n", encoding="utf-8")
+    custom_tr = tmp_path / "my_train.csv"
+    custom_dv = tmp_path / "my_dev.csv"
+    custom_tr.write_text("utt_id\nu3\n", encoding="utf-8")
+    custom_dv.write_text("utt_id\nu4\n", encoding="utf-8")
+
+    tr, dv = train.resolve_manifest_paths(
+        manifest_dir=tmp_path,
+        branch="B_zalo",
+        train_manifest=custom_tr,
+        dev_manifest=custom_dv,
+    )
+    assert tr == custom_tr
+    assert dv == custom_dv
+
+
+def test_resolve_manifest_paths_missing_raises_informative_error(tmp_path: Path):
+    train = _import_train()
+    missing_tr = tmp_path / "non_existent_train.csv"
+    with pytest.raises(FileNotFoundError) as exc_info:
+        train.resolve_manifest_paths(
+            manifest_dir=tmp_path,
+            branch="B",
+            train_manifest=missing_tr,
+        )
+    assert str(missing_tr) in str(exc_info.value)
+
+
+def test_validate_manifest_rejects_spk_xxxx():
+    train = _import_train()
+    df_bad = pd.DataFrame({
+        "speaker_id": ["VIVOS_01", "SPK_0001"],
+        "tts_generator": ["none", "none"],
+    })
+    with pytest.raises(ValueError, match="SPK_0001"):
+        train.validate_manifest(df_bad, "train")
+
+    with pytest.raises(ValueError, match="SPK_0001"):
+        train.validate_manifest(df_bad, "dev")
+
+
+def test_validate_manifest_rejects_vieneu_in_dev():
+    train = _import_train()
+    df_bad = pd.DataFrame({
+        "speaker_id": ["VIVOS_01", "VIVOS_02"],
+        "tts_generator": ["none", "VieNeu-TTS v3 Turbo"],
+    })
+    with pytest.raises(ValueError, match="(?i)vieneu"):
+        train.validate_manifest(df_bad, "dev")
+
 

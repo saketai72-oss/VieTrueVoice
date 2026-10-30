@@ -13,16 +13,10 @@ _LABELS = {"bonafide": 1, "bona_fide": 1, "bona fide": 1, "1": 1,
            "spoof": 0, "fake": 0, "0": 0}
 
 
+from src.preprocessing.audio_loader import load_audio
+
 def load_wave(path, sr=16000):
-    import soundfile as sf
-    from scipy.signal import resample_poly
-    x, fs = sf.read(str(path), dtype="float32", always_2d=False)
-    if x.ndim > 1:
-        x = x.mean(axis=1)
-    if fs != sr:
-        g = gcd(int(fs), sr)
-        x = resample_poly(x, sr // g, int(fs) // g).astype(np.float32)
-    return x
+    return load_audio(path, target_sr=sr)
 
 
 def fit_length(x, n, train, rng):
@@ -60,6 +54,8 @@ class ViTrueVoiceDataset(Dataset):
             df = df[df["split"] == split]
         if mode == "clean":
             df = df[df["codec"] == CLEAN]
+        if "audio_path" in df.columns:
+            df["audio_path"] = df["audio_path"].astype(str).str.replace("\\", "/", regex=False)
         if len(df) == 0:
             raise ValueError("Không còn hàng nào sau khi lọc")
         lab = df["label"].astype(str).str.lower().str.strip().map(_LABELS)

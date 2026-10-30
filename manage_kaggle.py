@@ -12,15 +12,17 @@ from pathlib import Path
 METADATA_FILE = Path("kernel-metadata.json")
 OUTPUT_DIR = Path("out")
 
-def load_metadata():
-    if not METADATA_FILE.exists():
-        print(f"❌ Không tìm thấy file {METADATA_FILE}!")
+def load_metadata(meta_dir: Path = Path(".")):
+    meta_file = meta_dir / "kernel-metadata.json"
+    if not meta_file.exists():
+        print(f"❌ Không tìm thấy file {meta_file}!")
         sys.exit(1)
-    with open(METADATA_FILE, "r", encoding="utf-8") as f:
+    with open(meta_file, "r", encoding="utf-8") as f:
         return json.load(f)
 
-def save_metadata(data):
-    with open(METADATA_FILE, "w", encoding="utf-8") as f:
+def save_metadata(data, meta_dir: Path = Path(".")):
+    meta_file = meta_dir / "kernel-metadata.json"
+    with open(meta_file, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 def run_cmd(cmd):
@@ -37,27 +39,31 @@ def check_username(meta):
         return False
     return True
 
-def cmd_push():
-    meta = load_metadata()
+def cmd_push(kernel_dir: str = "."):
+    p = Path(kernel_dir)
+    meta = load_metadata(p)
     if not check_username(meta):
         return
-    print(f"🚀 Đang đẩy code lên Kaggle ({meta['id']})...")
-    run_cmd(["kaggle", "kernels", "push", "-p", "."])
+    print(f"🚀 Đang đẩy code lên Kaggle ({meta['id']}) từ {kernel_dir}...")
+    run_cmd(["kaggle", "kernels", "push", "-p", str(p)])
 
-def cmd_status():
-    meta = load_metadata()
+def cmd_status(kernel_dir: str = "."):
+    p = Path(kernel_dir)
+    meta = load_metadata(p)
     if not check_username(meta):
         return
     print(f"📊 Kiểm tra trạng thái kernel: {meta['id']}")
     run_cmd(["kaggle", "kernels", "status", meta["id"]])
 
-def cmd_output(force: bool = False):
-    meta = load_metadata()
+def cmd_output(kernel_dir: str = ".", out_dir: str = "out", force: bool = False):
+    p = Path(kernel_dir)
+    meta = load_metadata(p)
     if not check_username(meta):
         return
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"📥 Đang tải kết quả từ Kaggle ({meta['id']}) về thư mục ./{OUTPUT_DIR}...")
-    cmd = ["kaggle", "kernels", "output", meta["id"], "-p", str(OUTPUT_DIR)]
+    out_p = Path(out_dir)
+    out_p.mkdir(parents=True, exist_ok=True)
+    print(f"📥 Đang tải kết quả từ Kaggle ({meta['id']}) về thư mục ./{out_p}...")
+    cmd = ["kaggle", "kernels", "output", meta["id"], "-p", str(out_p)]
     if force:
         cmd.append("--force")
     run_cmd(cmd)
@@ -101,13 +107,16 @@ def main():
         return
 
     action = sys.argv[1].lower()
+    target_dir = sys.argv[2] if len(sys.argv) >= 3 and not sys.argv[2].startswith("-") else "."
+
     if action == "push":
-        cmd_push()
+        cmd_push(kernel_dir=target_dir)
     elif action == "status":
-        cmd_status()
+        cmd_status(kernel_dir=target_dir)
     elif action == "output":
         force = ("--force" in sys.argv) or ("-f" in sys.argv)
-        cmd_output(force=force)
+        out_target = "out/zalo_baseline" if target_dir == "deploy_zalo_eval" else "out"
+        cmd_output(kernel_dir=target_dir, out_dir=out_target, force=force)
     elif action == "set-user" and len(sys.argv) >= 3:
         cmd_set_user(sys.argv[2])
     elif action == "add-dataset" and len(sys.argv) >= 3:

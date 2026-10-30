@@ -9,7 +9,13 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import sys
 from typing import Callable, Optional
+
+# Đảm bảo đường dẫn gốc của project luôn nằm trong sys.path
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 
 import numpy as np
 import pandas as pd
@@ -51,7 +57,10 @@ def build_branch_config(
     if branch == "B":
         cfg = TrainConfig(branch="B", phase1_epochs=4, phase2_epochs=20, out_dir=out_dir)
         return cfg, "augmented", make_rawboost()
-    raise ValueError(f"branch phải là A, B0 hoặc B — nhận được: {branch!r}")
+    if branch == "B_zalo":
+        cfg = TrainConfig(branch="B_zalo", phase1_epochs=5, phase2_epochs=0, out_dir=out_dir)
+        return cfg, "augmented", make_rawboost()
+    raise ValueError(f"branch phải là A, B0, B hoặc B_zalo — nhận được: {branch!r}")
 
 
 def compute_weights(train_df: pd.DataFrame, branch: str) -> list[float]:
@@ -69,8 +78,44 @@ def compute_weights(train_df: pd.DataFrame, branch: str) -> list[float]:
 
 
 def validate_manifest(train_df: pd.DataFrame, split_name: str) -> None:
-    """Báo lỗi nếu VieNeu lọt vào tập train/dev (vô hiệu hóa H2)."""
+    """Báo lỗi nếu VieNeu hoặc tình nguyện viên SPK_xxxx lọt vào train/dev."""
     check_unseen_excluded(train_df, _VIENEU_PATTERN, split_name)
+    if "speaker_id" in train_df.columns:
+        spk_series = train_df["speaker_id"].astype(str)
+        if spk_series.str.startswith("SPK_").any():
+            bad = sorted(spk_series[spk_series.str.startswith("SPK_")].unique())
+            raise ValueError(f"Vi phạm ranh giới: Phát hiện tình nguyện viên {bad} trong tập {split_name}!")
+
+
+def resolve_manifest_paths(
+    manifest_dir: str | Path = "data/manifests",
+    branch: str = "B",
+    train_manifest: str | Path | None = None,
+    dev_manifest: str | Path | None = None,
+) -> tuple[Path, Path]:
+    """Xác định đường dẫn (train_path, dev_path) linh hoạt theo nhánh và cờ CLI."""
+    mdir = Path(manifest_dir)
+    if train_manifest is not None:
+        t_path = Path(train_manifest)
+    elif branch == "B_zalo" and (mdir / "train_zalo.csv").is_file():
+        t_path = mdir / "train_zalo.csv"
+    else:
+        t_path = mdir / "train.csv"
+
+    if not t_path.is_file():
+        raise FileNotFoundError(f"Không tìm thấy file train manifest: {t_path}")
+
+    if dev_manifest is not None:
+        d_path = Path(dev_manifest)
+    elif branch == "B_zalo" and (mdir / "dev_zalo.csv").is_file():
+        d_path = mdir / "dev_zalo.csv"
+    else:
+        d_path = mdir / "dev.csv"
+
+    if not d_path.is_file():
+        raise FileNotFoundError(f"Không tìm thấy file dev manifest: {d_path}")
+
+    return t_path, d_path
 
 
 # ─────────────────────────────────────────────
@@ -79,10 +124,16 @@ def validate_manifest(train_df: pd.DataFrame, split_name: str) -> None:
 
 def _parse_args():
     p = argparse.ArgumentParser(description="Huấn luyện ViTrueVoice SSL-AASIST")
-    p.add_argument("--branch", required=True, choices=["A", "B0", "B"],
-                   help="Nhánh thí nghiệm: A (clean), B0 (codec), B (codec+RawBoost)")
+    p.add_argument("--branch", required=True, choices=["A", "B0", "B", "B_zalo"],
+                   help="Nhánh thí nghiệm: A (clean), B0 (codec), B (codec+RawBoost), B_zalo (Zalo fine-tune)")
+    p.add_argument("--init-ckpt", default=None,
+                   help="Đường dẫn checkpoint để nạp trọng số khởi tạo (cho fine-tuning)")
     p.add_argument("--manifest-dir", default="data/manifests",
                    help="Thư mục chứa train.csv và dev.csv")
+    p.add_argument("--train-manifest", default=None,
+                   help="Đường dẫn trực tiếp tới tệp train manifest (ghi đè manifest-dir)")
+    p.add_argument("--dev-manifest", default=None,
+                   help="Đường dẫn trực tiếp tới tệp dev manifest (ghi đè manifest-dir)")
     p.add_argument("--audio-root", default=".",
                    help="Thư mục gốc chứa file âm thanh")
     p.add_argument("--out-dir", default=None,
@@ -107,13 +158,20 @@ def _parse_args():
 def main():
     args = _parse_args()
     out_dir = args.out_dir or f"out/run_{args.branch}"
-    manifest_dir = Path(args.manifest_dir)
 
     # ── Tải manifest ────────────────────────────────────────────────────────
-    train_df = pd.read_csv(manifest_dir / "train.csv", keep_default_na=False)
-    dev_df   = pd.read_csv(manifest_dir / "dev.csv",   keep_default_na=False)
+    train_path, dev_path = resolve_manifest_paths(
+        manifest_dir=args.manifest_dir,
+        branch=args.branch,
+        train_manifest=args.train_manifest,
+        dev_manifest=args.dev_manifest,
+    )
+    print(f"📄 Nạp Train manifest: {train_path}")
+    print(f"📄 Nạp Dev manifest:   {dev_path}")
+    train_df = pd.read_csv(train_path, keep_default_na=False)
+    dev_df   = pd.read_csv(dev_path,   keep_default_na=False)
 
-    # ── Kiểm tra VieNeu không lọt vào train/dev ─────────────────────────────
+    # ── Kiểm tra VieNeu & SPK_xxxx không lọt vào train/dev ──────────────────
     validate_manifest(train_df, "train")
     validate_manifest(dev_df,   "dev")
 
@@ -163,6 +221,11 @@ def main():
         conv_channels=tuple(args.conv_channels),
         n_hs=args.n_hs,
     )
+    if args.init_ckpt:
+        ck = torch.load(args.init_ckpt, map_location="cpu")
+        state_dict = ck.get("model", ck.get("model_state_dict"))
+        model.load_state_dict(state_dict)
+        print(f"📥 Nạp thành công trọng số từ {args.init_ckpt} (khởi tạo fine-tuning)")
     total_params = sum(p.numel() for p in model.parameters()) / 1e6
     print(f"🧠 Model: {total_params:.1f}M params | branch={args.branch} | device={args.device}")
     print(f"📦 Train: {len(train_ds)} mẫu | Dev: {len(dev_ds)} mẫu")
