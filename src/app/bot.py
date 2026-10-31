@@ -14,7 +14,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
 from src.app.decision import classify_score
-from src.app.server import TARGET_SAMPLE_COUNT, _default_model_loader, _load_audio_in_memory, _pad_or_crop
+from src.app.server import DEFAULT_CHECKPOINT, TARGET_SAMPLE_COUNT, _default_model_loader, _load_audio_in_memory, _pad_or_crop
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -32,7 +32,7 @@ async def handle_voice_message(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
     model: Any = None,
-    checkpoint_path: Path | str = Path("out/run_B/best_model.pt"),
+    checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
     device: str = "cpu",
     threshold: float = 0.0,
 ) -> None:

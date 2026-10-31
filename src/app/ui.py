@@ -25,9 +25,16 @@ from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE, _default_mod
 from src.preprocessing.audio_loader import load_audio
 
 
+DEFAULT_CHECKPOINT = (
+    Path("out/best_model_B_zalo.pt")
+    if Path("out/best_model_B_zalo.pt").exists()
+    else Path("out/run_B/best_model.pt")
+)
+
+
 def make_predict_fn(
     model: Any = None,
-    checkpoint_path: Path | str = Path("out/run_B/best_model.pt"),
+    checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
     device: str = "cpu",
     threshold: float = 0.0,
     model_loader: Callable[[Path | str, str], Any] | None = None,
@@ -116,7 +123,7 @@ def make_predict_fn(
 
 def build_ui(
     model: Any = None,
-    checkpoint_path: Path | str = Path("out/run_B/best_model.pt"),
+    checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
     device: str = "cpu",
     threshold: float = 0.0,
 ) -> gr.Blocks:

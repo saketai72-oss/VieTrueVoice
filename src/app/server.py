@@ -80,8 +80,15 @@ def _default_model_loader(checkpoint_path: Path | str, device: str) -> Any:
     return model
 
 
+DEFAULT_CHECKPOINT = (
+    Path("out/best_model_B_zalo.pt")
+    if Path("out/best_model_B_zalo.pt").exists()
+    else Path("out/run_B/best_model.pt")
+)
+
+
 def create_app(
-    checkpoint_path: Path | str = Path("out/run_B/best_model.pt"),
+    checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
     device: str = "cpu",
     threshold: float = 0.0,
     latency_log_path: Path | str = Path("benchmarks/latency_log.json"),
