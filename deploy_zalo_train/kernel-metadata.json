@@ -1,6 +1,6 @@
 {
   "id": "nguyenthanhtai1959/vietrue-zalo-fine-tuning",
-  "title": "Vietrue Zalo Fine Tuning B_zalo",
+  "title": "Vietrue Zalo Fine Tuning",
   "code_file": "train_zalo.ipynb",
   "language": "python",
   "kernel_type": "notebook",

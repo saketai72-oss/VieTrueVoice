@@ -90,7 +90,7 @@ def generate_paired_manifest(
     df_aac["codec"] = "aac_zalo_76k"
     df_aac["pre_codec"] = "aac_76k_m4a"
     df_aac["audio_path"] = df_aac["audio_path"].apply(
-        lambda p: str(Path(p).with_name(f"{derive_base_utt(Path(p).stem)}_aac_zalo.wav"))
+        lambda p: Path(p).with_name(f"{derive_base_utt(Path(p).stem)}_aac_zalo.wav").as_posix()
     )
 
     # Proxy Profile B: Opus 24kbps
@@ -99,7 +99,7 @@ def generate_paired_manifest(
     df_opus["codec"] = "opus_zalo_24k"
     df_opus["pre_codec"] = "opus_24k_ogg"
     df_opus["audio_path"] = df_opus["audio_path"].apply(
-        lambda p: str(Path(p).with_name(f"{derive_base_utt(Path(p).stem)}_opus_zalo.wav"))
+        lambda p: Path(p).with_name(f"{derive_base_utt(Path(p).stem)}_opus_zalo.wav").as_posix()
     )
 
     # Optional: generate physical audio files if requested and audio exists
@@ -215,10 +215,10 @@ def main():
     validate_split_leakage(train_paired, dev_paired, test_paired)
     print("✅ Split validation passed: 0% speaker, base_utt, or SPK_xxxx leakage!")
 
-    # Save to out_dir
-    train_paired.to_csv(out_dir / "train_zalo.csv", index=False)
-    dev_paired.to_csv(out_dir / "dev_zalo.csv", index=False)
-    test_paired.to_csv(out_dir / "test_indomain_zalo.csv", index=False)
+    # Save to out_dir with LF line endings
+    train_paired.to_csv(out_dir / "train_zalo.csv", index=False, lineterminator="\n")
+    dev_paired.to_csv(out_dir / "dev_zalo.csv", index=False, lineterminator="\n")
+    test_paired.to_csv(out_dir / "test_indomain_zalo.csv", index=False, lineterminator="\n")
     print(f"Saved paired manifests to {out_dir}")
 
 
