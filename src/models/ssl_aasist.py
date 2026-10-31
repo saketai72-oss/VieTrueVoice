@@ -125,7 +125,7 @@ class SSLAASIST(nn.Module):
         self.drop = nn.Dropout(dropout)
         self.out = nn.Linear(5 * d_graph, 2)
 
-    def backend(self, feats):
+    def backend(self, feats, return_embedding: bool = False):
         x = F.max_pool2d(feats.transpose(1, 2).unsqueeze(1), (3, 3))  # (B,1,D/3,T/3)
         x = self.conv(F.selu(self.bn_in(x)))                          # (B,C,F,T')
         g_s = self.gat_s(x.abs().amax(dim=3).transpose(1, 2))         # (B,F,d)
@@ -135,10 +135,14 @@ class SSLAASIST(nn.Module):
             g_t, g_s, master = layer(g_t, g_s, master)
         h = torch.cat([g_t.abs().amax(1), g_t.mean(1),
                        g_s.abs().amax(1), g_s.mean(1), master.squeeze(1)], dim=1)
-        return self.out(self.drop(h))
+        emb = self.drop(h)
+        logits = self.out(emb)
+        if return_embedding:
+            return logits, emb
+        return logits
 
-    def forward(self, wav):
-        return self.backend(self.frontend(wav))  # (B, 2) = [z_spoof, z_bonafide]
+    def forward(self, wav, return_embedding: bool = False):
+        return self.backend(self.frontend(wav), return_embedding=return_embedding)  # (B, 2) = [z_spoof, z_bonafide]
 
     def score(self, wav):
         z = self.forward(wav)

@@ -152,6 +152,15 @@ def _parse_args():
     p.add_argument("--d-graph", type=int, default=64)
     p.add_argument("--conv-channels", nargs=2, type=int, default=[64, 128])
     p.add_argument("--n-hs", type=int, default=1)
+    # Tùy chọn hàm mất mát AM-Softmax và tăng cường cao độ
+    p.add_argument("--loss", default="ce", choices=["ce", "am_softmax"],
+                   help="Hàm mất mát: ce (Cross-Entropy) hoặc am_softmax (Additive Margin Softmax)")
+    p.add_argument("--am-s", type=float, default=30.0,
+                   help="Scaling factor cho AM-Softmax (mặc định: 30.0)")
+    p.add_argument("--am-m", type=float, default=0.35,
+                   help="Additive margin cho AM-Softmax (mặc định: 0.35)")
+    p.add_argument("--pitch-aug", action="store_true",
+                   help="Bật tăng cường cao độ PitchPerturbation trong RawBoost")
     return p.parse_args()
 
 
@@ -192,6 +201,16 @@ def main():
         cfg.phase1_epochs = args.phase1_epochs
     if args.phase2_epochs is not None:
         cfg.phase2_epochs = args.phase2_epochs
+
+    if args.loss == "am_softmax":
+        cfg.loss_type = "am_softmax"
+        cfg.am_s = args.am_s
+        cfg.am_m = args.am_m
+        print(f"🎯 Hàm mất mát: AM-Softmax (s={cfg.am_s}, m={cfg.am_m})")
+
+    if args.pitch_aug:
+        transform = make_rawboost(p_pitch=0.5)
+        print("🎵 Đã kích hoạt tăng cường cao độ PitchPerturbation (p=0.5, semitones=[-4, +4])")
 
     # ── Trọng số loss động ──────────────────────────────────────────────────
     cfg.class_weights = tuple(compute_weights(train_df, args.branch))

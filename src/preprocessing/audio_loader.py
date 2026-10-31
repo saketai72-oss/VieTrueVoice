@@ -28,11 +28,12 @@ def load_audio(
 
     Auto-detects format from header/stream contents, avoiding extension-mismatch errors.
     """
+    source_path: Path | None = None
     if isinstance(source, (str, Path)):
-        p = Path(source)
-        if not p.exists():
+        source_path = Path(source)
+        if not source_path.exists():
             raise FileNotFoundError(f"Audio file not found: {source}")
-        with open(p, "rb") as f:
+        with open(source_path, "rb") as f:
             raw_bytes = f.read()
     elif isinstance(source, io.BytesIO):
         source.seek(0)
@@ -58,23 +59,64 @@ def load_audio(
     except Exception:
         pass
 
-    # 2. Universal In-Memory Fallback: ffmpeg pipe (M4A, AAC, MP3, OPUS, AMR)
+    # 2. Universal In-Memory Fallback: ffmpeg
+    # When source_path exists, prefer it as FFmpeg input because MP4/M4A containers
+    # require seeking to parse trailing metadata (moov atom), which fails over stdin pipes.
+    input_arg = str(source_path) if source_path is not None else "pipe:0"
     cmd = [
         "ffmpeg", "-v", "error",
-        "-i", "pipe:0",
+        "-i", input_arg,
         "-f", "wav",
         "-ar", str(target_sr),
         "-ac", "1",
         "pipe:1"
     ]
-    proc = subprocess.run(cmd, input=raw_bytes, capture_output=True)
+    proc = subprocess.run(
+        cmd,
+        input=raw_bytes if source_path is None else None,
+        capture_output=True
+    )
+
+    # If piping bytes failed or returned empty (e.g. non-seekable M4A with trailing moov),
+    # use an ephemeral temp file scrubbed immediately after decoding.
+    if (proc.returncode != 0 or len(proc.stdout) <= 78) and source_path is None:
+        import tempfile, os
+        tmp_fd, tmp_file = tempfile.mkstemp(prefix="vitrue_tmp_decode_")
+        try:
+            with os.fdopen(tmp_fd, "wb") as f:
+                f.write(raw_bytes)
+            cmd_tmp = [
+                "ffmpeg", "-v", "error",
+                "-i", tmp_file,
+                "-f", "wav",
+                "-ar", str(target_sr),
+                "-ac", "1",
+                "pipe:1"
+            ]
+            proc = subprocess.run(cmd_tmp, capture_output=True)
+        finally:
+            if os.path.exists(tmp_file):
+                try: os.unlink(tmp_file)
+                except OSError: pass
+
     if proc.returncode != 0:
         err = proc.stderr.decode(errors="ignore").strip()
         raise ValueError(f"Failed to decode audio stream: {err}")
 
-    data, _ = sf.read(io.BytesIO(proc.stdout), dtype="float32", always_2d=False)
+    if len(proc.stdout) == 0:
+        raise ValueError("Decoded audio stream is empty")
+
+    try:
+        data, _ = sf.read(io.BytesIO(proc.stdout), dtype="float32", always_2d=False)
+    except Exception as exc:
+        raise ValueError(f"Failed to parse decoded WAV stream: {exc}")
+
     if data.ndim > 1:
         data = data.mean(axis=1)
+
+    if len(data) == 0:
+        raise ValueError("Decoded audio stream produced 0 samples")
+
     return data.astype(np.float32)
 
 

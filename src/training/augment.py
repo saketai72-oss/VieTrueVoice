@@ -6,6 +6,8 @@ Mọi hàm: f(x, rng) -> mảng cùng độ dài. Ngẫu nhiên chỉ lấy từ
 from __future__ import annotations
 import numpy as np
 
+import scipy.signal as sps
+
 SR = 16000
 _EPS = 1e-12
 
@@ -13,6 +15,76 @@ _EPS = 1e-12
 def _peak_match(y, ref):
     py, pr = np.max(np.abs(y)), np.max(np.abs(ref))
     return y if py < _EPS or pr < _EPS else y * (pr / py)
+
+
+def pitch_perturbation(
+    x: np.ndarray,
+    rng: np.random.Generator,
+    semitones_range: tuple[float, float] = (-4.0, 4.0),
+    target_len: int = 64000,
+    sr: int = SR,
+) -> np.ndarray:
+    """Tăng cường biến đổi cao độ và formants bằng resampling.
+    
+    Tự động sinh biến thể giọng trầm hoặc bổng trong khoảng semitones_range,
+    bảo toàn cố định đúng target_len (mặc định 64.000 mẫu) qua repeat padding / cropping.
+    """
+    x = np.asarray(x, dtype=np.float32)
+    if len(x) == 0 or np.max(np.abs(x)) < _EPS:
+        return np.zeros(target_len, dtype=np.float32)
+
+    delta_st = float(rng.uniform(*semitones_range))
+    if abs(delta_st) < 0.1:
+        y = x.copy()
+    else:
+        # Ratio biến đổi độ dài: hạ nốt (delta < 0) => mẫu dãn dài ra (ratio > 1), tần số giảm
+        ratio = 2.0 ** (-delta_st / 12.0)
+        new_len = max(int(round(len(x) * ratio)), 16)
+        y = sps.resample(x, new_len).astype(np.float32)
+
+    # Đảm bảo đúng chuẩn cố định target_len
+    if len(y) < target_len:
+        num_repeats = int(np.ceil(target_len / len(y)))
+        y = np.tile(y, num_repeats)[:target_len]
+    elif len(y) > target_len:
+        y = y[:target_len]
+
+    return _peak_match(y, x).astype(np.float32)
+
+
+class RawBoostTransform:
+    """Callable class thay cho local closure để tương thích pickle khi DataLoader num_workers > 0 trên Windows."""
+
+    def __init__(self, p_lnl: float = 0.5, p_isd: float = 0.3, p_ssi: float = 0.5,
+                 p_pitch: float = 0.0, always_one: bool = True):
+        self.p_lnl = p_lnl
+        self.p_isd = p_isd
+        self.p_ssi = p_ssi
+        self.p_pitch = p_pitch
+        self.always_one = always_one
+
+    def __call__(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+        x = np.asarray(x, dtype=np.float32)
+        flags = [rng.random() < p for p in (self.p_lnl, self.p_isd, self.p_ssi)]
+        if self.always_one and not any(flags):
+            flags[int(rng.integers(0, 3))] = True
+        y = x.astype(np.float64)
+        if flags[0]:
+            y = lnl_convolutive(y, rng)
+        if flags[1]:
+            y = isd_additive(y, rng)
+        if flags[2]:
+            y = ssi_additive(y, rng)
+        y = y.astype(np.float32)
+        if self.p_pitch > 0.0 and rng.random() < self.p_pitch:
+            y = pitch_perturbation(y, rng, semitones_range=(-4.0, 4.0), target_len=len(x))
+        return y
+
+
+def make_rawboost(p_lnl=0.5, p_isd=0.3, p_ssi=0.5, p_pitch=0.0, always_one=True):
+    """Trả về transform(x, rng) cho ViTrueVoiceDataset(mode='augmented')."""
+    return RawBoostTransform(p_lnl=p_lnl, p_isd=p_isd, p_ssi=p_ssi,
+                             p_pitch=p_pitch, always_one=always_one)
 
 
 def lnl_convolutive(x, rng, n_bands=(1, 4), gain_db=8.0, width=(0.1, 0.6),
@@ -67,21 +139,3 @@ def ssi_additive(x, rng, snr_db=(10.0, 40.0), sr=SR):
         return x
     n *= np.sqrt(px / (pn * 10 ** (rng.uniform(*snr_db) / 10)))
     return x + n
-
-
-def make_rawboost(p_lnl=0.5, p_isd=0.3, p_ssi=0.5, always_one=True):
-    """Trả về transform(x, rng) cho ViTrueVoiceDataset(mode='augmented')."""
-    def tf(x, rng):
-        x = np.asarray(x, dtype=np.float32)
-        flags = [rng.random() < p for p in (p_lnl, p_isd, p_ssi)]
-        if always_one and not any(flags):
-            flags[int(rng.integers(0, 3))] = True
-        y = x.astype(np.float64)
-        if flags[0]:
-            y = lnl_convolutive(y, rng)
-        if flags[1]:
-            y = isd_additive(y, rng)
-        if flags[2]:
-            y = ssi_additive(y, rng)
-        return y.astype(np.float32)
-    return tf

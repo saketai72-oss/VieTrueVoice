@@ -8,7 +8,7 @@ import torch
 from torch.nn.utils import clip_grad_norm_
 
 from src.evaluation.metrics import compute_eer
-from src.training.losses import weighted_ce
+from src.training.losses import weighted_ce, AMSoftmaxLoss
 
 
 @dataclass
@@ -25,6 +25,9 @@ class TrainConfig:
     grad_clip: float = 5.0
     patience: int = 5
     class_weights: tuple = (0.8602, 0.1398)   # [spoof, bonafide]
+    loss_type: str = "ce"                     # "ce" hoặc "am_softmax"
+    am_s: float = 30.0                        # scaling factor cho AM-Softmax
+    am_m: float = 0.35                        # margin cho AM-Softmax
     amp: bool = True
     out_dir: str = "out/run"
 
@@ -72,7 +75,19 @@ class Trainer:
         self.device = torch.device(device)
         self.model = model.to(self.device)
         self.cfg = cfg
-        self.criterion = weighted_ce(list(cfg.class_weights)).to(self.device)
+        if getattr(cfg, "loss_type", "ce") == "am_softmax":
+            weights_t = torch.tensor(cfg.class_weights, dtype=torch.float32)
+            d_out = getattr(model, "out", None)
+            in_feats = d_out.in_features if d_out is not None else 320
+            self.criterion = AMSoftmaxLoss(
+                in_features=in_feats,
+                num_classes=2,
+                s=getattr(cfg, "am_s", 30.0),
+                m=getattr(cfg, "am_m", 0.35),
+                weight=weights_t,
+            ).to(self.device)
+        else:
+            self.criterion = weighted_ce(list(cfg.class_weights)).to(self.device)
         self.use_amp = cfg.amp and self.device.type == "cuda"
         self.scaler = torch.amp.GradScaler("cuda", enabled=self.use_amp)
         self.best_eer = float("inf")
@@ -87,7 +102,11 @@ class Trainer:
         for i, b in enumerate(loader, 1):
             x, y = b["wave"].to(self.device), b["label"].to(self.device)
             with torch.autocast(device_type=self.device.type, enabled=self.use_amp):
-                loss = self.criterion(self.model(x).float(), y)
+                if isinstance(self.criterion, AMSoftmaxLoss):
+                    _, emb = self.model(x, return_embedding=True)
+                    loss = self.criterion(emb.float(), y, weight_matrix=self.model.out.weight)
+                else:
+                    loss = self.criterion(self.model(x).float(), y)
             self.scaler.scale(loss / cfg.accum_steps).backward()
             total += loss.item() * len(y)
             n += len(y)

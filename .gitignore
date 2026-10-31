@@ -103,3 +103,8 @@ htmlcov/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Agent & local tooling configurations
+.agent/
+.agents/
+
