@@ -141,3 +141,51 @@ def test_merge_deep_voice_pool_schema_integrity():
     assert np.isnan(row["raw_wer"])
     assert np.isnan(row["ecapa_sim"])
     assert np.isnan(row["wavlm_sim"])
+
+
+def test_scan_deep_voices_caching_and_orig_path(mock_cv_env):
+    tmp_path, tsv_path, clips_dir = mock_cv_env
+    cache_file = tmp_path / "deep_voice_f0_cache.json"
+    out_csv = tmp_path / "deep_voice_pool.csv"
+
+    # Lần 1: Chưa có cache
+    assert not cache_file.exists()
+    df1 = scan_deep_voices_from_tsv(
+        tsv_path=tsv_path,
+        audio_root=clips_dir,
+        out_csv=out_csv,
+        f0_max=125.0,
+        min_clips=2,
+        cache_file=cache_file,
+        max_dur_sec=8.0,
+    )
+    assert len(df1) == 3
+    assert cache_file.exists()
+    assert "orig_audio_path" in df1.columns
+
+    # Lần 2: Nạp từ cache
+    df2 = scan_deep_voices_from_tsv(
+        tsv_path=tsv_path,
+        audio_root=clips_dir,
+        out_csv=out_csv,
+        f0_max=125.0,
+        min_clips=2,
+        cache_file=cache_file,
+        max_dur_sec=8.0,
+    )
+    assert len(df2) == 3
+    pd.testing.assert_frame_equal(df1, df2)
+
+    # Kiểm tra merge bảo toàn orig_audio_path
+    dev_df = pd.DataFrame([{"speaker_id": "spk_dev_01", "base_utt": "utt_dev_01"}])
+    test_df = pd.DataFrame([{"speaker_id": "spk_test_01", "base_utt": "utt_test_01"}])
+    train_df = pd.DataFrame([{
+        "utt_id": "u_tr_01", "audio_path": "tr.wav", "speaker_id": "spk_tr_01",
+        "source": "vivos", "label": "bonafide", "role": "train", "codec": "clean_16khz",
+        "split": "train", "duration_sec": 4.0, "transcript": "gốc",
+        "raw_wer": np.nan, "raw_cer": np.nan, "ecapa_sim": np.nan, "wavlm_sim": np.nan,
+        "base_utt": "u_tr_01"
+    }])
+    merged = merge_deep_voice_pool(train_df, dev_df, test_df, df1)
+    assert "orig_audio_path" in merged.columns
+    assert merged[merged["source"] == "common_voice_deep"]["orig_audio_path"].notna().all()

@@ -251,7 +251,7 @@ def merge_deep_voice_pool(
     for _, r in pool_df.iterrows():
         u_id = str(r["utt_id"])
         b_utt = str(r["base_utt"]) if "base_utt" in r and pd.notna(r["base_utt"]) else derive_base_utt(u_id)
-        new_rows.append({
+        row_dict = {
             "utt_id": u_id,
             "speaker_id": str(r["speaker_id"]),
             "label": "bonafide",
@@ -271,7 +271,10 @@ def merge_deep_voice_pool(
             "seed": 0,
             "audio_path": str(r["audio_path"]),
             "base_utt": b_utt,
-        })
+        }
+        if "orig_audio_path" in r and pd.notna(r["orig_audio_path"]):
+            row_dict["orig_audio_path"] = str(r["orig_audio_path"])
+        new_rows.append(row_dict)
 
     merged_df = pd.concat([train_df, pd.DataFrame(new_rows)], ignore_index=True)
     return merged_df
