@@ -180,12 +180,110 @@ def validate_split_leakage(
         raise ValueError(f"Base utterance overlap between Dev and Test: {len(leak_b_dt)}")
 
 
+def merge_deep_voice_pool(
+    train_df: pd.DataFrame,
+    dev_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    pool: str | Path | pd.DataFrame | None,
+) -> pd.DataFrame:
+    """Enrich train split with scanned deep voice samples while asserting 0% leakage."""
+    if pool is None:
+        return train_df
+
+    if isinstance(pool, (str, Path)):
+        pool_path = Path(pool)
+        if not pool_path.is_file():
+            print(f"⚠️ Deep voice pool file not found: {pool_path}, skipping merge.")
+            return train_df
+        pool_df = pd.read_csv(pool_path)
+    elif isinstance(pool, pd.DataFrame):
+        pool_df = pool.copy()
+    else:
+        raise TypeError(f"Invalid pool type: {type(pool)}")
+
+    if len(pool_df) == 0:
+        return train_df
+
+    # 1. Reject SPK_xxxx in deep voice pool
+    spk_re = re.compile(r"^SPK_\d{4}$", re.IGNORECASE)
+    pool_spks = set(pool_df["speaker_id"].astype(str).unique())
+    forbidden_spks = [s for s in pool_spks if spk_re.match(s)]
+    if forbidden_spks:
+        raise ValueError(f"Found forbidden SPK_xxxx volunteer in deep voice pool: {set(forbidden_spks)}")
+
+    # 2. Derive base_utt for pool and splits if not present
+    if "base_utt" not in pool_df.columns:
+        pool_df["base_utt"] = pool_df["utt_id"].apply(derive_base_utt)
+
+    dev_base = (
+        set(dev_df["base_utt"].dropna().unique())
+        if "base_utt" in dev_df.columns
+        else set(dev_df["utt_id"].apply(derive_base_utt).dropna().unique())
+        if "utt_id" in dev_df.columns
+        else set()
+    )
+    test_base = (
+        set(test_df["base_utt"].dropna().unique())
+        if "base_utt" in test_df.columns
+        else set(test_df["utt_id"].apply(derive_base_utt).dropna().unique())
+        if "utt_id" in test_df.columns
+        else set()
+    )
+
+    # 3. Speaker-disjoint check with dev and test
+    dev_spks = set(dev_df["speaker_id"].astype(str).unique()) if "speaker_id" in dev_df.columns else set()
+    test_spks = set(test_df["speaker_id"].astype(str).unique()) if "speaker_id" in test_df.columns else set()
+
+    if leak_spk_dev := pool_spks.intersection(dev_spks):
+        raise ValueError(f"Speaker overlap between deep voice pool and dev: {leak_spk_dev}")
+    if leak_spk_test := pool_spks.intersection(test_spks):
+        raise ValueError(f"Speaker overlap between deep voice pool and test: {leak_spk_test}")
+
+    # 4. Base utterance-disjoint check with dev and test
+    pool_base = set(pool_df["base_utt"].dropna().unique())
+    if leak_dev_utt := pool_base.intersection(dev_base):
+        raise ValueError(f"Base utterance overlap between deep voice pool and dev: {leak_dev_utt}")
+    if leak_test_utt := pool_base.intersection(test_base):
+        raise ValueError(f"Base utterance overlap between deep voice pool and test: {leak_test_utt}")
+
+    # 5. Build standardized bonafide rows (role='train', realistic duration, real transcript, NaN metrics)
+    new_rows = []
+    for _, r in pool_df.iterrows():
+        u_id = str(r["utt_id"])
+        b_utt = str(r["base_utt"]) if "base_utt" in r and pd.notna(r["base_utt"]) else derive_base_utt(u_id)
+        new_rows.append({
+            "utt_id": u_id,
+            "speaker_id": str(r["speaker_id"]),
+            "label": "bonafide",
+            "source": "common_voice_deep",
+            "tts_generator": "none",
+            "codec": "clean_16khz",
+            "pre_codec": "clean_16khz",
+            "role": "train",
+            "split": "train",
+            "duration_sec": float(r["duration_sec"]),
+            "transcript": str(r.get("transcript", "")),
+            "raw_wer": np.nan,
+            "raw_cer": np.nan,
+            "ecapa_sim": np.nan,
+            "wavlm_sim": np.nan,
+            "derived_tier": "tier1",
+            "seed": 0,
+            "audio_path": str(r["audio_path"]),
+            "base_utt": b_utt,
+        })
+
+    merged_df = pd.concat([train_df, pd.DataFrame(new_rows)], ignore_index=True)
+    return merged_df
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate paired manifests for Zalo proxies (Profiles A & B).")
     parser.add_argument("--manifest-dir", default="out/kaggle_ssl_out/data/manifests_seen_only", help="Input manifest directory")
     parser.add_argument("--out-dir", default="data/manifests_zalo", help="Output directory for paired manifests")
     parser.add_argument("--audio-root", default="", help="Audio root directory to transcode physical files")
     parser.add_argument("--generate-audio", action="store_true", help="Generate proxy audio files on disk")
+    parser.add_argument("--deep-voice-pool", default=None, help="Optional path to deep_voice_pool.csv to enrich train split")
     args = parser.parse_args()
 
     in_dir = Path(args.manifest_dir)
@@ -202,6 +300,12 @@ def main():
     test_df = pd.read_csv(test_path)
 
     print(f"Original counts: train={len(train_df)}, dev={len(dev_df)}, test={len(test_df)}")
+
+    # Enrich train split with deep voice pool if provided
+    if args.deep_voice_pool:
+        print(f"Merging deep voice pool from {args.deep_voice_pool} into train split...")
+        train_df = merge_deep_voice_pool(train_df, dev_df, test_df, args.deep_voice_pool)
+        print(f"Enriched train count: {len(train_df)}")
 
     # Generate paired manifests
     train_paired = generate_paired_manifest(train_df, generate_audio=args.generate_audio, audio_root=args.audio_root)
