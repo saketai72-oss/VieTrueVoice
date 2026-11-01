@@ -67,6 +67,7 @@ def compute_weights(train_df: pd.DataFrame, branch: str) -> list[float]:
     """Tính w_c = N/(2·N_c) từ tập train thực tế theo nhánh.
 
     Nhánh A chỉ xét hàng clean_16khz (phản ánh đúng dữ liệu mà dataset thấy).
+    Nhánh B_zalo kẹp [0.35, 0.65] để tránh áp lực thiên vị quá mức khiến đoán nhầm giọng lạ thành spoof.
     """
     if branch == "A":
         df = train_df[train_df["codec"] == "clean_16khz"]
@@ -74,7 +75,8 @@ def compute_weights(train_df: pd.DataFrame, branch: str) -> list[float]:
         df = train_df
     n_spoof  = int((df["label"] == "spoof").sum())
     n_bona   = int((df["label"] == "bonafide").sum())
-    return loss_weights_from_counts(n_spoof, n_bona)
+    clamp_range = (0.35, 0.65) if branch == "B_zalo" else None
+    return loss_weights_from_counts(n_spoof, n_bona, clamp_range=clamp_range)
 
 
 def validate_manifest(train_df: pd.DataFrame, split_name: str) -> None:
@@ -148,6 +150,8 @@ def _parse_args():
                    help="Ghi đè số epoch Pha 1 (mặc định theo nhánh: 4)")
     p.add_argument("--phase2-epochs", type=int, default=None,
                    help="Ghi đè số epoch Pha 2 (mặc định theo nhánh: 60 cho A, 20 cho B0/B)")
+    p.add_argument("--patience", type=int, default=None,
+                   help="Ghi đè patience của EarlyStopping (mặc định: 5)")
     # Siêu tham số kiến trúc (giữ mặc định để tái lập từ model_kwargs)
     p.add_argument("--d-graph", type=int, default=64)
     p.add_argument("--conv-channels", nargs=2, type=int, default=[64, 128])
@@ -161,6 +165,10 @@ def _parse_args():
                    help="Additive margin cho AM-Softmax (mặc định: 0.35)")
     p.add_argument("--pitch-aug", action="store_true",
                    help="Bật tăng cường cao độ PitchPerturbation trong RawBoost")
+    p.add_argument("--pitch-prob", type=float, default=0.7,
+                   help="Xác suất áp dụng PitchPerturbation (mặc định: 0.7)")
+    p.add_argument("--pitch-range", nargs=2, type=float, default=[-7.0, 4.0],
+                   help="Dải semitones cho PitchPerturbation (mặc định: -7.0 4.0)")
     return p.parse_args()
 
 
@@ -201,6 +209,8 @@ def main():
         cfg.phase1_epochs = args.phase1_epochs
     if args.phase2_epochs is not None:
         cfg.phase2_epochs = args.phase2_epochs
+    if args.patience is not None:
+        cfg.patience = args.patience
 
     if args.loss == "am_softmax":
         cfg.loss_type = "am_softmax"
@@ -209,8 +219,8 @@ def main():
         print(f"🎯 Hàm mất mát: AM-Softmax (s={cfg.am_s}, m={cfg.am_m})")
 
     if args.pitch_aug:
-        transform = make_rawboost(p_pitch=0.5)
-        print("🎵 Đã kích hoạt tăng cường cao độ PitchPerturbation (p=0.5, semitones=[-4, +4])")
+        transform = make_rawboost(p_pitch=args.pitch_prob, semitones_range=tuple(args.pitch_range))
+        print(f"🎵 Đã kích hoạt tăng cường cao độ PitchPerturbation (p={args.pitch_prob}, semitones={args.pitch_range})")
 
     # ── Trọng số loss động ──────────────────────────────────────────────────
     cfg.class_weights = tuple(compute_weights(train_df, args.branch))

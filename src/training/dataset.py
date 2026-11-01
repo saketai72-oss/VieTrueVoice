@@ -82,7 +82,7 @@ class ViTrueVoiceDataset(Dataset):
         r = self.df.iloc[i]
         rng = np.random.default_rng([self.seed, self.epoch, i])
         x = load_wave(self.root / r["audio_path"])
-        if self.train and self.transform is not None:
+        if self.train and self.transform is not None and int(self.labels[i]) == 1:
             x = self.transform(x, rng)
         x = fit_length(x, self.target_len, self.train, rng)
         return {"wave": torch.from_numpy(x),

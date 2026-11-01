@@ -102,11 +102,21 @@ def test_transform_only_applied_in_augmented_train(manifest):
         calls.append(1)
         return x * 0.0
     d_aug = ds(manifest, mode="augmented", train=True, transform=tf)
-    assert d_aug[0]["wave"].abs().sum() == 0 and len(calls) == 1
+    bona_idx = int(np.where(d_aug.labels == 1)[0][0])
+    spoof_idx = int(np.where(d_aug.labels == 0)[0][0])
+
+    # Bona fide BẮT BUỘC áp dụng transform
+    assert d_aug[bona_idx]["wave"].abs().sum() == 0 and len(calls) == 1
+
+    # Spoof KHÔNG áp dụng transform (P0.2)
+    calls.clear()
+    assert d_aug[spoof_idx]["wave"].abs().sum() > 0 and len(calls) == 0
+
+    # Các mode khác hoặc train=False không bao giờ áp dụng transform
     calls.clear()
     for mode, train in [("clean", True), ("eval", False), ("augmented", False)]:
         d = ds(manifest, mode=mode, train=train, transform=tf)
-        _ = d[0]
+        _ = d[bona_idx]
     assert calls == []
 
 

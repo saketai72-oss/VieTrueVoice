@@ -1,13 +1,13 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.4.1) — 2026-10-30
+# Bối Cảnh Agent — ViTrueVoice (v0.4.2) — 2026-11-01
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.4.1 (Zalo Dual-Profile Paired Pipeline & B_zalo Fine-Tuning) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.4.2 (Deep Voice Generalization & AM-Softmax Regularization) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
-- **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md)
+- **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [deep-voice-generalization.md](deep-voice-generalization.md)
 
 ## Thứ Tự Ưu Tiên Tài Liệu
 - Thư mục `docs/` là Nguồn Chân Lý Duy Nhất (Single Source of Truth - SSOT) về hành vi, kiến trúc và tiêu chuẩn thực thi.
@@ -75,7 +75,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
-1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 202 bài test phải pass 100%.
+1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 216 bài test phải pass 100%.
 2. **Tài liệu**: Cập nhật tệp `docs/LOGIC_*.md` hoặc `docs/ARCH_*.md` liên quan nếu logic thay đổi (thông qua yêu cầu doc sweep rõ ràng).
 3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
 4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
@@ -85,23 +85,22 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - [x] v0.2.0 / v0.2.3: Must #1 (W3-W4) — Frozen Pipeline V14: Chuẩn bị dữ liệu 5 tình nguyện viên (`SPK_0001`..`0007`), Dual Pipeline sinh 200 mẫu spoof gốc, lọc 4 cổng (Gate 1-4 Label-Free Prosody), TelephonyCompressor, 5 tệp Manifest 17 cột chia Speaker-Disjoint, 31/31 unit tests xanh 100%.
 - [x] v0.2.4: Mở rộng toàn bộ VIVOS (65 người nói) & Mozilla Common Voice 8.0 (22.97h, 419 người nói), cấu trúc manifest chuẩn 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho eval, Hard Text-Disjoint, kiểm định âm tiết dấu thanh. Đã hoàn tất sinh 49.038 mẫu trên Kaggle GPU (Version 22).
 - [x] v0.2.5 / v0.3.0: Must #2 (W5) — Hoàn tất huấn luyện & đánh giá thực nghiệm: Baseline LFCC+GMM, SSL-AASIST 3 nhánh (A, B0, B), 138/138 unit tests xanh 100%. Checkpoints A/B0/B đã lưu tại `./out/`. Kết quả thực nghiệm: H1 PASS trên tập nội bộ (giảm 40.46% AMR-NB, 47.55% G.711); In-domain Seen TTS EER = 3.28% (đạt mục tiêu <= 8%); H2 Unseen TTS EER = 21.88%–26.34% (chưa đạt mục tiêu <= 15%); RawBoost giúp giảm thêm 13.8%–22.1% EER.
-- [/] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio $\le 3$ thao tác), Telegram Bot (độ trễ $\le 3$s), AI Eval $\ge 30$ ca. Đã hoàn tất chuẩn hóa quyết định ngưỡng, loại bỏ confidence giả mạo, đồng bộ toàn diện API/UI/Bot và khóa quy trình đánh giá Dev độc lập.
-- [/] v0.4.1: Kênh Zalo & Fine-Tuning B_zalo — Hoàn tất chuẩn hóa loader đa định dạng in-memory qua FFmpeg (`audio_loader.py`); khóa cấu hình Dual Profile Zalo (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps); sinh 3 manifest ghép cặp `base_utt` tại `data/manifests_zalo/` (0% rò rỉ, 100% cô lập `SPK_xxxx` và `VieNeu-TTS`); đo lường và khóa baseline Checkpoint B chính thức trên 11.450 mẫu Dev Zalo (AAC EER 2.62%, Opus EER 2.10%, Clean EER 2.60%, AMR EER 3.13%, G.711 EER 3.13%; 10.490 bona fide, 960 spoof, paired deltas đầy đủ); giải quyết đường dẫn manifest qua TDD trong `scripts/train.py`, hoàn tất smoke test CPU nội bộ xác nhận đóng băng 211 tensors Wav2Vec2 và cập nhật 84 tensors HS-GAL/proj; đóng gói hoàn chỉnh kernel `deploy_zalo_train/` sẵn sàng đẩy Kaggle khi quota reset. 202/202 unit tests xanh 100%.
+- [x] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio $\le 3$ thao tác), Telegram Bot (độ trễ $\le 3$s), AI Eval $\ge 30$ ca. Đã hoàn tất chuẩn hóa quyết định ngưỡng, loại bỏ confidence giả mạo, đồng bộ toàn diện API/UI/Bot và khóa quy trình đánh giá Dev độc lập.
+- [x] v0.4.1: Kênh Zalo & Fine-Tuning B_zalo — Hoàn tất chuẩn hóa loader đa định dạng in-memory qua FFmpeg (`audio_loader.py`); khóa cấu hình Dual Profile Zalo (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps); sinh 3 manifest ghép cặp `base_utt` tại `data/manifests_zalo/` (0% rò rỉ, 100% cô lập `SPK_xxxx` và `VieNeu-TTS`); đo lường và khóa baseline Checkpoint B chính thức trên 11.450 mẫu Dev Zalo (AAC EER 2.62%, Opus EER 2.10%, Clean EER 2.60%, AMR EER 3.13%, G.711 EER 3.13%; 10.490 bona fide, 960 spoof, paired deltas đầy đủ). Huấn luyện thành công Version 3 (Phase 2 CE, Dev EER 1.50%) và Version 4 (AM-Softmax + Pitch Aug, Dev EER 1.56% - 1.73%, FAR@0 giảm 3 lần còn 3.65%).
+- [/] v0.4.2: Deep Voice Generalization & AM-Softmax Regularization — Bóc tách 5 lỗi kỹ thuật và tinh chỉnh kế hoạch V5 qua 6 pha: thay `scipy.resample` bằng phase-vocoder `torchaudio.functional.pitch_shift` giữ formant; chỉ áp augment cho bona fide trong dataset; kẹp trọng số lớp $[0.35, 0.65]$ để triệt tiêu thiên lệch cực đoan; tăng margin AM-Softmax $m=0.35$; tích hợp `calibrate_score` tầng suy luận; bổ sung `eval_v5_gate.py` và `scan_deep_voices.py`; 216/216 unit tests pass 100%; tái đóng gói kernel `deploy_zalo_train/` Version 5 (763 KB) sẵn sàng đẩy Kaggle GPU.
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
-- `pytest tests/ -v`: Chạy toàn bộ 202 bài kiểm thử unit test.
+- `pytest tests/ -v`: Chạy toàn bộ 216 bài kiểm thử unit test.
 - `python manage_kaggle.py push deploy_zalo_train`: Đẩy kernel huấn luyện B_zalo fine-tuning lên Kaggle GPU.
 - `python manage_kaggle.py status deploy_zalo_train`: Kiểm tra trạng thái kernel huấn luyện B_zalo.
-- `python manage_kaggle.py output deploy_zalo_train out/zalo_b_zalo --force`: Tải kết quả checkpoint và báo cáo B_zalo về máy local.
-- `python manage_kaggle.py push deploy_zalo_eval`: Đẩy kernel đo baseline Zalo lên Kaggle GPU.
-- `python manage_kaggle.py status deploy_zalo_eval`: Kiểm tra trạng thái kernel đo baseline Zalo.
-- `python manage_kaggle.py output deploy_zalo_eval`: Tải 11.450 scores và baseline report về `out/zalo_baseline/`.
-- `python scripts/train.py --branch B_zalo --init-ckpt out/kaggle_ssl_out/best_model_B.pt --manifest-dir data/manifests_zalo`: Huấn luyện nhánh fine-tune Zalo.
-- `python scripts/eval_zalo_baseline.py --ckpt out/kaggle_ssl_out/best_model_B.pt --manifest data/manifests_zalo/dev_zalo.csv`: Đo lường baseline kênh Zalo.
-- `python scripts/generate_zalo_paired_manifests.py`: Sinh manifest ghép cặp Zalo Profiles A & B.
+- `python manage_kaggle.py output deploy_zalo_train out/zalo_b_zalo_v4 --force`: Tải kết quả checkpoint và báo cáo B_zalo về máy local.
+- `python scripts/eval_v5_gate.py`: Đánh giá 3 cổng kiểm định độc lập (SPK_0001/VoiCes, 4 SPK đối chứng, Dev Zalo).
+- `python scripts/eval_voices_new.py`: Đánh giá trực tiếp trên bộ thu mới `VoiCes` ($F_0 \approx 105 - 118$ Hz).
+- `python scripts/eval_v4_summary.py`: So sánh đối chứng V2 vs V3 vs V4 trên Dev Zalo và 15 file `SPK_0001`.
+- `python scripts/train.py --branch B_zalo --loss am_softmax --am-s 30.0 --am-m 0.35 --pitch-aug --pitch-prob 0.9 --pitch-range -8.0 4.0`: Huấn luyện nhánh fine-tune Zalo Version 5.
 - `uvicorn src.app.server:app --reload`: Khởi động máy chủ phát triển FastAPI.
 
 ---
 
-*v0.4.1 — 2026-10-30*
+*v0.4.2 — 2026-11-01*

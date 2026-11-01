@@ -20,34 +20,34 @@ def _peak_match(y, ref):
 def pitch_perturbation(
     x: np.ndarray,
     rng: np.random.Generator,
-    semitones_range: tuple[float, float] = (-4.0, 4.0),
+    semitones_range: tuple[float, float] = (-7.0, 4.0),
     target_len: int = 64000,
     sr: int = SR,
 ) -> np.ndarray:
-    """Tăng cường biến đổi cao độ và formants bằng resampling.
+    """Tăng cường biến đổi cao độ giữ nguyên formant (pitch-preserving via phase vocoder).
     
-    Tự động sinh biến thể giọng trầm hoặc bổng trong khoảng semitones_range,
-    bảo toàn cố định đúng target_len (mặc định 64.000 mẫu) qua repeat padding / cropping.
+    Sử dụng torchaudio.functional.pitch_shift để chỉ dịch chuyển F0,
+    bảo toàn formant và tốc độ nói của người nói thật.
     """
+    import torch
+    import torchaudio
+
     x = np.asarray(x, dtype=np.float32)
     if len(x) == 0 or np.max(np.abs(x)) < _EPS:
         return np.zeros(target_len, dtype=np.float32)
 
-    delta_st = float(rng.uniform(*semitones_range))
-    if abs(delta_st) < 0.1:
+    n_steps = float(rng.uniform(*semitones_range))
+    if abs(n_steps) < 0.1:
         y = x.copy()
     else:
-        # Ratio biến đổi độ dài: hạ nốt (delta < 0) => mẫu dãn dài ra (ratio > 1), tần số giảm
-        ratio = 2.0 ** (-delta_st / 12.0)
-        new_len = max(int(round(len(x) * ratio)), 16)
-        y = sps.resample(x, new_len).astype(np.float32)
-
-    # Đảm bảo đúng chuẩn cố định target_len
-    if len(y) < target_len:
-        num_repeats = int(np.ceil(target_len / len(y)))
-        y = np.tile(y, num_repeats)[:target_len]
-    elif len(y) > target_len:
-        y = y[:target_len]
+        t = torch.from_numpy(x)
+        y = torchaudio.functional.pitch_shift(
+            t, sample_rate=sr, n_steps=n_steps
+        ).numpy()
+        if len(y) > target_len:
+            y = y[:target_len]
+        elif len(y) < target_len:
+            y = np.tile(y, int(np.ceil(target_len / len(y))))[:target_len]
 
     return _peak_match(y, x).astype(np.float32)
 
@@ -56,11 +56,13 @@ class RawBoostTransform:
     """Callable class thay cho local closure để tương thích pickle khi DataLoader num_workers > 0 trên Windows."""
 
     def __init__(self, p_lnl: float = 0.5, p_isd: float = 0.3, p_ssi: float = 0.5,
-                 p_pitch: float = 0.0, always_one: bool = True):
+                 p_pitch: float = 0.0, semitones_range: tuple[float, float] = (-7.0, 4.0),
+                 always_one: bool = True):
         self.p_lnl = p_lnl
         self.p_isd = p_isd
         self.p_ssi = p_ssi
         self.p_pitch = p_pitch
+        self.semitones_range = semitones_range
         self.always_one = always_one
 
     def __call__(self, x: np.ndarray, rng: np.random.Generator) -> np.ndarray:
@@ -77,14 +79,14 @@ class RawBoostTransform:
             y = ssi_additive(y, rng)
         y = y.astype(np.float32)
         if self.p_pitch > 0.0 and rng.random() < self.p_pitch:
-            y = pitch_perturbation(y, rng, semitones_range=(-4.0, 4.0), target_len=len(x))
+            y = pitch_perturbation(y, rng, semitones_range=self.semitones_range, target_len=len(x))
         return y
 
 
-def make_rawboost(p_lnl=0.5, p_isd=0.3, p_ssi=0.5, p_pitch=0.0, always_one=True):
+def make_rawboost(p_lnl=0.5, p_isd=0.3, p_ssi=0.5, p_pitch=0.0, semitones_range=(-7.0, 4.0), always_one=True):
     """Trả về transform(x, rng) cho ViTrueVoiceDataset(mode='augmented')."""
     return RawBoostTransform(p_lnl=p_lnl, p_isd=p_isd, p_ssi=p_ssi,
-                             p_pitch=p_pitch, always_one=always_one)
+                             p_pitch=p_pitch, semitones_range=semitones_range, always_one=always_one)
 
 
 def lnl_convolutive(x, rng, n_bands=(1, 4), gain_db=8.0, width=(0.1, 0.6),

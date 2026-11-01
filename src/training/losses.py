@@ -11,13 +11,22 @@ def weighted_ce(weights, reduction="mean"):
                                reduction=reduction)
 
 
-def loss_weights_from_counts(n_spoof, n_bonafide):
-    """w_c = N / (2 N_c), chuẩn hóa tổng = 1. Thứ tự: [spoof(0), bonafide(1)]."""
+def loss_weights_from_counts(n_spoof, n_bonafide, clamp_range: tuple[float, float] | None = None):
+    """w_c = N / (2 N_c), chuẩn hóa tổng = 1. Thứ tự: [spoof(0), bonafide(1)].
+    
+    Hỗ trợ clamp_range (ví dụ [0.35, 0.65]) để tránh phạt quá cực đoan khi tỷ lệ spoof rất nhỏ.
+    """
     if n_spoof <= 0 or n_bonafide <= 0:
         raise ValueError("Mỗi lớp cần ít nhất 1 mẫu")
     raw = [1.0 / n_spoof, 1.0 / n_bonafide]
     s = sum(raw)
-    return [r / s for r in raw]
+    w = [r / s for r in raw]
+    if clamp_range is not None:
+        low, high = clamp_range
+        w = [min(max(x, low), high) for x in w]
+        s = sum(w)
+        w = [r / s for r in w]
+    return w
 
 
 class AMSoftmaxLoss(nn.Module):
