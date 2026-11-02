@@ -16,7 +16,7 @@ import pytest
 import soundfile as sf
 
 from scripts.scan_deep_voices import scan_deep_voices_from_tsv
-from scripts.generate_zalo_paired_manifests import merge_deep_voice_pool
+from scripts.generate_zalo_paired_manifests import merge_deep_voice_pool, generate_paired_manifest
 
 
 @pytest.fixture
@@ -141,6 +141,31 @@ def test_merge_deep_voice_pool_schema_integrity():
     assert np.isnan(row["raw_wer"])
     assert np.isnan(row["ecapa_sim"])
     assert np.isnan(row["wavlm_sim"])
+
+
+def test_merge_deep_voice_pool_train_without_base_utt():
+    dev_df = pd.DataFrame([{"speaker_id": "spk_dev_01", "base_utt": "utt_dev_01"}])
+    test_df = pd.DataFrame([{"speaker_id": "spk_test_01", "base_utt": "utt_test_01"}])
+    # train_df lacks base_utt column completely
+    train_df = pd.DataFrame([{
+        "utt_id": "u_tr_01_clean", "audio_path": "tr.wav", "speaker_id": "spk_tr_01",
+        "source": "vivos", "label": "bonafide", "role": "train", "codec": "clean_16khz",
+        "split": "train", "duration_sec": 4.0, "transcript": "gốc",
+    }])
+
+    valid_pool = pd.DataFrame([{
+        "utt_id": "clip_valid_01", "audio_path": "valid_01.wav", "speaker_id": "CV_deep_spk_88",
+        "transcript": "giọng trầm", "duration_sec": 3.45, "f0_median": 110.0
+    }])
+
+    merged = merge_deep_voice_pool(train_df, dev_df, test_df, valid_pool)
+    assert "base_utt" in merged.columns
+    assert merged["base_utt"].isna().sum() == 0
+    assert merged.loc[merged["utt_id"] == "u_tr_01_clean", "base_utt"].iloc[0] == "u_tr_01"
+
+    paired = generate_paired_manifest(merged)
+    assert paired["base_utt"].isna().sum() == 0
+    assert paired["utt_id"].isna().sum() == 0
 
 
 def test_scan_deep_voices_caching_and_orig_path(mock_cv_env):

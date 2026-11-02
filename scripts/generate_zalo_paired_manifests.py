@@ -76,6 +76,10 @@ def generate_paired_manifest(
     df = df.copy()
     if "base_utt" not in df.columns:
         df["base_utt"] = df["utt_id"].apply(derive_base_utt)
+    else:
+        null_mask = df["base_utt"].isna() | (df["base_utt"].astype(str) == "") | (df["base_utt"].astype(str) == "nan")
+        if null_mask.any():
+            df.loc[null_mask, "base_utt"] = df.loc[null_mask, "utt_id"].apply(derive_base_utt)
 
     # Clean subset: take utterances with clean_16khz codec
     clean_mask = df["codec"].astype(str).str.contains("clean", case=False)
@@ -211,9 +215,17 @@ def merge_deep_voice_pool(
     if forbidden_spks:
         raise ValueError(f"Found forbidden SPK_xxxx volunteer in deep voice pool: {set(forbidden_spks)}")
 
-    # 2. Derive base_utt for pool and splits if not present
+    # 2. Derive base_utt for pool, train_df, and splits if not present
     if "base_utt" not in pool_df.columns:
         pool_df["base_utt"] = pool_df["utt_id"].apply(derive_base_utt)
+
+    train_df = train_df.copy()
+    if "base_utt" not in train_df.columns:
+        train_df["base_utt"] = train_df["utt_id"].apply(derive_base_utt)
+    else:
+        null_mask = train_df["base_utt"].isna() | (train_df["base_utt"].astype(str) == "") | (train_df["base_utt"].astype(str) == "nan")
+        if null_mask.any():
+            train_df.loc[null_mask, "base_utt"] = train_df.loc[null_mask, "utt_id"].apply(derive_base_utt)
 
     dev_base = (
         set(dev_df["base_utt"].dropna().unique())
@@ -320,6 +332,10 @@ def preaugment_deep_voices(
 
     if "base_utt" not in cand_df.columns:
         cand_df["base_utt"] = cand_df["utt_id"].apply(derive_base_utt)
+    else:
+        null_mask = cand_df["base_utt"].isna() | (cand_df["base_utt"].astype(str) == "") | (cand_df["base_utt"].astype(str) == "nan")
+        if null_mask.any():
+            cand_df.loc[null_mask, "base_utt"] = cand_df.loc[null_mask, "utt_id"].apply(derive_base_utt)
 
     cand_df = cand_df.drop_duplicates(subset=["base_utt"]).reset_index(drop=True)
 
