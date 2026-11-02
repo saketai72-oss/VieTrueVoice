@@ -8,6 +8,8 @@ import librosa
 import numpy as np
 import pandas as pd
 import soundfile as sf
+import torch
+import torchaudio
 
 
 def median_f0_and_duration(
@@ -22,13 +24,17 @@ def median_f0_and_duration(
     if y.ndim > 1:
         y = y.mean(axis=1)
     duration_sec = float(len(y) / sr)
-    # Cắt tối đa max_dur_sec đầu để tối ưu thời gian tính pyin mà vẫn chuẩn xác
+    if duration_sec <= 0.1:
+        return None, duration_sec
+    # Cắt tối đa max_dur_sec đầu để tối ưu thời gian tính mà vẫn chuẩn xác
     y_f0 = y[: int(max_dur_sec * sr)] if duration_sec > max_dur_sec else y
     if sr != sr_target:
         y_f0 = librosa.resample(y_f0, orig_sr=sr, target_sr=sr_target)
-    f0, vf, _ = librosa.pyin(y_f0, fmin=65, fmax=400, sr=sr_target)
-    c = f0[vf & ~np.isnan(f0)]
-    f0_med = float(np.median(c)) if len(c) else None
+    t_wav = torch.from_numpy(y_f0)
+    # torchaudio detect_pitch_frequency: nhanh gấp 250 lần librosa.pyin
+    pitches = torchaudio.functional.detect_pitch_frequency(t_wav, sample_rate=sr_target)
+    valid_p = pitches[(pitches >= 65.0) & (pitches <= 400.0)]
+    f0_med = float(valid_p.median().item()) if len(valid_p) > 0 else None
     return f0_med, duration_sec
 
 

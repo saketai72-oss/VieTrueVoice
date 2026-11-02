@@ -280,6 +280,99 @@ def merge_deep_voice_pool(
     return merged_df
 
 
+def preaugment_deep_voices(
+    train_df: pd.DataFrame,
+    dev_df: pd.DataFrame,
+    test_df: pd.DataFrame,
+    audio_root: str | Path,
+    out_audio_dir: str | Path,
+    n_samples: int = 500,
+    semitones_range: tuple[float, float] = (-8.0, -4.0),
+    seed: int = 42,
+) -> pd.DataFrame:
+    """Offline pre-augmentation: Generates bona fide deep voice variants via formant-preserving pitch shift.
+
+    Excludes SPK_xxxx, dev/test speakers, and dev/test utterances with zero leakage guarantee.
+    """
+    from src.preprocessing.audio_loader import load_audio
+    from src.training.augment import pitch_perturbation
+
+    rng = np.random.default_rng(seed)
+    root_p = Path(audio_root)
+    out_root = Path(out_audio_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    # 1. Lọc tập ứng viên bonafide clean_16khz từ train_df
+    cand_df = train_df[
+        (train_df["label"] == "bonafide") &
+        (train_df["codec"].str.contains("clean", case=False, na=False))
+    ].copy()
+
+    # Chặn tuyệt đối SPK_xxxx
+    spk_re = re.compile(r"^SPK_\d{4}$", re.IGNORECASE)
+    cand_df = cand_df[~cand_df["speaker_id"].astype(str).str.match(spk_re)].copy()
+
+    # Chặn rò rỉ speaker và base_utt với dev/test
+    dev_spks = set(dev_df["speaker_id"].astype(str).unique()) if "speaker_id" in dev_df.columns else set()
+    test_spks = set(test_df["speaker_id"].astype(str).unique()) if "speaker_id" in test_df.columns else set()
+    forbidden_spks = dev_spks | test_spks
+    cand_df = cand_df[~cand_df["speaker_id"].astype(str).isin(forbidden_spks)].copy()
+
+    if "base_utt" not in cand_df.columns:
+        cand_df["base_utt"] = cand_df["utt_id"].apply(derive_base_utt)
+
+    cand_df = cand_df.drop_duplicates(subset=["base_utt"]).reset_index(drop=True)
+
+    # Lấy tối đa n_samples mẫu
+    if len(cand_df) > n_samples:
+        cand_df = cand_df.sample(n=n_samples, random_state=seed).reset_index(drop=True)
+
+    new_rows = []
+    for _, r in cand_df.iterrows():
+        src_path = root_p / r["audio_path"]
+        if not src_path.is_file():
+            continue
+        try:
+            wav = load_audio(src_path, target_sr=16000)
+            if len(wav) < 1600:
+                continue
+            wav_aug = pitch_perturbation(wav, rng, semitones_range=semitones_range, target_len=len(wav))
+        except Exception:
+            continue
+
+        b_utt = f"{r['base_utt']}_deep"
+        dst_rel = f"data/raw/deep_aug/{r['speaker_id']}/{b_utt}.wav"
+        dst_full = out_root / dst_rel
+        dst_full.parent.mkdir(parents=True, exist_ok=True)
+        sf.write(str(dst_full), wav_aug, 16000, subtype="PCM_16")
+
+        new_rows.append({
+            "utt_id": b_utt,
+            "speaker_id": f"CV_aug_{r['speaker_id']}",
+            "label": "bonafide",
+            "source": "deep_pitch_augmented",
+            "tts_generator": "none",
+            "codec": "clean_16khz",
+            "pre_codec": "clean_16khz",
+            "role": "train",
+            "split": "train",
+            "duration_sec": float(len(wav_aug) / 16000),
+            "transcript": str(r.get("transcript", "")),
+            "raw_wer": np.nan,
+            "raw_cer": np.nan,
+            "ecapa_sim": np.nan,
+            "wavlm_sim": np.nan,
+            "derived_tier": "tier1",
+            "seed": seed,
+            "audio_path": dst_rel,
+            "base_utt": b_utt,
+        })
+
+    if not new_rows:
+        return pd.DataFrame()
+    return pd.DataFrame(new_rows)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate paired manifests for Zalo proxies (Profiles A & B).")
     parser.add_argument("--manifest-dir", default="out/kaggle_ssl_out/data/manifests_seen_only", help="Input manifest directory")

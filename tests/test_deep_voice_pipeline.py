@@ -189,3 +189,45 @@ def test_scan_deep_voices_caching_and_orig_path(mock_cv_env):
     merged = merge_deep_voice_pool(train_df, dev_df, test_df, df1)
     assert "orig_audio_path" in merged.columns
     assert merged[merged["source"] == "common_voice_deep"]["orig_audio_path"].notna().all()
+
+
+def test_preaugment_deep_voices_offline(tmp_path):
+    from scripts.generate_zalo_paired_manifests import preaugment_deep_voices
+    audio_dir = tmp_path / "audio"
+    audio_dir.mkdir()
+    sr = 16000
+    t = np.linspace(0, 1.0, sr)
+    wav = (0.5 * np.sin(2 * np.pi * 150 * t)).astype(np.float32)
+    sf.write(audio_dir / "clip_tr_01.wav", wav, sr)
+
+    train_df = pd.DataFrame([
+        {
+            "utt_id": "clip_tr_01", "base_utt": "clip_tr_01", "audio_path": "clip_tr_01.wav",
+            "speaker_id": "spk_tr_01", "label": "bonafide", "codec": "clean_16khz",
+            "role": "train", "split": "train", "duration_sec": 1.0, "transcript": "test câu"
+        },
+        {
+            # SPK_0001 (phải bị lọc bỏ)
+            "utt_id": "clip_spk_01", "base_utt": "clip_spk_01", "audio_path": "clip_spk_01.wav",
+            "speaker_id": "SPK_0001", "label": "bonafide", "codec": "clean_16khz",
+            "role": "train", "split": "train", "duration_sec": 1.0, "transcript": "volunteer"
+        }
+    ])
+    dev_df = pd.DataFrame([{"speaker_id": "spk_dev_01", "base_utt": "utt_dev_01"}])
+    test_df = pd.DataFrame([{"speaker_id": "spk_test_01", "base_utt": "utt_test_01"}])
+
+    out_audio = tmp_path / "out_audio"
+    aug_df = preaugment_deep_voices(
+        train_df, dev_df, test_df,
+        audio_root=audio_dir,
+        out_audio_dir=out_audio,
+        n_samples=5,
+        semitones_range=(-6.0, -4.0),
+    )
+
+    assert len(aug_df) == 1
+    row = aug_df.iloc[0]
+    assert row["role"] == "train"
+    assert row["source"] == "deep_pitch_augmented"
+    assert "SPK_" not in row["speaker_id"]
+    assert (out_audio / row["audio_path"]).exists()
