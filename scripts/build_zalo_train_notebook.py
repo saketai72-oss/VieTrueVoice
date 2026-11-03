@@ -23,31 +23,16 @@ def build_zalo_train_notebook(
     nb_path = out_dir / "train_zalo.ipynb"
     meta_path = out_dir / "kernel-metadata.json"
 
-    # 1. Package src/ and scripts/ payloads
-    pkg = {}
-    for p in sorted(Path("src").rglob("*.py")):
-        if "__pycache__" in str(p):
-            continue
-        pkg[p.as_posix()] = p.read_text(encoding="utf-8")
-    for p in sorted(Path("scripts").rglob("*.py")):
-        if "__pycache__" in str(p):
-            continue
-        pkg[p.as_posix()] = p.read_text(encoding="utf-8")
-
-    compressed_src = zlib.compress(json.dumps(pkg).encode("utf-8"), level=9)
-    b64_src_payload = base64.b64encode(compressed_src).decode("ascii")
-
-    # 2. Package dev_zalo.csv payload & compute expected SHA-256
+    # 1. Compute expected SHA-256 for manifests
     train_raw = train_manifest.read_bytes()
     expected_train_sha = hashlib.sha256(train_raw).hexdigest()
 
     dev_raw = dev_manifest.read_bytes()
-    b64_dev = base64.b64encode(zlib.compress(dev_raw, level=9)).decode("ascii")
     expected_dev_sha = hashlib.sha256(dev_raw).hexdigest()
 
-    # 3. Create kernel-metadata.json
+    # 2. Create kernel-metadata.json
     metadata = {
-        "id": "nguyenthanhtai1959/vietrue-zalo-fine-tuning",
+        "id": "sussss123/vietrue-zalo-fine-tuning",
         "title": "Vietrue Zalo Fine Tuning",
         "code_file": "train_zalo.ipynb",
         "language": "python",
@@ -161,37 +146,35 @@ def build_zalo_train_notebook(
             ]
         },
 
-        # Cell 2: Bung src/, dev_zalo.csv và thiết lập train_zalo.csv
+        # Cell 2: Kéo mã nguồn từ GitHub & thiết lập train_zalo.csv
         {
             "cell_type": "code",
             "execution_count": None,
-            "metadata": {
-                "collapsed": True,
-                "jupyter": {
-                    "source_hidden": True
-                }
-            },
+            "metadata": {},
             "outputs": [],
             "source": [
-                "# 2. Bung mã nguồn src/, dev_zalo.csv và thiết lập train_zalo.csv\n",
+                "# 2. Đồng bộ mã nguồn từ GitHub & Nạp dev_zalo.csv (100% sạch, 0% Base64)\n",
                 "working_dir = Path('/kaggle/working') if Path('/kaggle/working').exists() else Path('.')\n",
+                "repo_tmp = Path('/tmp/repo_src')\n",
+                "if not (working_dir / 'src').exists() or not (working_dir / 'scripts').exists():\n",
+                "    print('📥 Đang đồng bộ mã nguồn VieTrueVoice từ GitHub...')\n",
+                "    if repo_tmp.exists():\n",
+                "        shutil.rmtree(repo_tmp)\n",
+                "    subprocess.run(['git', 'clone', '--depth', '1', 'https://github.com/saketai72-oss/VieTrueVoice.git', str(repo_tmp)], check=True)\n",
+                "    for folder in ['src', 'scripts']:\n",
+                "        dst = working_dir / folder\n",
+                "        if dst.exists():\n",
+                "            shutil.rmtree(dst)\n",
+                "        shutil.copytree(repo_tmp / folder, dst)\n",
+                "    dv_src = repo_tmp / 'data/manifests_zalo/dev_zalo.csv'\n",
+                "    if dv_src.exists() and not (working_dir / 'dev_zalo.csv').exists():\n",
+                "        shutil.copy2(dv_src, working_dir / 'dev_zalo.csv')\n",
+                "    shutil.rmtree(repo_tmp, ignore_errors=True)\n",
+                "    print(f'✅ Đã đồng bộ mã nguồn sạch vào {working_dir}')\n",
                 "\n",
-                f"b64_src = '{b64_src_payload}'\n",
-                "src_files = json.loads(zlib.decompress(base64.b64decode(b64_src.encode('ascii'))).decode('utf-8'))\n",
-                "for fpath_str, content in src_files.items():\n",
-                "    dest = working_dir / fpath_str\n",
-                "    dest.parent.mkdir(parents=True, exist_ok=True)\n",
-                "    dest.write_text(content, encoding='utf-8')\n",
-                "print(f'✅ Đã bung {len(src_files)} tệp mã nguồn vào {working_dir}')\n",
-                "\n",
-                f"b64_dv = '{b64_dev}'\n",
-                "dv_raw = zlib.decompress(base64.b64decode(b64_dv.encode('ascii')))\n",
                 "dv_path = working_dir / 'dev_zalo.csv'\n",
-                "dv_path.write_bytes(dv_raw)\n",
-                f"EXPECTED_DEV_SHA = '{expected_dev_sha}'\n",
-                "assert hashlib.sha256(dv_path.read_bytes()).hexdigest() == EXPECTED_DEV_SHA, '❌ Sai SHA dev_zalo.csv'\n",
-                "\n",
                 "tr_path = working_dir / 'train_zalo.csv'\n",
+                f"EXPECTED_DEV_SHA = '{expected_dev_sha}'\n",
                 f"EXPECTED_TRAIN_SHA = '{expected_train_sha}'\n",
                 "\n",
                 "if str(working_dir.resolve()) not in sys.path:\n",
