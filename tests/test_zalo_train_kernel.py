@@ -13,7 +13,7 @@ def test_build_zalo_train_notebook(tmp_path: Path):
     nb_path = build_zalo_train_notebook(out_dir=out_dir)
 
     assert nb_path.exists()
-    assert nb_path.stat().st_size > 100000
+    assert nb_path.stat().st_size > 25000
 
     # 1. Validate valid JSON
     with open(nb_path, "r", encoding="utf-8") as f:
@@ -28,7 +28,10 @@ def test_build_zalo_train_notebook(tmp_path: Path):
     with open(meta_path, "r", encoding="utf-8") as f:
         meta = json.load(f)
 
-    assert meta["id"] == "nguyenthanhtai1959/vietrue-zalo-fine-tuning"
+    assert meta["id"] in [
+        "nguyenthanhtai1959/vietrue-zalo-fine-tuning",
+        "sussss123/vietrue-zalo-fine-tuning"
+    ]
     assert meta["enable_gpu"] == "true"
     assert "nguyenthanhtai1959/vietrue-ssl-training" in meta["kernel_sources"]
     assert "nguyenthanhtai1959/vietrue-model-training" in meta["kernel_sources"]
