@@ -94,7 +94,7 @@ def build_zalo_train_notebook(
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 1. Kiểm tra môi trường GPU & Nạp trước cấu hình HuggingFace\n",
+                "# 1. Kiểm tra môi trường GPU & Tự động cấu hình Colab / Kaggle\n",
                 "import os\n",
                 "import sys\n",
                 "import time\n",
@@ -108,6 +108,33 @@ def build_zalo_train_notebook(
                 "import concurrent.futures\n",
                 "from pathlib import Path\n",
                 "\n",
+                "# Tự động phát hiện Google Colab và tải dữ liệu đầu vào nếu thiếu\n",
+                "IS_COLAB = 'google.colab' in sys.modules or Path('/content').exists()\n",
+                "if IS_COLAB:\n",
+                "    print('🌐 Phát hiện môi trường Google Colab — Đang thiết lập tự động...')\n",
+                "    subprocess.run(['apt-get', 'update', '-qq'], check=False)\n",
+                "    subprocess.run(['apt-get', 'install', '-y', '-qq', 'ffmpeg'], check=False)\n",
+                "    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', 'kaggle', 'soundfile', 'librosa', 'torchaudio', 'transformers'], check=False)\n",
+                "    os.environ['KAGGLE_USERNAME'] = 'sussss123'\n",
+                "    os.environ['KAGGLE_KEY'] = '4228a17cc6043d543ac2974b5260e477'\n",
+                "    ssl_in = Path('/kaggle/input/notebooks/nguyenthanhtai1959/vietrue-ssl-training')\n",
+                "    model_in = Path('/kaggle/input/notebooks/nguyenthanhtai1959/vietrue-model-training')\n",
+                "    cv_in = Path('/kaggle/input/vi-common-voice')\n",
+                "    ssl_in.mkdir(parents=True, exist_ok=True)\n",
+                "    model_in.mkdir(parents=True, exist_ok=True)\n",
+                "    cv_in.mkdir(parents=True, exist_ok=True)\n",
+                "    Path('/kaggle/working').mkdir(parents=True, exist_ok=True)\n",
+                "    if not (ssl_in / 'best_model_B.pt').exists():\n",
+                "        print('📥 Đang tải Checkpoint B & manifests từ Kaggle...')\n",
+                "        subprocess.run(['kaggle', 'kernels', 'output', 'nguyenthanhtai1959/vietrue-ssl-training', '-p', str(ssl_in)], check=False)\n",
+                "    if not list(model_in.rglob('*.zip')):\n",
+                "        print('📥 Đang tải Audio ZIP 3.1GB từ Kaggle...')\n",
+                "        subprocess.run(['kaggle', 'kernels', 'output', 'nguyenthanhtai1959/vietrue-model-training', '-p', str(model_in)], check=False)\n",
+                "    if not list(cv_in.rglob('*.tsv')):\n",
+                "        print('📥 Đang tải dataset Common Voice...')\n",
+                "        subprocess.run(['kaggle', 'datasets', 'download', 'tuannguyenvananh/vi-common-voice', '-p', str(cv_in), '--unzip'], check=False)\n",
+                "    print('✅ Thiết lập môi trường và nạp dữ liệu Colab hoàn tất!')\n",
+                "\n",
                 "import torch\n",
                 "import torchaudio\n",
                 "import soundfile as sf\n",
@@ -116,7 +143,7 @@ def build_zalo_train_notebook(
                 "from transformers import AutoConfig, Wav2Vec2Model\n",
                 "\n",
                 "print('=' * 60)\n",
-                "print('⚙️ MÔI TRƯỜNG THỰC THI KAGGLE GPU — B_ZALO TRAINING')\n",
+                "print('⚙️ MÔI TRƯỜNG THỰC THI GPU — B_ZALO TRAINING')\n",
                 "print('=' * 60)\n",
                 "print(f'• Python: {sys.version}')\n",
                 "print(f'• PyTorch: {torch.__version__} | CUDA: {torch.cuda.is_available()}')\n",
@@ -138,7 +165,12 @@ def build_zalo_train_notebook(
         {
             "cell_type": "code",
             "execution_count": None,
-            "metadata": {},
+            "metadata": {
+                "collapsed": True,
+                "jupyter": {
+                    "source_hidden": True
+                }
+            },
             "outputs": [],
             "source": [
                 "# 2. Bung mã nguồn src/, dev_zalo.csv và thiết lập train_zalo.csv\n",
@@ -603,7 +635,20 @@ def build_zalo_train_notebook(
                 "# Dọn dẹp /tmp/vitrue_audio để giải phóng bộ nhớ\n",
                 "if tmp_audio_dir.exists():\n",
                 "    shutil.rmtree(tmp_audio_dir, ignore_errors=True)\n",
-                "print('🏁 CỔNG 5: B_ZALO ĐÁNH GIÁ THÀNH CÔNG VÀ SẴN SÀNG NGHIỆM THU!')\n"
+                "print('🏁 CỔNG 5: B_ZALO ĐÁNH GIÁ THÀNH CÔNG VÀ SẴN SÀNG NGHIỆM THU!')\n",
+                "\n",
+                "# Tự động sao lưu Checkpoint vào Google Drive nếu chạy trên Colab\n",
+                "if IS_COLAB:\n",
+                "    try:\n",
+                "        from google.colab import drive\n",
+                "        drive.mount('/content/drive', force_remount=False)\n",
+                "        gdrive_dest = Path('/content/drive/MyDrive/best_model_B_zalo.pt')\n",
+                "        best_ckpt = out_run_dir / 'best_model_B_zalo.pt'\n",
+                "        if best_ckpt.exists():\n",
+                "            shutil.copy2(best_ckpt, gdrive_dest)\n",
+                "            print(f'💾 Đã tự động sao lưu checkpoint an toàn vào Google Drive: {gdrive_dest}')\n",
+                "    except Exception as e:\n",
+                "        print(f'ℹ️ Bỏ qua sao lưu Google Drive: {e}')\n"
             ]
         }
     ]
