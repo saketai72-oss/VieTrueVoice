@@ -37,6 +37,7 @@
 > STUBBORN_FACT: Toàn bộ tập dữ liệu tình nguyện viên `SPK_xxxx` là BỘ NGHIỆM THU TÁCH BIỆT HOÀN TOÀN — nghiêm cấm 100% đưa vào Train, Dev, Calibration, chọn threshold, chọn checkpoint hoặc fine-tuning.
 > STUBBORN_FACT: Chuẩn hóa nạp âm thanh đa định dạng (WAV, M4A, AAC, MP3, OPUS, AMR) qua `load_audio` bắt buộc nhận diện theo magic bytes và giải mã in-memory qua FFmpeg stream, tuyệt đối không phụ thuộc phần mở rộng tệp (`.wav`/`.m4a`).
 > STUBBORN_FACT: Kênh Zalo mục tiêu khóa cấu hình Dual Profile: Profile A (`aac_zalo_76k`, AAC-LC 76kbps @ 48kHz mono) và Profile B (`opus_zalo_24k`, Opus 24kbps OGG) liên kết đồng bộ qua trường `base_utt` và bảo toàn ranh giới split.
+> STUBBORN_FACT: Mọi thay đổi kỹ thuật, sửa lỗi, hoàn tất pha hoặc cập nhật tiến độ BẮT BUỘC phải đồng bộ cập nhật ngay vào các tệp tài liệu liên quan (PLAN.md, README.md, howtorun.md, AGENTS.md và docs/) trước khi kết thúc tác vụ hoặc commit; tuyệt đối không để tài liệu bị lệch pha so với mã nguồn thực tế.
 
 ## Nguyên Tắc Kỹ Thuật Cho AI (TỐI QUAN TRỌNG)
 - **Ưu tiên Thảo luận (Discussion Precedence)**: Nghiêm cấm tự ý tạo mới, chỉnh sửa hoặc xóa mã nguồn/tệp tin khi kế hoạch chưa được thảo luận và thống nhất hoàn toàn với người dùng.
@@ -76,7 +77,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 
 ## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
 1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 223 bài test phải pass 100%.
-2. **Tài liệu**: Cập nhật tệp `docs/LOGIC_*.md` hoặc `docs/ARCH_*.md` liên quan nếu logic thay đổi (thông qua yêu cầu doc sweep rõ ràng).
+2. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
 3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
 4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
 
