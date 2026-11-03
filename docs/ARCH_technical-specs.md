@@ -40,11 +40,11 @@ graph TD
 ## 3. Kiến Trúc Huấn Luyện Hybrid & Môi Trường Đám Mây AWS
 
 ### Kiến Trúc Hybrid (Local Code <-> Kaggle GPU)
-1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (190/190 unit tests xanh 100%), đóng gói mã nguồn vào `train_kaggle.ipynb`.
-2. **Kaggle GPU (Tesla T4 16GB VRAM)**: Điều khiển tự động qua CLI `manage_kaggle.py`:
+1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (223/223 unit tests xanh 100%), đóng gói mã nguồn và kiểm soát ranh giới split.
+2. **Kaggle GPU & Google Colab GPU (Tesla T4 16GB VRAM)**:
    - Kernel sinh dữ liệu: `nguyenthanhtai1959/vietrue-model-training` (V22) tạo ra `vitruevoice_data_processed.zip` (3.26 GB).
    - Kernel huấn luyện: `nguyenthanhtai1959/vietrue-ssl-training` nạp dữ liệu qua `kernel_sources: ["nguyenthanhtai1959/vietrue-model-training"]`.
-   - Quá trình chạy: Tự động giải nén dữ liệu, lọc VieNeu vào `manifests_seen_only`, chạy Smoke Test (100 mẫu), huấn luyện 3 nhánh A/B0/B, đánh giá tự động trên test set và xuất báo cáo H1/H2 Markdown.
+   - Kernel fine-tuning Zalo: `deploy_zalo_train/train_zalo.ipynb` hỗ trợ triển khai kép tự động (Kaggle và Google Colab), đồng bộ mã nguồn qua Git clone (0% Base64), stream tải tệp dữ liệu 3.26 GB qua `ApiDownloadKernelOutputRequest` trực tiếp không phân trang, tiền sinh offline 500 mẫu bona fide trầm ($F_0 < 120$ Hz) và huấn luyện AM-Softmax $m=0.35$.
    - Tải kết quả về máy Local: `python manage_kaggle.py output` (lưu vào `./out/`).
 
 ### Hạ Tầng Đám Mây AWS & 2 Biện Pháp Bảo Mật (Course Package A)
@@ -75,4 +75,4 @@ Tuân thủ nghiêm ngặt Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 
 
 ---
 
-*v0.4.1 — 2026-10-30*
+*v0.4.2 — 2026-11-03*

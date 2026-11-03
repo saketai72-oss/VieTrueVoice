@@ -32,13 +32,14 @@ flowchart TD
 - **P0.2**: Khóa điều kiện augment trong `src/training/dataset.py`: chỉ áp cho bona fide (`label == 1`).
 - **P0.3**: Bảo toàn độ dài 64.000 mẫu (`target_len`), không cắt xén đuôi.
 - **P0.4**: Kẹp trọng số lớp `clamp_range=(0.35, 0.65)` trong `compute_weights` cho nhánh `B_zalo`, loại bỏ áp lực phạt spoof cực đoan.
-- **Kiểm thử**: Toàn bộ **216/216 bài kiểm thử unit test đã PASS 100%**.
+- **Kiểm thử**: Toàn bộ **223/223 bài kiểm thử unit test đã PASS 100%** trên cả máy Local và GitHub Actions CI.
 
-### Pha 1 — Sinh Dữ Liệu Giọng Trầm
+### Pha 1 — Sinh Dữ Liệu Giọng Trầm & Offline Pre-Augmentation
 - Tạo kịch bản `scripts/scan_deep_voices.py` để quét $F_0 \le 125$ Hz trên kho Common Voice.
 - Cập nhật `scripts/generate_zalo_paired_manifests.py` nhận cờ `--deep-voice-pool` để ghép các mẫu bona fide trầm vào `train_zalo.csv`.
+- **Khắc phục nút thắt timeout 12h**: Triển khai `preaugment_deep_voices` thực hiện offline pre-augmentation cho 500 mẫu bona fide trầm ($F_0 < 120$ Hz) kết hợp `torchaudio` fast pitch detection (tốc độ 0.08s/mẫu), bổ sung 1.500 dòng manifest train ghép cặp chuẩn 18 cột mà không làm chậm DataLoader trong quá trình huấn luyện.
 
-### Pha 2 — Cấu Hình Huấn Luyện Version 5
+### Pha 2 — Cấu Hình Huấn Luyện Version 5 & Triển Khai Kép Colab / Kaggle
 - Khóa tham số trong `deploy_zalo_train/train_zalo.ipynb`:
   ```bash
   python scripts/train.py \
@@ -54,6 +55,10 @@ flowchart TD
       --patience 4 \
       --batch-size 16
   ```
+- **Tối ưu hóa Kernel Notebook**:
+  - Giảm kích thước notebook từ 777 KB xuống **~36 KB** bằng cách loại bỏ hoàn toàn Base64 nhúng mã nguồn, thay bằng cơ chế đồng bộ trực tiếp qua `git clone --depth 1` từ kho GitHub `VieTrueVoice`.
+  - Tự động nhận diện môi trường Google Colab vs Kaggle: chuyển đổi phân vùng lưu trữ sang `/content/input` tránh lỗi hệ thống tệp chỉ đọc (`Read-only file system: '/kaggle'`).
+  - Tải trực tiếp tệp âm thanh `vitruevoice_data_processed.zip` (3.26 GB) và checkpoint qua API `ApiDownloadKernelOutputRequest` trong 1 request duy nhất, triệt tiêu 100% lỗi phân trang và `HTTP 429 Too Many Requests`.
 
 ### Pha 3 — Kiểm Định Đa Tầng (3 Gates)
 Sử dụng `scripts/eval_v5_gate.py`:

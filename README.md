@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.1)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.2)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -31,6 +31,6 @@
   - **Giả thuyết H1 (Độ bền nén kênh thoại)**: Đạt **PASS trên tập nội bộ** ($\Delta\text{EER}_{\text{rel}} = +40.46\%$ trên AMR-NB, $+47.55\%$ trên G.711 A-law, $p < 0.05$); OOD G.711 chưa qua ($+15.91\%$).
   - **Giả thuyết H2 (Công cụ lạ Unseen VieNeu-TTS)**: EER đạt **$21.88\% - 26.34\%$** (CHƯA ĐẠT mục tiêu $\le 15\%$ do bảo toàn ràng buộc 100% Unseen).
   - **Phân rã RawBoost**: Giúp giảm thêm **$13.79\% - 22.06\%$** EER trên kênh nén so với chỉ tăng cường Codec thuần túy.
-- **Must #3 (W6)**: Triển khai API FastAPI (`/api/v1/predict`), giao diện Gradio tối giản $\le 3$ thao tác, Bot Telegram nhận voice message và benchmark đo độ trễ 30 lần $\le 3.0$s; chuẩn hóa phân định ngưỡng $\theta=0.0$, loại bỏ confidence phi chuẩn hóa. 214/214 unit tests TDD xanh 100%.
+- **Must #3 (W6)**: Triển khai API FastAPI (`/api/v1/predict`), giao diện Gradio tối giản $\le 3$ thao tác, Bot Telegram nhận voice message và benchmark đo độ trễ 30 lần $\le 3.0$s; chuẩn hóa phân định ngưỡng $\theta=0.0$, loại bỏ confidence phi chuẩn hóa. 193/193 unit tests TDD xanh 100%.
 - **Kênh Zalo & Fine-Tuning B_zalo (v0.4.1)**: Chuẩn hóa bộ nạp âm thanh in-memory đa định dạng (`audio_loader.py` fix seekable M4A); khóa cấu hình Zalo Dual Profile (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps); sinh manifest ghép cặp `data/manifests_zalo/` (0% rò rỉ); hoàn tất đo lường baseline Checkpoint B; huấn luyện thành công Version 3 (Dev EER 1.50%) và Version 4 (AM-Softmax + Pitch Aug, Dev EER **1.56% - 1.73%**, FAR@0 giảm 3 lần còn **3.65%**).
-- **Tổng Quát Hóa Giọng Trầm & AM-Softmax (v0.4.2)**: Bóc tách thực nghiệm nguyên nhân False Positive dải giọng nam cực trầm ($F_0 < 120$ Hz trên `SPK_0001` và bộ `VoiCes`) do lệch miền phân phối tập Train (55 speakers); chứng minh mô hình tổng quát hóa tốt trên 4 tình nguyện viên còn lại (60/64 clip đúng = 93.8%); mở rộng dải âm vực `pitch_perturbation` $[-7, +4]$ semitones ($p=0.7$), điều chỉnh margin AM-Softmax $m=0.15$; 214/214 unit tests pass 100%; tái đóng gói kernel `deploy_zalo_train/` Version 5 sẵn sàng đẩy Kaggle GPU.
+- **Tổng Quát Hóa Giọng Trầm & AM-Softmax (v0.4.2)**: Bóc tách 5 lỗi kỹ thuật và triển khai giải pháp toàn diện: Phase-vocoder `torchaudio.functional.pitch_shift` giữ nguyên formant; chỉ áp augment cho bona fide; kẹp trọng số loss $[0.35, 0.65]$ triệt tiêu thiên lệch phạt; tăng margin AM-Softmax $m=0.35$; tích hợp `calibrate_score` bù ngưỡng ở tầng suy luận; giải quyết timeout 12h bằng Offline Pre-Augmentation 500 mẫu bona fide trầm kết hợp `torchaudio` fast pitch detection (0.08s/mẫu); tối ưu triển khai kép Kaggle & Google Colab: tinh gọn kernel từ 777 KB xuống 36 KB (xóa bỏ Base64 sang đồng bộ Git), tải dữ liệu trực tiếp bằng `ApiDownloadKernelOutputRequest` loại bỏ lỗi 429; 223/223 unit tests pass 100% trên Local và CI; sẵn sàng huấn luyện nghiệm thu.

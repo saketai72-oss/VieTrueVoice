@@ -55,13 +55,31 @@ python manage_kaggle.py status
 ```
 *(Trạng thái sẽ hiển thị: `queued` -> `running` -> `complete`)*
 
+---
+
+## 3.1. Huấn Luyện Fine-Tuning B_zalo Trên Google Colab (GPU T4 Miễn Phí)
+
+Nếu tài khoản Kaggle bị giới hạn GPU hoặc cần huấn luyện tương tác:
+1. Mở [Google Colab](https://colab.research.google.com/).
+2. Chọn **File -> Upload notebook** và chọn tệp [`deploy_zalo_train/train_zalo.ipynb`](file:///c:/Codes/VieTrueVoice/deploy_zalo_train/train_zalo.ipynb).
+3. Đổi Runtime sang GPU: **Runtime -> Change runtime type -> T4 GPU**.
+4. Bấm **Runtime -> Run all**:
+   - Notebook sẽ tự nhận diện môi trường Google Colab.
+   - Tự cài đặt FFmpeg, Kaggle CLI và thư viện phụ thuộc.
+   - Tự động tải Checkpoint B, tập Common Voice và tệp dữ liệu âm thanh 3.26 GB từ Kaggle về `/content/input`.
+   - Tự clone mã nguồn mới nhất từ GitHub `VieTrueVoice` vào container.
+   - Tiến hành tiền sinh offline 500 mẫu giọng trầm và huấn luyện 2 pha với AM-Softmax ($m=0.35$).
+   - Đánh giá kiểm định 5 codecs trên 11.450 mẫu Dev Zalo và xuất kết quả.
+
+---
+
 ## 4. Các Lệnh Thực Thi & Kiểm Thử Thường Dùng
 
 ### Chạy Kiểm Thử Tự Động (TDD Unit Tests)
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 137 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle)*
+*(Yêu cầu: Toàn bộ 223 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
