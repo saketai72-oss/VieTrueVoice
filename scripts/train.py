@@ -8,16 +8,15 @@ Kaggle: bọc script này trong train_kaggle.ipynb (notebook riêng biệt).
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import sys
-from typing import Callable, Optional
+from collections.abc import Callable
+from pathlib import Path
 
 # Đảm bảo đường dẫn gốc của project luôn nằm trong sys.path
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -41,7 +40,7 @@ _TARGET_LEN = 64_000          # 4.0 s @ 16 kHz (STUBBORN_FACT)
 def build_branch_config(
     branch: str,
     out_dir: str,
-) -> tuple[TrainConfig, str, Optional[Callable]]:
+) -> tuple[TrainConfig, str, Callable | None]:
     """Trả về (TrainConfig, mode, transform) theo nhánh A / B0 / B.
 
     - A  : clean only, phase2 = 60 (×3 để cân bằng optimizer steps)
@@ -141,6 +140,8 @@ def _parse_args():
     p.add_argument("--out-dir", default=None,
                    help="Thư mục lưu best_model.pt (mặc định: out/run_<branch>)")
     p.add_argument("--batch-size", type=int, default=16)
+    p.add_argument("--accum-steps", type=int, default=None,
+                   help="Số bước tích lũy gradient (gradient accumulation) để giảm bộ nhớ VRAM")
     p.add_argument("--num-workers", type=int, default=2)
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     # Tùy chọn kiểm thử nhanh và điều chỉnh epoch
@@ -211,6 +212,9 @@ def main():
         cfg.phase2_epochs = args.phase2_epochs
     if args.patience is not None:
         cfg.patience = args.patience
+    if args.accum_steps is not None:
+        cfg.accum_steps = args.accum_steps
+        print(f"⚡ Gradient accumulation steps: {cfg.accum_steps} (Effective batch size: {args.batch_size * cfg.accum_steps})")
 
     if args.loss == "am_softmax":
         cfg.loss_type = "am_softmax"

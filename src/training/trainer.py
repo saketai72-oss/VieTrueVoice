@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
@@ -8,7 +9,7 @@ import torch
 from torch.nn.utils import clip_grad_norm_
 
 from src.evaluation.metrics import compute_eer
-from src.training.losses import weighted_ce, AMSoftmaxLoss
+from src.training.losses import AMSoftmaxLoss, weighted_ce
 
 
 @dataclass
@@ -139,6 +140,8 @@ class Trainer:
         for phase, n_ep in ((1, cfg.phase1_epochs), (2, cfg.phase2_epochs)):
             if n_ep <= 0:
                 continue
+            if self.device.type == "cuda":
+                torch.cuda.empty_cache()
             self.model.freeze_ssl() if phase == 1 else self.model.unfreeze_ssl()
             opt = make_optimizer(self.model, phase, cfg)
             stopper = EarlyStopper(cfg.patience)
@@ -149,6 +152,8 @@ class Trainer:
                     ds.set_epoch(epoch)
                 loss = self._train_epoch(train_loader, opt)
                 s, l, _ = predict(self.model, dev_loader, self.device)
+                if self.device.type == "cuda":
+                    torch.cuda.empty_cache()
                 eer = compute_eer(s, l)[0]
                 if eer < self.best_eer:
                     self.best_eer = eer

@@ -73,13 +73,32 @@ Nếu tài khoản Kaggle bị giới hạn GPU hoặc cần huấn luyện tư�
 
 ---
 
+## 3.2. Huấn Luyện Cục Bộ Trên Máy Local (GPU RTX 3050 4GB)
+
+Dành cho việc huấn luyện trực tiếp trên GPU máy tính cá nhân mà không phụ thuộc cloud/timeout:
+
+### Bước 1: Chuẩn bị & Tải dữ liệu chọn lọc (1 lần duy nhất)
+Tự động tải Checkpoint B và tệp nén 3.26 GB từ Kaggle, sau đó giải nén chọn lọc 6.786 audio files phục vụ tập Zalo:
+```bash
+python scripts/setup_local_train.py
+```
+
+### Bước 2: Khởi động huấn luyện chống tràn VRAM
+Script tự động kích hoạt Gradient Accumulation (`--batch-size 4 --accum-steps 4`, effective batch size 16) kết hợp PyTorch AMP FP16, kiểm soát VRAM trong khoảng 2.8 - 3.2 GB:
+```bash
+python scripts/train_local_zalo.py
+```
+*Sau khi huấn luyện xong, script tự động gọi `scripts/eval_v5_gate.py` để kiểm định độc lập 3 Gates.*
+
+---
+
 ## 4. Các Lệnh Thực Thi & Kiểm Thử Thường Dùng
 
 ### Chạy Kiểm Thử Tự Động (TDD Unit Tests)
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 223 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
+*(Yêu cầu: Toàn bộ 227 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
