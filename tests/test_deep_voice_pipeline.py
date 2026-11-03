@@ -256,3 +256,49 @@ def test_preaugment_deep_voices_offline(tmp_path):
     assert row["source"] == "deep_pitch_augmented"
     assert "SPK_" not in row["speaker_id"]
     assert (out_audio / row["audio_path"]).exists()
+
+
+def test_merge_deep_voice_pool_dedup_train():
+    dev_df = pd.DataFrame([{"speaker_id": "spk_dev_01", "base_utt": "utt_dev_01"}])
+    test_df = pd.DataFrame([{"speaker_id": "spk_test_01", "base_utt": "utt_test_01"}])
+    train_df = pd.DataFrame([
+        {
+            "utt_id": "u_tr_01_clean", "audio_path": "tr01.wav", "speaker_id": "spk_tr_01",
+            "source": "vivos", "label": "bonafide", "role": "train", "codec": "clean_16khz",
+            "split": "train", "duration_sec": 4.0, "transcript": "gốc 1", "base_utt": "u_tr_01"
+        },
+        {
+            "utt_id": "u_tr_02_clean", "audio_path": "tr02.wav", "speaker_id": "spk_tr_02",
+            "source": "vivos", "label": "bonafide", "role": "train", "codec": "clean_16khz",
+            "split": "train", "duration_sec": 3.0, "transcript": "gốc 2", "base_utt": "u_tr_02"
+        }
+    ])
+
+    pool_df = pd.DataFrame([
+        {
+            # Trùng base_utt u_tr_01 -> PHẢI BỊ LỌC BỎ
+            "utt_id": "u_tr_01", "audio_path": "pool01.wav", "speaker_id": "CV_deep_spk_01",
+            "transcript": "trùng với train", "duration_sec": 4.0, "f0_median": 115.0, "base_utt": "u_tr_01"
+        },
+        {
+            # Mới hoàn toàn -> ĐƯỢC GIỮ LẠI
+            "utt_id": "u_tr_03", "audio_path": "pool03.wav", "speaker_id": "CV_deep_spk_03",
+            "transcript": "mới trầm", "duration_sec": 3.5, "f0_median": 105.0, "base_utt": "u_tr_03"
+        }
+    ])
+
+    merged = merge_deep_voice_pool(train_df, dev_df, test_df, pool_df)
+    # train có 2 + pool có 1 mới = 3
+    assert len(merged) == 3
+    assert "u_tr_03" in merged["base_utt"].values
+    # u_tr_01 chỉ xuất hiện đúng 1 lần (từ train_df gốc)
+    assert (merged["base_utt"] == "u_tr_01").sum() == 1
+    assert merged.loc[merged["base_utt"] == "u_tr_01", "speaker_id"].iloc[0] == "spk_tr_01"
+
+    paired = generate_paired_manifest(merged)
+    # Mỗi base_utt có đúng 1 clean, 1 aac, 1 opus
+    for b_utt in ["u_tr_01", "u_tr_02", "u_tr_03"]:
+        sub = paired[paired["base_utt"] == b_utt]
+        assert len(sub) == 3
+        assert set(sub["codec"]) == {"clean_16khz", "aac_zalo_76k", "opus_zalo_24k"}
+

@@ -258,6 +258,23 @@ def merge_deep_voice_pool(
     if leak_test_utt := pool_base.intersection(test_base):
         raise ValueError(f"Base utterance overlap between deep voice pool and test: {leak_test_utt}")
 
+    # 4.1 Loại bỏ hoàn toàn các clip trùng lặp với train_df (ngăn ngừa duplicate base_utt và xung đột proxy)
+    train_base = set(train_df["base_utt"].dropna().unique())
+    dup_mask = pool_df["base_utt"].isin(train_base)
+    if dup_mask.any():
+        num_dups = int(dup_mask.sum())
+        print(f"ℹ️ Bỏ qua {num_dups} mẫu từ deep voice pool vì đã tồn tại trong train_df")
+        pool_df = pool_df[~dup_mask].copy()
+
+    if "audio_path" in train_df.columns:
+        train_paths = set(train_df["audio_path"].dropna().unique())
+        path_dup_mask = pool_df["audio_path"].isin(train_paths)
+        if path_dup_mask.any():
+            pool_df = pool_df[~path_dup_mask].copy()
+
+    if len(pool_df) == 0:
+        return train_df
+
     # 5. Build standardized bonafide rows (role='train', realistic duration, real transcript, NaN metrics)
     new_rows = []
     for _, r in pool_df.iterrows():

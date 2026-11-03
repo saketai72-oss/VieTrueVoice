@@ -47,9 +47,11 @@ def scan_deep_voices_from_tsv(
     max_clips_per_speaker: int = 10,
     cache_file: str | Path | None = None,
     max_dur_sec: float = 8.0,
+    exclude_base_utts: set[str] | list[str] | None = None,
 ) -> pd.DataFrame:
     tsv_p = Path(tsv_path)
     root_p = Path(audio_root)
+    exclude_set = set(exclude_base_utts) if exclude_base_utts else set()
 
     if not tsv_p.is_file():
         raise FileNotFoundError(f"Không tìm thấy file TSV: {tsv_p}")
@@ -88,6 +90,9 @@ def scan_deep_voices_from_tsv(
         if spk_used_counts.get(cid, 0) >= max_clips_per_speaker:
             continue
         p_name = Path(r["path"]).name
+        stem = Path(r["path"]).stem
+        if exclude_set and (stem in exclude_set or p_name in exclude_set):
+            continue
         if p_name in audio_index:
             valid_rows.append({
                 "client_id": cid,
