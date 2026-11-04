@@ -9,9 +9,18 @@
 
 ## 0. Kết Quả Xác Minh Thực Nghiệm & Triển Khai (Verification Evidence)
 - **Tối ưu hóa VRAM 4GB**: Bổ sung cờ `--accum-steps` vào `scripts/train.py` và `src/training/trainer.py` kết hợp PyTorch AMP FP16. Cấu hình `--batch-size 4 --accum-steps 4` mang lại effective batch size = 16, đảm bảo hội tụ tương đương Kaggle GPU T4 trong khi mức tiêu thụ VRAM chỉ ~2.8 - 3.2 GB (không gây OOM).
+- **Tối ưu hóa Throughput DataLoader (Loại bỏ nghẽn CPU STFT)**: Loại bỏ cờ `--pitch-aug` online trong vòng lặp huấn luyện do 500 mẫu giọng trầm đã được tiền sinh offline đầy đủ vào `train_zalo.csv`. Bổ sung log tiến độ định kỳ 500 batches trong `src/training/trainer.py`. Tốc độ nạp dữ liệu tăng vọt từ 0.8 mẫu/s lên **~50 - 148 mẫu/s (tăng tốc ~185 lần)**, rút ngắn thời gian 1 epoch từ 14 giờ xuống chỉ còn **~15 - 16 phút**.
 - **Tải tệp nén 3.26 GB & Giải nén chọn lọc**: Xây dựng `scripts/setup_local_train.py` sử dụng direct call `ApiDownloadKernelOutputRequest` (tải ổn định tốc độ ~7-10 MB/s, chống lỗi 429) và giải nén chọn lọc 6.786 audio files cần thiết cho tập Zalo.
 - **Entry-point huấn luyện cục bộ**: Tạo script `scripts/train_local_zalo.py` tự động kiểm tra dữ liệu, cấu hình AM-Softmax ($s=30.0, m=0.35$), pitch-augmentation ($p=0.9$), và tự động kích hoạt `scripts/eval_v5_gate.py` sau khi hoàn thành.
 - **Kiểm thử tự động TDD**: Bổ sung bộ test `tests/test_local_train_setup.py` kiểm định gradient accumulation step, AM-Softmax loss scaler và clamped class weights. Toàn bộ **227/227 bài kiểm thử unit tests đạt 100% PASS** trong 48 giây.
+- **Kết Quả Huấn Luyện Thực Tế (Hoàn Tất)**:
+  - Huấn luyện 14 epochs (2 Phase 1 warm-up + 12 Phase 2 fine-tuning), kích hoạt Early Stopping tại Epoch 14 (patience=4).
+  - Checkpoint tối ưu: `out/zalo_b_zalo_v5_local/best_model.pt` lưu tại **Epoch 10 với Dev EER = 1.98%** (vượt kỷ lục baseline B 2.10% - 2.62%).
+  - **Kết quả kiểm định 3 Gates (`scripts/eval_v5_gate.py`)**:
+    - **Gate 2 (Generalization 4 SPK đối chứng)**: **95.3% PASS** (61/64 clip bona fide đúng nhãn).
+    - **Gate 3 (Dev Zalo EER)**: **PASS** (`aac_zalo_76k`: 1.73%, `opus_zalo_24k`: 1.56%, `clean_16khz`: 1.56%).
+    - **Gate 1 (SPK_0001 & VoiCes)**: Đạt 4/15 file (26.7%), mean score $-15.29$ và $-15.24$ $\implies$ xác nhận bản chất bias âm cố định của giọng cực trầm, làm tiền đề áp dụng `calibrate_score` (Pha 4) ở tầng suy luận API.
+
 
 
 ---

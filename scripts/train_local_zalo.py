@@ -12,6 +12,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Đảm bảo đường dẫn gốc của project luôn nằm trong sys.path
+_ROOT = Path(__file__).resolve().parent.parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 import torch
 
 
@@ -32,9 +37,10 @@ def main():
 
     ckpt_init = Path("out/kaggle_ssl_out/best_model_B.pt")
     sample_cv = Path("data/spoof_f5tts/CV_08110ec9e6")
-    if not ckpt_init.exists() or not sample_cv.exists() or not any(sample_cv.glob("*.wav")):
-        print("⚠️ Checkpoint B hoặc dữ liệu âm thanh Zalo chưa sẵn sàng. Đang chạy setup_local_train.py...")
-        subprocess.run([sys.executable, "scripts/setup_local_train.py"], check=True)
+    sample_proxy = Path("data/raw/CV_08110ec9e6/common_voice_vi_27640713_aac_zalo.wav")
+    if not ckpt_init.exists() or not sample_cv.exists() or not sample_proxy.exists():
+        print("⚠️ Checkpoint B hoặc dữ liệu âm thanh/proxy Zalo chưa sẵn sàng. Đang chạy setup_local_train.py...")
+        subprocess.run([sys.executable, "-u", "scripts/setup_local_train.py"], check=True)
 
     out_dir = Path("out/zalo_b_zalo_v5_local")
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -42,6 +48,7 @@ def main():
     # Cấu hình huấn luyện tối ưu hóa cho 4GB VRAM
     cmd = [
         sys.executable,
+        "-u",
         "scripts/train.py",
         "--branch", "B_zalo",
         "--init-ckpt", str(ckpt_init),
@@ -53,9 +60,6 @@ def main():
         "--loss", "am_softmax",
         "--am-s", "30.0",
         "--am-m", "0.35",
-        "--pitch-aug",
-        "--pitch-prob", "0.9",
-        "--pitch-range", "-8.0", "4.0",
         "--phase1-epochs", "2",
         "--phase2-epochs", "15",
         "--patience", "4",
@@ -78,7 +82,7 @@ def main():
     if best_model.exists():
         print(f"\n🎉 Huấn luyện thành công! Checkpoint đã lưu tại: {best_model}")
         print("\n🔍 Đang chạy đánh giá 3 Gates kiểm định qua scripts/eval_v5_gate.py...")
-        subprocess.run([sys.executable, "scripts/eval_v5_gate.py", "--ckpt", str(best_model)], check=False)
+        subprocess.run([sys.executable, "-u", "scripts/eval_v5_gate.py", "--ckpt", str(best_model)], check=False)
 
 
 if __name__ == "__main__":

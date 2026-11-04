@@ -95,7 +95,7 @@ class Trainer:
         self.opt_steps = 0
         self.history = []
 
-    def _train_epoch(self, loader, opt):
+    def _train_epoch(self, loader, opt, phase: int = 1, epoch: int = 1):
         cfg = self.cfg
         self.model.train()
         total, n, nb = 0.0, 0, len(loader)
@@ -118,6 +118,18 @@ class Trainer:
                 self.scaler.update()
                 opt.zero_grad(set_to_none=True)
                 self.opt_steps += 1
+
+            if i % 500 == 0 or i == nb:
+                vram_info = ""
+                if self.device.type == "cuda":
+                    alloc_mb = torch.cuda.memory_allocated(self.device) / (1024**2)
+                    vram_info = f" | VRAM: {alloc_mb:.0f}MB"
+                pct = (i / nb) * 100
+                print(
+                    f"   [P{phase} Ep {epoch}] Batch {i}/{nb} ({pct:.1f}%) | "
+                    f"Loss: {total / max(n, 1):.4f}{vram_info}",
+                    flush=True,
+                )
         return total / max(n, 1)
 
     def _save(self, phase, epoch, eer):
@@ -150,7 +162,7 @@ class Trainer:
                 ds = getattr(train_loader, "dataset", None)
                 if hasattr(ds, "set_epoch"):
                     ds.set_epoch(epoch)
-                loss = self._train_epoch(train_loader, opt)
+                loss = self._train_epoch(train_loader, opt, phase=phase, epoch=epoch)
                 s, l, _ = predict(self.model, dev_loader, self.device)
                 if self.device.type == "cuda":
                     torch.cuda.empty_cache()
