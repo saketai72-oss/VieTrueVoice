@@ -75,4 +75,18 @@ Tuân thủ nghiêm ngặt Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 
 
 ---
 
-*v0.4.2 — 2026-11-03*
+## 6. Mô Hình Đe Dọa & Giới Hạn Đã Biết (Threat Model & Known Limitations)
+
+1. **Lỗ hổng tấn công hạ pitch sâu (Adversarial Pitch Shift Vulnerability)**:
+   - Khi kẻ tấn công sử dụng thuật toán phase-vocoder hạ pitch sâu ($-6\text{ st}$), điểm của spoof F5-TTS bị đẩy từ $-30.81$ lên $+11.87$, làm ROC-AUC giảm từ $0.9895$ xuống $0.6717$, EER tăng lên $43.00\%$ và FAR đạt $62.0\%$. Mô hình hiện tại bị điểm mù trước dạng can thiệp pha này.
+2. **Độ mong manh theo người nói trước biến đổi tín hiệu (Speaker-Dependent Fragility)**:
+   - Mô hình nhạy cảm với các biến đổi pitch nhẹ ($\pm 2\text{ st}$), và có sự phân hóa cực đoan: trong khi 3 người nói đối chứng duy trì EER tốt ($4.0\% - 6.8\%$), thì `SPK_0007` sụp đổ toàn bộ $20/20$ clip xuống vùng điểm âm (Mean $-25$ đến $-29$).
+3. **Độ nhạy cao với phân bổ phổ dị biệt (Spectral Outlier Fragility)**:
+   - Tỷ lệ từ chối sai (FRR) rất cao trên các ca có phổ lệch cực đoan: lệch dải trầm như `SPK_0001` (FRR 73.3%, 95% Wilson CI: [48.0% – 89.1%], $e_{\text{low}} = 54.9\%$) hoặc lệch dải trung như `SPK_0007` ($e_{\text{mid}} = 84.3\%$).
+4. **Giới hạn cỡ mẫu & Phạm vi kiểm định**:
+   - Dữ liệu giọng trầm dựa trên 1 người ($N=1$, 15 clip) và 4 người đối chứng ($N=4$, 64 clip), chưa đủ để suy diễn thống kê toàn dân số. Toàn bộ thực nghiệm pitch-shift mới đo trên F5-TTS, chưa kiểm chứng trên VieNeu-TTS.
+   - Thống nhất giải quyết bài toán độ bền vững ở Pha 5 bằng Data Augmentation 2 chiều (bộ lọc ngẫu nhiên + pitch/phase perturbation) thuần thuật toán, không thu thập thêm giọng tình nguyện viên.
+
+---
+
+*v0.4.2 — 2026-11-05*

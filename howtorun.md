@@ -142,9 +142,15 @@ processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'S
 "
 ```
 
-### Chạy Máy Chủ API Phát Triển (FastAPI)
+### Chạy Máy Chủ API Phát Triển (FastAPI với Checkpoint V5 Local)
 ```bash
+# Biến môi trường checkpoint mặc định: out/zalo_b_zalo_v5_local/best_model.pt
 uvicorn src.app.server:app --reload --port 8000
+```
+
+### Chạy Đánh Giá 3 Cổng Kiểm Định (Gates 1, 2, 3)
+```bash
+python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v5_local/best_model.pt
 ```
 
 ### Chạy Đo Lường Độ Trễ (30 lần lặp)

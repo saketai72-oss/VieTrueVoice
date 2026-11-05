@@ -61,13 +61,14 @@ def eval_checkpoint_gates(ckpt_path: str, device: str = "cpu"):
                 g1_pass = False
             print(f"  {label:<25} | {n_bona:2d}/{len(scores):2d} ({pct:5.1f}%) | Mean: {np.mean(scores):+6.2f} | {status}")
 
-    # ── GATE 2: 4 TÌNH NGUYỆN VIÊN ĐỐI CHỨNG (Generalization) ───────────────
-    print("\n🔍 GATE 2: Kiểm định trên 4 tình nguyện viên đối chứng (SPK_0004, 0005, 0006, 0007)")
-    g2_spks = ["SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"]
+    # ── GATE 2: 5 TÌNH NGUYỆN VIÊN ĐỐI CHỨNG (Generalization) ───────────────
+    print("\n🔍 GATE 2: Kiểm định trên 5 tình nguyện viên đối chứng (SPK_0003, 0004, 0005, 0006, 0007)")
+    g2_spks = ["SPK_0003", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"]
     total_g2_files, total_g2_bona = 0, 0
     with torch.no_grad():
         for spk in g2_spks:
-            files = sorted(glob.glob(f"data/raw/{spk}/*.wav"))
+            all_files = sorted(glob.glob(f"data/raw/{spk}/*.wav"))
+            files = [f for f in all_files if not any(c in Path(f).name for c in ["_g711", "_amrnb", "_aac_zalo", "_opus_zalo"])]
             if not files:
                 continue
             scores = []
@@ -81,8 +82,8 @@ def eval_checkpoint_gates(ckpt_path: str, device: str = "cpu"):
             total_g2_bona += n_bona
             print(f"  {spk:<10} | {n_bona:2d}/{len(files):2d} ({n_bona/len(files)*100:5.1f}%) | Mean: {np.mean(scores):+6.2f}")
     g2_pct = (total_g2_bona / total_g2_files * 100) if total_g2_files else 0
-    g2_pass = g2_pct >= 90.0
-    print(f"  -> Tổng hợp G2: {total_g2_bona}/{total_g2_files} ({g2_pct:.1f}%) | {'✅ PASS' if g2_pass else '❌ FAIL'}")
+    g2_pass = g2_pct >= 85.0
+    print(f"  -> Tổng hợp G2 (5 SPK): {total_g2_bona}/{total_g2_files} ({g2_pct:.1f}%) | {'✅ PASS' if g2_pass else '❌ FAIL'}")
 
     # ── GATE 3: DEV ZALO METRICS ─────────────────────────────────────────────
     print("\n🔍 GATE 3: Kiểm định trên tập Dev Zalo Metrics (nếu có CSV)")

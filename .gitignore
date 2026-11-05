@@ -107,4 +107,5 @@ Thumbs.db
 # Agent & local tooling configurations
 .agent/
 .agents/
+vocab.txt
 
