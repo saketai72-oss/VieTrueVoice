@@ -17,7 +17,10 @@ class SSLFrontEnd(nn.Module):
         if config is not None:
             self.encoder = Wav2Vec2Model(config)
         else:
-            self.encoder = Wav2Vec2Model.from_pretrained(model_name)
+            try:
+                self.encoder = Wav2Vec2Model.from_pretrained(model_name, local_files_only=True)
+            except Exception:
+                self.encoder = Wav2Vec2Model.from_pretrained(model_name)
         self.encoder.config.apply_spec_augment = False
         self.encoder.config.layerdrop = 0.0
         self.proj = nn.Linear(self.encoder.config.hidden_size, out_dim)

@@ -42,9 +42,20 @@ def make_predict_fn(
     device: str = "cpu",
     threshold: float = 0.0,
     model_loader: Callable[[Path | str, str], Any] | None = None,
+    preload: bool = True,
 ) -> Callable[[Any], tuple[str, str, str]]:
     active_model = model
     loader = model_loader or _default_model_loader
+
+    if active_model is None and preload and Path(checkpoint_path).exists():
+        active_model = loader(checkpoint_path, device)
+        if active_model is not None and hasattr(active_model, "score"):
+            try:
+                dummy = torch.zeros(1, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
+                with torch.inference_mode():
+                    active_model.score(dummy)
+            except Exception:
+                pass
 
     def predict_audio(audio_input: Any) -> tuple[str, str, str]:
         nonlocal active_model
@@ -130,12 +141,14 @@ def build_ui(
     checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
     device: str = "cpu",
     threshold: float = 0.0,
+    preload: bool = True,
 ) -> gr.Blocks:
     predict_fn = make_predict_fn(
         model=model,
         checkpoint_path=checkpoint_path,
         device=device,
         threshold=threshold,
+        preload=preload,
     )
 
     with gr.Blocks(title="ViTrueVoice — Hệ Thống Phát Hiện Giọng Nói Giả Mạo") as demo:

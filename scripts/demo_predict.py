@@ -50,8 +50,9 @@ def main():
 
     if args.web:
         print(f"🚀 Đang khởi động Gradio Web UI với checkpoint: {args.ckpt}")
+        print("⏳ Đang tải trước mô hình và khởi động (warm-up) để lần bấm đầu tiên phản hồi tức thời...")
+        demo = build_ui(checkpoint_path=args.ckpt, device=args.device, preload=True)
         print(f"🌐 Truy cập tại: http://localhost:{args.port}")
-        demo = build_ui(checkpoint_path=args.ckpt, device=args.device)
         demo.launch(server_name="0.0.0.0", server_port=args.port)
         return
 

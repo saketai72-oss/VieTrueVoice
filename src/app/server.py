@@ -102,6 +102,13 @@ def create_app(
     log_path = Path(latency_log_path)
     loader = model_loader or _default_model_loader
     model = loader(ckpt_path, device)
+    if model is not None and hasattr(model, "score"):
+        try:
+            dummy = torch.zeros(1, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
+            with torch.inference_mode():
+                model.score(dummy)
+        except Exception:
+            pass
 
     app = FastAPI(
         title="ViTrueVoice Anti-Spoofing Inference API",
