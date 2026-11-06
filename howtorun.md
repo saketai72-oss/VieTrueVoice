@@ -157,3 +157,42 @@ python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v5_local/best_model.pt
 ```bash
 python scripts/benchmark_latency.py
 ```
+
+---
+
+## 5. Hướng Dẫn Demo Dự Án (Trực Quan & Đầy Đủ Các Kênh)
+
+Hệ thống cung cấp 4 phương thức demo linh hoạt:
+
+### Cách 1: Giao diện Web Trực Quan (Gradio Web UI — Khuyên Dùng Cho Người Dùng & Thuyết Trình)
+Giao diện thân thiện tối giản $\le 3$ thao tác, thiết kế riêng cho người lớn tuổi / gia đình:
+```bash
+python scripts/demo_predict.py --web
+# hoặc: python src/app/ui.py
+```
+- Mở trình duyệt tại: `http://localhost:7860`
+- Kéo thả file âm thanh (hoặc bấm mic thu trực tiếp) $\rightarrow$ Bấm **"🔍 2. KIỂM TRA NGAY"** $\rightarrow$ Nhận kết quả trực quan (Xanh: Giọng thật / Đỏ: Cảnh báo giả mạo kèm khuyến cáo phòng chống lừa đảo).
+
+### Cách 2: Thử Nghiệm Nhanh Trên Dòng Lệnh (CLI Demo)
+Thực hiện phân loại tức thời trên terminal:
+```bash
+# Tự động chạy demo trên 3 mẫu đối chứng (Thật, F5-TTS, VieNeu-TTS):
+python scripts/demo_predict.py
+
+# Hoặc phân loại 1 file âm thanh bất kỳ:
+python scripts/demo_predict.py data/raw/SPK_0003/SPK_0003_01.wav
+```
+
+### Cách 3: Dịch Vụ API Chuẩn Doanh Nghiệp (FastAPI Swagger)
+```bash
+python scripts/demo_predict.py --server --port 8000
+# hoặc: uvicorn src.app.server:app --reload --port 8000
+```
+- Truy cập tài liệu tương tác: `http://localhost:8000/docs`
+- Thử nghiệm endpoint `POST /api/v1/predict` với file audio tải lên, kiểm tra phản hồi JSON và log mã băm SHA-256 ẩn danh.
+
+### Cách 4: Chạy Đánh Giá Hàng Loạt 234 Mẫu Thật/Giả (Quay Video Demo W04)
+```bash
+python scripts/eval_5spk_full_benchmark.py
+```
+In bảng tổng kết toàn diện trên 5 người nói đối chứng (SPK_0003..0007), hiển thị rõ EER 11.33% và AUC 0.9343.
