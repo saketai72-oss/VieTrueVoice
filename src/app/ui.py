@@ -26,9 +26,13 @@ from src.preprocessing.audio_loader import load_audio
 
 
 DEFAULT_CHECKPOINT = (
-    Path("out/best_model_B_zalo.pt")
-    if Path("out/best_model_B_zalo.pt").exists()
-    else Path("out/run_B/best_model.pt")
+    Path("out/zalo_b_zalo_v5_local/best_model.pt")
+    if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
+    else (
+        Path("out/best_model_B_zalo.pt")
+        if Path("out/best_model_B_zalo.pt").exists()
+        else Path("out/run_B/best_model.pt")
+    )
 )
 
 
