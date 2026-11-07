@@ -2,7 +2,7 @@
 
 > **Mã văn bản**: `SPEC_loso_exploratory_ablation.md`  
 > **Trạng thái**: Completed & Verified (Đã hoàn tất thực thi & Kiểm chứng thực nghiệm)  
-> **Phiên bản**: 1.2.0 — 2026-11-07  
+> **Phiên bản**: 1.2.1 — 2026-11-07  
 > **Mục tiêu**: Đánh giá thực nghiệm hiệu ứng chuyển giao liên người nói (Inter-speaker Transfer Effect) khi bổ sung dữ liệu tình nguyện viên vào đầu phân loại, kiểm chứng giả thuyết về giới hạn của việc bổ sung dữ liệu theo cá nhân.
 
 ---
@@ -14,6 +14,7 @@
 | **v1.0.0** | `006aec45317863acedbb3f82313f84daddf451f0a1fc69cd407d0e5d8ef11381` | 2026-11-07 | Bản khởi tạo đầu tiên của đặc tả tiên nghiệm. |
 | **v1.1.0** | `8cc8e7eaf1171f1bcd7319486d6baabbbc3833a63c806dd462a7dd959603c6bb` | 2026-11-07 | 1. Phân cấp Cấu hình 1 (Standard: $5\times 10^{-5}$) là **Primary**, Cấu hình 2 (Aggressive: $2\times 10^{-4}$) là **Secondary**. Tiêu chí thành công $\ge 3/4$ folds chỉ áp dụng cho Cấu hình 1; Cấu hình 2 không dùng để cứu kết quả âm.<br>2. Bổ sung phép đo Giả thuyết H2 trên Unseen TTS (`VieNeu-TTS` clone của chính người bị giữ lại) tại $\theta_{\text{cal}}$ vào nhóm kết quả phụ để kiểm tra đánh đổi bảo mật.<br>3. Khóa điểm trích xuất cache tại `encoder.last_hidden_state` (768 chiều), encoder ở `eval()`. Bổ sung bằng chứng kiểm định tương đương số học trên 100 tệp (FP32 lệch $0,000000$, FP16 lệch tối đa $0,002673 \le 0,02$).<br>4. Tiêu chí #3 làm rõ là $+15$ điểm phần trăm tuyệt đối ($+15$ percentage points absolute).<br>5. Xác thực Hard Text-Disjoint giữa các fold tình nguyện viên (0 câu trùng lặp).<br>6. Đổi quy ước gọi tên mô hình chuẩn theo mã băm/mô tả: `ckpt-49k-pitchaug` và `ckpt-50.6k-deep`.<br>*(Ghi chú minh bạch: Bản v1.1.0 được chốt trước khi chạy bất kỳ fold huấn luyện nào của LOSO, nhưng diễn ra sau khi đã kiểm tra kết quả chẩn đoán của `ckpt-50.6k-deep`).* |
 | **v1.2.0** | `2f324dca0cf713c1f0090deade41be3a9a2f1eac8c3f4ca30e366c66c7926ca7` | 2026-11-07 | Hoàn tất thực thi toàn bộ 48 lượt chạy (4 folds $\times$ 2 configs $\times$ 3 seeds $\times$ 2 branches). Cập nhật bảng kết quả thực nghiệm chi tiết và xác nhận bác bỏ hoàn toàn Giả thuyết chuyển giao liên người nói (0/4 folds đạt). |
+| **v1.2.1** | `591956e4abf812bd77067599e319d7cafaa3a20af74aeb5ff437a282d7f9fa16` | 2026-11-07 | Chuẩn hóa kết luận & bổ sung đối chứng: 1. Bổ sung đối chứng nhánh Replay-only và mức đóng góp ròng của dữ liệu tình nguyện viên; 2. Bổ sung baseline và cỡ mẫu $k/N$ cho H2 VieNeu-TTS; 3. Ghi nhận hiệu ứng trần (ceiling effect) tại Fold 3 và 4; 4. Chuẩn hóa kết luận: chuyển giao dương trên người bị giữ lại ($\Delta s > 0$, pass rate tăng 10–49 pp) nhưng đánh đổi bằng suy giảm an ninh (Dev EER và APCER vượt ngưỡng). |
 
 ---
 
@@ -129,38 +130,44 @@ Kết luận của thử nghiệm LOSO 4 folds này hoàn toàn mang tính chấ
 
 Thực hiện vào: **2026-11-07 20:30:48** trên GPU NVIDIA GeForce RTX 3050 Laptop GPU.  
 Baseline Checkpoint: `out/best_model_B_zalo.pt` (`ckpt-49k-pitchaug`, SHA-256: `5b566d925bca1f79489a46aa6a390b8f4ffe284d1fe235140a529a1ac1536243`).  
-- Baseline Dev Zalo: $\text{EER} = 1,90\%$, $\theta_{\text{cal}} = -0,7419$, $\text{APCER}_{\text{nom}} = 4,27\%$, $\text{APCER}_{\text{worst}} = 7,60\%$.
+- Baseline Dev Zalo: $\text{EER} = 1,90\%$, $\theta_{\text{cal}} = -0,7419$, $\text{APCER}_{\text{nom}} = 4,27\%$, $\text{APCER}_{\text{worst}} = 7,60\%$ (mức dịch cố định xấu nhất 0.5s; mô hình đe dọa gộp cực đại theo từng mẫu đạt $11,15\%$).
 
 ### Bảng Kết Quả Cấu Hình 1 (Standard Head Tuning — Primary, Quyết Định Chính)
 
-| Fold | Người bị giữ lại | $P_0$ Baseline | Mean $\Delta s$ | $\text{CI}_{95\%, \text{lower}}$ | Tỷ lệ Vượt Ngưỡng (Exp) | Mức tăng Tuyệt đối ($\Delta$pp) | Dev EER | APCER Nom | APCER Worst | H2 VieNeu APCER | Đạt Cả 4 Tiêu Chí? |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Fold 1** | `SPK_0001` | $0,0\%$ | $+5,00$ | $+3,11$ | $24,4\%$ | $+24,4$ pp | $2,37\%$ | $6,70\%$ | $10,87\%$ | $0,00\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
-| **Fold 2** | `SPK_0003` | $60,0\%$ | $+1,86$ | $+0,07$ | $76,7\%$ | $+16,7$ pp | $2,58\%$ | $8,19\%$ | $15,38\%$ | $12,00\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
-| **Fold 3** | `SPK_0004` | $85,7\%$ | $+5,20$ | $+4,06$ | $100,0\%$ | $+14,3$ pp | $2,82\%$ | $8,58\%$ | $14,83\%$ | $25,78\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
-| **Fold 4** | `SPK_0006` | $90,0\%$ | $+2,87$ | $+2,07$ | $100,0\%$ | $+10,0$ pp | $2,81\%$ | $9,58\%$ | $14,44\%$ | $45,78\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| Fold | Người bị giữ lại | $P_0$ Base | Mean $\Delta s$ | $\text{CI}_{95\%, \text{lower}}$ | Pass Rate (Exp) | Pass Rate (Rep) | Đóng góp ròng ($\Delta$pp) | Dev EER (Exp / Rep) | APCER Nom (Exp / Rep) | APCER Worst (Exp / Rep) | H2 VieNeu [Base $\to$ Exp] ($k/N$) | Đạt Cả 4 Tiêu Chí? |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Fold 1** | `SPK_0001` | $0,0\%$ | $+5,00$ | $+3,11$ | $24,4\%$ | $4,4\%$ | $+20,0$ pp | $2,37\%$ / $2,15\%$ | $6,70\%$ / $4,86\%$ | $10,87\%$ / $8,30\%$ | $0,00\% \to 0,00\%$ ($0/50$) | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 2** | `SPK_0003` | $60,0\%$ | $+1,86$ | $+0,07$ | $76,7\%$ | $65,0\%$ | $+11,7$ pp | $2,58\%$ / $2,15\%$ | $8,19\%$ / $5,03\%$ | $15,38\%$ / $8,12\%$ | $4,00\% \to 12,00\%$ ($3 \to 9 / 75$) | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 3** | `SPK_0004` | $85,7\%$ | $+5,20$ | $+4,06$ | $100,0\%$ | $95,2\%$ | $+4,8$ pp | $2,82\%$ / $2,12\%$ | $8,58\%$ / $5,00\%$ | $14,83\%$ / $8,23\%$ | $14,67\% \to 25,78\%$ ($11 \to 19,3 / 75$) | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 4** | `SPK_0006` | $90,0\%$ | $+2,87$ | $+2,07$ | $100,0\%$ | $100,0\%$ | $+0,0$ pp | $2,81\%$ / $2,17\%$ | $9,58\%$ / $4,97\%$ | $14,44\%$ / $8,23\%$ | $36,00\% \to 45,78\%$ ($27 \to 34,3 / 75$) | ❌ **KHÔNG** ($0/3$ seeds) |
 
 - **Kết quả tổng hợp**: **$0/4$ folds** đạt tiêu chuẩn tiên nghiệm.
-- **Quy tắc Rule 5**: Thất bại hoàn toàn ($0/4 < 3/4$).
+- **Quy tắc Rule 5**: Thất bại ($0/4 < 3/4$).
 
 ### Bảng Kết Quả Cấu Hình 2 (Aggressive Head Adaptation — Secondary, Tham Chiếu Phụ)
 
-| Fold | Người bị giữ lại | $P_0$ Baseline | Mean $\Delta s$ | $\text{CI}_{95\%, \text{lower}}$ | Tỷ lệ Vượt Ngưỡng (Exp) | Mức tăng Tuyệt đối ($\Delta$pp) | Dev EER | APCER Nom | APCER Worst | H2 VieNeu APCER | Đạt Cả 4 Tiêu Chí? |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **Fold 1** | `SPK_0001` | $0,0\%$ | $+13,42$ | $+10,78$ | $48,9\%$ | $+48,9$ pp | $3,01\%$ | $8,58\%$ | $12,81\%$ | $0,00\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
-| **Fold 2** | `SPK_0003` | $60,0\%$ | $+5,04$ | $+2,66$ | $83,3\%$ | $+23,3$ pp | $3,32\%$ | $9,79\%$ | $15,03\%$ | $17,78\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
-| **Fold 3** | `SPK_0004` | $85,7\%$ | $+4,24$ | $+2,17$ | $100,0\%$ | $+14,3$ pp | $3,54\%$ | $11,84\%$ | $17,08\%$ | $28,44\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
-| **Fold 4** | `SPK_0006` | $90,0\%$ | $+7,47$ | $+5,68$ | $100,0\%$ | $+10,0$ pp | $3,18\%$ | $11,46\%$ | $14,24\%$ | $49,33\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| Fold | Người bị giữ lại | $P_0$ Base | Mean $\Delta s$ | $\text{CI}_{95\%, \text{lower}}$ | Pass Rate (Exp) | Pass Rate (Rep) | Đóng góp ròng ($\Delta$pp) | Dev EER (Exp / Rep) | APCER Nom (Exp / Rep) | APCER Worst (Exp / Rep) | H2 VieNeu [Base $\to$ Exp] ($k/N$) | Đạt Cả 4 Tiêu Chí? |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Fold 1** | `SPK_0001` | $0,0\%$ | $+13,42$ | $+10,78$ | $48,9\%$ | $13,3\%$ | $+35,6$ pp | $3,01\%$ / $2,26\%$ | $8,58\%$ / $5,38\%$ | $12,81\%$ / $8,89\%$ | $0,00\% \to 0,00\%$ ($0/50$) | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 2** | `SPK_0003` | $60,0\%$ | $+5,04$ | $+2,66$ | $83,3\%$ | $71,7\%$ | $+11,7$ pp | $3,32\%$ / $2,44\%$ | $9,79\%$ / $6,67\%$ | $15,03\%$ / $9,90\%$ | $4,00\% \to 17,78\%$ ($3 \to 13,3 / 75$) | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 3** | `SPK_0004` | $85,7\%$ | $+4,24$ | $+2,17$ | $100,0\%$ | $95,2\%$ | $+4,8$ pp | $3,54\%$ / $2,59\%$ | $11,84\%$ / $6,39\%$ | $17,08\%$ / $9,13\%$ | $14,67\% \to 28,44\%$ ($11 \to 21,3 / 75$) | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 4** | `SPK_0006` | $90,0\%$ | $+7,47$ | $+5,68$ | $100,0\%$ | $100,0\%$ | $+0,0$ pp | $3,18\%$ / $2,51\%$ | $11,46\%$ / $6,42\%$ | $14,24\%$ / $10,62\%$ | $36,00\% \to 49,33\%$ ($27 \to 37,0 / 75$) | ❌ **KHÔNG** ($0/3$ seeds) |
 
 - **Kết quả tổng hợp**: **$0/4$ folds** đạt tiêu chuẩn.
 
-### Kết Luận Khoa Học & Bác Bỏ Giả Thuyết Tiên Nghiệm
+### Đối Chiếu Nhánh Đối Chứng Replay-Only & Mức Đóng Góp Ròng Của Dữ Liệu Tình Nguyện Viên
 
-1. **Bác bỏ hoàn toàn Giả thuyết Chuyển giao (Negative Transfer Hypothesis Confirmed)**:
-   - Thử nghiệm chứng minh dứt khoát rằng việc bổ sung dữ liệu giọng tình nguyện viên vào huấn luyện head phân loại **không mang lại khả năng tổng quát hóa liên người nói**.
-   - Mặc dù điểm số của cá nhân bị giữ lại có tăng nhẹ cục bộ, sự gia tăng này luôn đi kèm với **sự sụp đổ của đường biên quyết định tổng quát**: Dev EER suy giảm nghiêm trọng từ $1,90\%$ lên $2,37\% - 2,82\%$ ở Cấu hình 1 và vọt lên $3,01\% - 3,54\%$ ở Cấu hình 2.
-2. **Đánh đổi bảo mật nghiêm trọng (H2 VieNeu-TTS Vulnerability)**:
-   - Việc fine-tuning phá vỡ tính bất biến của không gian biểu diễn AASIST, làm suy giảm khả năng phòng vệ trước công cụ Unseen TTS: tỷ lệ tấn công lọt lưới trên các bản clone VieNeu-TTS tăng vọt lên tới **$25,78\%$** ở `SPK_0004` và **$45,78\% - 49,33\%$** ở `SPK_0006` (gần một nửa cuộc gọi giả mạo qua mắt được hệ thống).
-3. **Khẳng định tính đúng đắn của Quyết định Kiến trúc (STUBBORN_FACT)**:
-   - Kết quả thực nghiệm 48 lượt chạy này là bằng chứng thực nghiệm tối thượng khẳng định: **Tuyệt đối không đưa dữ liệu tình nguyện viên vào bất kỳ giai đoạn huấn luyện hay fine-tuning nào**.
-   - Giữ nguyên mô hình chuẩn `ckpt-49k-pitchaug` và phương pháp tiếp cận đúng đắn là Data Augmentation đa chiều thuần thuật toán để củng cố độ bền vững tổng quát.
+Nhánh đối chứng Replay-only (huấn luyện trên $4.800$ mẫu replay buffer lấy từ tập Train Zalo, không chứa dữ liệu tình nguyện viên) cho phép tách biệt tác động của quá trình fine-tune và tác động riêng của dữ liệu tình nguyện viên:
+1. **Quá trình fine-tune đầu phân loại (Replay-only)**: Làm Dev EER tăng nhẹ từ $1,90\%$ lên trung bình $2,15\%$ ($+0,25$ pp) và APCER danh định tăng từ $4,27\%$ lên trung bình $4,96\%$ ($+0,69$ pp).
+2. **Mức đóng góp riêng của dữ liệu tình nguyện viên ($\text{Metric}_{\text{exp}} - \text{Metric}_{\text{rep}}$)**:
+   - Làm tăng điểm số và tỷ lệ vượt ngưỡng của người bị giữ lại: $\Delta s$ dương ở cả 4 fold ($+1,86$ đến $+5,20$ điểm), đóng góp thêm $0,0$ đến $+20,0$ điểm phần trăm vào tỷ lệ vượt ngưỡng của người bị giữ lại so với chỉ fine-tune trên replay buffer.
+   - Nhưng đồng thời gây suy giảm an ninh tổng quát: Dev EER tăng thêm $+0,22$ đến $+0,70$ pp (trung bình $+0,50$ pp, đưa Dev EER lên $2,37\%–2,82\%$); APCER danh định tăng thêm $+1,84$ đến $+4,62$ pp (trung bình $+3,30$ pp); và APCER worst-case tăng thêm $+2,57$ đến $+7,26$ pp (trung bình $+5,66$ pp).
+
+### Ghi Nhận Giới Hạn & Hiệu Ứng Trần (Ceiling Effect)
+
+1. **Hiệu ứng trần trong tiêu chí đã đăng ký trước**: Ở Fold 3 (`SPK_0004`, $P_0 = 85,7\%$) và Fold 4 (`SPK_0006`, $P_0 = 90,0\%$), mức cải thiện tối đa để đạt trần $100\%$ lần lượt chỉ là $+14,3$ pp và $+10,0$ pp. Do đó, tiêu chí cố định $\Delta \text{pp} \ge +15,0$ pp là bất khả thi về mặt số học ngay từ đầu. Dù cả hai fold đều đạt trần $100,0\%$ vượt ngưỡng, kết luận $0/4$ folds đạt vẫn giữ nguyên vì ràng buộc an ninh Dev EER và APCER đều bị vi phạm.
+2. **Khác biệt Baseline cục bộ và Kaggle**: Ngưỡng $\theta_{\text{cal}} = -0,7419$ và Dev EER $1,90\%$ phản ánh độ lệch mã hóa proxy của bộ FFmpeg cục bộ (lệch trung bình $0,2$–$0,4$ điểm đã xác minh). Giá trị APCER worst-case $7,60\%$ đo lường điều kiện một mức dịch cố định xấu nhất (offset = 0.50s), trong khi $11,15\%$ thuộc mô hình tấn công đối kháng gộp cực đại theo từng mẫu (sample-level max-pooling).
+
+### Kết Luận Khoa Học
+
+Trong thí nghiệm thăm dò LOSO 4 fold (48 lượt chạy, đăng ký trước), fine-tune đầu phân loại bằng dữ liệu các tình nguyện viên khác làm tăng điểm của người bị giữ lại (cận dưới CI 95% của $\Delta s$ dương ở cả 4 fold, tỷ lệ vượt ngưỡng tăng 10–49 điểm phần trăm) nhưng làm Dev EER tăng từ $1,90\%$ lên $2,37\%–2,82\%$ (cấu hình chính) và APCER danh định tăng 2,4–5,3 điểm phần trăm, nên không fold nào đạt toàn bộ tiêu chí. Chuyển giao là dương trên người bị giữ lại nhưng phải đánh đổi bằng việc suy giảm độ an toàn tổng quát (Dev EER và APCER vượt ngưỡng). Đây là kết quả thăm dò trên 4 người trong tập dữ liệu sẵn có, củng cố quyết định giữ nguyên bộ trọng số `ckpt-49k-pitchaug` và không thay thế cho việc nghiệm thu độc lập trên một nhóm tình nguyện viên mới.
