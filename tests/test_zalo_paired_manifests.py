@@ -91,27 +91,56 @@ def test_validate_split_leakage_clean():
 
 
 def test_validate_split_leakage_rejects_spk_xxxx_in_train_or_dev():
-    train_bad = pd.DataFrame({
-        "speaker_id": ["SPK_0001", "SPK_B"],
+    train_base = pd.DataFrame({
+        "speaker_id": ["SPK_A", "SPK_B"],
         "transcript": ["câu một", "câu hai"],
         "base_utt": ["utt_1", "utt_2"],
         "tts_generator": ["none", "f5tts"],
     })
-    dev_good = pd.DataFrame({
+    dev_base = pd.DataFrame({
         "speaker_id": ["SPK_C"],
         "transcript": ["câu ba"],
         "base_utt": ["utt_3"],
         "tts_generator": ["f5tts"],
     })
-    test_good = pd.DataFrame({
+    test_base = pd.DataFrame({
         "speaker_id": ["SPK_D"],
         "transcript": ["câu bốn"],
         "base_utt": ["utt_4"],
         "tts_generator": ["vieneu"],
     })
 
-    with pytest.raises(ValueError, match="SPK_xxxx"):
-        validate_split_leakage(train_bad, dev_good, test_good)
+    # 1. Acceptance volunteer SPK_0003 in train, dev, or test -> Must raise ValueError
+    train_spk03 = train_base.copy()
+    train_spk03.loc[0, "speaker_id"] = "SPK_0003"
+    with pytest.raises(ValueError, match="SPK_"):
+        validate_split_leakage(train_spk03, dev_base, test_base)
+
+    dev_spk03 = dev_base.copy()
+    dev_spk03.loc[0, "speaker_id"] = "SPK_0003"
+    with pytest.raises(ValueError, match="SPK_"):
+        validate_split_leakage(train_base, dev_spk03, test_base)
+
+    test_spk03 = test_base.copy()
+    test_spk03.loc[0, "speaker_id"] = "SPK_0003"
+    with pytest.raises(ValueError, match="SPK_"):
+        validate_split_leakage(train_base, dev_base, test_spk03)
+
+    # 2. SPK_0001 in dev or test -> Must raise ValueError
+    dev_spk01 = dev_base.copy()
+    dev_spk01.loc[0, "speaker_id"] = "SPK_0001"
+    with pytest.raises(ValueError, match="SPK_"):
+        validate_split_leakage(train_base, dev_spk01, test_base)
+
+    test_spk01 = test_base.copy()
+    test_spk01.loc[0, "speaker_id"] = "SPK_0001"
+    with pytest.raises(ValueError, match="SPK_"):
+        validate_split_leakage(train_base, dev_base, test_spk01)
+
+    # 3. SPK_0001 in train (while dev and test are clean) -> Must PASS successfully (V6 rule)!
+    train_spk01 = train_base.copy()
+    train_spk01.loc[0, "speaker_id"] = "SPK_0001"
+    validate_split_leakage(train_spk01, dev_base, test_base)
 
 
 def test_validate_split_leakage_rejects_vieneu_in_train():

@@ -98,7 +98,18 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 272 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
+*(Yêu cầu: Toàn bộ 274 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
+
+### Kiểm Toán An Ninh Manifest V6
+```bash
+python scripts/audit_v6_manifest.py
+```
+*(Xác minh 5 tiêu chí: Zero-leakage 5 SPK nghiệm thu, cô lập SPK_0001 ở Train, Hard Text-Disjoint, cách ly VieNeu-TTS, và tính toàn vẹn 125 file)*
+
+### Khởi Động Huấn Luyện B_zalo V6 Local (GPU RTX 3050 4GB)
+```bash
+python scripts/train_local_zalo_v6.py
+```
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash

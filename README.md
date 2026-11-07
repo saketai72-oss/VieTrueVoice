@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.3)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.4)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -40,4 +40,11 @@
   - **Bảo toàn an ninh**: Tỷ lệ Dev Spoof APCER dưới max-pooling đạt **6.77% $\le 8.0\%$** tại $\theta = 0.0$.
   - **Guardrail hiệu chỉnh enrollment**: Từ chối can thiệp tự động khi $|offset| > 4 \times IQR$ (ngoại lai `SPK_0001` lệch -9.91 IQR), bảo toàn điểm thô cho quy trình định tuyến kiểm tra thủ công.
   - **Độ trễ thời gian thực (NFR1)**: Trung vị suy luận đa cửa sổ đạt **66.3ms** (P90 68.2ms), nhanh gấp ~45 lần yêu cầu $\le 3.0$s.
-  - **Kiểm thử**: Toàn bộ **272/272 unit tests pass 100%**. Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).
+  - **Kiểm thử**: Toàn bộ **272/272 unit tests pass 100%**.
+- **Chuyển Dịch SPK_0001 Vào Train & Khóa 5 Tình Nguyện Viên Nghiệm Thu (v0.4.4 / V6 Foundation)**:
+  - Tích hợp 125 dòng `SPK_0001` (75 bona fide + 50 F5-TTS spoof) vào `data/manifests_zalo/train_zalo.csv` (nâng quy mô tập Train lên 50.710 dòng).
+  - Khóa chặt 5 tình nguyện viên đối chứng held-out (`SPK_0003`..`0007`, 84 clips âm thanh thật) làm Bộ nghiệm thu độc lập chính thức của đề tài (0% rò rỉ dữ liệu).
+  - Cập nhật logic validator trong `scripts/train.py` và `scripts/generate_zalo_paired_manifests.py`.
+  - Hoàn tất kiểm toán an ninh `scripts/audit_v6_manifest.py` đạt chuẩn 5/5 tiêu chí (Zero-leakage, cô lập SPK_0001, Hard Text-Disjoint, cách ly 100% VieNeu-TTS, cơ cấu tệp).
+  - Sẵn sàng script huấn luyện V6 Local trên RTX 3050: `scripts/train_local_zalo_v6.py`.
+  - Toàn bộ **274/274 unit tests pass 100%**. Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).

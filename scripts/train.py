@@ -78,14 +78,21 @@ def compute_weights(train_df: pd.DataFrame, branch: str) -> list[float]:
     return loss_weights_from_counts(n_spoof, n_bona, clamp_range=clamp_range)
 
 
+ACCEPTANCE_VOLUNTEERS = {"SPK_0003", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"}
+
+
 def validate_manifest(train_df: pd.DataFrame, split_name: str) -> None:
-    """Báo lỗi nếu VieNeu hoặc tình nguyện viên SPK_xxxx lọt vào train/dev."""
+    """Báo lỗi nếu VieNeu hoặc tình nguyện viên nghiệm thu lọt vào train/dev."""
     check_unseen_excluded(train_df, _VIENEU_PATTERN, split_name)
     if "speaker_id" in train_df.columns:
         spk_series = train_df["speaker_id"].astype(str)
-        if spk_series.str.startswith("SPK_").any():
-            bad = sorted(spk_series[spk_series.str.startswith("SPK_")].unique())
-            raise ValueError(f"Vi phạm ranh giới: Phát hiện tình nguyện viên {bad} trong tập {split_name}!")
+        # Bộ 5 tình nguyện viên nghiệm thu bị cấm 100% ở mọi split
+        hit_forbidden = sorted(spk_series[spk_series.isin(ACCEPTANCE_VOLUNTEERS)].unique())
+        if hit_forbidden:
+            raise ValueError(f"Vi phạm ranh giới: Phát hiện tình nguyện viên nghiệm thu {hit_forbidden} trong tập {split_name}!")
+        # Riêng SPK_0001: Cho phép trong train, cấm tuyệt đối trong dev/test
+        if split_name != "train" and (spk_series == "SPK_0001").any():
+            raise ValueError(f"Vi phạm ranh giới: Phát hiện SPK_0001 trong tập {split_name} (chỉ được phép ở train)!")
 
 
 def resolve_manifest_paths(

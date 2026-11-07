@@ -21,6 +21,7 @@ logs/
 # Outputs, checkpoints and models
 out/
 outputs/
+*.bak*
 *.pt
 *.pth
 *.bin

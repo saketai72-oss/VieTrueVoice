@@ -340,15 +340,35 @@ def test_resolve_manifest_paths_missing_raises_informative_error(tmp_path: Path)
 
 def test_validate_manifest_rejects_spk_xxxx():
     train = _import_train()
-    df_bad = pd.DataFrame({
+    # 1. Acceptance volunteer (e.g. SPK_0003) in train or dev must raise ValueError
+    df_eval_spk_train = pd.DataFrame({
+        "speaker_id": ["VIVOS_01", "SPK_0003"],
+        "tts_generator": ["none", "none"],
+    })
+    with pytest.raises(ValueError, match="SPK_0003"):
+        train.validate_manifest(df_eval_spk_train, "train")
+
+    df_eval_spk_dev = pd.DataFrame({
+        "speaker_id": ["VIVOS_01", "SPK_0003"],
+        "tts_generator": ["none", "none"],
+    })
+    with pytest.raises(ValueError, match="SPK_0003"):
+        train.validate_manifest(df_eval_spk_dev, "dev")
+
+    # 2. SPK_0001 in dev must raise ValueError
+    df_spk0001_dev = pd.DataFrame({
         "speaker_id": ["VIVOS_01", "SPK_0001"],
         "tts_generator": ["none", "none"],
     })
     with pytest.raises(ValueError, match="SPK_0001"):
-        train.validate_manifest(df_bad, "train")
+        train.validate_manifest(df_spk0001_dev, "dev")
 
-    with pytest.raises(ValueError, match="SPK_0001"):
-        train.validate_manifest(df_bad, "dev")
+    # 3. SPK_0001 in train must pass without raising (V6 transfer rule)
+    df_spk0001_train = pd.DataFrame({
+        "speaker_id": ["VIVOS_01", "SPK_0001"],
+        "tts_generator": ["none", "none"],
+    })
+    train.validate_manifest(df_spk0001_train, "train")
 
 
 def test_validate_manifest_rejects_vieneu_in_dev():

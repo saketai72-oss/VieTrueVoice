@@ -138,6 +138,9 @@ def generate_paired_manifest(
     return combined
 
 
+ACCEPTANCE_VOLUNTEERS = {"SPK_0003", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"}
+
+
 def validate_split_leakage(
     train_df: pd.DataFrame,
     dev_df: pd.DataFrame,
@@ -146,12 +149,18 @@ def validate_split_leakage(
     """Strictly assert zero data leakage between Train, Dev, and Test splits."""
     all_dfs = [("train", train_df), ("dev", dev_df), ("test", test_df)]
 
-    # 1. Reject SPK_xxxx in train or dev
+    # 1. Reject 5 acceptance volunteers across all splits
     for name, df in all_dfs:
-        spks = df["speaker_id"].astype(str).tolist()
-        hit_spk = [s for s in spks if re.match(r"^SPK_\d{4}$", s, re.IGNORECASE)]
-        if hit_spk:
-            raise ValueError(f"Found forbidden SPK_xxxx volunteer in {name}: {set(hit_spk)}")
+        spks = set(df["speaker_id"].astype(str).unique())
+        hit_acceptance = spks.intersection(ACCEPTANCE_VOLUNTEERS)
+        if hit_acceptance:
+            raise ValueError(f"Found forbidden acceptance volunteer in {name}: {hit_acceptance}")
+
+    # 2. Reject SPK_0001 in dev or test (SPK_0001 is only permitted in train)
+    for name, df in [("dev", dev_df), ("test", test_df)]:
+        spks = set(df["speaker_id"].astype(str).unique())
+        if "SPK_0001" in spks:
+            raise ValueError(f"Found forbidden SPK_0001 in {name}: SPK_0001 is only permitted in train!")
 
     # 2. Reject VieNeu-TTS in train or dev
     for name, df in [("train", train_df), ("dev", dev_df)]:
