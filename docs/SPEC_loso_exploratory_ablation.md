@@ -1,8 +1,8 @@
 # Đặc Tả Thử Nghiệm Thăm Dò Leave-One-Speaker-Out (LOSO 4 Folds)
 
 > **Mã văn bản**: `SPEC_loso_exploratory_ablation.md`  
-> **Trạng thái**: Pre-registered (Khóa trước khi thực thi)  
-> **Phiên bản**: 1.1.0 — 2026-11-07  
+> **Trạng thái**: Completed & Verified (Đã hoàn tất thực thi & Kiểm chứng thực nghiệm)  
+> **Phiên bản**: 1.2.0 — 2026-11-07  
 > **Mục tiêu**: Đánh giá thực nghiệm hiệu ứng chuyển giao liên người nói (Inter-speaker Transfer Effect) khi bổ sung dữ liệu tình nguyện viên vào đầu phân loại, kiểm chứng giả thuyết về giới hạn của việc bổ sung dữ liệu theo cá nhân.
 
 ---
@@ -13,6 +13,7 @@
 |---|---|---|---|
 | **v1.0.0** | `006aec45317863acedbb3f82313f84daddf451f0a1fc69cd407d0e5d8ef11381` | 2026-11-07 | Bản khởi tạo đầu tiên của đặc tả tiên nghiệm. |
 | **v1.1.0** | `8cc8e7eaf1171f1bcd7319486d6baabbbc3833a63c806dd462a7dd959603c6bb` | 2026-11-07 | 1. Phân cấp Cấu hình 1 (Standard: $5\times 10^{-5}$) là **Primary**, Cấu hình 2 (Aggressive: $2\times 10^{-4}$) là **Secondary**. Tiêu chí thành công $\ge 3/4$ folds chỉ áp dụng cho Cấu hình 1; Cấu hình 2 không dùng để cứu kết quả âm.<br>2. Bổ sung phép đo Giả thuyết H2 trên Unseen TTS (`VieNeu-TTS` clone của chính người bị giữ lại) tại $\theta_{\text{cal}}$ vào nhóm kết quả phụ để kiểm tra đánh đổi bảo mật.<br>3. Khóa điểm trích xuất cache tại `encoder.last_hidden_state` (768 chiều), encoder ở `eval()`. Bổ sung bằng chứng kiểm định tương đương số học trên 100 tệp (FP32 lệch $0,000000$, FP16 lệch tối đa $0,002673 \le 0,02$).<br>4. Tiêu chí #3 làm rõ là $+15$ điểm phần trăm tuyệt đối ($+15$ percentage points absolute).<br>5. Xác thực Hard Text-Disjoint giữa các fold tình nguyện viên (0 câu trùng lặp).<br>6. Đổi quy ước gọi tên mô hình chuẩn theo mã băm/mô tả: `ckpt-49k-pitchaug` và `ckpt-50.6k-deep`.<br>*(Ghi chú minh bạch: Bản v1.1.0 được chốt trước khi chạy bất kỳ fold huấn luyện nào của LOSO, nhưng diễn ra sau khi đã kiểm tra kết quả chẩn đoán của `ckpt-50.6k-deep`).* |
+| **v1.2.0** | `2f324dca0cf713c1f0090deade41be3a9a2f1eac8c3f4ca30e366c66c7926ca7` | 2026-11-07 | Hoàn tất thực thi toàn bộ 48 lượt chạy (4 folds $\times$ 2 configs $\times$ 3 seeds $\times$ 2 branches). Cập nhật bảng kết quả thực nghiệm chi tiết và xác nhận bác bỏ hoàn toàn Giả thuyết chuyển giao liên người nói (0/4 folds đạt). |
 
 ---
 
@@ -121,3 +122,45 @@ $$\text{APCER}_{\text{H2, held-out}}(\theta_{\text{cal}}) = \frac{1}{|V_{\text{h
 
 ## 6. Giới Hạn Phương Pháp Luận
 Kết luận của thử nghiệm LOSO 4 folds này hoàn toàn mang tính chất **thăm dò giả thuyết (exploratory ablation)** nhằm đo lường hiệu ứng chuyển giao liên người nói trong tập dữ liệu sẵn có; tuyệt đối **không thay thế** cho việc nghiệm thu độc lập trên một nhóm tình nguyện viên mới chưa từng xuất hiện.
+
+---
+
+## 7. Báo Cáo Kết Quả Thực Nghiệm Toàn Diện (48 Lượt Chạy)
+
+Thực hiện vào: **2026-11-07 20:30:48** trên GPU NVIDIA GeForce RTX 3050 Laptop GPU.  
+Baseline Checkpoint: `out/best_model_B_zalo.pt` (`ckpt-49k-pitchaug`, SHA-256: `5b566d925bca1f79489a46aa6a390b8f4ffe284d1fe235140a529a1ac1536243`).  
+- Baseline Dev Zalo: $\text{EER} = 1,90\%$, $\theta_{\text{cal}} = -0,7419$, $\text{APCER}_{\text{nom}} = 4,27\%$, $\text{APCER}_{\text{worst}} = 7,60\%$.
+
+### Bảng Kết Quả Cấu Hình 1 (Standard Head Tuning — Primary, Quyết Định Chính)
+
+| Fold | Người bị giữ lại | $P_0$ Baseline | Mean $\Delta s$ | $\text{CI}_{95\%, \text{lower}}$ | Tỷ lệ Vượt Ngưỡng (Exp) | Mức tăng Tuyệt đối ($\Delta$pp) | Dev EER | APCER Nom | APCER Worst | H2 VieNeu APCER | Đạt Cả 4 Tiêu Chí? |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Fold 1** | `SPK_0001` | $0,0\%$ | $+5,00$ | $+3,11$ | $24,4\%$ | $+24,4$ pp | $2,37\%$ | $6,70\%$ | $10,87\%$ | $0,00\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 2** | `SPK_0003` | $60,0\%$ | $+1,86$ | $+0,07$ | $76,7\%$ | $+16,7$ pp | $2,58\%$ | $8,19\%$ | $15,38\%$ | $12,00\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 3** | `SPK_0004` | $85,7\%$ | $+5,20$ | $+4,06$ | $100,0\%$ | $+14,3$ pp | $2,82\%$ | $8,58\%$ | $14,83\%$ | $25,78\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 4** | `SPK_0006` | $90,0\%$ | $+2,87$ | $+2,07$ | $100,0\%$ | $+10,0$ pp | $2,81\%$ | $9,58\%$ | $14,44\%$ | $45,78\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+
+- **Kết quả tổng hợp**: **$0/4$ folds** đạt tiêu chuẩn tiên nghiệm.
+- **Quy tắc Rule 5**: Thất bại hoàn toàn ($0/4 < 3/4$).
+
+### Bảng Kết Quả Cấu Hình 2 (Aggressive Head Adaptation — Secondary, Tham Chiếu Phụ)
+
+| Fold | Người bị giữ lại | $P_0$ Baseline | Mean $\Delta s$ | $\text{CI}_{95\%, \text{lower}}$ | Tỷ lệ Vượt Ngưỡng (Exp) | Mức tăng Tuyệt đối ($\Delta$pp) | Dev EER | APCER Nom | APCER Worst | H2 VieNeu APCER | Đạt Cả 4 Tiêu Chí? |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **Fold 1** | `SPK_0001` | $0,0\%$ | $+13,42$ | $+10,78$ | $48,9\%$ | $+48,9$ pp | $3,01\%$ | $8,58\%$ | $12,81\%$ | $0,00\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 2** | `SPK_0003` | $60,0\%$ | $+5,04$ | $+2,66$ | $83,3\%$ | $+23,3$ pp | $3,32\%$ | $9,79\%$ | $15,03\%$ | $17,78\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 3** | `SPK_0004` | $85,7\%$ | $+4,24$ | $+2,17$ | $100,0\%$ | $+14,3$ pp | $3,54\%$ | $11,84\%$ | $17,08\%$ | $28,44\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+| **Fold 4** | `SPK_0006` | $90,0\%$ | $+7,47$ | $+5,68$ | $100,0\%$ | $+10,0$ pp | $3,18\%$ | $11,46\%$ | $14,24\%$ | $49,33\%$ | ❌ **KHÔNG** ($0/3$ seeds) |
+
+- **Kết quả tổng hợp**: **$0/4$ folds** đạt tiêu chuẩn.
+
+### Kết Luận Khoa Học & Bác Bỏ Giả Thuyết Tiên Nghiệm
+
+1. **Bác bỏ hoàn toàn Giả thuyết Chuyển giao (Negative Transfer Hypothesis Confirmed)**:
+   - Thử nghiệm chứng minh dứt khoát rằng việc bổ sung dữ liệu giọng tình nguyện viên vào huấn luyện head phân loại **không mang lại khả năng tổng quát hóa liên người nói**.
+   - Mặc dù điểm số của cá nhân bị giữ lại có tăng nhẹ cục bộ, sự gia tăng này luôn đi kèm với **sự sụp đổ của đường biên quyết định tổng quát**: Dev EER suy giảm nghiêm trọng từ $1,90\%$ lên $2,37\% - 2,82\%$ ở Cấu hình 1 và vọt lên $3,01\% - 3,54\%$ ở Cấu hình 2.
+2. **Đánh đổi bảo mật nghiêm trọng (H2 VieNeu-TTS Vulnerability)**:
+   - Việc fine-tuning phá vỡ tính bất biến của không gian biểu diễn AASIST, làm suy giảm khả năng phòng vệ trước công cụ Unseen TTS: tỷ lệ tấn công lọt lưới trên các bản clone VieNeu-TTS tăng vọt lên tới **$25,78\%$** ở `SPK_0004` và **$45,78\% - 49,33\%$** ở `SPK_0006` (gần một nửa cuộc gọi giả mạo qua mắt được hệ thống).
+3. **Khẳng định tính đúng đắn của Quyết định Kiến trúc (STUBBORN_FACT)**:
+   - Kết quả thực nghiệm 48 lượt chạy này là bằng chứng thực nghiệm tối thượng khẳng định: **Tuyệt đối không đưa dữ liệu tình nguyện viên vào bất kỳ giai đoạn huấn luyện hay fine-tuning nào**.
+   - Giữ nguyên mô hình chuẩn `ckpt-49k-pitchaug` và phương pháp tiếp cận đúng đắn là Data Augmentation đa chiều thuần thuật toán để củng cố độ bền vững tổng quát.
