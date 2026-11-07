@@ -82,12 +82,43 @@ def test_predict_returns_contract_and_logs_only_audio_hash(client, tmp_path):
     assert payload["raw_score"] == 1.0
     assert payload["latency_sec"] >= 0.0
     assert payload["audio_sha256"] == hashlib.sha256(audio_bytes).hexdigest()
+    assert payload["n_windows"] == 1
 
     log_path = tmp_path / "latency_log.json"
     entries = json.loads(log_path.read_text(encoding="utf-8"))
     assert len(entries) == 1
     assert entries[0]["audio_sha256"] == hashlib.sha256(audio_bytes).hexdigest()
+    assert entries[0]["n_windows"] == 1
     assert "voice.wav" not in json.dumps(entries)
+
+
+def test_predict_multi_window_long_clip(tmp_path):
+    class MultiWindowStubModel:
+        def score(self, waveform):
+            assert isinstance(waveform, torch.Tensor)
+            assert waveform.dim() == 2
+            assert waveform.shape[1] == 64000
+            assert waveform.shape[0] == 2
+            return torch.tensor([0.5, 1.2], device=waveform.device)
+
+    app = create_app(
+        checkpoint_path=tmp_path / "stub-checkpoint.pt",
+        device="cpu",
+        latency_log_path=tmp_path / "latency_log.json",
+        model_loader=lambda checkpoint_path, device: MultiWindowStubModel(),
+    )
+    with TestClient(app) as test_client:
+        # 5.0s audio at 16kHz = 80,000 samples -> produces 2 windows
+        audio_bytes = make_wav_bytes(duration_sec=5.0)
+        response = test_client.post(
+            "/api/v1/predict",
+            files={"file": ("voice_5s.wav", audio_bytes, "audio/wav")},
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["n_windows"] == 2
+        # Max pooling across [0.5, 1.2] selects 1.2
+        assert payload["raw_score"] == 1.2
 
 
 def test_predict_rejects_unsupported_audio_format(client):

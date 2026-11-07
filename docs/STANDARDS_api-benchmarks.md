@@ -20,14 +20,16 @@
   "threshold": 0.0,
   "confidence": null,
   "confidence_calibrated": false,
-  "latency_sec": 1.48,
+  "n_windows": 2,
+  "latency_sec": 0.066,
   "audio_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 }
 ```
 
 > **Quy ước Quyết định & Độ Tin Cậy (STUBBORN_FACT)**:
-> - Ngưỡng mặc định: $\theta = 0.0$. `raw_score >= threshold` $\implies$ `BONA_FIDE` (nhãn 1), ngược lại $\implies$ `SPOOF` (nhãn 0).
+> - Ngưỡng mặc định: $\theta = 0.0$ hoặc ngưỡng hiệu chuẩn theo ngân sách $\theta_{\text{cal}} = \text{percentile}(\text{scores}_{\text{bona}}, \text{budget} \times 100)$. `raw_score >= threshold` $\implies$ `BONA_FIDE` (nhãn 1), ngược lại $\implies$ `SPOOF` (nhãn 0).
 > - Khi chưa huấn luyện bộ hiệu chuẩn xác suất (Isotonic / Platt Scaling trên tập Dev độc lập), trường `confidence` bắt buộc trả về `null` và `confidence_calibrated = false`.
+> - **Cơ chế Multi-window Max-pooling (v0.4.3)**: Đoạn âm thanh dài hơn 4.0s được trích xuất cửa sổ trượt (win=64.000, hop=16.000, tối đa 5 cửa sổ) và gộp thành một mini-batch `(N_windows, 64000)` để chạy trong 1 lượt forward pass duy nhất (`batch_window_forward`), sau đó gộp điểm bằng `pool_scores(mode='max')`. Trường `n_windows` minh bạch số lượng cửa sổ được gộp.
 > - Tuyệt đối không dùng `sigmoid(abs(raw_score))` để tạo xác suất giả mạo 100%.
 
 ---

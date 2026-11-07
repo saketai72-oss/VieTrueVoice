@@ -29,6 +29,7 @@ from src.app.server import (
     _load_audio_in_memory,
     _pad_or_crop,
 )
+from src.preprocessing.pooling import extract_window_batch, pool_scores
 
 
 def run_benchmark(
@@ -37,6 +38,7 @@ def run_benchmark(
     model: Any = None,
     checkpoint_path: Path | str = Path("out/run_B/best_model.pt"),
     device: str = "cpu",
+    pooling: bool = True,
     out_csv: Path | str = Path("benchmarks/latency_benchmark.csv"),
     log_path: Path | str = Path("benchmarks/latency_log.json"),
     target_median_sec: float = 3.0,
@@ -56,25 +58,46 @@ def run_benchmark(
 
     # Warm-up 1 run
     audio_data = _load_audio_in_memory(raw_bytes)
-    padded = _pad_or_crop(audio_data, TARGET_SAMPLE_COUNT)
-    t_in = torch.tensor(padded, dtype=torch.float32, device=device).unsqueeze(0)
-    with torch.inference_mode():
-        _ = active_model.score(t_in)
+    if pooling:
+        windows_batch = extract_window_batch(
+            audio_data,
+            win=TARGET_SAMPLE_COUNT,
+            hop=16000,
+            max_windows=5,
+        ).to(device)
+        with torch.inference_mode():
+            win_scores = active_model.score(windows_batch)
+            _ = pool_scores(win_scores, mode="max")
+    else:
+        padded = _pad_or_crop(audio_data, TARGET_SAMPLE_COUNT)
+        t_in = torch.tensor(padded, dtype=torch.float32, device=device).unsqueeze(0)
+        with torch.inference_mode():
+            _ = active_model.score(t_in)
 
     records: list[dict[str, Any]] = []
-    print(f"⏱️ Bắt đầu đo độ trễ ({iterations} lần lặp liên tiếp)...", flush=True)
+    print(f"⏱️ Bắt đầu đo độ trễ ({iterations} lần lặp liên tiếp, pooling={pooling})...", flush=True)
 
     for i in range(1, iterations + 1):
         t0 = time.perf_counter()
 
-        # Full pipeline: decode in-memory -> pad/crop -> tensor -> inference
+        # Full pipeline: decode in-memory -> multi-window / crop -> batched inference -> pool
         aud = _load_audio_in_memory(raw_bytes)
-        pad = _pad_or_crop(aud, TARGET_SAMPLE_COUNT)
-        tensor_in = torch.tensor(pad, dtype=torch.float32, device=device).unsqueeze(0)
-
-        with torch.inference_mode():
-            score_out = active_model.score(tensor_in)
-            raw_score = float(score_out.item() if hasattr(score_out, "item") else score_out[0])
+        if pooling:
+            windows_batch = extract_window_batch(
+                aud,
+                win=TARGET_SAMPLE_COUNT,
+                hop=16000,
+                max_windows=5,
+            ).to(device)
+            with torch.inference_mode():
+                score_tensor = active_model.score(windows_batch)
+                raw_score = pool_scores(score_tensor, mode="max")
+        else:
+            pad = _pad_or_crop(aud, TARGET_SAMPLE_COUNT)
+            tensor_in = torch.tensor(pad, dtype=torch.float32, device=device).unsqueeze(0)
+            with torch.inference_mode():
+                score_out = active_model.score(tensor_in)
+                raw_score = float(score_out.item() if hasattr(score_out, "item") else score_out[0])
 
         latency = time.perf_counter() - t0
         is_bona = raw_score >= 0.0
@@ -131,8 +154,9 @@ def main():
     p = argparse.ArgumentParser(description="Benchmark độ trễ hệ thống suy luận ViTrueVoice.")
     p.add_argument("--audio", required=True, help="Đường dẫn file âm thanh đo (5-10s)")
     p.add_argument("--iterations", type=int, default=30, help="Số lần lặp (mặc định 30)")
-    p.add_argument("--ckpt", default="out/run_B/best_model.pt", help="Checkpoint mô hình")
+    p.add_argument("--ckpt", default="out/zalo_b_zalo_v5_local/best_model.pt", help="Checkpoint mô hình")
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    p.add_argument("--pooling", action=argparse.BooleanOptionalAction, default=True, help="Bật multi-window max-pool")
     p.add_argument("--out", default="benchmarks/latency_benchmark.csv")
     p.add_argument("--log-path", default="benchmarks/latency_log.json")
     args = p.parse_args()
@@ -142,6 +166,7 @@ def main():
         iterations=args.iterations,
         checkpoint_path=args.ckpt,
         device=args.device,
+        pooling=args.pooling,
         out_csv=args.out,
         log_path=args.log_path,
     )

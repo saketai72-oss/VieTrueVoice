@@ -16,6 +16,7 @@ import soundfile as sf
 import torch
 
 from src.app.decision import classify_score
+from src.preprocessing.pooling import extract_window_batch, pool_scores
 
 SUPPORTED_EXTS = {".wav", ".mp3", ".m4a", ".ogg", ".opus", ".flac"}
 SUPPORTED_TYPES = {
@@ -142,15 +143,29 @@ def create_app(
         except Exception as exc:
             raise HTTPException(status_code=400, detail=f"Failed to decode audio: {exc}")
 
-        padded_audio = _pad_or_crop(audio_data, TARGET_SAMPLE_COUNT)
-        tensor_input = torch.tensor(padded_audio, dtype=torch.float32, device=device).unsqueeze(0)
-
         if model is None:
             raise HTTPException(status_code=503, detail="Model is not loaded")
 
+        # Multi-window extraction (STUBBORN_FACT: repeat padding <64k, single batched forward pass)
+        windows_batch = extract_window_batch(
+            audio_data,
+            win=TARGET_SAMPLE_COUNT,
+            hop=16000,
+            max_windows=5,
+        ).to(device)
+        n_windows = int(windows_batch.shape[0])
+
         with torch.inference_mode():
-            score_tensor = model.score(tensor_input)
-            raw_score = float(score_tensor.item() if hasattr(score_tensor, "item") else score_tensor[0])
+            score_tensor = model.score(windows_batch)
+            if isinstance(score_tensor, torch.Tensor):
+                scores_np = score_tensor.detach().cpu().numpy()
+            else:
+                scores_np = np.asarray(score_tensor)
+            if scores_np.ndim > 1:
+                scores_np = scores_np.squeeze(-1)
+            elif scores_np.ndim == 0:
+                scores_np = np.array([scores_np.item()], dtype=np.float32)
+            raw_score = pool_scores(scores_np, mode="max")
 
         latency_sec = time.perf_counter() - t0
         decision = classify_score(raw_score, threshold=threshold)
@@ -166,6 +181,7 @@ def create_app(
             "confidence_calibrated": decision.confidence_calibrated,
             "latency_sec": round(latency_sec, 4),
             "audio_sha256": audio_sha256,
+            "n_windows": n_windows,
         }
 
         # Anonymized audit log
@@ -177,6 +193,7 @@ def create_app(
             "threshold": result["threshold"],
             "confidence_score": result["confidence"],
             "latency_sec": result["latency_sec"],
+            "n_windows": n_windows,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
         _append_latency_log(log_path, log_entry)

@@ -107,5 +107,7 @@ Thumbs.db
 # Agent & local tooling configurations
 .agent/
 .agents/
+scratch/
+.quarantine_mock/
 vocab.txt
 

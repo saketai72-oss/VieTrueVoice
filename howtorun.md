@@ -98,7 +98,7 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 227 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
+*(Yêu cầu: Toàn bộ 272 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
@@ -150,12 +150,20 @@ uvicorn src.app.server:app --reload --port 8000
 
 ### Chạy Đánh Giá 3 Cổng Kiểm Định (Gates 1, 2, 3)
 ```bash
+# Đánh giá mặc định bật multi-window max-pooling (--pooling)
 python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v5_local/best_model.pt
+
+# Hoặc tắt pooling để so sánh với cách cắt 4s đầu truyền thống:
+python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v5_local/best_model.pt --no-pooling
 ```
 
 ### Chạy Đo Lường Độ Trễ (30 lần lặp)
 ```bash
+# Đo lường độ trễ chuẩn hóa theo NFR1 (mặc định bật --pooling)
 python scripts/benchmark_latency.py
+
+# Đo lường không dùng pooling:
+python scripts/benchmark_latency.py --no-pooling
 ```
 
 ---

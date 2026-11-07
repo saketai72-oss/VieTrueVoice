@@ -1,10 +1,10 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.4.2) — 2026-11-01
+# Bối Cảnh Agent — ViTrueVoice (v0.4.3) — 2026-11-07
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.4.2 (Deep Voice Generalization & AM-Softmax Regularization) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.4.3 (BPCER Remediation & Multi-window Inference Pooling) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [deep-voice-generalization.md](deep-voice-generalization.md)
@@ -76,7 +76,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
-1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 227 bài test phải pass 100%.
+1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 272 bài test phải pass 100%.
 2. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
 3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
 4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
@@ -89,16 +89,18 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - [x] v0.4.0: Must #3 (W6) — API suy luận thời gian thực (FastAPI), Web Demo (Gradio $\le 3$ thao tác), Telegram Bot (độ trễ $\le 3$s), AI Eval $\ge 30$ ca. Đã hoàn tất chuẩn hóa quyết định ngưỡng, loại bỏ confidence giả mạo, đồng bộ toàn diện API/UI/Bot và khóa quy trình đánh giá Dev độc lập.
 - [x] v0.4.1: Kênh Zalo & Fine-Tuning B_zalo — Hoàn tất chuẩn hóa loader đa định dạng in-memory qua FFmpeg (`audio_loader.py`); khóa cấu hình Dual Profile Zalo (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps); sinh 3 manifest ghép cặp `base_utt` tại `data/manifests_zalo/` (0% rò rỉ, 100% cô lập `SPK_xxxx` và `VieNeu-TTS`); đo lường và khóa baseline Checkpoint B chính thức trên 11.450 mẫu Dev Zalo (AAC EER 2.62%, Opus EER 2.10%, Clean EER 2.60%, AMR EER 3.13%, G.711 EER 3.13%; 10.490 bona fide, 960 spoof, paired deltas đầy đủ). Huấn luyện thành công Version 3 (Phase 2 CE, Dev EER 1.50%) và Version 4 (AM-Softmax + Pitch Aug, Dev EER 1.56% - 1.73%, FAR@0 giảm 3 lần còn 3.65%).
 - [x] v0.4.2: Deep Voice Generalization, Forensic Audio Audit & Data Hygiene — Bóc tách 5 lỗi kỹ thuật và hoàn tất kế hoạch V5 trên GPU cục bộ (RTX 3050 4GB): Huấn luyện thành công 14 epochs, đạt Dev EER kỷ lục **1.98%** trên 11.450 mẫu Zalo; Checkpoint lưu tại `out/zalo_b_zalo_v5_local/best_model.pt`; Gate 2 Pass **95.3%** (+25.98 macro, +26.35 pooled). Hoàn tất chuỗi thực nghiệm bóc tách khoa học: (1) Bác bỏ giả thuyết F0 là nguyên nhân duy nhất; (2) Phát hiện lỗ hổng an ninh trước spoof hạ pitch -6st (AUC giảm từ 0.9895 về 0.6717, EER 43%, FAR 62%) và độ nhạy cục bộ theo người nói (SPK_0007); (3) Hủy bỏ hoàn toàn offset tĩnh và bộ lọc suy luận thô để tránh phá vỡ phân phối; (4) Tự kiểm chứng dữ liệu: phát hiện và cô lập 10 file mock thử nghiệm vào `.quarantine_mock/` (xác nhận tập train/dev Zalo và sweep sạch 100%); (5) Thống nhất giải quyết bài toán độ bền vững bằng Data Augmentation 2 chiều thuần thuật toán, bác bỏ việc thu thập thêm giọng tình nguyện viên; (6) Nhập 20 file gốc `SPK_0003` bù cho `SPK_0001`, hoàn tất pipeline sinh kép F5-TTS và VieNeu-TTS (15 câu x 2 engine = 30 clip spoof clean + paired codecs, 100% SHA-256 độc bản, Pass Rate Gate 2 đạt 89.3% trên 5 tình nguyện viên); (7) Hoàn tất thử nghiệm thăm dò Leave-One-Speaker-Out (LOSO 4 Folds, 48 lượt chạy) theo đặc tả tiên nghiệm Pre-registered SPEC v1.2.1: Xác nhận chuyển giao dương trên người bị giữ lại (Mean Δs > 0, CI 95% cận dưới > 0, pass rate tăng 10.0–48.9 pp) nhưng đánh đổi bằng việc Dev EER và APCER vượt ngưỡng an ninh (0/4 Folds đạt); đối chứng nhánh Replay-only và phân tích H2 VieNeu-TTS củng cố tính bất khả xâm phạm của STUBBORN_FACT cô lập 100% dữ liệu tình nguyện viên khỏi quá trình huấn luyện; hoàn thành 100% cả 3 chứng chỉ AWS Gói A; xuất bản báo cáo W04 và W05 (Must #2, Chương 2 hoàn chỉnh 18 trang); 227/227 unit tests pass 100%.
+- [x] v0.4.3: BPCER Remediation & Multi-window Inference Pooling (Pha A + C + D) — Giải quyết dứt điểm hiện tượng nhận diện sai giọng thật tình nguyện viên mà không cần huấn luyện lại GPU (0 GPU retrain): (1) Tích hợp trích xuất đa cửa sổ trượt (window 4.0s = 64.000 mẫu, hop 1.0s = 16.000 mẫu, tối đa 5 cửa sổ) gộp thành 1 mini-batch `(N_windows, 64000)` suy luận song song trong 1 forward pass duy nhất kèm max-pooling (`src/preprocessing/pooling.py`); (2) Nâng tỷ lệ vượt Gate 2 trên 4 người nói đối chứng (`SPK_0004`..`0007`, 64 files) lên **98.4% (63/64)** trên cả V4 và V5 (file duy nhất còn lại `SPK_0004_03.wav` dài 3.84s < 4.0s nên chỉ có 1 cửa sổ); trên cả 5 SPK đối chứng (`SPK_0003`..`0007`, 84 files), V5 đạt **95.2% (80/84)**; (3) Bảo toàn an ninh: Dev Spoof APCER dưới max-pooling đạt **6.77% $\le 8.0\%$** tại $\theta = 0.0$; (4) Tích hợp guardrail hiệu chỉnh enrollment: tự động từ chối can thiệp khi $|offset| > 4 \times IQR$ (như ngoại lai `SPK_0001` lệch -9.91 IQR), bảo toàn điểm thô phục vụ định tuyến duyệt thủ công; (5) Giữ vững NFR1 với trung vị độ trễ **66.3ms** (P90 68.2ms), nhanh gấp ~45 lần trần $\le 3.0$s; (6) 272/272 unit tests pass 100%.
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
-- `pytest tests/ -v`: Chạy toàn bộ 227 bài kiểm thử unit test.
+- `pytest tests/ -v`: Chạy toàn bộ 272 bài kiểm thử unit test.
 - `python scripts/setup_local_train.py`: Tải Checkpoint B & tệp nén 3.26GB từ Kaggle, giải nén chọn lọc dữ liệu Zalo vào máy cục bộ.
 - `python scripts/train_local_zalo.py`: Huấn luyện B_zalo V5 tối ưu cho máy cục bộ (RTX 3050 4GB VRAM) và tự động đánh giá 3 Gates.
 - `python manage_kaggle.py push deploy_zalo_train`: Đẩy kernel huấn luyện B_zalo fine-tuning lên Kaggle GPU.
 - `python manage_kaggle.py status deploy_zalo_train`: Kiểm tra trạng thái kernel huấn luyện B_zalo.
 - `python manage_kaggle.py output deploy_zalo_train out/zalo_b_zalo_v4 --force`: Tải kết quả checkpoint và báo cáo B_zalo về máy local.
-- `python scripts/eval_v5_gate.py`: Đánh giá 3 cổng kiểm định độc lập (SPK_0001/VoiCes, 4 SPK đối chứng, Dev Zalo).
+- `python scripts/eval_v5_gate.py`: Đánh giá 3 cổng kiểm định độc lập với `--pooling` (mặc định True).
+- `python scripts/benchmark_latency.py`: Đo kiểm thời gian đáp ứng thời gian thực với `--pooling` (30 lần lặp).
 - `python scripts/eval_voices_new.py`: Đánh giá trực tiếp trên bộ thu mới `VoiCes` ($F_0 \approx 105 - 118$ Hz).
 - `python scripts/eval_v4_summary.py`: So sánh đối chứng V2 vs V3 vs V4 trên Dev Zalo và 15 file `SPK_0001`.
 - `python scripts/train.py --branch B_zalo --loss am_softmax --am-s 30.0 --am-m 0.35 --pitch-aug --pitch-prob 0.9 --pitch-range -8.0 4.0`: Huấn luyện nhánh fine-tune Zalo Version 5.
@@ -106,4 +108,4 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 
 ---
 
-*v0.4.2 — 2026-11-01*
+*v0.4.3 — 2026-11-07*
