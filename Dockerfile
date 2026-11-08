@@ -15,6 +15,8 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
     DEVICE=cpu \
+    HOME=/home/appuser \
+    HF_HOME=/home/appuser/.cache/huggingface \
     DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies: FFmpeg is mandatory for in-memory audio decoding
@@ -25,8 +27,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for enterprise container security (AWS Security / CIS Docker Benchmark)
-RUN groupadd -r appgroup && useradd -r -g appgroup -u 1000 appuser
+# Create non-root user with home directory for enterprise container security (AWS Security / CIS Docker Benchmark)
+RUN groupadd -r appgroup && useradd -m -r -g appgroup -u 1000 -d /home/appuser appuser
 
 WORKDIR /app
 
@@ -39,9 +41,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY src/ /app/src/
 COPY scripts/ /app/scripts/
 
-# Create directories for models and logs with non-root ownership
-RUN mkdir -p /app/out /app/benchmarks && \
-    chown -R appuser:appgroup /app
+# Create directories for models, Hugging Face cache, and logs with non-root ownership
+RUN mkdir -p /home/appuser/.cache/huggingface /app/out /app/benchmarks && \
+    chown -R appuser:appgroup /home/appuser /app
 
 # Switch to non-root user
 USER appuser
@@ -49,8 +51,8 @@ USER appuser
 # Expose FastAPI service port
 EXPOSE 8000
 
-# Container Healthcheck via /health endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+# Container Healthcheck via /health endpoint (allow 60s for model loading on cold start)
+HEALTHCHECK --interval=20s --timeout=5s --start-period=60s --retries=5 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Default command: Start FastAPI ASGI server

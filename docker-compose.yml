@@ -20,13 +20,14 @@ services:
     volumes:
       - ./out:/app/out:ro
       - ./benchmarks:/app/benchmarks
+      - hf_cache:/home/appuser/.cache/huggingface
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
+      interval: 20s
       timeout: 5s
-      retries: 3
-      start_period: 15s
+      retries: 5
+      start_period: 60s
 
   bot:
     build:
@@ -40,7 +41,12 @@ services:
       - PYTHONUNBUFFERED=1
     volumes:
       - ./out:/app/out:ro
+      - hf_cache:/home/appuser/.cache/huggingface
     restart: unless-stopped
     depends_on:
       api:
         condition: service_healthy
+
+volumes:
+  hf_cache:
+    name: vitruevoice_hf_cache
