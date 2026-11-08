@@ -1,0 +1,89 @@
+{
+  "manifest": "unseen_kokoro_benchmark.csv",
+  "checkpoint": "out/zalo_b_zalo_v6_local/best_model.pt",
+  "total_spoof": 375,
+  "correct_spoof": 374,
+  "spoof_detection_rate_pct": 99.73,
+  "mean_spoof_score": -34.209,
+  "total_bona": 84,
+  "correct_bona": 81,
+  "bona_pass_rate_pct": 96.43,
+  "mean_bona_score": 28.842,
+  "eer_pct": 0.53,
+  "eer_threshold": -11.8249,
+  "minDCF": 0.0053,
+  "codec_breakdown": {
+    "aac_zalo_76k": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -33.45,
+      "median_score": -33.937,
+      "mean_ratio_4k_pct": 0.2
+    },
+    "amrnb": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -38.116,
+      "median_score": -38.017,
+      "mean_ratio_4k_pct": 0.0
+    },
+    "clean": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -33.54,
+      "median_score": -33.615,
+      "mean_ratio_4k_pct": 0.22
+    },
+    "g711": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -34.527,
+      "median_score": -34.982,
+      "mean_ratio_4k_pct": 0.0
+    },
+    "opus_zalo_24k": {
+      "total": 75,
+      "correct_spoof": 74,
+      "pass_rate_pct": 98.67,
+      "mean_score": -31.413,
+      "median_score": -32.307,
+      "mean_ratio_4k_pct": 0.11
+    }
+  },
+  "speaker_breakdown": {
+    "SPK_0003": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -33.429
+    },
+    "SPK_0004": {
+      "total": 75,
+      "correct_spoof": 74,
+      "pass_rate_pct": 98.67,
+      "mean_score": -34.131
+    },
+    "SPK_0005": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -34.452
+    },
+    "SPK_0006": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -34.48
+    },
+    "SPK_0007": {
+      "total": 75,
+      "correct_spoof": 75,
+      "pass_rate_pct": 100.0,
+      "mean_score": -34.552
+    }
+  }
+}

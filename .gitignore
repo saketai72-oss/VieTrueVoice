@@ -111,4 +111,5 @@ Thumbs.db
 scratch/
 .quarantine_mock/
 vocab.txt
+external/
 

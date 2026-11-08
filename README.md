@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.4)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.5)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -51,4 +51,9 @@
     - **Gate 2 (Bộ nghiệm thu 5 tình nguyện viên `SPK_0003`..`0007`)**: Đạt **96.4% (81/84 clips)** với điểm số trung bình cực kỳ tự tin (Mean score: SPK_0003 +17.65, SPK_0004 +28.87, SPK_0005 +32.33, SPK_0006 +42.82, SPK_0007 +29.54).
     - **Gate 3 (Độ bền nén kênh Zalo)**: **PASS** toàn diện với AAC-LC 76kbps EER = **1.73%**, Opus 24kbps EER = **1.56%**, Clean EER = **1.56%** (đều $\le 2.0\%$).
     - **Gate 1 (Giọng trầm ngoại lai SPK_0001)**: Nhận diện đạt **73.3% (11/15 clips)** với Mean score đảo chiều từ âm sang dương mạnh (**+10.05**).
-  - Toàn bộ **274/274 unit tests pass 100%**. Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).
+  - Toàn bộ **292/292 unit tests pass 100%**.
+- **Mở Rộng Đo Đạc Unseen TTS Đa Mô Hình (Kokoro, Bark, OmniVoice) (v0.4.5)**:
+  - Tích hợp thành công **Kokoro-Vietnamese** (`contextboxai/Kokoro-Vietnamese`, StyleTTS 2 + iSTFTNet 24kHz), sinh độc lập **375 tệp spoof** (75 clean + 300 tệp 4 codec viễn thông & Zalo) trên 5 tình nguyện viên đối chứng (`SPK_0003`..`0007`) theo nguyên tắc Hard Text-Disjoint.
+  - Đánh giá thực nghiệm với mô hình **B_zalo V6** (Multi-window Max-Pooling): Tỷ lệ phát hiện Spoof đạt **99.73% (374/375)** với Mean Score **-34.21**, EER đạt **0.53%**, minDCF **0.0053**.
+  - Triển khai `BarkAdapter` (Suno Bark GPT + EnCodec) và trích xuất thành công `OmniVoice` (VoiceStudio).
+  - Toàn bộ **298/298 unit tests pass 100%**. Chi tiết báo cáo tại [`docs/BENCHMARK_unseen_tts_multimodel.md`](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_unseen_tts_multimodel.md). Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).
