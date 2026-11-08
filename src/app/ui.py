@@ -619,26 +619,6 @@ def build_ui(
                     </span>
                 </div>
             </div>
-            <div class="lab-banner" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-                <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <span style="font-size: 28px;">👨‍👩‍👧‍👦</span>
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <strong style="font-size: 1.1rem; color: #F8FAFC;">Phòng Chống Lừa Đảo Giọng Nói Giả Mạo</strong>
-                            <span style="background: rgba(46, 204, 113, 0.15); border: 1px solid rgba(46, 204, 113, 0.4); color: #2ECC71; font-size: 11px; padding: 1px 8px; border-radius: 9999px; font-weight: 600;">
-                                Dành Cho Gia Đình & Người Cao Tuổi
-                            </span>
-                        </div>
-                        <p style="font-size: 13px; color: #94A3B8; margin-top: 4px; line-height: 1.4;">
-                            Kiểm tra tin nhắn thoại mượn tiền, cuộc gọi lạ chỉ với <strong>1 lần bấm</strong>. Hệ thống tự động bóc tách sóng âm và khuyến cáo tức thời.
-                        </p>
-                    </div>
-                </div>
-                <div style="background: rgba(11, 15, 23, 0.85); border: 1px solid #334155; border-radius: 8px; padding: 6px 14px; text-align: right;">
-                    <div style="font-size: 11px; color: #94A3B8;">Chứng nhận AI Forensics</div>
-                    <div style="font-size: 12px; color: #14B8A6; font-weight: 600;">Chuẩn Âm Sắc Tiếng Việt 2026</div>
-                </div>
-            </div>
             """
         )
 
