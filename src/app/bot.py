@@ -12,6 +12,7 @@ import numpy as np
 import torch
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.request import HTTPXRequest
 
 from src.app.decision import classify_score
 from src.app.server import DEFAULT_CHECKPOINT, TARGET_SAMPLE_COUNT, _default_model_loader, _load_audio_in_memory
@@ -55,20 +56,34 @@ async def handle_voice_message(
             return
 
     t0 = time.perf_counter()
-    file_obj = await voice_target.get_file()
-    buf = io.BytesIO()
-    download_res = file_obj.download_to_memory(buf)
-    if inspect.isawaitable(download_res):
-        await download_res
-    raw_bytes = buf.getvalue()
-
-    if not raw_bytes:
-        await message.reply_text("❌ Không thể tải nội dung âm thanh.")
-        return
-
-    audio_hash = hashlib.sha256(raw_bytes).hexdigest()[:16]
 
     try:
+        try:
+            if message.chat:
+                await message.chat.send_action("typing")
+        except Exception:
+            pass
+
+        try:
+            file_obj = await voice_target.get_file(read_timeout=30.0)
+        except TypeError:
+            file_obj = await voice_target.get_file()
+
+        buf = io.BytesIO()
+        try:
+            download_res = file_obj.download_to_memory(buf, read_timeout=30.0)
+        except TypeError:
+            download_res = file_obj.download_to_memory(buf)
+
+        if inspect.isawaitable(download_res):
+            await download_res
+        raw_bytes = buf.getvalue()
+
+        if not raw_bytes:
+            await message.reply_text("❌ Không thể tải nội dung âm thanh.")
+            return
+
+        audio_hash = hashlib.sha256(raw_bytes).hexdigest()[:16]
         audio_data = _load_audio_in_memory(raw_bytes)
         # Multi-window extraction (STUBBORN_FACT: repeat padding <64k, single batched forward pass)
         windows_batch = extract_window_batch(
@@ -118,7 +133,7 @@ async def handle_voice_message(
         await message.reply_text(reply, parse_mode="Markdown")
 
     except Exception as exc:
-        await message.reply_text(f"❌ Lỗi khi phân tích âm thanh: {exc}")
+        await message.reply_text(f"❌ Lỗi khi phân tích âm thanh: {exc}\n\n👉 Vui lòng thử gửi lại một lần nữa.")
 
 
 def build_bot_app(
@@ -127,7 +142,14 @@ def build_bot_app(
     device: str = "cpu",
     threshold: float = 0.0,
 ) -> Application:
-    app = Application.builder().token(token).build()
+    request_cfg = HTTPXRequest(
+        connection_pool_size=16,
+        read_timeout=30.0,
+        write_timeout=30.0,
+        connect_timeout=20.0,
+        pool_timeout=10.0,
+    )
+    app = Application.builder().token(token).request(request_cfg).build()
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("help", start_command))
 
