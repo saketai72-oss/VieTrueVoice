@@ -1,0 +1,46 @@
+# =====================================================================
+# ViTrueVoice Docker Compose Orchestration
+# Services:
+#   1. api: FastAPI inference server + Web UI (port 8000)
+#   2. bot: Telegram voice note anti-spoofing bot daemon
+# =====================================================================
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vitruevoice-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DEVICE=cpu
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./out:/app/out:ro
+      - ./benchmarks:/app/benchmarks
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vitruevoice-bot
+    command: ["python", "scripts/run_bot.py"]
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - DEVICE=cpu
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./out:/app/out:ro
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy

@@ -227,3 +227,49 @@ python scripts/demo_predict.py --server --port 8000
 python scripts/eval_5spk_full_benchmark.py
 ```
 In bảng tổng kết toàn diện trên 5 người nói đối chứng (SPK_0003..0007), hiển thị rõ EER 11.33% và AUC 0.9343.
+
+---
+
+## 6. Hướng Dẫn Đóng Gói Docker & Triển Khai Trên AWS
+
+Hệ thống ViTrueVoice được đóng gói container hóa theo chuẩn bảo mật điện toán đám mây (AWS Security / CIS Docker Benchmark):
+
+### 6.1 Khởi chạy bằng Docker
+1. **Xây dựng Docker Image**:
+   ```bash
+   docker build -t vitruevoice:latest .
+   ```
+2. **Khởi chạy container độc lập (FastAPI Server)**:
+   ```bash
+   docker run -d \
+     --name vitruevoice-api \
+     -p 8000:8000 \
+     -v ${PWD}/out:/app/out:ro \
+     vitruevoice:latest
+   ```
+3. **Kiểm tra trạng thái sức khỏe container**:
+   ```bash
+   curl http://localhost:8000/health
+   ```
+
+### 6.2 Khởi chạy toàn bộ hệ thống bằng Docker Compose (API + Telegram Bot)
+Điều phối tự động 2 dịch vụ độc lập (`vitruevoice-api` và `vitruevoice-bot`):
+```bash
+# Thiết lập token bot (nếu có):
+export TELEGRAM_BOT_TOKEN="token_cua_ban"
+
+# Khởi chạy ngầm:
+docker compose up -d
+
+# Xem log hoạt động:
+docker compose logs -f
+```
+
+### 6.3 Triển khai tự động trên máy chủ AWS EC2 (G4dn.xlarge GPU hoặc T3.large CPU)
+1. Cấu hình quyền tối thiểu IAM Role theo mẫu: `deploy/aws/iam_policy.json`.
+2. Áp dụng quy tắc tự động hủy dữ liệu sinh trắc học S3 Lifecycle: `deploy/aws/s3_lifecycle_policy.json`.
+3. Chạy script triển khai tự động 1 lệnh duy nhất trên EC2:
+   ```bash
+   bash scripts/aws_deploy_ec2.sh
+   ```
+4. Tham khảo bảng ước tính chi phí vận hành cho 100 / 1.000 / 10.000 users tại: `deploy/aws/pricing_calculator_w08.md`.

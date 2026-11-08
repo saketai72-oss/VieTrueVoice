@@ -49,10 +49,16 @@ graph TD
 
 ### Hạ Tầng Đám Mây AWS & 2 Biện Pháp Bảo Mật (Course Package A)
 - **Kiến trúc triển khai**: Container Docker trên **Amazon EC2** (G4dn/T3), lưu image trên **Amazon ECR**, lưu log ẩn danh trên **Amazon S3**, giám sát qua **AWS CloudWatch**.
+- **Bộ tệp cấu hình triển khai hoàn chỉnh**:
+  - `Dockerfile` & `docker-compose.yml`: Container hóa chuẩn Python 3.12-slim, non-root `appuser`, FFmpeg in-memory audio decoding.
+  - `scripts/aws_deploy_ec2.sh`: Script tự động cài đặt Docker, NVIDIA Container Toolkit, pull image từ Amazon ECR và khởi chạy.
+  - `deploy/aws/s3_lifecycle_policy.json`: Cấu hình S3 Lifecycle tự động hủy vĩnh viễn tệp âm thanh tạm sau 1 ngày (Luật 91/2025/QH15).
+  - `deploy/aws/iam_policy.json`: IAM Policy quyền tối thiểu (Least Privilege) cho EC2 Instance Role.
+  - `deploy/aws/pricing_calculator_w08.md`: Dự toán chi phí AWS Pricing Calculator cho 100 / 1.000 / 10.000 users/ngày (Bảng 3.4).
 - **2 Biện pháp Bảo mật bắt buộc (CP7 - W7)**:
   1. **Mã hóa truyền tải & Tự động xóa file tạm**: Cấu hình HTTPS/TLS và Server-Side Encryption kèm quy tắc **Amazon S3 Lifecycle** tự động xóa hủy vĩnh viễn dữ liệu thoại tạm ngay sau khi suy luận hoàn tất.
   2. **Quản lý quyền tối thiểu & Chống lạm dụng API**: Áp dụng **IAM Least Privilege**, giới hạn tần suất gọi API (**Rate Limiting**), kiểm tra nghiêm ngặt định dạng MIME và kích thước tệp đầu vào.
-- **Ước tính chi phí vận hành**: Tính toán cho quy mô 100 / 1.000 / 10.000 người dùng bằng AWS Pricing Calculator (Bảng 3.4).
+- **Ước tính chi phí vận hành**: Chi tiết tại `deploy/aws/pricing_calculator_w08.md`.
 
 ---
 

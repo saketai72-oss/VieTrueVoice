@@ -1,0 +1,20 @@
+{
+  "Rules": [
+    {
+      "ID": "ViTrueVoice-Biometric-AutoDelete-Rule",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "biometric-temp/"
+      },
+      "Expiration": {
+        "Days": 1
+      },
+      "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 1
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+# Git and IDE
+.git/
+.gitignore
+.gitattributes
+.vscode/
+.idea/
+
+# Python Cache & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Heavy Audio Data & Temporary Artifacts
+data/
+scratch/
+.quarantine_mock/
+*.m4a
+*.mp3
+*.wav
+*.ogg
+*.aac
+
+# Local Environment Variables & Secrets
+.env
+*.pem
+*.key
+
+# Benchmarks Local Logs
+benchmarks/*.json
+benchmarks/*.csv
+
+# Kaggle Deploy Kernels Cache
+deploy_zalo_train/*.zip
+deploy_zalo_train/*.pt

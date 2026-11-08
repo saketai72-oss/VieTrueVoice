@@ -51,7 +51,7 @@ Mục tiêu: Xây dựng kiến trúc mô hình Baseline LFCC+GMM / AASIST & SSL
 ---
 
 ## 🧊 Kế Hoạch Tiếp Theo (v1.0.0 - W7–W8)
-- [ ] Đóng gói Docker trên Amazon EC2, Amazon ECR, Amazon S3 (Lifecycle auto-delete), AWS CloudWatch.
+- [x] Đóng gói Docker trên Amazon EC2, Amazon ECR, Amazon S3 (Lifecycle auto-delete), AWS CloudWatch (`Dockerfile`, `docker-compose.yml`, `scripts/aws_deploy_ec2.sh`, `deploy/aws/s3_lifecycle_policy.json`, `deploy/aws/iam_policy.json`, `deploy/aws/pricing_calculator_w08.md`).
 - [ ] Thử nghiệm Pilot & Red Team cùng CLB An toàn thông tin HUTECH.
 - [ ] Hoàn thiện báo cáo toàn văn Đề tài (Chương 3 & 4) và chuẩn bị slide bảo vệ trước Hội đồng chuyên môn.
 
