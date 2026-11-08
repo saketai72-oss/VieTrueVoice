@@ -37,7 +37,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy application source code and scripts
 COPY src/ /app/src/
-COPY configs/ /app/configs/
 COPY scripts/ /app/scripts/
 
 # Create directories for models and logs with non-root ownership
