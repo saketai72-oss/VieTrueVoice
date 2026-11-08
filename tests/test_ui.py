@@ -1,6 +1,7 @@
 """Unit tests for the Gradio UI demo."""
 
 import gradio as gr
+import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 import torch
@@ -14,8 +15,10 @@ class StubModel:
 
     def score(self, waveform):
         assert isinstance(waveform, torch.Tensor)
-        assert tuple(waveform.shape) == (1, 64000)
-        return torch.tensor([self.score_val], device=waveform.device)
+        # Supports (1, 64000) or batched (N, 64000)
+        assert waveform.ndim == 2 and waveform.shape[-1] == 64000
+        n_win = waveform.shape[0]
+        return torch.tensor([self.score_val] * n_win, device=waveform.device)
 
 
 def test_build_ui_returns_blocks():
@@ -59,3 +62,44 @@ def test_make_predict_fn_none_audio():
     verdict, conf_text, detail_text = predict_fn(None)
 
     assert "Chưa cung cấp" in verdict or "Lỗi" in verdict
+
+
+def test_make_predict_fn_rich_bonafide():
+    predict_rich = make_predict_fn(model=StubModel(score_val=5.0), device="cpu", return_rich=True)
+    audio_tuple = (16000, np.zeros(32000, dtype=np.float32))
+    res = predict_rich(audio_tuple)
+    assert len(res) == 9
+    verdict, conf, detail, verdict_html, conf_html, metrics_html, spec_fig, wave_fig, cam_fig = res
+
+    assert "THẬT" in verdict
+    assert "verdict-box-bonafide" in verdict_html
+    assert "progress-fill-bonafide" in conf_html
+    assert "stat-card" in metrics_html
+    assert isinstance(spec_fig, plt.Figure)
+    assert isinstance(wave_fig, plt.Figure)
+    assert isinstance(cam_fig, plt.Figure)
+    plt.close("all")
+
+
+def test_make_predict_fn_rich_spoof():
+    predict_rich = make_predict_fn(model=StubModel(score_val=-5.0), device="cpu", return_rich=True)
+    audio_tuple = (16000, np.zeros(32000, dtype=np.float32))
+    res = predict_rich(audio_tuple)
+    assert len(res) == 9
+    verdict, conf, detail, verdict_html, conf_html, metrics_html, spec_fig, wave_fig, cam_fig = res
+
+    assert "GIẢ" in verdict
+    assert "verdict-box-spoof" in verdict_html
+    assert "progress-fill-spoof" in conf_html
+    assert "TUYỆT ĐỐI KHÔNG" in verdict_html
+    assert isinstance(spec_fig, plt.Figure)
+    plt.close("all")
+
+
+def test_make_predict_fn_rich_none():
+    predict_rich = make_predict_fn(model=StubModel(), device="cpu", return_rich=True)
+    res = predict_rich(None)
+    assert len(res) == 9
+    verdict, conf, detail, verdict_html, conf_html, metrics_html, spec_fig, wave_fig, cam_fig = res
+    assert "Chưa cung cấp" in verdict
+    plt.close("all")

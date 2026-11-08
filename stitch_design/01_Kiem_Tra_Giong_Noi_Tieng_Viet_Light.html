@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>ViTrueVoice - Nhận Diện Deepfake Giọng Nói Tiếng Việt</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error-container":"#ffdad6","on-secondary":"#ffffff","surface-dim":"#cbdbf5","tertiary-fixed":"#6bfe9c","on-secondary-fixed":"#0d1c2f","inverse-primary":"#80d5cb","primary-fixed":"#9cf2e8","secondary-container":"#d5e3fd","on-tertiary-container":"#a2ffb8","background":"#f8f9ff","on-tertiary-fixed":"#00210c","on-surface":"#0b1c30","on-secondary-container":"#57657b","on-primary":"#ffffff","surface-container-low":"#eff4ff","tertiary-container":"#007a3e","surface-variant":"#d3e4fe","error":"#ba1a1a","surface-tint":"#006a63","on-primary-container":"#a3faef","secondary-fixed-dim":"#b9c7e0","primary-fixed-dim":"#80d5cb","surface-container-highest":"#d3e4fe","outline":"#6e7977","tertiary":"#005f2e","on-error-container":"#93000a","on-tertiary-fixed-variant":"#005228","on-background":"#0b1c30","inverse-surface":"#213145","on-tertiary":"#ffffff","surface":"#f8f9ff","inverse-on-surface":"#eaf1ff","on-secondary-fixed-variant":"#3a485c","on-primary-fixed":"#00201d","outline-variant":"#bdc9c6","secondary-fixed":"#d5e3fd","primary":"#005c55","on-surface-variant":"#3e4947","tertiary-fixed-dim":"#4ae183","on-primary-fixed-variant":"#00504a","surface-bright":"#f8f9ff","on-error":"#ffffff","surface-container-high":"#dce9ff","primary-container":"#0f766e","secondary":"#515f74","surface-container-lowest":"#ffffff","surface-container":"#e5eeff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"1.5rem","space-2xl":"3rem","margin":"2rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"code-md":["JetBrains Mono"],"body-lg":["Be Vietnam Pro"],"headline-lg":["Be Vietnam Pro"],"label-sm":["Be Vietnam Pro"],"body-md":["Be Vietnam Pro"],"label-lg":["Be Vietnam Pro"],"display-lg":["Be Vietnam Pro"],"headline-sm":["Be Vietnam Pro"],"label-md":["Be Vietnam Pro"],"body-sm":["Be Vietnam Pro"],"headline-md":["Be Vietnam Pro"]},"fontSize":{"code-md":["13px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"500"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"600"}],"display-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"18px","letterSpacing":"0.03em","fontWeight":"500"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(15,23,42,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-margin flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-md min-w-max"><div class="w-11 h-11 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[24px]">shield_with_heart</span></div><div class="flex flex-col"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">ViTrueVoice</span><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-container animate-pulse"></span>Mô hình AI: v2.4 Active</span></div><span class="font-body-sm text-body-sm text-on-surface-variant">Hệ thống nhận diện giọng nói Deepfake tiếng Việt</span></div></div><nav class="hidden xl:flex items-center gap-space-xs p-1 bg-surface-container rounded-xl" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a aria-current="page" class="px-space-md py-2 rounded-lg transition-all bg-primary-container text-on-primary font-semibold shadow-sm" data-path="kiem-tra-am-thanh" href="#">Kiểm tra âm thanh</a><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="lich-su-phan-tich" href="#">Lịch sử phân tích</a><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="huong-dan-phong-chong" href="#">Hướng dẫn phòng chống lừa đảo</a><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="tai-lieu-api" href="#">Tài liệu API</a></nav><div class="flex items-center gap-space-sm min-w-max"><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Cài đặt Gradio Runtime" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Môi trường xử lý an toàn" type="button"><span class="material-symbols-outlined text-[20px]">lock</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-background min-h-screen"><div class="max-w-[1440px] mx-auto px-margin py-space-xl"><div class="flex flex-col w-full gap-space-xl">
+<!-- Welcoming Friendly Family Banner -->
+<section class="relative overflow-hidden rounded-xl bg-surface-container-low shadow-sm p-space-lg">
+<div class="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-primary-container/10 blur-2xl pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md relative z-10">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-on-primary shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[26px]">family_restroom</span>
+</div>
+<div>
+<div class="flex items-center gap-space-sm flex-wrap">
+<h2 class="font-headline-md text-headline-md text-on-surface">Phòng Chống Lừa Đảo Giọng Nói Giả Mạo</h2>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-tertiary-container text-on-tertiary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">bolt</span>Bảo vệ gia đình &amp; người cao tuổi
+            </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            Dành cho người lớn tuổi &amp; gia đình: Kiểm tra tin nhắn thoại mượn tiền, cuộc gọi lạ chỉ với <strong class="text-on-surface font-semibold">1 lần bấm</strong>. Không cần cài đặt phần mềm phức tạp.
+          </p>
+</div>
+</div>
+<div class="flex items-center gap-space-md shrink-0 self-end lg:self-center">
+<div class="flex items-center gap-2 px-space-md py-2 rounded-lg bg-surface-container-lowest shadow-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">verified</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Chứng nhận phân tích AI</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Chuẩn âm sắc Tiếng Việt 2025</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Gradio Analytical Workspace (2 Columns) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- COLUMN 1: Audio Input & Control (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Input Panel -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-semibold">1</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Tải lên hoặc Ghi âm</h3>
+</div>
+<span class="font-code-md text-code-md text-on-surface-variant">.wav .mp3 .m4a</span>
+</div>
+<!-- Presets quick buttons -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant">Mẫu âm thanh thử nghiệm nhanh:</label>
+<div class="grid grid-cols-3 gap-2" id="sample-buttons">
+<button class="preset-btn px-2.5 py-1.5 rounded-lg bg-error-container/60 hover:bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold transition-all text-left flex flex-col" onclick="loadSample('spoof')" type="button">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">warning</span> Mẫu 1</span>
+<span class="text-[10px] opacity-80 truncate">Mượn tiền (Spoof)</span>
+</button>
+<button class="preset-btn px-2.5 py-1.5 rounded-lg bg-tertiary-fixed/30 hover:bg-tertiary-fixed/50 text-tertiary font-label-sm text-label-sm font-semibold transition-all text-left flex flex-col" onclick="loadSample('bonafide')" type="button">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span> Mẫu 2</span>
+<span class="text-[10px] opacity-80 truncate">Người thân (Thật)</span>
+</button>
+<button class="preset-btn px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold transition-all text-left flex flex-col" onclick="loadSample('bank')" type="button">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">call</span> Mẫu 3</span>
+<span class="text-[10px] opacity-80 truncate">Giả danh ngân hàng</span>
+</button>
+</div>
+</div>
+<!-- Gradio-style Upload Zone -->
+<div class="relative group rounded-xl p-space-lg flex flex-col items-center justify-center gap-space-sm bg-surface-container-low transition-all cursor-pointer hover:bg-surface-container">
+<div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary shadow-sm group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[24px]">cloud_upload</span>
+</div>
+<div class="text-center">
+<p class="font-label-lg text-label-lg text-on-surface">Kéo thả file âm thanh vào đây</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">hoặc duyệt tìm từ máy tính / điện thoại (Tối đa 10MB)</p>
+</div>
+<div class="flex items-center gap-space-md pt-1 w-full justify-center">
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-primary text-[18px]">mic</span>
+              Bấm ghi âm trực tiếp
+            </button>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest shadow-sm hover:shadow text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">attachment</span>
+              Chọn tập tin
+            </button>
+</div>
+</div>
+<!-- Audio Player & Waveform Visualizer -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">graphic_eq</span>
+<span class="font-label-md text-label-md text-on-surface font-medium truncate max-w-[200px]" id="player-file-title">tin_nhan_muon_tien_gap.mp3</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors" title="Tải về file" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors" title="Chia sẻ kết quả" type="button">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface p-1 rounded transition-colors" title="Xóa file" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Interactive Canvas Frequency Spectrum Visualizer -->
+<div class="h-20 bg-surface-container-lowest rounded-lg p-2 flex items-center justify-between gap-1 overflow-hidden relative shadow-inner">
+<!-- Simulated Waveform Bars -->
+<div class="h-3 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-6 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-10 w-1.5 rounded-full bg-primary-container"></div>
+<div class="h-14 w-1.5 rounded-full bg-primary"></div>
+<div class="h-8 w-1.5 rounded-full bg-primary-container"></div>
+<div class="h-4 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-12 w-1.5 rounded-full bg-primary"></div>
+<div class="h-16 w-1.5 rounded-full bg-error"></div>
+<div class="h-14 w-1.5 rounded-full bg-error"></div>
+<div class="h-10 w-1.5 rounded-full bg-error"></div>
+<div class="h-6 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-8 w-1.5 rounded-full bg-primary-container"></div>
+<div class="h-12 w-1.5 rounded-full bg-primary"></div>
+<div class="h-16 w-1.5 rounded-full bg-error"></div>
+<div class="h-11 w-1.5 rounded-full bg-error"></div>
+<div class="h-5 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-9 w-1.5 rounded-full bg-primary-container"></div>
+<div class="h-13 w-1.5 rounded-full bg-primary"></div>
+<div class="h-7 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-3 w-1.5 rounded-full bg-secondary-container"></div>
+<div class="h-8 w-1.5 rounded-full bg-primary-container"></div>
+<div class="h-15 w-1.5 rounded-full bg-error"></div>
+<div class="h-10 w-1.5 rounded-full bg-primary-container"></div>
+<div class="h-4 w-1.5 rounded-full bg-secondary-container"></div>
+<!-- Scrubber line -->
+<div class="absolute top-0 bottom-0 left-[38%] w-0.5 bg-primary shadow-sm pointer-events-none"></div>
+<div class="absolute top-1 left-[38%] -translate-x-1/2 px-1 rounded bg-primary text-on-primary text-[9px] font-code-md">0:04</div>
+</div>
+<!-- Playback Controls -->
+<div class="flex items-center justify-between pt-1">
+<span class="font-code-md text-code-md text-on-surface-variant" id="play-time">0:04 / 0:12</span>
+<div class="flex items-center gap-space-sm">
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors" title="Lùi 5s" type="button">
+<span class="material-symbols-outlined text-[18px]">replay_5</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center hover:bg-primary-container shadow-sm transition-all transform active:scale-95" id="play-btn" onclick="togglePlayState()" type="button">
+<span class="material-symbols-outlined text-[22px]" id="play-icon">play_arrow</span>
+</button>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container text-on-surface-variant transition-colors" title="Tiến 5s" type="button">
+<span class="material-symbols-outlined text-[18px]">forward_5</span>
+</button>
+</div>
+<div class="flex items-center gap-1">
+<span class="px-2 py-0.5 rounded bg-surface-container font-code-md text-code-md text-on-surface-variant cursor-pointer">1.0x</span>
+<button class="w-7 h-7 rounded flex items-center justify-center hover:bg-surface-container text-on-surface-variant" title="Lặp lại" type="button">
+<span class="material-symbols-outlined text-[16px]">repeat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Prominent Primary CTA Button -->
+<button class="w-full py-3.5 px-space-lg rounded-xl bg-[#0F766E] hover:bg-[#005c55] active:bg-[#00201d] text-on-primary font-headline-sm text-headline-sm flex items-center justify-center gap-space-sm shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5" id="analyze-btn" onclick="runAnalysis()" type="button">
+<span class="material-symbols-outlined text-[24px]">manage_search</span>
+<span>2. KIỂM TRA TÍNH XÁC THỰC NGAY</span>
+</button>
+</div>
+<!-- Legal Compliance & Privacy Banner -->
+<div class="rounded-xl bg-surface-container-low p-space-md shadow-sm flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">shield</span>
+<div class="flex flex-col gap-0.5">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Cam kết Quyền Riêng Tư &amp; An Toàn Tuyệt Đối</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.2 rounded">Luật 91/2025/QH15</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Âm thanh được phân tích hoàn toàn trong RAM và hủy ngay sau phiên tính toán (0.4s). Chúng tôi không lưu trữ, không chia sẻ và không sao chép mẫu giọng gốc của bạn.
+          </p>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: Verification Result & Technical Analysis (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Top Switcher & Result Label -->
+<div class="bg-surface-container-lowest rounded-xl shadow-md p-space-lg flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-xs gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<span class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-label-md text-label-md font-semibold">3</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Kết Quả Xác Minh Âm Thanh</h3>
+</div>
+<!-- Toggle view for testing states -->
+<div class="flex items-center bg-surface-container-low p-1 rounded-lg">
+<button class="px-3 py-1 rounded font-label-sm text-label-sm transition-all bg-error-container text-on-error-container font-semibold shadow-sm flex items-center gap-1" id="tab-spoof" onclick="showVerdict('spoof')" type="button">
+<span class="material-symbols-outlined text-[14px]">warning</span> Giả Mạo (Spoof)
+            </button>
+<button class="px-3 py-1 rounded font-label-sm text-label-sm transition-all text-on-surface-variant hover:text-on-surface flex items-center gap-1" id="tab-bonafide" onclick="showVerdict('bonafide')" type="button">
+<span class="material-symbols-outlined text-[14px]">verified</span> Giọng Thật (Bonafide)
+            </button>
+</div>
+</div>
+<!-- STATE 1: SPOOF VERDICT CARD (Active default) -->
+<div class="flex flex-col gap-space-md" id="verdict-spoof-box">
+<!-- Big Warning Alert Box in Coral Red & Light Coral -->
+<div class="rounded-xl p-space-lg bg-[#FDEDEC] text-[#93000a] flex flex-col gap-space-md shadow-sm">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-[#E74C3C] text-white flex items-center justify-center shrink-0 shadow-md">
+<span class="material-symbols-outlined text-[28px]">crisis_alert</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-[#ba1a1a]">CẢNH BÁO: GIỌNG NÓI GIẢ MẠO</span>
+<span class="px-2.5 py-0.5 rounded-full bg-[#E74C3C] text-white font-label-sm text-label-sm font-semibold uppercase">Phát hiện Deepfake</span>
+</div>
+<p class="font-body-md text-body-md text-[#93000a] mt-0.5">
+                  Hệ thống AI nhận diện thấy dấu vết biến điệu nhân tạo (AI Voice Cloning / TTS Synthesis). Có nguy cơ cao đây là cuộc gọi hoặc tin nhắn giả danh để lừa đảo.
+                </p>
+</div>
+</div>
+<!-- Confidence Bar Gauge -->
+<div class="flex flex-col gap-1.5 bg-white/70 p-space-md rounded-xl">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#E74C3C] text-[18px]">speed</span>
+                  Độ tin cậy phát hiện Deepfake (Platt Scaling):
+                </span>
+<span class="font-headline-sm text-headline-sm text-[#ba1a1a] font-bold font-code-md">99.9% SPOOF</span>
+</div>
+<!-- Progress Indicator -->
+<div class="w-full h-3 rounded-full bg-error-container overflow-hidden">
+<div class="h-full rounded-full bg-[#E74C3C] transition-all duration-700 w-[99.9%]"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant pt-0.5">
+<span>0% Tự nhiên</span>
+<span>50% Nghi vấn</span>
+<span class="font-bold text-[#ba1a1a]">99.9% Giả mạo</span>
+</div>
+</div>
+<!-- Action Advice Checklist (For family / elder safety) -->
+<div class="flex flex-col gap-2 bg-white/90 p-space-md rounded-xl text-on-surface">
+<span class="font-label-lg text-label-lg font-bold text-[#ba1a1a] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px]">flip_camera_ios</span>
+                HÀNH ĐỘNG KHẨN CẤP ĐỂ BẢO VỆ TÀI SẢN:
+              </span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-sm pt-1">
+<div class="flex items-start gap-2 p-2.5 rounded-lg bg-[#FDEDEC]">
+<span class="material-symbols-outlined text-[#E74C3C] text-[20px] shrink-0">cancel</span>
+<div class="flex flex-col">
+<strong class="font-label-md text-label-md text-[#93000a]">TUYỆT ĐỐI KHÔNG</strong>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Không chuyển tiền, không đọc mã OTP ngân hàng, không gửi mật khẩu cá nhân.</span>
+</div>
+</div>
+<div class="flex items-start gap-2 p-2.5 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0">phone_callback</span>
+<div class="flex flex-col">
+<strong class="font-label-md text-label-md text-on-surface">GỌI LẠI TRỰC TIẾP</strong>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Gọi lại số di động thông thường hoặc gọi Video Call để nhìn trực tiếp gương mặt.</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Deep Technical Inspection Card (Forensic Breakdown) -->
+<div class="rounded-xl bg-surface-container-low p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between cursor-pointer" onclick="toggleDetails()">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">troubleshoot</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Chi tiết Pháp lý &amp; Chỉ số Kỹ thuật</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform" id="details-arrow">expand_more</span>
+</div>
+<div class="flex flex-col gap-space-sm pt-2" id="tech-details-content">
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+<div class="p-2.5 rounded-lg bg-surface-container-lowest shadow-sm flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Điểm Raw Score</span>
+<span class="font-code-md text-code-md text-[#ba1a1a] font-bold">-43.4975</span>
+<span class="text-[10px] text-on-surface-variant">Ngưỡng: 0.0000</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest shadow-sm flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Thời gian xử lý</span>
+<span class="font-code-md text-code-md text-primary font-bold">0.39 giây</span>
+<span class="text-[10px] text-on-surface-variant">GPU NVIDIA A10G</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest shadow-sm flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tần số lấy mẫu</span>
+<span class="font-code-md text-code-md text-on-surface font-bold">16,000 Hz</span>
+<span class="text-[10px] text-on-surface-variant">Mono 16-bit PCM</span>
+</div>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest shadow-sm flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Thuật toán lõi</span>
+<span class="font-code-md text-code-md text-on-surface font-bold">RawNet2 + AASIST</span>
+<span class="text-[10px] text-on-surface-variant">ViTrue-v2.4</span>
+</div>
+</div>
+<!-- Anomaly spectrum breakdown tags -->
+<div class="p-3 rounded-lg bg-surface-container-lowest shadow-sm flex flex-col gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Bất thường âm học phát hiện trong phổ Mel-Spectrogram:</span>
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">noise_control_off</span> Mất dải hài âm cao tần (&gt;4kHz)
+                  </span>
+<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">graphic_eq</span> Lỗi tổng hợp pha Vocoder HiFi-GAN
+                  </span>
+<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">mic_off</span> Thiếu tạp âm thở tự nhiên
+                  </span>
+</div>
+<div class="flex items-center gap-2 pt-1 font-code-md text-[11px] text-on-surface-variant">
+<span>Mã băm SHA-256 đối soát:</span>
+<code class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface select-all">78b84276a3e04f41b2c4e9089901aa7d</code>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- STATE 2: BONAFIDE VERDICT CARD (Hidden until toggle or sample selected) -->
+<div class="hidden flex flex-col gap-space-md" id="verdict-bonafide-box">
+<!-- Big Success Alert Box in Mint Green & Light Mint -->
+<div class="rounded-xl p-space-lg bg-[#E8F8F5] text-[#00210c] flex flex-col gap-space-md shadow-sm">
+<div class="flex items-start gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-[#2ECC71] text-white flex items-center justify-center shrink-0 shadow-md">
+<span class="material-symbols-outlined text-[28px]">verified_user</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-[#005f2e]">XÁC THỰC: GIỌNG NÓI TỰ NHIÊN</span>
+<span class="px-2.5 py-0.5 rounded-full bg-[#2ECC71] text-white font-label-sm text-label-sm font-semibold uppercase">Bonafide Audio</span>
+</div>
+<p class="font-body-md text-body-md text-[#005f2e] mt-0.5">
+                  Không tìm thấy bất kỳ dấu hiệu tổng hợp âm thanh bằng AI hay cắt ghép giả mạo. Đường nét cao độ thanh quản và nhiễu vi mô hoàn toàn trùng khớp giọng nói người thật.
+                </p>
+</div>
+</div>
+<!-- Confidence Bar Gauge -->
+<div class="flex flex-col gap-1.5 bg-white/70 p-space-md rounded-xl">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[#2ECC71] text-[18px]">verified</span>
+                  Độ tin cậy xác thực Người thật (Bonafide Score):
+                </span>
+<span class="font-headline-sm text-headline-sm text-[#005f2e] font-bold font-code-md">99.9% THẬT</span>
+</div>
+<!-- Progress Indicator -->
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full rounded-full bg-[#2ECC71] transition-all duration-700 w-[99.9%]"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant pt-0.5">
+<span class="font-bold text-[#005f2e]">99.9% Tự nhiên</span>
+<span>50% Nghi vấn</span>
+<span>0% Giả mạo</span>
+</div>
+</div>
+<!-- Reassurance Checklist -->
+<div class="flex flex-col gap-2 bg-white/90 p-space-md rounded-xl text-on-surface">
+<span class="font-label-lg text-label-lg font-bold text-[#005f2e] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+                KẾT QUẢ ĐỐI SOÁT AN TOÀN:
+              </span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-sm pt-1">
+<div class="flex items-start gap-2 p-2.5 rounded-lg bg-[#E8F8F5]">
+<span class="material-symbols-outlined text-[#2ECC71] text-[20px] shrink-0">check_circle</span>
+<div class="flex flex-col">
+<strong class="font-label-md text-label-md text-[#005f2e]">Âm sắc Người Thật</strong>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Phổ âm sinh học đầy đủ, phản xạ hơi thở tự nhiên đạt chuẩn.</span>
+</div>
+</div>
+<div class="flex items-start gap-2 p-2.5 rounded-lg bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-[20px] shrink-0">security</span>
+<div class="flex flex-col">
+<strong class="font-label-md text-label-md text-on-surface">An tâm xác nhận</strong>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Bạn có thể tiếp tục liên lạc hoặc trao đổi công việc bình thường.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bonafide tech raw -->
+<div class="p-3 rounded-lg bg-white/80 shadow-sm flex flex-col gap-1 font-code-md text-code-md text-on-surface-variant">
+<div class="flex justify-between items-center">
+<span>Điểm raw score: <strong class="text-[#005f2e]">+20.4500</strong> (Ngưỡng: 0.0000)</span>
+<span>Thời gian: <strong>0.40s</strong></span>
+</div>
+<span class="text-[11px] truncate">Mã băm: d2192fb966451ce9ac44a88f01bba290</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Gradio Diagnostic & Operational Toolbar -->
+<div class="rounded-xl bg-surface-container-lowest p-space-md shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md flex-wrap text-on-surface-variant font-label-md text-label-md">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary-container animate-ping"></span>
+<span class="text-on-surface font-semibold">Gradio Inference Engine v4.38</span>
+</div>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">memory</span>
+        Backend: PyTorch CUDA (A10G Cluster)
+      </span>
+<span class="text-outline-variant">•</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+        Độ trễ trung bình: <strong>~0.39s</strong>
+</span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+<a class="px-2.5 py-1 rounded-lg hover:bg-surface-container transition-colors flex items-center gap-1 text-primary font-semibold" href="#">
+<span class="material-symbols-outlined text-[16px]">terminal</span>
+        RESTful API
+      </a>
+<a class="px-2.5 py-1 rounded-lg hover:bg-surface-container transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">help</span>
+        Trợ giúp
+      </a>
+<a class="px-2.5 py-1 rounded-lg hover:bg-surface-container transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">code</span>
+        HuggingFace Space
+      </a>
+</div>
+</div>
+</div>
+<!-- Interactive Client-side Script for Gradio States -->
+<script>
+  let isPlaying = false;
+  let playInterval = null;
+  let currentSecond = 4;
+  const maxDuration = 12;
+
+  function togglePlayState() {
+    const icon = document.getElementById('play-icon');
+    const timeDisplay = document.getElementById('play-time');
+    isPlaying = !isPlaying;
+    
+    if (isPlaying) {
+      icon.textContent = 'pause';
+      playInterval = setInterval(() => {
+        currentSecond++;
+        if (currentSecond > maxDuration) {
+          currentSecond = 0;
+        }
+        const s = currentSecond < 10 ? '0' + currentSecond : currentSecond;
+        timeDisplay.textContent = `0:${s} / 0:12`;
+      }, 1000);
+    } else {
+      icon.textContent = 'play_arrow';
+      clearInterval(playInterval);
+    }
+  }
+
+  function showVerdict(type) {
+    const spoofBox = document.getElementById('verdict-spoof-box');
+    const bonafideBox = document.getElementById('verdict-bonafide-box');
+    const tabSpoof = document.getElementById('tab-spoof');
+    const tabBonafide = document.getElementById('tab-bonafide');
+
+    if (type === 'spoof') {
+      spoofBox.classList.remove('hidden');
+      bonafideBox.classList.add('hidden');
+      tabSpoof.className = "px-3 py-1 rounded font-label-sm text-label-sm transition-all bg-error-container text-on-error-container font-semibold shadow-sm flex items-center gap-1";
+      tabBonafide.className = "px-3 py-1 rounded font-label-sm text-label-sm transition-all text-on-surface-variant hover:text-on-surface flex items-center gap-1";
+    } else {
+      spoofBox.classList.add('hidden');
+      bonafideBox.classList.remove('hidden');
+      tabBonafide.className = "px-3 py-1 rounded font-label-sm text-label-sm transition-all bg-[#2ECC71] text-white font-semibold shadow-sm flex items-center gap-1";
+      tabSpoof.className = "px-3 py-1 rounded font-label-sm text-label-sm transition-all text-on-surface-variant hover:text-on-surface flex items-center gap-1";
+    }
+  }
+
+  function loadSample(sampleType) {
+    const title = document.getElementById('player-file-title');
+    const timeDisplay = document.getElementById('play-time');
+    currentSecond = 0;
+    timeDisplay.textContent = '0:00 / 0:12';
+    
+    if (sampleType === 'spoof') {
+      title.textContent = "tin_nhan_muon_tien_gap.mp3";
+      showVerdict('spoof');
+    } else if (sampleType === 'bonafide') {
+      title.textContent = "cuoc_goi_nguoi_than_xac_thuc.wav";
+      showVerdict('bonafide');
+    } else {
+      title.textContent = "gia_danh_nhan_vien_ngan_hang.m4a";
+      showVerdict('spoof');
+    }
+  }
+
+  function runAnalysis() {
+    const btn = document.getElementById('analyze-btn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<span class="material-symbols-outlined text-[24px] animate-spin">refresh</span><span>Đang phân tích phổ âm học... (0.39s)</span>`;
+    btn.classList.add('opacity-80', 'pointer-events-none');
+    
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.classList.remove('opacity-80', 'pointer-events-none');
+    }, 450);
+  }
+
+  function toggleDetails() {
+    const content = document.getElementById('tech-details-content');
+    const arrow = document.getElementById('details-arrow');
+    if (content.classList.contains('hidden')) {
+      content.classList.remove('hidden');
+      arrow.textContent = 'expand_more';
+    } else {
+      content.classList.add('hidden');
+      arrow.textContent = 'expand_less';
+    }
+  }
+</script></div></main><footer class="w-full bg-surface-container-low shadow-[0_-1px_8px_rgba(15,23,42,0.02)]"><div class="max-w-[1440px] mx-auto px-margin py-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-primary text-[20px]">verified_user</span><span><strong>Bảo vệ quyền riêng tư:</strong> Âm thanh được phân tích trực tiếp trên bộ nhớ RAM và xóa hủy ngay lập tức, không lưu trữ giọng nói gốc. Tuân thủ Nghị định 13/2023/NĐ-CP.</span></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">memory</span>Powered by Gradio</span><span class="text-outline-variant">•</span><span>ViTrueVoice AI Engine © 2025</span></div></div></footer></body></html>

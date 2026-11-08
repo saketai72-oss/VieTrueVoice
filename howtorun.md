@@ -196,13 +196,20 @@ python scripts/benchmark_latency.py --no-pooling
 Hệ thống cung cấp 4 phương thức demo linh hoạt:
 
 ### Cách 1: Giao diện Web Trực Quan (Gradio Web UI — Khuyên Dùng Cho Người Dùng & Thuyết Trình)
-Giao diện thân thiện tối giản $\le 3$ thao tác, thiết kế riêng cho người lớn tuổi / gia đình:
+Giao diện Dark Forensics Lab đạt chuẩn thiết kế Stitch v2.4, tối giản $\le 3$ thao tác cho người cao tuổi, tích hợp toàn diện các góc nhìn số liệu khoa học:
 ```bash
 python scripts/demo_predict.py --web
 # hoặc: python src/app/ui.py
 ```
-- Mở trình duyệt tại: `http://localhost:7860`
-- Kéo thả file âm thanh (hoặc bấm mic thu trực tiếp) $\rightarrow$ Bấm **"🔍 2. KIỂM TRA NGAY"** $\rightarrow$ Nhận kết quả trực quan (Xanh: Giọng thật / Đỏ: Cảnh báo giả mạo kèm khuyến cáo phòng chống lừa đảo).
+- Mở trình duyệt tại: `http://localhost:7860` (hoặc `http://localhost:8000` khi chạy bằng Docker).
+- **Thử nghiệm nhanh**: 3 nút Preset mẫu đối chứng 1-click (Spoof F5-TTS, Giọng thật SPK_0004, Spoof Zalo Opus nén).
+- **Kết quả trực quan**: Thẻ cảnh báo nổi bật (Xanh: Giọng thật / Đỏ: Cảnh báo Deepfake kèm khuyến cáo khẩn cấp chống chuyển tiền và bảo vệ mã OTP).
+- **Thanh đo độ tin cậy**: Thang đo phần trăm xác suất đã hiệu chuẩn Platt Scaling (0% - 100%).
+- **Chỉ số kỹ thuật**: Điểm Raw Score, Thời gian suy luận (latency), Cửa sổ phân tích Multi-window Max-Pooling, Tỷ lệ năng lượng cao tần >4kHz phát hiện vết vocoder.
+- **Biểu đồ khoa học trực quan**:
+  1. *Mel-Spectrogram (80 Mels, log dBFS)*: Thể hiện dải tần 0 - 8kHz kèm đường ranh giới cắt cao tần 4.0kHz của vocoder HiFi-GAN.
+  2. *Biểu đồ sóng âm đồng bộ (Raw Time-Domain Waveform)*: Hiển thị dạng sóng thời gian thực.
+  3. *Bản đồ chú ý nơ-ron (Grad-CAM Temporal Saliency)*: Trọng số kích hoạt phát hiện chính xác vùng thời gian phát sinh tín hiệu giả mạo.
 
 ### Cách 2: Thử Nghiệm Nhanh Trên Dòng Lệnh (CLI Demo)
 Thực hiện phân loại tức thời trên terminal:

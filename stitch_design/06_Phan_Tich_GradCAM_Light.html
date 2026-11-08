@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html lang="vi"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><title>ViTrueVoice - Nhận Diện Deepfake Giọng Nói Tiếng Việt</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error-container":"#ffdad6","on-secondary":"#ffffff","surface-dim":"#cbdbf5","tertiary-fixed":"#6bfe9c","on-secondary-fixed":"#0d1c2f","inverse-primary":"#80d5cb","primary-fixed":"#9cf2e8","secondary-container":"#d5e3fd","on-tertiary-container":"#a2ffb8","background":"#f8f9ff","on-tertiary-fixed":"#00210c","on-surface":"#0b1c30","on-secondary-container":"#57657b","on-primary":"#ffffff","surface-container-low":"#eff4ff","tertiary-container":"#007a3e","surface-variant":"#d3e4fe","error":"#ba1a1a","surface-tint":"#006a63","on-primary-container":"#a3faef","secondary-fixed-dim":"#b9c7e0","primary-fixed-dim":"#80d5cb","surface-container-highest":"#d3e4fe","outline":"#6e7977","tertiary":"#005f2e","on-error-container":"#93000a","on-tertiary-fixed-variant":"#005228","on-background":"#0b1c30","inverse-surface":"#213145","on-tertiary":"#ffffff","surface":"#f8f9ff","inverse-on-surface":"#eaf1ff","on-secondary-fixed-variant":"#3a485c","on-primary-fixed":"#00201d","outline-variant":"#bdc9c6","secondary-fixed":"#d5e3fd","primary":"#005c55","on-surface-variant":"#3e4947","tertiary-fixed-dim":"#4ae183","on-primary-fixed-variant":"#00504a","surface-bright":"#f8f9ff","on-error":"#ffffff","surface-container-high":"#dce9ff","primary-container":"#0f766e","secondary":"#515f74","surface-container-lowest":"#ffffff","surface-container":"#e5eeff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"1.5rem","space-2xl":"3rem","margin":"2rem","space-lg":"1.5rem","space-sm":"0.5rem","space-xl":"2rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"code-md":["JetBrains Mono"],"body-lg":["Be Vietnam Pro"],"headline-lg":["Be Vietnam Pro"],"label-sm":["Be Vietnam Pro"],"body-md":["Be Vietnam Pro"],"label-lg":["Be Vietnam Pro"],"display-lg":["Be Vietnam Pro"],"headline-sm":["Be Vietnam Pro"],"label-md":["Be Vietnam Pro"],"body-sm":["Be Vietnam Pro"],"headline-md":["Be Vietnam Pro"]},"fontSize":{"code-md":["13px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"500"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"0em","fontWeight":"400"}],"label-lg":["14px",{"lineHeight":"20px","letterSpacing":"0.02em","fontWeight":"600"}],"display-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"0em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"18px","letterSpacing":"0.03em","fontWeight":"500"}],"body-sm":["13px",{"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"400"}],"headline-md":["22px",{"lineHeight":"30px","letterSpacing":"-0.01em","fontWeight":"600"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(15,23,42,0.04)]"><div class="h-20 max-w-[1440px] mx-auto px-margin flex items-center justify-between gap-space-lg"><div class="flex items-center gap-space-md min-w-max"><div class="w-11 h-11 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[24px]">shield_with_heart</span></div><div class="flex flex-col"><div class="flex items-center gap-space-sm"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">ViTrueVoice</span><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-tertiary-container animate-pulse"></span>Mô hình AI: v2.4 Active</span></div><span class="font-body-sm text-body-sm text-on-surface-variant">Hệ thống nhận diện giọng nói Deepfake tiếng Việt</span></div></div><nav class="hidden xl:flex items-center gap-space-xs p-1 bg-surface-container rounded-xl" data-active-classes="bg-primary-container text-on-primary font-semibold shadow-sm"><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="kiem-tra-am-thanh" href="#">Kiểm tra âm thanh</a><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="lich-su-phan-tich" href="#">Lịch sử phân tích</a><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="huong-dan-phong-chong" href="#">Hướng dẫn phòng chống lừa đảo</a><a class="px-space-md py-2 rounded-lg font-label-lg text-label-lg text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="tai-lieu-api" href="#">Tài liệu API</a></nav><div class="flex items-center gap-space-sm min-w-max"><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Cài đặt Gradio Runtime" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><button class="w-9 h-9 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="Môi trường xử lý an toàn" type="button"><span class="material-symbols-outlined text-[20px]">lock</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Modal Forensic Window Container (Light Mode Analytical Suite) -->
+<div class="w-full max-w-[1400px] mx-auto px-space-md py-space-lg flex flex-col gap-space-lg">
+<!-- HEADER SECTION -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-md">
+<!-- Upper Lab Metadata & Action Badges -->
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-sm">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-primary font-code-md text-code-md shadow-xs">
+<span class="material-symbols-outlined text-[18px]">biotech</span>
+            PHÒNG LAB KỸ THUẬT PHÂN TÍCH ÂM HỌC v2.4.9 (LIGHT FORENSIC SUITE)
+          </span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-error font-label-md text-label-md shadow-xs">
+<span class="w-2 h-2 rounded-full bg-error animate-ping"></span>
+            CẢNH BÁO: PHÁT HIỆN ARTIFACTS TỔNG HỢP HI-FI GAN (99.9% SPOOF)
+          </span>
+</div>
+<!-- Quick Functional Utilities -->
+<div class="flex items-center gap-space-sm">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md shadow-xs">
+<span class="material-symbols-outlined text-[18px] text-error">picture_as_pdf</span>
+            Xuất Báo Cáo PDF
+          </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors font-label-md text-label-md shadow-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">download</span>
+            Xuất Dữ Liệu (.npy / .csv)
+          </button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:bg-surface-variant flex items-center justify-center transition-colors" title="Đóng cửa sổ modal">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Main Headline & File Identity Card -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md pt-space-xs">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Phân Tích Âm Học Chuyên Sâu: Mel-Spectrogram &amp; Grad-CAM Attention Map
+          </h1>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-space-md text-on-surface-variant font-code-md text-code-md mt-1">
+<span class="flex items-center gap-1 text-on-surface font-semibold">
+<span class="material-symbols-outlined text-[16px] text-primary-container">audio_file</span>
+              tin_nhan_muon_tien_gap.mp3
+            </span>
+<span>• Thời lượng: <strong class="text-on-surface">12.4s</strong> (198,400 samples)</span>
+<span>• Lấy mẫu: <strong class="text-on-surface">16,000 Hz 16-bit Mono</strong></span>
+<span>• Chuẩn giải mã: <strong class="text-on-surface">PCM WAV (Linear)</strong></span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-2 rounded-lg">
+<div class="w-3 h-3 rounded-full bg-error"></div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Trạng thái phân loại</span>
+<span class="font-label-lg text-label-lg text-error">Giọng Nói Nhân Tạo (Deepfake AI)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- TOOLBAR & PARAMETER FILTERS -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+<!-- Analytical Tabs -->
+<div class="flex items-center gap-1.5 p-1 bg-surface-container-low rounded-lg overflow-x-auto">
+<button class="px-space-md py-1.5 rounded-md bg-primary-container text-on-primary font-label-md text-label-md shadow-xs flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">graphic_eq</span>
+          Mel-Spectrogram (80 Mels)
+        </button>
+<button class="px-space-md py-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">show_chart</span>
+          Raw Waveform
+        </button>
+<button class="px-space-md py-1.5 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">waves</span>
+          Phase &amp; Instant Freq
+        </button>
+<button class="px-space-md py-1.5 rounded-md bg-secondary-container text-on-secondary-fixed font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">visibility</span>
+          Grad-CAM (XAI Active)
+        </button>
+</div>
+<!-- Live Inspection Tweaks -->
+<div class="flex flex-wrap items-center gap-space-sm text-on-surface-variant font-code-md text-code-md">
+<span class="px-2.5 py-1 rounded bg-surface-container-low">Dải tần: <strong>0 - 8.0 kHz</strong></span>
+<span class="px-2.5 py-1 rounded bg-surface-container-low">dBFS: <strong>[-80..0]</strong></span>
+<span class="px-2.5 py-1 rounded bg-surface-container-low">FFT: <strong>1024</strong></span>
+<span class="px-2.5 py-1 rounded bg-surface-container-low flex items-center gap-1">
+<span class="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-primary to-error"></span>
+          Viridis / Magma
+        </span>
+</div>
+</div>
+<!-- MAIN VISUALIZATION STACK (Waveform, Mel-Spectrogram, Grad-CAM) -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-lg flex flex-col gap-space-lg">
+<!-- PART 1: RAW TIME-DOMAIN WAVEFORM -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">1. Biểu đồ Sóng Âm Đồng Bộ (Raw Time-Domain Waveform)</span>
+<span class="font-code-md text-code-md text-on-surface-variant">[16-bit PCM Amplitude: -1.0 .. +1.0]</span>
+</div>
+<span class="font-code-md text-code-md text-primary font-semibold">Tốc độ khung: 20ms Hanning</span>
+</div>
+<div class="relative w-full h-24 bg-surface-container-low rounded-lg p-2 overflow-hidden flex flex-col justify-between">
+<!-- Time Grid Markers -->
+<div class="absolute inset-0 flex justify-between px-4 pointer-events-none opacity-20">
+<div class="w-px h-full bg-outline"></div>
+<div class="w-px h-full bg-outline"></div>
+<div class="w-px h-full bg-outline"></div>
+<div class="w-px h-full bg-outline"></div>
+<div class="w-px h-full bg-outline"></div>
+<div class="w-px h-full bg-outline"></div>
+</div>
+<!-- Highlight Region (04.2s - 08.9s) -->
+<div class="absolute top-0 bottom-0 left-[34%] right-[28%] bg-error-container/40 z-10 flex flex-col justify-between p-1">
+<span class="self-center bg-error text-on-error font-code-md text-[11px] px-2 py-0.5 rounded-full shadow-xs">
+              VÙNG BẤT THƯỜNG VOCODER [04.2s - 08.9s]
+            </span>
+<span class="text-right text-error font-code-md text-[10px] font-semibold">Lệch pha &amp; Phổ phẳng</span>
+</div>
+<!-- SVG Waveform Simulation -->
+<svg class="w-full h-full relative z-0" preserveaspectratio="none" viewbox="0 0 1000 80">
+<!-- Natural Voice Baseline (Mint / Teal) -->
+<path d="M0,40 Q15,20 30,40 T60,40 T90,15 T120,40 T150,55 T180,40 T210,18 T240,40 T270,62 T300,40 T340,30" fill="none" stroke="#007a3e" stroke-linecap="round" stroke-width="2.2"></path>
+<!-- Spoofed / Vocoder Glitched Segment (Coral Red) -->
+<path d="M340,30 Q355,5 370,40 T400,75 T430,2 T460,78 T490,4 T520,76 T550,6 T580,74 T610,8 T640,72 T670,10 T700,70 T720,40" fill="none" stroke="#ba1a1a" stroke-linecap="round" stroke-width="2.6"></path>
+<!-- Ending Segment (Mint) -->
+<path d="M720,40 Q750,22 780,40 T810,58 T840,32 T870,48 T900,38 T930,42 T960,39 T1000,40" fill="none" stroke="#007a3e" stroke-linecap="round" stroke-width="2.2"></path>
+</svg>
+<!-- Time Ruler Labeling -->
+<div class="flex justify-between text-on-surface-variant font-code-md text-[11px] relative z-20">
+<span>0.0s</span>
+<span>2.5s</span>
+<span>4.2s (Bắt đầu Spoof)</span>
+<span>7.0s</span>
+<span>8.9s (Kết thúc Spoof)</span>
+<span>12.4s</span>
+</div>
+</div>
+</div>
+<!-- PART 2: MEL-SPECTROGRAM (80 MELS LOG-POWER HEATMAP) -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">2. Bản đồ nhiệt Mel-Spectrogram (80 Mels Log-Power Heatmap)</span>
+<span class="font-code-md text-code-md text-on-surface-variant">[Viridis High-Contrast Mode]</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant">Filterbanks: 80 Bands • Cửa sổ: 25ms</span>
+</div>
+<div class="flex items-stretch gap-space-md">
+<!-- Frequency Axis Label -->
+<div class="flex flex-col justify-between text-right font-code-md text-[11px] text-on-surface-variant py-2 w-16">
+<span>8.0 kHz</span>
+<span>6.0 kHz</span>
+<span>4.0 kHz</span>
+<span>2.0 kHz</span>
+<span>0.0 kHz</span>
+</div>
+<!-- Heatmap Main Display Area -->
+<div class="flex-1 h-64 bg-surface-container-low rounded-lg relative overflow-hidden flex flex-col justify-end p-2">
+<!-- Heatmap Gradient Layers Representing Mel-Frequencies -->
+<div class="absolute inset-0 bg-gradient-to-t from-primary/30 via-tertiary/20 to-surface-container-high opacity-90"></div>
+<!-- Synthetic Mel Harmonic Bands Simulation via Layered Shapes -->
+<div class="absolute inset-x-0 bottom-6 h-12 bg-gradient-to-r from-primary-fixed-dim/80 via-primary-container/90 to-primary-fixed-dim/80 opacity-70 blur-[1px]"></div>
+<div class="absolute inset-x-0 bottom-24 h-8 bg-gradient-to-r from-secondary-fixed/60 via-primary-fixed/80 to-secondary-fixed/60 opacity-60 blur-[2px]"></div>
+<!-- ANOMALY MARKER BOX (4.2s - 8.9s) -->
+<div class="absolute top-4 bottom-8 left-[34%] right-[28%] rounded-lg bg-error/10 p-space-sm flex flex-col justify-between z-20">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded-md text-error font-code-md text-[11px] shadow-sm w-fit">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+                Mất dải cao tần (&gt;4.0kHz) &amp; Họa âm phi tự nhiên của HiFi-GAN Vocoder
+              </div>
+<!-- Anomaly Cutoff Line -->
+<div class="w-full flex items-center justify-between text-error font-code-md text-[10px]">
+<span class="bg-surface-container-lowest px-1.5 py-0.5 rounded shadow-xs">High-freq collapse @ 4.12 kHz</span>
+<span class="bg-surface-container-lowest px-1.5 py-0.5 rounded shadow-xs">Synthetic spectral tilt</span>
+</div>
+</div>
+<!-- Grid Overlay Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-15">
+<div class="h-px w-full bg-on-surface"></div>
+<div class="h-px w-full bg-on-surface"></div>
+<div class="h-px w-full bg-on-surface"></div>
+<div class="h-px w-full bg-on-surface"></div>
+</div>
+<!-- Scrubber Indicator (Synchronized with 06.1s Playhead) -->
+<div class="absolute top-0 bottom-0 left-[48%] w-0.5 bg-primary z-30 flex flex-col justify-start items-center">
+<span class="bg-primary text-on-primary font-code-md text-[10px] px-1.5 py-0.5 rounded -mt-2">06.1s</span>
+</div>
+<!-- Spectrogram Time Labels -->
+<div class="flex justify-between text-on-surface-variant font-code-md text-[11px] relative z-20 pt-1">
+<span>0.0s</span>
+<span>2.5s</span>
+<span>5.0s</span>
+<span>7.5s</span>
+<span>10.0s</span>
+<span>12.4s</span>
+</div>
+</div>
+<!-- Colorbar dBFS Scale -->
+<div class="flex flex-col items-center justify-between font-code-md text-[11px] text-on-surface-variant w-14 py-2">
+<span>0 dB</span>
+<div class="w-4 h-48 rounded bg-gradient-to-t from-surface-variant via-primary-container to-error shadow-inner"></div>
+<span>-80 dB</span>
+</div>
+</div>
+</div>
+<!-- PART 3: GRAD-CAM ATTENTION MAP (AI EXPLAINABILITY - XAI) -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">3. Bản đồ chú ý mạng nơ-ron Grad-CAM Attention Map (RawNet2 + AASIST)</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              XAI Saliency Active
+            </span>
+</div>
+<span class="font-code-md text-code-md text-error font-medium">Attention Score: 0.984 @ Convmixing Layer 4</span>
+</div>
+<div class="flex items-stretch gap-space-md">
+<!-- Frequency / Channel Latents -->
+<div class="flex flex-col justify-between text-right font-code-md text-[11px] text-on-surface-variant py-2 w-16">
+<span>Ch. 128</span>
+<span>Ch. 96</span>
+<span>Ch. 64</span>
+<span>Ch. 32</span>
+<span>Ch. 0</span>
+</div>
+<!-- Attention Map Grid Heat Display -->
+<div class="flex-1 h-44 bg-surface-container-low rounded-lg relative overflow-hidden flex flex-col justify-between p-2">
+<!-- Background Neural Weight Field -->
+<div class="absolute inset-0 bg-surface-container-high/40"></div>
+<!-- Attention Hotspots (Simulating Grad-CAM Saliency) -->
+<div class="absolute left-[36%] top-6 w-32 h-20 bg-error/70 rounded-full blur-xl pointer-events-none"></div>
+<div class="absolute left-[48%] top-10 w-28 h-16 bg-error/80 rounded-full blur-lg pointer-events-none"></div>
+<div class="absolute left-[56%] top-4 w-36 h-24 bg-error/70 rounded-full blur-xl pointer-events-none"></div>
+<div class="absolute left-[10%] top-12 w-20 h-10 bg-primary/20 rounded-full blur-md pointer-events-none"></div>
+<!-- High Saliency Box Annotation -->
+<div class="absolute top-2 bottom-6 left-[34%] right-[28%] rounded bg-error-container/20 flex flex-col justify-between p-2 pointer-events-none">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest/90 px-2 py-0.5 rounded text-error font-code-md text-[10px] w-fit shadow-xs">
+<span class="material-symbols-outlined text-[12px]">center_focus_strong</span>
+                Trọng số kích hoạt cực đại: Lớp tích chập ResBlock-4 (Deepfake Trigger)
+              </div>
+</div>
+<!-- Time markers -->
+<div></div>
+<div class="flex justify-between text-on-surface-variant font-code-md text-[11px] relative z-20">
+<span>0.0s</span>
+<span>2.5s</span>
+<span>4.2s (Hotspot Ingestion)</span>
+<span>8.9s (Hotspot Decay)</span>
+<span>12.4s</span>
+</div>
+</div>
+<!-- Colorbar Saliency Normalized Scale -->
+<div class="flex flex-col items-center justify-between font-code-md text-[11px] text-on-surface-variant w-14 py-2">
+<span class="text-error font-semibold">1.0</span>
+<div class="w-4 h-32 rounded bg-gradient-to-t from-surface-variant via-primary to-error shadow-inner"></div>
+<span>0.0</span>
+</div>
+</div>
+</div>
+</div>
+<!-- PART 4: FORENSIC METRICS & EXPLAINABILITY SCORECARDS -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Card 1: Temporal Saliency -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Độ Tin Cậy Định Vị</span>
+<span class="material-symbols-outlined text-primary text-[20px]">timer</span>
+</div>
+<div>
+<span class="font-display-lg text-display-lg text-on-surface tracking-tight font-bold">99.2%</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Temporal Saliency định vị chính xác phân đoạn nhân tạo [04.2s - 08.9s].</p>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 99.2%"></div>
+</div>
+</div>
+<!-- Card 2: Phase Discontinuity -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Lệch Pha Âm Học</span>
+<span class="material-symbols-outlined text-error text-[20px]">warning</span>
+</div>
+<div>
+<span class="font-headline-md text-headline-md text-error tracking-tight font-bold">Nghiêm trọng</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Phase Discontinuity vượt ngưỡng an toàn (+3.4π rad). Triệt tiêu pha nhân tạo.</p>
+</div>
+<span class="inline-flex items-center gap-1 font-code-md text-code-md text-error bg-error-container px-2 py-0.5 rounded w-fit">
+          Δθ = 1.84 rad/ms (Dị thường)
+        </span>
+</div>
+<!-- Card 3: Vocoder Signature -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Dấu Vết Thuật Toán</span>
+<span class="material-symbols-outlined text-primary-container text-[20px]">fingerprint</span>
+</div>
+<div>
+<span class="font-headline-md text-headline-md text-on-surface tracking-tight font-bold">HiFi-GAN v1</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Độ tương thích BigVGAN / HiFi-GAN Vocoder đạt 98.7% qua phân tích Multi-Period Discriminator.</p>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded w-fit">
+          Khớp Mel-Loss &gt; 0.72
+        </span>
+</div>
+<!-- Card 4: Cryptographic Proof & Hash Integrity -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col justify-between gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Toàn Vẹn Dữ Liệu SHA-256</span>
+<span class="material-symbols-outlined text-tertiary-container text-[20px]">verified</span>
+</div>
+<div>
+<span class="font-code-md text-code-md text-on-surface font-semibold break-all select-all block bg-surface-container-low p-2 rounded">
+            78b84276a3e04f41b2c4e9089901aa7d
+          </span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Đã ký số niêm phong mẫu vật forensic theo chuẩn Bộ Công An.</p>
+</div>
+<div class="flex items-center gap-1 text-tertiary font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+          Chuỗi đối soát hợp lệ
+        </div>
+</div>
+</div>
+<!-- BOTTOM ACTION & EXPORT STRIP -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">info</span>
+<span>Phân tích được tạo tự động bởi mạng nơ-ron sâu ViTrueVoice Forensics Engine v2.4. Khuyến nghị gửi giám định viên tư pháp nếu dùng trong tố tụng.</span>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<button class="px-space-md py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-colors flex items-center gap-1.5 shadow-xs">
+<span class="material-symbols-outlined text-[18px]">grid_on</span>
+          Xem ma trận Attention Matrix
+        </button>
+<button class="px-space-md py-2 rounded-lg bg-primary-container hover:opacity-95 text-on-primary font-label-md text-label-md transition-transform active:scale-95 flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px]">image</span>
+          Tải ảnh phổ độ phân giải cao (Hi-Res PNG)
+        </button>
+</div>
+</div>
+</div>
+</div></main><footer class="w-full bg-surface-container-low shadow-[0_-1px_8px_rgba(15,23,42,0.02)]"><div class="max-w-[1440px] mx-auto px-margin py-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm"><span class="material-symbols-outlined text-primary text-[20px]">verified_user</span><span><strong>Bảo vệ quyền riêng tư:</strong> Âm thanh được phân tích trực tiếp trên bộ nhớ RAM và xóa hủy ngay lập tức, không lưu trữ giọng nói gốc. Tuân thủ Nghị định 13/2023/NĐ-CP.</span></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">memory</span>Powered by Gradio</span><span class="text-outline-variant">•</span><span>ViTrueVoice AI Engine © 2025</span></div></div></footer></body></html>

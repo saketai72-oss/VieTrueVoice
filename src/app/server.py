@@ -224,8 +224,9 @@ def create_app(
                 preload=False,
             )
             app = gr.mount_gradio_app(app, gradio_demo, path="/")
-        except Exception:
-            pass
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning("Gradio mount failed: %s", exc)
 
     return app
 
