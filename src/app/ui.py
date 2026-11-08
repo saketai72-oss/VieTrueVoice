@@ -67,6 +67,20 @@ body, .gradio-container {
     color: #F8FAFC !important;
 }
 
+/* Force dark styling on all Gradio blocks and plot panels */
+.gradio-container .block,
+.gradio-container .panel,
+.gradio-container .form,
+.gradio-container [data-testid="plot"],
+.gradio-container div[class*="plot"] {
+    background-color: #0B0F17 !important;
+    border-color: var(--border-color) !important;
+}
+
+.gradio-container svg text {
+    fill: #94A3B8 !important;
+}
+
 .lab-header {
     background: rgba(19, 27, 46, 0.95);
     border: 1px solid var(--border-color);
@@ -430,11 +444,11 @@ def make_predict_fn(
                 <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: #072414; border: 1px solid rgba(46, 204, 113, 0.4); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="color: #2ECC71; font-size: 18px;">✅</span>
-                        <span style="font-size: 12px; color: #F8FAFC;"><strong>Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
+                        <span style="font-size: 12px; color: #F8FAFC;"><strong style="color: #86EFAC;">Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="color: #2ECC71; font-size: 18px;">🤝</span>
-                        <span style="font-size: 12px; color: #F8FAFC;"><strong>An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
+                        <span style="font-size: 12px; color: #F8FAFC;"><strong style="color: #86EFAC;">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
                     </div>
                 </div>
             </div>
@@ -700,12 +714,14 @@ def build_ui(
                 cam_plot = gr.Plot(label="Trọng Số Chú Ý Mạng Nơ-ron (Vùng Kích Hoạt Quyết Định Giả Mạo)")
 
         # Presets click handlers
-        sample_spoof_path = "data/spoof_f5tts/CV_08110ec9e6/CV_08110ec9e6_prompt_000.wav"
-        sample_bonafide_path = "data/bonafide_ref/SPK_0004/SPK_0004_01.wav"
-        sample_zalo_path = "data/spoof_f5tts/CV_08110ec9e6/CV_08110ec9e6_prompt_000_opus_zalo.wav"
+        samples_dir = Path(__file__).resolve().parent / "samples"
+        sample_spoof_path = str(samples_dir / "sample_spoof_f5tts.wav")
+        sample_bonafide_path = str(samples_dir / "sample_bonafide_spk0004.wav")
+        sample_zalo_path = str(samples_dir / "sample_spoof_zalo_opus.wav")
 
         def _load_sample_audio(path: str) -> str:
-            return path if Path(path).exists() else ""
+            p = Path(path)
+            return str(p) if p.exists() else ""
 
         sample_spoof_btn.click(fn=lambda: _load_sample_audio(sample_spoof_path), outputs=[audio_input])
         sample_bonafide_btn.click(fn=lambda: _load_sample_audio(sample_bonafide_path), outputs=[audio_input])
