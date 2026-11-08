@@ -860,18 +860,13 @@ def build_ui(
                     </div>
                     """
                 )
-            with gr.Column(scale=3, min_width=200):
+            with gr.Column(scale=1, min_width=50):
                 with gr.Row(elem_classes=["header-actions-row"]):
                     theme_btn = gr.Button(
                         "☀️",
                         size="sm",
                         elem_id="theme-toggle-btn",
                         min_width=40,
-                        scale=0,
-                    )
-                    ram_badge = gr.HTML(
-                        """<div style="padding: 0 12px; height: 38px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border-color); font-size: 12px; color: var(--text-secondary); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; box-sizing: border-box;">🔒 RAM In-Memory</div>""",
-                        min_width=130,
                         scale=0,
                     )
                 theme_btn.click(fn=None, js=THEME_TOGGLE_JS)
