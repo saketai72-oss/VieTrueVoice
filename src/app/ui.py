@@ -20,7 +20,7 @@ import gradio as gr
 import numpy as np
 import torch
 
-from src.app.decision import classify_score
+from src.app.decision import classify_score, platt_calibrator
 from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE, _default_model_loader, _pad_or_crop
 from src.preprocessing.audio_loader import load_audio
 
@@ -43,6 +43,7 @@ def make_predict_fn(
     threshold: float = 0.0,
     model_loader: Callable[[Path | str, str], Any] | None = None,
     preload: bool = True,
+    calibrator: Callable[..., float] | None = platt_calibrator,
 ) -> Callable[[Any], tuple[str, str, str]]:
     active_model = model
     loader = model_loader or _default_model_loader
@@ -105,12 +106,12 @@ def make_predict_fn(
             raw_score = float(score_out.item() if hasattr(score_out, "item") else score_out[0])
 
         latency = time.perf_counter() - t0
-        decision = classify_score(raw_score, threshold=threshold)
+        decision = classify_score(raw_score, threshold=threshold, calibrator=calibrator)
 
         if decision.is_bonafide:
             verdict = "🛡️ GIỌNG THẬT (BONAFIDE)"
             if decision.confidence_calibrated and decision.confidence is not None:
-                conf_str = f"Độ tin cậy: {decision.confidence * 100:.1f}%"
+                conf_str = f"Độ tin cậy: {decision.confidence * 100:.1f}% (Platt Scaling)"
             else:
                 conf_str = f"Chưa hiệu chuẩn xác suất (Điểm thô: {raw_score:+.2f} | Ngưỡng: {threshold:+.2f})"
             detail = (
@@ -121,7 +122,7 @@ def make_predict_fn(
         else:
             verdict = "⚠️ CẢNH BÁO: GIỌNG NÓI GIẢ MẠO (SPOOF)"
             if decision.confidence_calibrated and decision.confidence is not None:
-                conf_str = f"Độ tin cậy phát hiện: {decision.confidence * 100:.1f}%"
+                conf_str = f"Độ tin cậy phát hiện: {decision.confidence * 100:.1f}% (Platt Scaling)"
             else:
                 conf_str = f"Chưa hiệu chuẩn xác suất (Điểm thô: {raw_score:+.2f} | Ngưỡng: {threshold:+.2f})"
             detail = (
@@ -142,6 +143,7 @@ def build_ui(
     device: str = "cpu",
     threshold: float = 0.0,
     preload: bool = True,
+    calibrator: Callable[..., float] | None = platt_calibrator,
 ) -> gr.Blocks:
     predict_fn = make_predict_fn(
         model=model,
@@ -149,6 +151,7 @@ def build_ui(
         device=device,
         threshold=threshold,
         preload=preload,
+        calibrator=calibrator,
     )
 
     with gr.Blocks(title="ViTrueVoice — Hệ Thống Phát Hiện Giọng Nói Giả Mạo") as demo:

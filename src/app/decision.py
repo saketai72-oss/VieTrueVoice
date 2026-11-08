@@ -127,10 +127,29 @@ def calibrate_by_enrollment(
     )
 
 
+# Empirically fitted Platt Scaling parameter on 11,450 Zalo development utterances (out/dev_zalo_scores_b_zalo.csv)
+PLATT_SCALE_K: float = 0.3569
+
+
+def platt_calibrator(raw_score: float, threshold: float = 0.0) -> float:
+    """Calculate calibrated posterior probability of the predicted class using Platt Scaling.
+
+    Trained on 11,450 development set utterances (out/dev_zalo_scores_b_zalo.csv).
+    Guarantees:
+      - At raw_score == threshold: confidence is 50.0%.
+      - raw_score > threshold: returns P(bona_fide) in [0.50, 1.00).
+      - raw_score < threshold: returns P(spoof) in [0.50, 1.00).
+    """
+    diff = float(raw_score - threshold)
+    prob_bona = 1.0 / (1.0 + float(np.exp(-PLATT_SCALE_K * diff)))
+    conf = prob_bona if diff >= 0 else (1.0 - prob_bona)
+    return float(max(0.50, min(0.9999, conf)))
+
+
 def classify_score(
     raw_score: float,
     threshold: float = 0.0,
-    calibrator: Callable[[float], float] | None = None,
+    calibrator: Callable[..., float] | None = None,
 ) -> DecisionResult:
     """Classify a raw model score using a configured threshold and optional calibrator.
 
@@ -143,7 +162,11 @@ def classify_score(
     label = 1 if is_bonafide else 0
 
     if calibrator is not None:
-        confidence = float(calibrator(raw_score))
+        try:
+            conf_val = float(calibrator(raw_score, threshold))
+        except TypeError:
+            conf_val = float(calibrator(raw_score))
+        confidence = float(max(0.0001, min(0.9999, conf_val)))
         confidence_calibrated = True
     else:
         confidence = None

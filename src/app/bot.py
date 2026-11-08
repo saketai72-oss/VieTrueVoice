@@ -14,7 +14,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 from telegram.request import HTTPXRequest
 
-from src.app.decision import classify_score
+from src.app.decision import classify_score, platt_calibrator
 from src.app.server import DEFAULT_CHECKPOINT, TARGET_SAMPLE_COUNT, _default_model_loader, _load_audio_in_memory
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 
@@ -37,6 +37,7 @@ async def handle_voice_message(
     checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
     device: str = "cpu",
     threshold: float = 0.0,
+    calibrator: Any = platt_calibrator,
 ) -> None:
     if not update.message:
         return
@@ -105,14 +106,19 @@ async def handle_voice_message(
             raw_score = float(pool_scores(scores_np, mode="max"))
 
         latency = time.perf_counter() - t0
-        decision = classify_score(raw_score, threshold=threshold)
+        decision = classify_score(raw_score, threshold=threshold, calibrator=calibrator)
+
+        if decision.confidence_calibrated and decision.confidence is not None:
+            conf_str = f"`{decision.confidence * 100:.1f}%` (Đã hiệu chuẩn Platt Scaling)"
+        else:
+            conf_str = "Chưa hiệu chuẩn xác suất phần trăm"
 
         if decision.is_bonafide:
             reply = (
                 f"🛡️ *KẾT QUẢ: GIỌNG NÓI THẬT (BONAFIDE)*\n\n"
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
                 f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
-                f"• *Độ tin cậy*: Chưa hiệu chuẩn xác suất phần trăm\n"
+                f"• *Độ tin cậy*: {conf_str}\n"
                 f"• *Thời gian xử lý*: `{latency:.2f}s`\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
                 f"✅ *Đánh giá*: Âm thanh tự nhiên, không phát hiện dấu vết công nghệ tổng hợp giọng nói AI."
@@ -122,7 +128,7 @@ async def handle_voice_message(
                 f"🚨 *CẢNH BÁO LỪA ĐẢO: ĐÂY LÀ GIỌNG NÓI GIẢ MẠO (SPOOF)*\n\n"
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
                 f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
-                f"• *Độ tin cậy*: Chưa hiệu chuẩn xác suất phần trăm\n"
+                f"• *Độ tin cậy phát hiện*: {conf_str}\n"
                 f"• *Thời gian xử lý*: `{latency:.2f}s`\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
                 f"⚠️ *KHUYẾN CÁO KHẨN CẤP*:\n"
@@ -141,6 +147,7 @@ def build_bot_app(
     model: Any = None,
     device: str = "cpu",
     threshold: float = 0.0,
+    calibrator: Any = platt_calibrator,
 ) -> Application:
     request_cfg = HTTPXRequest(
         connection_pool_size=16,
@@ -154,7 +161,14 @@ def build_bot_app(
     app.add_handler(CommandHandler("help", start_command))
 
     async def _on_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await handle_voice_message(update, context, model=model, device=device, threshold=threshold)
+        await handle_voice_message(
+            update,
+            context,
+            model=model,
+            device=device,
+            threshold=threshold,
+            calibrator=calibrator,
+        )
 
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, _on_voice))
     return app

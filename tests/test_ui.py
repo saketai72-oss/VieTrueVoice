@@ -31,6 +31,16 @@ def test_make_predict_fn_bonafide():
     verdict, conf_text, detail_text = predict_fn(audio_tuple)
 
     assert "THẬT" in verdict
+    assert "Độ tin cậy" in conf_text or "Chưa hiệu chuẩn" in conf_text
+    assert "Xác thực" in detail_text
+
+
+def test_make_predict_fn_uncalibrated():
+    predict_fn = make_predict_fn(model=StubModel(score_val=2.0), device="cpu", calibrator=None)
+    audio_tuple = (16000, np.zeros(16000, dtype=np.float32))
+    verdict, conf_text, detail_text = predict_fn(audio_tuple)
+
+    assert "THẬT" in verdict
     assert "Chưa hiệu chuẩn" in conf_text or "Điểm thô" in conf_text
     assert "Xác thực" in detail_text
 

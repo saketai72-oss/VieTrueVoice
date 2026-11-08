@@ -139,7 +139,7 @@ def test_api_does_not_return_fake_100_percent_confidence(tmp_path):
 def test_ui_predict_fn_does_not_display_100_percent_uncalibrated():
     """Gradio UI must state that probabilities are uncalibrated and not print '100.0%'."""
     model = ParametricStubModel(score_val=-11.9034)
-    predict_fn = make_predict_fn(model=model, device="cpu", threshold=0.0)
+    predict_fn = make_predict_fn(model=model, device="cpu", threshold=0.0, calibrator=None)
     audio_tuple = (16000, np.zeros(16000, dtype=np.float32))
 
     verdict, conf_text, detail_text = predict_fn(audio_tuple)
@@ -148,6 +148,19 @@ def test_ui_predict_fn_does_not_display_100_percent_uncalibrated():
     assert "100%" not in conf_text
     assert "Chưa hiệu chuẩn" in conf_text or "Điểm thô" in conf_text or "Score" in conf_text
     assert "-11.9" in detail_text or "-11.9" in conf_text
+
+
+def test_ui_predict_fn_displays_calibrated_platt_scaling():
+    """Gradio UI displays calibrated probability when calibrator is provided."""
+    model = ParametricStubModel(score_val=3.5409)
+    predict_fn = make_predict_fn(model=model, device="cpu", threshold=0.0)
+    audio_tuple = (16000, np.zeros(16000, dtype=np.float32))
+
+    verdict, conf_text, detail_text = predict_fn(audio_tuple)
+
+    assert "THẬT" in verdict
+    assert "78.0%" in conf_text
+    assert "Platt Scaling" in conf_text
 
 
 @pytest.mark.anyio
@@ -176,6 +189,35 @@ async def test_bot_handle_voice_does_not_display_100_percent_uncalibrated():
     reply = update.message.reply_text.call_args[0][0]
     assert "100.0%" not in reply
     assert "100%" not in reply
+
+
+@pytest.mark.anyio
+async def test_bot_handle_voice_displays_calibrated_platt_scaling():
+    """Telegram bot displays Platt Scaling confidence for user voice verification."""
+    update = MagicMock()
+    context = MagicMock()
+    file_mock = AsyncMock()
+    raw_wav = make_synthetic_wav_bytes()
+
+    async def fake_download(buf):
+        buf.write(raw_wav)
+        return buf
+
+    file_mock.download_to_memory = fake_download
+    voice_mock = MagicMock()
+    voice_mock.get_file = AsyncMock(return_value=file_mock)
+    update.message.voice = voice_mock
+    update.message.audio = None
+    update.message.reply_text = AsyncMock()
+
+    model = ParametricStubModel(score_val=3.5409)
+    await handle_voice_message(update, context, model=model, device="cpu", threshold=0.0)
+
+    update.message.reply_text.assert_called_once()
+    reply = update.message.reply_text.call_args[0][0]
+    assert "GIỌNG NÓI THẬT" in reply
+    assert "78.0%" in reply
+    assert "Platt Scaling" in reply
 
 
 # ─────────────────────────────────────────────────────────────────────────────
