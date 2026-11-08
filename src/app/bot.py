@@ -85,6 +85,7 @@ async def handle_voice_message(
             return
 
         audio_hash = hashlib.sha256(raw_bytes).hexdigest()[:16]
+        t_infer = time.perf_counter()
         audio_data = _load_audio_in_memory(raw_bytes)
         # Multi-window extraction (STUBBORN_FACT: repeat padding <64k, single batched forward pass)
         windows_batch = extract_window_batch(
@@ -105,7 +106,8 @@ async def handle_voice_message(
                 scores_np = np.array([float(scores_np)])
             raw_score = float(pool_scores(scores_np, mode="max"))
 
-        latency = time.perf_counter() - t0
+        latency_infer = time.perf_counter() - t_infer
+        latency_total = time.perf_counter() - t0
         decision = classify_score(raw_score, threshold=threshold, calibrator=calibrator)
 
         if decision.confidence_calibrated and decision.confidence is not None:
@@ -119,7 +121,7 @@ async def handle_voice_message(
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
                 f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
                 f"• *Độ tin cậy*: {conf_str}\n"
-                f"• *Thời gian xử lý*: `{latency:.2f}s`\n"
+                f"• *Thời gian xử lý*: `{latency_infer:.2f}s` (Mạng Telegram: `{latency_total:.2f}s`)\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
                 f"✅ *Đánh giá*: Âm thanh tự nhiên, không phát hiện dấu vết công nghệ tổng hợp giọng nói AI."
             )
@@ -129,7 +131,7 @@ async def handle_voice_message(
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
                 f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
                 f"• *Độ tin cậy phát hiện*: {conf_str}\n"
-                f"• *Thời gian xử lý*: `{latency:.2f}s`\n"
+                f"• *Thời gian xử lý*: `{latency_infer:.2f}s` (Mạng Telegram: `{latency_total:.2f}s`)\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
                 f"⚠️ *KHUYẾN CÁO KHẨN CẤP*:\n"
                 f"1. Tuyệt đối *KHÔNG* chuyển tiền hoặc cung cấp mã OTP.\n"

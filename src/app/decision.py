@@ -143,7 +143,7 @@ def platt_calibrator(raw_score: float, threshold: float = 0.0) -> float:
     diff = float(raw_score - threshold)
     prob_bona = 1.0 / (1.0 + float(np.exp(-PLATT_SCALE_K * diff)))
     conf = prob_bona if diff >= 0 else (1.0 - prob_bona)
-    return float(max(0.50, min(0.9999, conf)))
+    return float(max(0.50, min(0.9990, conf)))
 
 
 def classify_score(
