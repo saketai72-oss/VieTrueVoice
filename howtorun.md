@@ -239,7 +239,7 @@ Hệ thống ViTrueVoice được đóng gói container hóa theo chuẩn bảo 
    ```bash
    docker build -t vitruevoice:latest .
    ```
-2. **Khởi chạy container độc lập (FastAPI Server)**:
+2. **Khởi chạy container độc lập (FastAPI Server + Gradio Web UI)**:
    ```bash
    docker run -d \
      --name vitruevoice-api \
@@ -247,23 +247,30 @@ Hệ thống ViTrueVoice được đóng gói container hóa theo chuẩn bảo 
      -v ${PWD}/out:/app/out:ro \
      vitruevoice:latest
    ```
-3. **Kiểm tra trạng thái sức khỏe container**:
-   ```bash
-   curl http://localhost:8000/health
-   ```
+3. **Truy cập các giao diện trực tiếp tại cổng 8000**:
+   - **Gradio Web UI**: Mở trình duyệt tại `http://localhost:8000/` (Giao diện web trực quan kiểm tra giọng nói thật/giả kèm Platt Scaling confidence).
+   - **Swagger API Docs**: `http://localhost:8000/docs`
+   - **Kiểm tra trạng thái sức khỏe container**:
+     ```bash
+     curl http://localhost:8000/health
+     ```
 
-### 6.2 Khởi chạy toàn bộ hệ thống bằng Docker Compose (API + Telegram Bot)
-Điều phối tự động 2 dịch vụ độc lập (`vitruevoice-api` và `vitruevoice-bot`):
+### 6.2 Khởi chạy toàn bộ hệ thống bằng Docker Compose (Web UI + REST API + Telegram Bot)
+Điều phối tự động toàn bộ dịch vụ trong 1 lệnh duy nhất:
 ```bash
 # Thiết lập token bot (nếu có):
 export TELEGRAM_BOT_TOKEN="token_cua_ban"
 
-# Khởi chạy ngầm:
+# Khởi chạy ngầm toàn bộ dịch vụ:
 docker compose up -d
 
 # Xem log hoạt động:
 docker compose logs -f
 ```
+Sau khi khởi chạy:
+- Truy cập Web UI tại: `http://localhost:8000/`
+- Truy cập REST API Swagger tại: `http://localhost:8000/docs`
+- Telegram Bot hoạt động song song tại nền tảng Telegram nhận diện tin nhắn thoại.
 
 ### 6.3 Triển khai tự động trên máy chủ AWS EC2 (G4dn.xlarge GPU hoặc T3.large CPU)
 1. Cấu hình quyền tối thiểu IAM Role theo mẫu: `deploy/aws/iam_policy.json`.

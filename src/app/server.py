@@ -213,6 +213,20 @@ def create_app(
         )
         app.include_router(zalo_router)
 
+        # Mount Gradio Web UI at "/" sharing the exact same model in RAM
+        try:
+            import gradio as gr
+            from src.app.ui import build_ui
+            gradio_demo = build_ui(
+                model=model,
+                device=device,
+                threshold=threshold,
+                preload=False,
+            )
+            app = gr.mount_gradio_app(app, gradio_demo, path="/")
+        except Exception:
+            pass
+
     return app
 
 
