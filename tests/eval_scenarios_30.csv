@@ -1,0 +1,31 @@
+case_id,text_content,label,source_or_engine,codec,device,environment,raw_score,prediction,is_correct,verdict_level,scenario_description
+TC-01,"Con đang trên đường về, mẹ nấu cơm chưa?",Bona fide,SPK_0004,clean_16khz,iPhone 14,Quiet room,16.38,1,True,SAFE_BONAFIDE,Giao tiếp gia đình thường ngày
+TC-02,"Gửi giúp anh tài liệu cuộc họp sáng nay qua Zalo nhé.",Bona fide,SPK_0005,aac_zalo_76k,Samsung Galaxy S22,Office,13.94,1,True,SAFE_BONAFIDE,Trao đổi công việc văn phòng
+TC-03,"Alo em à, anh đang ở ngân hàng chuẩn bị nộp tiền cọc.",Bona fide,SPK_0006,opus_zalo_24k,Xiaomi Redmi,Living room,12.02,1,True,SAFE_BONAFIDE,Cuộc gọi xác nhận giao dịch
+TC-04,"Chiều nay có tiết học chuyên ngành không em?",Bona fide,SPK_0007,amr_nb,Nokia Phone,Outdoor,9.84,1,True,SAFE_BONAFIDE,Thoại viễn thông GSM di động
+TC-05,"Dạ em chào anh, bên em gọi thông báo lịch phỏng vấn.",Bona fide,SPK_0004,g711_alaw,VoIP Softphone,Office,14.04,1,True,SAFE_BONAFIDE,Tổng đài chăm sóc khách hàng
+TC-06,"Bố ơi, cuối tuần này con về quê giỗ ông nhé.",Bona fide,SPK_0005,clean_16khz,iPhone 13,Quiet room,15.82,1,True,SAFE_BONAFIDE,Tin nhắn thoại hỏi thăm gia đình
+TC-07,"Hôm nay trời mưa to quá, anh nhớ mang theo áo mưa.",Bona fide,SPK_0006,aac_zalo_76k,Samsung A52,Street noise,11.45,1,True,SAFE_BONAFIDE,Nhắn thoại trên đường đi
+TC-08,"Dạ thưa cô, em xin phép nộp bài tập lớn qua email ạ.",Bona fide,SPK_0007,opus_zalo_24k,Laptop Mic,Quiet room,13.20,1,True,SAFE_BONAFIDE,Sinh viên liên hệ giảng viên
+TC-09,"Chị ơi kiểm tra giúp em đơn hàng này đã xuất kho chưa.",Bona fide,SPK_0004,amr_nb,Oppo Phone,Warehouse,8.75,1,True,SAFE_BONAFIDE,Kiểm tra kho hàng qua điện thoại
+TC-10,"Bác sĩ dặn mẹ uống thuốc đúng giờ sau bữa ăn nhé.",Bona fide,SPK_0005,g711_alaw,Landline PSTN,Living room,12.60,1,True,SAFE_BONAFIDE,Dặn dò sức khỏe gia đình
+TC-11,"Tối nay nhóm mình họp online lúc tám giờ nha mọi người.",Bona fide,SPK_0006,clean_16khz,USB Condenser,Home studio,17.10,1,True,SAFE_BONAFIDE,Trao đổi học nhóm trực tuyến
+TC-12,"Anh đã nhận được chuyển khoản tiền ăn trưa của em rồi.",Bona fide,SPK_0007,aac_zalo_76k,iPhone 12,Cafeteria,10.95,1,True,SAFE_BONAFIDE,Xác nhận thanh toán thường nhật
+TC-13,"Chào bạn, mình là Tài bên câu lạc bộ An toàn thông tin.",Bona fide,SPK_0001,clean_16khz,Studio Mic,Quiet room,10.05,1,True,SAFE_BONAFIDE,Giọng trầm nam ngoại lai V6
+TC-14,"Sáng mai trường tổ chức hội thảo khoa học ở hội trường E.",Bona fide,SPK_0003,aac_zalo_76k,Samsung S21,Hallway,8.40,1,True,SAFE_BONAFIDE,Thông báo hoạt động học thuật
+TC-15,"Em gửi biên lai chuyển tiền qua tin nhắn cho anh rồi đó.",Bona fide,SPK_0004,opus_zalo_24k,Xiaomi Note,Home,14.25,1,True,SAFE_BONAFIDE,Giao dịch chuyển tiền thân nhân
+TC-16,"Mẹ ơi con bị tai nạn đang cấp cứu ở Chợ Rẫy, chuyển tiền gấp!",Spoof,F5-TTS,aac_zalo_76k,Synthesized,Urgent noise,-18.73,0,True,DANGER_SPOOF,Giả danh con cái cấp cứu bệnh viện
+TC-17,"Tài khoản VCB của quý khách bị tạm khóa, vui lòng đọc OTP.",Spoof,VieNeu-TTS,opus_zalo_24k,Synthesized,Clean,-14.32,0,True,DANGER_SPOOF,Mạo danh ngân hàng lừa lấy OTP
+TC-18,"Chuyển gấp cho anh 20 triệu vào số tài khoản này giải quyết việc.",Spoof,F5-TTS,amr_nb,Synthesized,Phone filter,-11.87,0,True,DANGER_SPOOF,Giả mạo sếp yêu cầu chuyển tiền gấp
+TC-19,"Mẹ ơi chuyển tiền đóng học phí cho con vào tài khoản thầy giáo.",Spoof,F5-TTS,clean_16khz,Synthesized,Leading silence cut 200ms,-5.41,0,True,DANGER_SPOOF,Tấn công cắt đầu né bộ lọc ASR
+TC-20,"Chú ơi chuyển khoản tiền hàng giúp cháu vào tài khoản này nhé.",Spoof,VieNeu-TTS,aac_zalo_76k,Synthesized,Pitch shift -6st,-0.18,0,False,STEPUP_WARNING,Tấn công hạ cao độ vào vùng vàng
+TC-21,"Công an quận 1 yêu cầu anh phối hợp điều tra đường dây rửa tiền.",Spoof,F5-TTS,g711_alaw,Synthesized,Official tone,-16.50,0,True,DANGER_SPOOF,Mạo danh cơ quan công an đe dọa
+TC-22,"Alo anh hả, xe em bị hỏng giữa đường, bắn cho em năm trăm nghìn.",Spoof,VieNeu-TTS,amr_nb,Synthesized,Street noise,-12.40,0,True,DANGER_SPOOF,Giả bạn bè nhờ giúp đỡ lúc khó khăn
+TC-23,"Chúc mừng thuê bao trúng thưởng xe máy, đóng phí để nhận giải.",Spoof,F5-TTS,opus_zalo_24k,Synthesized,Music background,-15.15,0,True,DANGER_SPOOF,Lừa đảo trúng thưởng tri ân
+TC-24,"Em đang cầm tiền cọc nhà, gửi thêm năm mươi triệu nữa để ký.",Spoof,VieNeu-TTS,clean_16khz,Synthesized,Reverb,-13.80,0,True,DANGER_SPOOF,Lừa đảo tiền cọc bất động sản
+TC-25,"Tài khoản chứng khoán của bạn đang có lãi lớn, nạp thêm vốn ngay.",Spoof,F5-TTS,aac_zalo_76k,Synthesized,Office,-14.90,0,True,DANGER_SPOOF,Dụ dỗ đầu tư tài chính lừa đảo
+TC-26,"Anh ơi cô giáo thông báo bé bị sốt co giật ở trường mầm non.",Spoof,F5-TTS,amr_nb,Synthesized,Crying sound,-10.60,0,True,DANGER_SPOOF,Đánh vào tâm lý phụ huynh có con nhỏ
+TC-27,"Xác nhận đổi SIM 4G miễn phí để không bị khóa liên lạc hai chiều.",Spoof,VieNeu-TTS,g711_alaw,Synthesized,Call center,-12.95,0,True,DANGER_SPOOF,Lừa đảo chiếm đoạt SIM viễn thông
+TC-28,"Hạ cao độ âm vực sâu: Bạn thân đây, gửi lại cho mình khoản nợ cũ.",Spoof,F5-TTS,aac_zalo_76k,Synthesized,Pitch -4st,-3.25,0,True,DANGER_SPOOF,Tấn công hạ pitch âm vực sâu
+TC-29,"Cắt đầu 400ms: Dạ anh cho em xin mã số xác thực gửi về máy ạ.",Spoof,VieNeu-TTS,opus_zalo_24k,Synthesized,Truncated 400ms,-2.10,0,True,DANGER_SPOOF,Cắt xén đầu tệp né khung thời gian
+TC-30,"Tin nhắn thoại mượn tiền gấp từ bạn đại học lâu ngày không gặp.",Spoof,VieNeu-TTS,clean_16khz,Synthesized,Whispering noise,0.45,1,False,FALSE_NEGATIVE,Ca lọt giả mạo âm sắc chưa từng thấy

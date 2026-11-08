@@ -23,38 +23,45 @@
 
 ---
 
-## 🚀 Đang Triển Khai (v0.3.0 - Must #2 / W5)
-Mục tiêu: Xây dựng kiến trúc mô hình Baseline LFCC+GMM / AASIST & SSL-AASIST, thiết kế đối chứng CH1/CH2 và vòng lặp huấn luyện 2 pha trên Kaggle GPU.
+## ✅ Đã Hoàn Thành (v0.3.0 - Must #2 / W5 & v0.4.0 - Must #3)
+Mục tiêu: Xây dựng kiến trúc mô hình Baseline LFCC+GMM / AASIST & SSL-AASIST, thiết kế đối chứng CH1/CH2, vòng lặp huấn luyện 2 pha, tinh chỉnh Zalo B_zalo V6, dịch vụ thời gian thực và trọn bộ minh chứng Checkpoint W05.
 
-- [ ] **1. Kiến trúc mô hình Baseline & SSL-AASIST (`src/models/`)**
-  - [ ] Cài đặt LFCC + GMM baseline trên CPU làm mốc so sánh cơ sở.
-  - [ ] Cài đặt SincConv, ResNet và mô-đun HS-GAL trong `src/models/aasist.py`.
-  - [ ] Cài đặt backbone wav2vec 2.0 tiếng Việt kết hợp AASIST graph trong `src/models/ssl_aasist.py`.
-- [ ] **2. Dataset, DataLoader & Hàm mất mát Weighted Cross-Entropy (`src/training/`)**
-  - [ ] PyTorch Dataset tích hợp RawBoost và Codec simulation on-the-fly.
-  - [ ] Dynamic Weighted Cross-Entropy Loss $w_c = \frac{N}{2 \cdot N_c}$ (tương ứng $\approx [0.33, 0.67]$ cho tỷ lệ Spoof:Bona 2:1; không dùng đồng thời sampler).
-- [ ] **3. Vòng lặp huấn luyện 2 pha & Entry-point Kaggle (`train.py` / `train.ipynb`)**
-  - [ ] Pha 1: Warm-up 3–5 epochs đóng băng wav2vec 2.0 (lr=1e-4).
-  - [ ] Pha 2: Tinh chỉnh toàn mạng với lr=1e-6, kiểm chứng đối chứng:
-    - Nhánh đối chứng nén (CH1/H1): Có vs Không tăng cường nén kênh thoại.
-    - Nhánh tổng quát hóa (CH2/H2): Seen TTS (F5-TTS) vs Unseen TTS (VieNeu-TTS).
-  - [ ] Lưu checkpoint `best_model.pt` theo EER và minDCF thấp nhất trên tập Dev (tập người nói độc lập, không chứa `SPK_xxxx`).
+- [x] **1. Kiến trúc mô hình Baseline & SSL-AASIST (`src/models/`)**
+  - [x] Cài đặt LFCC + GMM baseline trên CPU làm mốc so sánh cơ sở (`src/models/baseline_gmm.py`).
+  - [x] Cài đặt SincConv, ResNet và mô-đun HS-GAL trong `src/models/aasist.py`.
+  - [x] Cài đặt backbone wav2vec 2.0 tiếng Việt kết hợp AASIST graph trong `src/models/ssl_aasist.py`.
+- [x] **2. Dataset, DataLoader & Hàm mất mát Weighted Cross-Entropy / AM-Softmax (`src/training/`)**
+  - [x] PyTorch Dataset tích hợp RawBoost và Codec simulation on-the-fly (`src/training/dataset.py`).
+  - [x] Dynamic Weighted Cross-Entropy Loss $w_c = \frac{N}{2 \cdot N_c}$ và Additive Margin Softmax (AM-Softmax, margin $m=0.35$, scale $s=30.0$).
+  - [x] Huấn luyện thành công Checkpoint B_zalo V6 Local (`out/zalo_b_zalo_v6_local/best_model.pt`, Dev EER 2.60%).
+- [x] **3. Đánh giá đối chứng & Nghiệm thu 3 Cổng (Gates)**
+  - [x] Nhánh đối chứng nén (CH1/H1): PASS (giảm 40.46% AMR-NB, 47.55% G.711).
+  - [x] Nhánh tổng quát hóa (CH2/H2): Seen TTS (F5-TTS, EER 3.28%) vs Unseen TTS (VieNeu-TTS, EER 21.88%–26.34%).
+  - [x] Multi-window Max-Pooling inference (`src/preprocessing/pooling.py`): Gate 2 trên 4 SPK đối chứng đạt 100.0% (64/64), trên 5 SPK nghiệm thu đạt 96.4% (81/84); Gate 3 Zalo AAC/Opus EER 1.56%–1.73%.
+  - [x] Chuyển `SPK_0001` sang train (`train_zalo.csv`), khóa 5 tình nguyện viên (`SPK_0003`..`0007`, 84 clips) làm Bộ nghiệm thu độc lập chính thức.
+- [x] **4. Dịch vụ người dùng & Minh chứng Checkpoint W05**
+  - [x] Xây dựng dịch vụ suy luận thời gian thực qua FastAPI `/api/v1/predict` (`src/app/server.py`), Web Gradio (`src/app/ui.py`) và Bot Telegram (`src/app/bot.py`, `scripts/run_bot.py`).
+  - [x] Chuẩn đo độ trễ NFR-1 với 30 lần lặp (`benchmarks/latency_benchmark.csv`), trung vị 66.3ms (model) / 352ms (API) $\le 3.0$s; log ẩn danh SHA-256 (`benchmarks/latency_log.json`).
+  - [x] Xây dựng bộ dữ liệu đánh giá thực tế (AI Eval) 30 ca (`tests/eval_scenarios_30.csv`).
+  - [x] Sơ đồ quy trình Trước/Sau tích hợp (Hitachi CRM/ERP): giảm từ 280s (5 bước làm tay) xuống 3.5s (2 bước tự động), tiết kiệm 98.7% thời gian.
+  - [x] Chương 2 hoàn chỉnh (18 trang học thuật, tích hợp công thức, trích dẫn IEEE và bóc tách âm học).
+  - [x] Hoàn thành 100% cả 3 chứng chỉ AWS Academy Gói A (Cloud Foundations, Security, Architecting).
+  - [x] Xuất bản báo cáo chính thức `DACN_2380601959_NguyenThanhTai_W05.docx` và `DACN_2380601959_NguyenThanhTai_W05.pdf`.
 
 ---
 
-## 🧊 Kế Hoạch Tiếp Theo (v0.4.0 - Must #3 & v1.0.0 - W6–W8)
-- [ ] Xây dựng dịch vụ suy luận thời gian thực qua FastAPI `/api/v1/predict`, giao diện Gradio ($\le 3$ thao tác) và Bot Telegram (phản hồi $\le 3$ giây).
-- [ ] Script kiểm thử độ trễ 30 lần liên tiếp (`scripts/benchmark_latency.py`) đảm bảo trung vị $\le 3$ giây và log ẩn danh SHA-256 (`benchmarks/latency_log.json`).
-- [ ] Xây dựng bộ AI Eval $\ge 30$ tình huống (trong đó $\ge 10$ ca từng nhận diện sai).
-- [ ] Đóng gói Docker trên Amazon EC2, Amazon ECR, Amazon S3 (Lifecycle auto-delete), CloudWatch và Red Team Pilot cùng CLB An toàn thông tin HUTECH.
+## 🧊 Kế Hoạch Tiếp Theo (v1.0.0 - W7–W8)
+- [ ] Đóng gói Docker trên Amazon EC2, Amazon ECR, Amazon S3 (Lifecycle auto-delete), AWS CloudWatch.
+- [ ] Thử nghiệm Pilot & Red Team cùng CLB An toàn thông tin HUTECH.
+- [ ] Hoàn thiện báo cáo toàn văn Đề tài (Chương 3 & 4) và chuẩn bị slide bảo vệ trước Hội đồng chuyên môn.
 
 ---
 
 ## An Toàn & Xác Minh
 1. Giao thức Tái cấu trúc Không mất mát: Tuyệt đối không thay đổi hành vi của mã nếu không có yêu cầu.
-2. Bắt buộc chạy `pytest tests/ -v` kiểm tra trước mỗi commit (đảm bảo giữ vững 31/31 tests xanh).
+2. Bắt buộc chạy `pytest tests/ -v` kiểm tra trước mỗi commit (đảm bảo giữ vững 274/274 tests xanh 100%).
 3. Mọi commit do AI thực hiện bắt buộc có tiền tố `[AI]`.
 
 ---
 
-*v0.2.3 — 2026-10-26 (Frozen Pipeline V14)*
+*v0.4.4 — 2026-11-08 (W05 Complete)*
