@@ -49,60 +49,151 @@ CUSTOM_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 :root {
-    --bg-dark: #0B0F17;
-    --card-bg: #131B2E;
-    --card-high: #1E293B;
+    /* Dark Mode Defaults (Lab Kỹ thuật) */
+    --bg-page: #0B0F17;
+    --bg-surface: #131B2E;
+    --bg-card: #111827;
+    --bg-stat: #111827;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
     --border-color: #334155;
-    --teal-primary: #14B8A6;
-    --teal-glow: #71F8E4;
-    --red-spoof: #EF4444;
-    --red-bg: #2A0F14;
-    --green-bonafide: #2ECC71;
-    --green-bg: #072414;
+    --header-bg: rgba(19, 27, 46, 0.95);
+    --header-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --btn-primary-bg: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
+    --btn-primary-border: #71F8E4;
+    --btn-primary-text: #00201C;
+    --btn-secondary-bg: #1E293B;
+    --btn-secondary-text: #F8FAFC;
+    --btn-secondary-border: #334155;
+    --spoof-box-bg: #1F0B0F;
+    --spoof-box-border: #EF4444;
+    --spoof-title-color: #F87171;
+    --spoof-desc-color: #FCA5A5;
+    --spoof-action-text: #FCA5A5;
+    --action-spoof-bg: #18080B;
+    --action-spoof-border: rgba(239, 68, 68, 0.4);
+    --bona-box-bg: #072414;
+    --bona-box-border: #2ECC71;
+    --bona-title-color: #86EFAC;
+    --bona-desc-color: #86EFAC;
+    --bona-action-text: #F8FAFC;
+    --bona-action-text-bold: #86EFAC;
+    --action-bona-bg: #072414;
+    --action-bona-border: rgba(46, 204, 113, 0.4);
+    --conf-box-bg: #111827;
+    --track-bg: #0F172A;
+    --hash-row-bg: #0B0F17;
+    --hash-row-border: #1E293B;
+    --plot-card-bg: #0B0F17;
+    --teal-accent: #71F8E4;
+    --toggle-bg: rgba(20, 184, 166, 0.12);
+    --toggle-border: rgba(20, 184, 166, 0.4);
+    --toggle-text: #71F8E4;
+}
+
+body.theme-light {
+    /* Light Mode Variables (ViTrueVoice Light) */
+    --bg-page: #F8F9FF;
+    --bg-surface: #FFFFFF;
+    --bg-card: #EFF4FF;
+    --bg-stat: #FFFFFF;
+    --text-primary: #0B1C30;
+    --text-secondary: #3E4947;
+    --text-muted: #64748B;
+    --border-color: #D3E4FE;
+    --header-bg: #FFFFFF;
+    --header-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+    --btn-primary-bg: linear-gradient(135deg, #007A6E 0%, #005C55 100%);
+    --btn-primary-border: #004D47;
+    --btn-primary-text: #FFFFFF;
+    --btn-secondary-bg: #F1F5F9;
+    --btn-secondary-text: #0F172A;
+    --btn-secondary-border: #CBD5E1;
+    --spoof-box-bg: #FEF2F2;
+    --spoof-box-border: #EF4444;
+    --spoof-title-color: #B91C1C;
+    --spoof-desc-color: #991B1B;
+    --spoof-action-text: #991B1B;
+    --action-spoof-bg: #FFFFFF;
+    --action-spoof-border: #FECACA;
+    --bona-box-bg: #F0FDF4;
+    --bona-box-border: #16A34A;
+    --bona-title-color: #15803D;
+    --bona-desc-color: #166534;
+    --bona-action-text: #1E293B;
+    --bona-action-text-bold: #15803D;
+    --action-bona-bg: #FFFFFF;
+    --action-bona-border: #BBF7D0;
+    --conf-box-bg: #FFFFFF;
+    --track-bg: #E2E8F0;
+    --hash-row-bg: #F8FAFC;
+    --hash-row-border: #E2E8F0;
+    --plot-card-bg: #FFFFFF;
+    --teal-accent: #0F766E;
+    --toggle-bg: #EFF4FF;
+    --toggle-border: #93C5FD;
+    --toggle-text: #1D4ED8;
 }
 
 body, .gradio-container {
-    background-color: var(--bg-dark) !important;
+    background-color: var(--bg-page) !important;
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif !important;
-    color: #F8FAFC !important;
+    color: var(--text-primary) !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Force dark styling on all Gradio blocks and plot panels */
 .gradio-container .block,
 .gradio-container .panel,
-.gradio-container .form,
+.gradio-container .form {
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.gradio-container label,
+.gradio-container span:not([style*="color"]) {
+    color: var(--text-primary);
+}
+
+.gradio-container h1,
+.gradio-container h2,
+.gradio-container h3,
+.gradio-container h4 {
+    color: var(--text-primary) !important;
+}
+
+.gradio-container p {
+    color: var(--text-secondary);
+}
+
 .gradio-container [data-testid="plot"],
 .gradio-container div[class*="plot"] {
-    background-color: #0B0F17 !important;
+    background-color: var(--plot-card-bg) !important;
     border-color: var(--border-color) !important;
 }
 
-.gradio-container svg text {
-    fill: #94A3B8 !important;
-}
-
 .lab-header {
-    background: rgba(19, 27, 46, 0.95);
+    background: var(--header-bg);
     border: 1px solid var(--border-color);
     border-radius: 1rem;
     padding: 1.25rem 1.75rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-}
-
-.lab-banner {
-    background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(19, 27, 46, 0.9) 100%);
-    border: 1px solid rgba(20, 184, 166, 0.3);
-    border-radius: 1rem;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.5rem;
+    box-shadow: var(--header-shadow);
+    transition: all 0.3s ease;
 }
 
 .stat-card {
-    background: #111827;
+    background: var(--bg-stat);
     border: 1px solid var(--border-color);
     border-radius: 0.75rem;
     padding: 0.85rem 1rem;
+    transition: all 0.3s ease;
+}
+
+body.theme-light .stat-card {
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
 }
 
 .pulse-dot {
@@ -122,23 +213,25 @@ body, .gradio-container {
 }
 
 .verdict-box-spoof {
-    background: var(--red-bg);
-    border: 2px solid var(--red-spoof);
+    background: var(--spoof-box-bg);
+    border: 2px solid var(--spoof-box-border);
     border-radius: 1rem;
     padding: 1.5rem;
-    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.25);
+    box-shadow: 0 8px 30px rgba(239, 68, 68, 0.15);
+    transition: all 0.3s ease;
 }
 
 .verdict-box-bonafide {
-    background: var(--green-bg);
-    border: 2px solid var(--green-bonafide);
+    background: var(--bona-box-bg);
+    border: 2px solid var(--bona-box-border);
     border-radius: 1rem;
     padding: 1.5rem;
-    box-shadow: 0 8px 30px rgba(46, 204, 113, 0.25);
+    box-shadow: 0 8px 30px rgba(46, 204, 113, 0.15);
+    transition: all 0.3s ease;
 }
 
 .progress-track {
-    background: #0F172A;
+    background: var(--track-bg);
     border: 1px solid var(--border-color);
     border-radius: 9999px;
     height: 14px;
@@ -163,9 +256,9 @@ body, .gradio-container {
 }
 
 .btn-primary-teal {
-    background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%) !important;
-    border: 1px solid #71F8E4 !important;
-    color: #00201C !important;
+    background: var(--btn-primary-bg) !important;
+    border: 1px solid var(--btn-primary-border) !important;
+    color: var(--btn-primary-text) !important;
     font-weight: 700 !important;
     font-size: 1.05rem !important;
     box-shadow: 0 4px 20px rgba(20, 184, 166, 0.35) !important;
@@ -175,6 +268,32 @@ body, .gradio-container {
 .btn-primary-teal:hover {
     transform: translateY(-1px) !important;
     box-shadow: 0 6px 24px rgba(20, 184, 166, 0.5) !important;
+}
+
+/* Light Mode specific overrides for Gradio native components */
+body.theme-light button:not(.btn-primary-teal) {
+    background: #F1F5F9 !important;
+    border: 1px solid #CBD5E1 !important;
+    color: #0F172A !important;
+}
+
+body.theme-light button:not(.btn-primary-teal):hover {
+    background: #E2E8F0 !important;
+}
+
+body.theme-light .gradio-container .tab-nav button {
+    color: #475569 !important;
+}
+
+body.theme-light .gradio-container .tab-nav button.selected {
+    color: #0F766E !important;
+    border-bottom: 2px solid #0F766E !important;
+    font-weight: 700 !important;
+}
+
+body.theme-light .gradio-container .accordion {
+    background: #FFFFFF !important;
+    border-color: #CBD5E1 !important;
 }
 """
 
@@ -436,32 +555,32 @@ def make_predict_fn(
             verdict_html = f"""
             <div class="verdict-box-bonafide">
                 <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #2ECC71, #1E824C); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 16px rgba(46, 204, 113, 0.4); flex-shrink: 0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
                         🛡️
                     </div>
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                            <span style="font-size: 1.25rem; font-weight: 700; color: #86EFAC;">XÁC THỰC: GIỌNG NÓI TỰ NHIÊN</span>
-                            <span style="padding: 2px 10px; border-radius: 9999px; background: #2ECC71; color: #00210C; font-size: 11px; font-weight: 700; text-transform: uppercase;">Bonafide Audio</span>
+                            <span style="font-size: 1.25rem; font-weight: 700; color: var(--bona-title-color);">XÁC THỰC: GIỌNG NÓI TỰ NHIÊN</span>
+                            <span style="padding: 2px 10px; border-radius: 9999px; background: #10B981; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase;">Bonafide Audio</span>
                         </div>
-                        <p style="margin-top: 0.5rem; font-size: 13.5px; color: #86EFAC; line-height: 1.5;">
+                        <p style="margin-top: 0.5rem; font-size: 13.5px; color: var(--bona-desc-color); line-height: 1.5;">
                             Không tìm thấy bất kỳ dấu hiệu tổng hợp âm thanh bằng AI hay cắt ghép giả mạo. Đường nét cao độ thanh quản và nhiễu vi mô hoàn toàn trùng khớp giọng nói người thật.
                         </p>
                     </div>
                 </div>
-                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: #072414; border: 1px solid rgba(46, 204, 113, 0.4); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--action-bona-bg); border: 1px solid var(--action-bona-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #2ECC71; color: #00210C; font-weight: 800; font-size: 13px; flex-shrink: 0;">✓</span>
-                        <span style="font-size: 12px; color: #F8FAFC;"><strong style="color: #86EFAC;">Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #10B981; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">✓</span>
+                        <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: var(--bona-action-text-bold);">Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #14B8A6; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">🤝</span>
-                        <span style="font-size: 12px; color: #F8FAFC;"><strong style="color: #86EFAC;">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">🤝</span>
+                        <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: var(--bona-action-text-bold);">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
                     </div>
                 </div>
             </div>
             """
-            conf_color = "#2ECC71"
+            conf_color = "#10B981"
             conf_label = "Tự Nhiên (Bonafide)"
         else:
             verdict_html = f"""
@@ -472,22 +591,22 @@ def make_predict_fn(
                     </div>
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                            <span style="font-size: 1.25rem; font-weight: 700; color: #F87171;">CẢNH BÁO: GIỌNG NÓI GIẢ MẠO</span>
+                            <span style="font-size: 1.25rem; font-weight: 700; color: var(--spoof-title-color);">CẢNH BÁO: GIỌNG NÓI GIẢ MẠO</span>
                             <span style="padding: 2px 10px; border-radius: 9999px; background: #EF4444; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase;">Phát hiện Deepfake</span>
                         </div>
-                        <p style="margin-top: 0.5rem; font-size: 13.5px; color: #FCA5A5; line-height: 1.5;">
+                        <p style="margin-top: 0.5rem; font-size: 13.5px; color: var(--spoof-desc-color); line-height: 1.5;">
                             Hệ thống AI nhận diện thấy dấu vết biến điệu nhân tạo (AI Voice Cloning / TTS Synthesis). Có nguy cơ cao đây là cuộc gọi hoặc tin nhắn giả danh để lừa đảo.
                         </p>
                     </div>
                 </div>
-                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: #18080B; border: 1px solid rgba(239, 68, 68, 0.4); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--action-spoof-bg); border: 1px solid var(--action-spoof-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #EF4444; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">✕</span>
-                        <span style="font-size: 12px; color: #FCA5A5;"><strong>TUYỆT ĐỐI KHÔNG:</strong> Không chuyển tiền, không đọc mã OTP hoặc gửi mật khẩu.</span>
+                        <span style="font-size: 12px; color: var(--spoof-action-text);"><strong>TUYỆT ĐỐI KHÔNG:</strong> Không chuyển tiền, không đọc mã OTP hoặc gửi mật khẩu.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #14B8A6; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">📞</span>
-                        <span style="font-size: 12px; color: #F8FAFC;"><strong>GỌI LẠI TRỰC TIẾP:</strong> Gọi điện thoại truyền thống hoặc Video Call để nhìn mặt.</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">📞</span>
+                        <span style="font-size: 12px; color: var(--text-primary);"><strong>GỌI LẠI TRỰC TIẾP:</strong> Gọi điện thoại truyền thống hoặc Video Call để nhìn mặt.</span>
                     </div>
                 </div>
             </div>
@@ -496,27 +615,27 @@ def make_predict_fn(
             conf_label = "Giả Mạo (Deepfake Spoof)"
 
         conf_html = f"""
-        <div style="background: #111827; border: 1px solid #334155; border-radius: 0.75rem; padding: 1rem; margin-top: 0.75rem;">
+        <div style="background: var(--conf-box-bg); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1rem; margin-top: 0.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 13px; font-weight: 600; color: #F8FAFC;">Độ tin cậy phân tích (Platt Scaling Calibrated):</span>
+                <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Độ tin cậy phân tích (Platt Scaling Calibrated):</span>
                 <span style="font-size: 15px; font-weight: 700; color: {conf_color}; font-family: 'JetBrains Mono', monospace;">{conf_pct:.1f}% {conf_label}</span>
             </div>
             <div class="progress-track">
                 <div class="progress-fill-spoof" style="width: {prob_spoof_pct:.1f}%;"></div>
                 <div class="progress-fill-bonafide" style="width: {prob_bona_pct:.1f}%;"></div>
-                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255, 255, 255, 0.6); transform: translateX(-50%); z-index: 2;" title="Ngưỡng phân định θ"></div>
+                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(148, 163, 184, 0.8); transform: translateX(-50%); z-index: 2;" title="Ngưỡng phân định θ"></div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-top: 0.25rem;">
-                <span style="color: {'#EF4444' if not is_bonafide else '#94A3B8'}; font-weight: {'700' if not is_bonafide else '400'};">🔴 Giả Mạo: {prob_spoof_pct:.1f}%</span>
-                <span style="color: #64748B;">Ngưỡng θ: {threshold:.4f} (50%)</span>
-                <span style="color: {'#2ECC71' if is_bonafide else '#94A3B8'}; font-weight: {'700' if is_bonafide else '400'};">🟢 Người Thật: {prob_bona_pct:.1f}%</span>
+                <span style="color: {'#EF4444' if not is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if not is_bonafide else '400'};">🔴 Giả Mạo: {prob_spoof_pct:.1f}%</span>
+                <span style="color: var(--text-muted);">Ngưỡng θ: {threshold:.4f} (50%)</span>
+                <span style="color: {'#10B981' if is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if is_bonafide else '400'};">🟢 Người Thật: {prob_bona_pct:.1f}%</span>
             </div>
         </div>
         """
 
         hf_val = acoustics['hf_ratio']
         if is_bonafide:
-            hf_color = "#2ECC71"
+            hf_color = "#10B981"
             hf_sub = "Dải cao tần tự nhiên"
         else:
             if hf_val < 1.0:
@@ -529,29 +648,29 @@ def make_predict_fn(
         metrics_html = f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.75rem;">
             <div class="stat-card">
-                <div style="font-size: 11px; color: #94A3B8;">Điểm Raw Score</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Điểm Raw Score</div>
                 <div style="font-size: 14px; font-weight: 700; color: {conf_color}; font-family: 'JetBrains Mono', monospace;">{raw_score:+.4f}</div>
-                <div style="font-size: 10px; color: #64748B;">Ngưỡng θ: {threshold:.4f}</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Ngưỡng θ: {threshold:.4f}</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; color: #94A3B8;">Thời gian xử lý</div>
-                <div style="font-size: 14px; font-weight: 700; color: #14B8A6; font-family: 'JetBrains Mono', monospace;">{latency:.3f}s</div>
-                <div style="font-size: 10px; color: #64748B;">NFR1: ≤ 3.0s (PASS)</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Thời gian xử lý</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">{latency:.3f}s</div>
+                <div style="font-size: 10px; color: var(--text-muted);">NFR1: ≤ 3.0s (PASS)</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; color: #94A3B8;">Cửa sổ suy luận</div>
-                <div style="font-size: 14px; font-weight: 700; color: #F8FAFC; font-family: 'JetBrains Mono', monospace;">{n_windows} Cửa sổ</div>
-                <div style="font-size: 10px; color: #64748B;">Max-Pooling Mode</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Cửa sổ suy luận</div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">{n_windows} Cửa sổ</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Max-Pooling Mode</div>
             </div>
             <div class="stat-card">
-                <div style="font-size: 11px; color: #94A3B8;">Năng lượng >4kHz</div>
+                <div style="font-size: 11px; color: var(--text-muted);">Năng lượng >4kHz</div>
                 <div style="font-size: 14px; font-weight: 700; color: {hf_color}; font-family: 'JetBrains Mono', monospace;">{hf_val:.2f}%</div>
                 <div style="font-size: 10px; color: {hf_color};">{hf_sub}</div>
             </div>
         </div>
-        <div style="margin-top: 0.5rem; background: #0B0F17; border: 1px solid #1E293B; border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; justify-content: space-between; font-size: 11px; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">
-            <span>Mã băm SHA-256 đối soát: <strong style="color: #71F8E4;">{audio_sha256[:24]}...</strong></span>
-            <span>Thời lượng: <strong style="color: #F8FAFC;">{acoustics['duration']:.2f}s</strong> | Tần số: 16,000 Hz Mono</span>
+        <div style="margin-top: 0.5rem; background: var(--hash-row-bg); border: 1px solid var(--hash-row-border); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+            <span>Mã băm SHA-256 đối soát: <strong style="color: var(--teal-accent);">{audio_sha256[:24]}...</strong></span>
+            <span>Thời lượng: <strong style="color: var(--text-primary);">{acoustics['duration']:.2f}s</strong> | Tần số: 16,000 Hz Mono</span>
         </div>
         """
 
@@ -577,6 +696,44 @@ def make_predict_fn(
         )
 
     return predict_audio
+
+
+THEME_TOGGLE_JS = """
+() => {
+    const isLight = document.body.classList.contains('theme-light');
+    const btn = document.querySelector('#theme-toggle-btn button') || document.getElementById('theme-toggle-btn');
+    if (isLight) {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('dark');
+        localStorage.setItem('vitruevoice_theme', 'dark');
+        if (btn) btn.innerText = '🌙 Chế độ Lab Kỹ thuật (Dark)';
+    } else {
+        document.body.classList.add('theme-light');
+        document.body.classList.remove('dark');
+        localStorage.setItem('vitruevoice_theme', 'light');
+        if (btn) btn.innerText = '☀️ Chế độ ViTrueVoice (Light)';
+    }
+}
+"""
+
+THEME_INIT_JS = """
+() => {
+    const saved = localStorage.getItem('vitruevoice_theme');
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTheme = urlParams.get('__theme');
+    const isLight = (saved === 'light' || urlTheme === 'light');
+    const btn = document.querySelector('#theme-toggle-btn button') || document.getElementById('theme-toggle-btn');
+    if (isLight) {
+        document.body.classList.add('theme-light');
+        document.body.classList.remove('dark');
+        if (btn) btn.innerText = '☀️ Chế độ ViTrueVoice (Light)';
+    } else {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('dark');
+        if (btn) btn.innerText = '🌙 Chế độ Lab Kỹ thuật (Dark)';
+    }
+}
+"""
 
 
 def build_ui(
@@ -610,37 +767,40 @@ def build_ui(
         # Inject Custom Forensics CSS
         gr.HTML(f"<style>{CUSTOM_CSS}</style>")
 
-        # Header Section
-        gr.HTML(
-            """
-            <div class="lab-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-                <div style="display: flex; align-items: center; gap: 1rem;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #14B8A6, #0F766E); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 20px rgba(20, 184, 166, 0.4);">
-                        🛡️
-                    </div>
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                            <span style="font-size: 1.5rem; font-weight: 700; color: #F8FAFC; letter-spacing: -0.02em;">ViTrueVoice</span>
-                            <span style="background: #111827; border: 1px solid #334155; padding: 2px 10px; border-radius: 9999px; font-size: 12px; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">
-                                <span class="pulse-dot"></span>Mô hình AI: B_zalo V6 Active
-                            </span>
+        # Header Section with Light/Dark Theme Switcher
+        with gr.Row(elem_classes=["lab-header"]):
+            with gr.Column(scale=8):
+                gr.HTML(
+                    """
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #14B8A6, #0F766E); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 20px rgba(20, 184, 166, 0.4); flex-shrink: 0;">
+                            🛡️
                         </div>
-                        <div style="font-size: 13px; color: #94A3B8; margin-top: 2px;">
-                            Phòng Lab phân tích âm thanh Forensics Deepfake qua kênh thoại nén tiếng Việt
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;">ViTrueVoice</span>
+                                <span style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 9999px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">
+                                    <span class="pulse-dot"></span>Mô hình AI: B_zalo V6 Active
+                                </span>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
+                                Phòng Lab phân tích âm thanh Forensics Deepfake qua kênh thoại nén tiếng Việt
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="background: rgba(20, 184, 166, 0.12); border: 1px solid rgba(20, 184, 166, 0.4); color: #71F8E4; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600;">
-                        🌙 Chế độ Lab Kỹ thuật (Dark Mode)
-                    </span>
-                    <span style="background: #1E293B; border: 1px solid #334155; color: #CBD5E1; padding: 4px 10px; border-radius: 8px; font-size: 12px;">
-                        🔒 RAM In-Memory
-                    </span>
-                </div>
-            </div>
-            """
-        )
+                    """
+                )
+            with gr.Column(scale=4, min_width=250):
+                with gr.Row():
+                    theme_btn = gr.Button(
+                        "🌙 Chế độ Lab Kỹ thuật (Dark)",
+                        size="sm",
+                        elem_id="theme-toggle-btn",
+                    )
+                    ram_badge = gr.HTML(
+                        """<div style="padding: 7px 12px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border-color); font-size: 12px; color: var(--text-secondary); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">🔒 RAM In-Memory</div>"""
+                    )
+                theme_btn.click(fn=None, js=THEME_TOGGLE_JS)
 
         with gr.Row():
             # LEFT COLUMN: Audio Input & Presets
@@ -668,14 +828,14 @@ def build_ui(
 
                 gr.HTML(
                     """
-                    <div style="margin-top: 1rem; background: #131B2E; border: 1px solid #334155; border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
-                        <span style="font-size: 20px; color: #14B8A6;">🛡️</span>
+                    <div style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+                        <span style="font-size: 20px; color: var(--teal-accent);">🛡️</span>
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <strong style="font-size: 12px; color: #F8FAFC;">Cam kết Quyền Riêng Tư & An Toàn Tuyệt Đối</strong>
-                                <span style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.4); color: #71F8E4; font-size: 10px; padding: 1px 6px; border-radius: 4px;">Luật 91/2025/QH15</span>
+                                <strong style="font-size: 12px; color: var(--text-primary);">Cam kết Quyền Riêng Tư & An Toàn Tuyệt Đối</strong>
+                                <span style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.4); color: var(--teal-accent); font-size: 10px; padding: 1px 6px; border-radius: 4px;">Luật 91/2025/QH15</span>
                             </div>
-                            <p style="font-size: 11.5px; color: #94A3B8; margin-top: 3px; line-height: 1.4;">
+                            <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">
                                 Âm thanh được phân tích trực tiếp trên RAM và xóa hủy ngay lập tức sau 0.4s. Không lưu trữ, không sao chép và không chia sẻ giọng nói gốc.
                             </p>
                         </div>
@@ -689,7 +849,7 @@ def build_ui(
 
                 verdict_html = gr.HTML(
                     """
-                    <div style="padding: 1.5rem; border-radius: 1rem; background: #131B2E; border: 1px solid #334155; text-align: center; color: #94A3B8;">
+                    <div style="padding: 1.5rem; border-radius: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
                         <p style="margin-top: 0.5rem; font-size: 14px;">Bấm nút <strong>'2. KIỂM TRA TÍNH XÁC THỰC NGAY'</strong> để nhận diện giọng thật / giả mạo.</p>
                     </div>
                     """
@@ -752,6 +912,8 @@ def build_ui(
             </div>
             """
         )
+
+        demo.load(fn=None, js=THEME_INIT_JS)
 
     return demo
 
