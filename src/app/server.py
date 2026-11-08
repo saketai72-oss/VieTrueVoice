@@ -204,6 +204,15 @@ def create_app(
 
         return result
 
+    if model is not None:
+        from src.app.zalo_webhook import create_zalo_router
+        zalo_router = create_zalo_router(
+            model=model,
+            device=device,
+            threshold=threshold,
+        )
+        app.include_router(zalo_router)
+
     return app
 
 

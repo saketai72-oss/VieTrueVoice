@@ -273,3 +273,35 @@ docker compose logs -f
    bash scripts/aws_deploy_ec2.sh
    ```
 4. Tham khảo bảng ước tính chi phí vận hành cho 100 / 1.000 / 10.000 users tại: `deploy/aws/pricing_calculator_w08.md`.
+
+---
+
+## 7. Hướng Dẫn Tích Hợp & Mô Phỏng Nền Tảng Zalo Official Account (OA)
+
+Hệ thống ViTrueVoice tích hợp đầy đủ module tiếp nhận tin nhắn thoại Zalo Webhook chuẩn OpenAPI v3.0 của Zalo for Developers:
+
+### 7.1 Kiểm thử nhanh bằng Bộ mô phỏng (Zalo Webhook Simulator)
+Khởi chạy kiểm thử mô phỏng gửi voice note Zalo kèm chữ ký số HMAC-SHA256:
+```bash
+# 1. Kiểm thử với giọng nói thật (Bona fide):
+python scripts/simulate_zalo_webhook.py --audio data/bonafide_ref/SPK_0004/SPK_0004_01.wav
+
+# 2. Kiểm thử với giọng giả mạo (F5-TTS Spoof):
+python scripts/simulate_zalo_webhook.py --audio data/spoof_f5tts/CV_08110ec9e6/CV_08110ec9e6_prompt_000.wav
+```
+
+### 7.2 Cấu hình triển khai Zalo Official Account thật trong sản xuất
+1. Mở trang quản trị [Zalo for Developers](https://developers.zalo.me/) và tạo Zalo App liên kết Zalo OA.
+2. Thiết lập Webhook URL trỏ về máy chủ ViTrueVoice:
+   ```text
+   https://<ten-mien-cua-ban>/api/v1/zalo/webhook
+   ```
+3. Đăng ký sự kiện: `user_send_audio` (người dùng gửi tin nhắn thoại).
+4. Điền các khóa bảo mật vào file `.env`:
+   ```bash
+   ZALO_APP_ID=<APP_ID_CUA_BAN>
+   ZALO_APP_SECRET=<APP_SECRET_CUA_BAN>
+   ZALO_OA_ACCESS_TOKEN=<OA_ACCESS_TOKEN_CUA_BAN>
+   ```
+5. Hệ thống sẽ tự động xác thực chữ ký số HMAC-SHA256 từ Zalo và tự động phản hồi kết quả kiểm định tới hộp chat của người dùng qua Zalo OpenAPI v3.0 CS Message.
+

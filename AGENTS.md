@@ -76,7 +76,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
-1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 284 bài test phải pass 100%.
+1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 289 bài test phải pass 100%.
 2. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
 3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
 4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
@@ -94,7 +94,8 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
-- `pytest tests/ -v`: Chạy toàn bộ 284 bài kiểm thử unit test.
+- `pytest tests/ -v`: Chạy toàn bộ 289 bài kiểm thử unit test.
+- `python scripts/simulate_zalo_webhook.py --audio data/bonafide_ref/SPK_0004/SPK_0004_01.wav`: Mô phỏng gửi tin nhắn thoại Zalo Webhook tới hệ thống.
 - `python scripts/audit_v6_manifest.py`: Kiểm toán an ninh và tính toàn vẹn của Manifest Zalo V6.
 - `python scripts/train_local_zalo_v6.py`: Khởi động huấn luyện B_zalo V6 Local trên GPU RTX 3050 (AMP FP16, batch 4 accum 4, AM-Softmax + Pitch Aug).
 - `python scripts/setup_local_train.py`: Tải Checkpoint B & tệp nén 3.26GB từ Kaggle, giải nén chọn lọc dữ liệu Zalo vào máy cục bộ.
