@@ -263,7 +263,8 @@ def main():
          "  + Commit [AI] Build 30-case real-world AI Eval suite and Hitachi before/after workflow benchmark (commit 720ef1a)\n"
          "  + Commit [AI] Forensic audio audit, 21-speaker breakdown and offset threat model analysis (commit addfb8b)\n"
          "  + Commit [AI] Multi-window max-pooling inference and SPK_0001 train migration with Model V6 Local (commit dbd0fa0)\n"
-         "• Kết quả kiểm thử tự động: 274/274 unit tests pass 100% (pytest tests/ -v)\n"
+         "  + Commit [AI] Docker packaging, docker-compose orchestration, and AWS EC2/S3/IAM configs (commit 608fd4d)\n"
+         "• Kết quả kiểm thử tự động: 281/281 unit tests pass 100% (pytest tests/ -v)\n"
          "• File số liệu: out/w05_experiment_matrix_consolidated.csv, scratch/audit_diagnostics_final.py, benchmarks/latency_benchmark.csv, tests/eval_scenarios_30.csv."),
         ("Khó khăn & cách xử lý",
          "• Khó khăn 1 (Độ lệch điểm giữa môi trường Linux Kaggle và Windows Local): Khi chấm điểm lại tập Dev Spoof trên máy cục bộ, phát hiện tệp proxy Zalo bị lệch trung bình 0.2-0.4 điểm (cá biệt mẫu 798 lệch 5.47 điểm). Cách xử lý: Kiểm tra tính tất định cho thấy mô hình hoàn toàn bất biến theo batch (lệch tối đa chỉ 0.016 điểm), nguyên nhân do sự khác biệt giữa bộ mã hóa lossy libopus/aac của FFmpeg Windows và Linux. Nhóm đã ghi nhận đây là đặc tính phụ thuộc bộ mã hóa và khóa một đường cơ sở danh định chuẩn.\n"
