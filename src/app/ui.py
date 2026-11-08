@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from src.app.decision import classify_score, platt_calibrator
+from src.app.decision import classify_score, platt_calibrator, PLATT_SCALE_K
 from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE, _default_model_loader, _pad_or_crop
 from src.preprocessing.audio_loader import load_audio
 from src.preprocessing.pooling import extract_window_batch, pool_scores
@@ -144,21 +144,21 @@ body, .gradio-container {
     height: 14px;
     overflow: hidden;
     margin: 8px 0;
+    position: relative;
+    display: flex;
 }
 
 .progress-fill-spoof {
-    background: linear-gradient(90deg, #E74C3C, #EF4444);
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
+    background: linear-gradient(90deg, #DC2626, #EF4444);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
     height: 100%;
-    border-radius: 9999px;
     transition: width 0.6s ease-in-out;
 }
 
 .progress-fill-bonafide {
-    background: linear-gradient(90deg, #2ECC71, #4AE183);
-    box-shadow: 0 0 12px rgba(46, 204, 113, 0.8);
+    background: linear-gradient(90deg, #10B981, #2ECC71);
+    box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
     height: 100%;
-    border-radius: 9999px;
     transition: width 0.6s ease-in-out;
 }
 
@@ -423,6 +423,14 @@ def make_predict_fn(
         if not return_rich:
             return verdict, conf_str, detail
 
+        # Probability calculation (Platt Scaling) for full dual-class visualization
+        diff = float(raw_score - threshold)
+        prob_bona = 1.0 / (1.0 + float(np.exp(-PLATT_SCALE_K * diff)))
+        prob_bona = float(max(0.001, min(0.999, prob_bona)))
+        prob_spoof = 1.0 - prob_bona
+        prob_bona_pct = prob_bona * 100.0
+        prob_spoof_pct = prob_spoof * 100.0
+
         # Generate Stitch-Theme Rich HTML Components
         if is_bonafide:
             verdict_html = f"""
@@ -443,17 +451,16 @@ def make_predict_fn(
                 </div>
                 <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: #072414; border: 1px solid rgba(46, 204, 113, 0.4); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="color: #2ECC71; font-size: 18px;">✅</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #2ECC71; color: #00210C; font-weight: 800; font-size: 13px; flex-shrink: 0;">✓</span>
                         <span style="font-size: 12px; color: #F8FAFC;"><strong style="color: #86EFAC;">Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="color: #2ECC71; font-size: 18px;">🤝</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #14B8A6; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">🤝</span>
                         <span style="font-size: 12px; color: #F8FAFC;"><strong style="color: #86EFAC;">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
                     </div>
                 </div>
             </div>
             """
-            conf_bar_class = "progress-fill-bonafide"
             conf_color = "#2ECC71"
             conf_label = "Tự Nhiên (Bonafide)"
         else:
@@ -475,17 +482,16 @@ def make_predict_fn(
                 </div>
                 <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: #18080B; border: 1px solid rgba(239, 68, 68, 0.4); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="color: #EF4444; font-size: 18px;">🛑</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #EF4444; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">✕</span>
                         <span style="font-size: 12px; color: #FCA5A5;"><strong>TUYỆT ĐỐI KHÔNG:</strong> Không chuyển tiền, không đọc mã OTP hoặc gửi mật khẩu.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="color: #14B8A6; font-size: 18px;">📞</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #14B8A6; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">📞</span>
                         <span style="font-size: 12px; color: #F8FAFC;"><strong>GỌI LẠI TRỰC TIẾP:</strong> Gọi điện thoại truyền thống hoặc Video Call để nhìn mặt.</span>
                     </div>
                 </div>
             </div>
             """
-            conf_bar_class = "progress-fill-spoof"
             conf_color = "#EF4444"
             conf_label = "Giả Mạo (Deepfake Spoof)"
 
@@ -493,18 +499,32 @@ def make_predict_fn(
         <div style="background: #111827; border: 1px solid #334155; border-radius: 0.75rem; padding: 1rem; margin-top: 0.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 13px; font-weight: 600; color: #F8FAFC;">Độ tin cậy phân tích (Platt Scaling Calibrated):</span>
-                <span style="font-size: 16px; font-weight: 700; color: {conf_color}; font-family: 'JetBrains Mono', monospace;">{conf_pct:.1f}% {conf_label}</span>
+                <span style="font-size: 15px; font-weight: 700; color: {conf_color}; font-family: 'JetBrains Mono', monospace;">{conf_pct:.1f}% {conf_label}</span>
             </div>
             <div class="progress-track">
-                <div class="{conf_bar_class}" style="width: {conf_pct:.1f}%;"></div>
+                <div class="progress-fill-spoof" style="width: {prob_spoof_pct:.1f}%;"></div>
+                <div class="progress-fill-bonafide" style="width: {prob_bona_pct:.1f}%;"></div>
+                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255, 255, 255, 0.6); transform: translateX(-50%); z-index: 2;" title="Ngưỡng phân định θ"></div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">
-                <span>0.0% Tự nhiên</span>
-                <span>50.0% Ngưỡng phân định</span>
-                <span style="color: {conf_color}; font-weight: 600;">{conf_pct:.1f}%</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-top: 0.25rem;">
+                <span style="color: {'#EF4444' if not is_bonafide else '#94A3B8'}; font-weight: {'700' if not is_bonafide else '400'};">🔴 Giả Mạo: {prob_spoof_pct:.1f}%</span>
+                <span style="color: #64748B;">Ngưỡng θ: {threshold:.4f} (50%)</span>
+                <span style="color: {'#2ECC71' if is_bonafide else '#94A3B8'}; font-weight: {'700' if is_bonafide else '400'};">🟢 Người Thật: {prob_bona_pct:.1f}%</span>
             </div>
         </div>
         """
+
+        hf_val = acoustics['hf_ratio']
+        if is_bonafide:
+            hf_color = "#2ECC71"
+            hf_sub = "Dải cao tần tự nhiên"
+        else:
+            if hf_val < 1.0:
+                hf_color = "#EF4444"
+                hf_sub = "Bất thường Vocoder (<1%)"
+            else:
+                hf_color = "#F87171"
+                hf_sub = "Vocoder Roll-off"
 
         metrics_html = f"""
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.75rem;">
@@ -525,8 +545,8 @@ def make_predict_fn(
             </div>
             <div class="stat-card">
                 <div style="font-size: 11px; color: #94A3B8;">Năng lượng >4kHz</div>
-                <div style="font-size: 14px; font-weight: 700; color: #71F8E4; font-family: 'JetBrains Mono', monospace;">{acoustics['hf_ratio']:.2f}%</div>
-                <div style="font-size: 10px; color: #64748B;">Vocoder Roll-off</div>
+                <div style="font-size: 14px; font-weight: 700; color: {hf_color}; font-family: 'JetBrains Mono', monospace;">{hf_val:.2f}%</div>
+                <div style="font-size: 10px; color: {hf_color};">{hf_sub}</div>
             </div>
         </div>
         <div style="margin-top: 0.5rem; background: #0B0F17; border: 1px solid #1E293B; border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; justify-content: space-between; font-size: 11px; color: #94A3B8; font-family: 'JetBrains Mono', monospace;">
