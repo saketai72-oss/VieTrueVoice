@@ -182,6 +182,64 @@ body, .gradio-container {
     margin-bottom: 1.5rem;
     box-shadow: var(--header-shadow);
     transition: all 0.3s ease;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.header-actions-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.6rem !important;
+    width: 100% !important;
+}
+
+.header-actions-row > div,
+.header-actions-row .block {
+    min-width: unset !important;
+    width: auto !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#theme-toggle-btn,
+#theme-toggle-btn button {
+    min-width: 40px !important;
+    max-width: 44px !important;
+    width: 40px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    border-radius: 8px !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease !important;
+}
+
+#theme-toggle-btn:hover,
+#theme-toggle-btn button:hover {
+    transform: scale(1.08) !important;
+    border-color: #14B8A6 !important;
+}
+
+body.theme-light #theme-toggle-btn,
+body.theme-light #theme-toggle-btn button {
+    background: #EFF4FF !important;
+    border-color: #CBD5E1 !important;
 }
 
 .stat-card {
@@ -706,12 +764,18 @@ THEME_TOGGLE_JS = """
         document.body.classList.remove('theme-light');
         document.body.classList.add('dark');
         localStorage.setItem('vitruevoice_theme', 'dark');
-        if (btn) btn.innerText = '🌙 Chế độ Lab Kỹ thuật (Dark)';
+        if (btn) {
+            btn.innerText = '☀️';
+            btn.title = 'Chế độ Sáng (Light)';
+        }
     } else {
         document.body.classList.add('theme-light');
         document.body.classList.remove('dark');
         localStorage.setItem('vitruevoice_theme', 'light');
-        if (btn) btn.innerText = '☀️ Chế độ ViTrueVoice (Light)';
+        if (btn) {
+            btn.innerText = '🌙';
+            btn.title = 'Chế độ Tối (Dark)';
+        }
     }
 }
 """
@@ -726,11 +790,17 @@ THEME_INIT_JS = """
     if (isLight) {
         document.body.classList.add('theme-light');
         document.body.classList.remove('dark');
-        if (btn) btn.innerText = '☀️ Chế độ ViTrueVoice (Light)';
+        if (btn) {
+            btn.innerText = '🌙';
+            btn.title = 'Chế độ Tối (Dark)';
+        }
     } else {
         document.body.classList.remove('theme-light');
         document.body.classList.add('dark');
-        if (btn) btn.innerText = '🌙 Chế độ Lab Kỹ thuật (Dark)';
+        if (btn) {
+            btn.innerText = '☀️';
+            btn.title = 'Chế độ Sáng (Light)';
+        }
     }
 }
 """
@@ -769,7 +839,7 @@ def build_ui(
 
         # Header Section with Light/Dark Theme Switcher
         with gr.Row(elem_classes=["lab-header"]):
-            with gr.Column(scale=8):
+            with gr.Column(scale=9):
                 gr.HTML(
                     """
                     <div style="display: flex; align-items: center; gap: 1rem;">
@@ -790,15 +860,19 @@ def build_ui(
                     </div>
                     """
                 )
-            with gr.Column(scale=4, min_width=250):
-                with gr.Row():
+            with gr.Column(scale=3, min_width=200):
+                with gr.Row(elem_classes=["header-actions-row"]):
                     theme_btn = gr.Button(
-                        "🌙 Chế độ Lab Kỹ thuật (Dark)",
+                        "☀️",
                         size="sm",
                         elem_id="theme-toggle-btn",
+                        min_width=40,
+                        scale=0,
                     )
                     ram_badge = gr.HTML(
-                        """<div style="padding: 7px 12px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border-color); font-size: 12px; color: var(--text-secondary); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">🔒 RAM In-Memory</div>"""
+                        """<div style="padding: 0 12px; height: 38px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border-color); font-size: 12px; color: var(--text-secondary); font-weight: 600; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; box-sizing: border-box;">🔒 RAM In-Memory</div>""",
+                        min_width=130,
+                        scale=0,
                     )
                 theme_btn.click(fn=None, js=THEME_TOGGLE_JS)
 
@@ -867,11 +941,11 @@ def build_ui(
         gr.Markdown("### 🔬 Góc Nhìn Số Liệu Khoa Học Trực Quan (Forensic Scientific Visualizations)")
         with gr.Tabs():
             with gr.TabItem("📊 Mel-Spectrogram (80 Mels, log dBFS)"):
-                spec_plot = gr.Plot(label="Phổ Tần Số Mel-Spectrogram (Dải 0 - 8.0 kHz với Ranh Giới Vocoder 4.0 kHz)")
+                spec_plot = gr.Plot(show_label=False)
             with gr.TabItem("🌊 Sóng Âm Đồng Bộ (Time-Domain Waveform)"):
-                wave_plot = gr.Plot(label="Biểu Đồ Sóng Âm Thời Gian Thực (Normalized 16kHz)")
+                wave_plot = gr.Plot(show_label=False)
             with gr.TabItem("🎯 Bản Đồ Chú Ý AI (Grad-CAM Temporal Saliency)"):
-                cam_plot = gr.Plot(label="Trọng Số Chú Ý Mạng Nơ-ron (Vùng Kích Hoạt Quyết Định Giả Mạo)")
+                cam_plot = gr.Plot(show_label=False)
 
         # Presets click handlers
         samples_dir = Path(__file__).resolve().parent / "samples"
