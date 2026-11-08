@@ -35,6 +35,8 @@ services:
       dockerfile: Dockerfile
     container_name: vitruevoice-bot
     command: ["python", "scripts/run_bot.py"]
+    healthcheck:
+      disable: true
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - DEVICE=cpu

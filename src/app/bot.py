@@ -161,14 +161,17 @@ def main() -> None:
 
     token = args.token
     if not token:
-        print("❌ LỖI: Chưa cung cấp Telegram Bot Token!")
-        print("👉 Cách lấy token:")
-        print("   1. Mở Telegram Desktop, tìm kiếm bot @BotFather (https://t.me/BotFather)")
-        print("   2. Gửi lệnh /newbot và làm theo hướng dẫn để đặt tên bot")
-        print("   3. Sao chép API Token nhận được (dạng: 123456789:ABCdefGhI...)")
-        print("   4. Chạy lại lệnh: python scripts/run_bot.py --token <TOKEN_CỦA_BẠN>")
-        print("      Hoặc tạo file .env với nội dung: TELEGRAM_BOT_TOKEN=<TOKEN_CỦA_BẠN>")
-        return
+        print("⏸️ [ViTrueVoice Bot Daemon] Chưa có Telegram Bot Token. Đang tạm dừng chờ cấu hình...")
+        print("👉 Hướng dẫn lấy token:")
+        print("   1. Mở Telegram, tìm kiếm bot @BotFather (https://t.me/BotFather) và gửi lệnh /newbot")
+        print("   2. Sao chép API Token nhận được (dạng: 123456789:ABCdefGhI...)")
+        print("   3. Đặt vào file .env: TELEGRAM_BOT_TOKEN=<TOKEN_CỦA_BẠN>")
+        print("   4. Khởi động lại bot bằng lệnh: docker compose restart bot")
+        try:
+            while True:
+                time.sleep(3600)
+        except (KeyboardInterrupt, SystemExit):
+            return
 
     print("=" * 60)
     print("🛡️ KHỞI ĐỘNG VITRUEVOICE TELEGRAM BOT")
