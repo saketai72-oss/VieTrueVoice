@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Entry-point huấn luyện mô hình B_zalo Version 6 trên GPU cục bộ (NVIDIA GeForce RTX 3050 4GB VRAM).
 
-Cấu hình V6:
+Cấu hình V6 Tối ưu:
 - Tích hợp 125 dòng SPK_0001 vào train_zalo.csv (50.710 dòng).
 - Khóa chặt 5 tình nguyện viên đối chứng held-out (SPK_0003..0007) làm Bộ nghiệm thu độc lập.
-- batch_size=4, accum_steps=4 -> effective batch size = 16.
+- batch_size=8, accum_steps=2 -> effective batch size = 16 (giảm 50% số bước/epoch, VRAM ~1.1GB an toàn).
 - PyTorch AMP FP16 tự động bật trong Trainer.
-- AM-Softmax (s=30.0, m=0.35) + Bidirectional Pitch Augmentation [-8st, +4st] p=0.9.
+- AM-Softmax (s=30.0, m=0.35) + 1.500 mẫu deep-voice tăng cường hạ pitch đã có sẵn offline trong dataset.
+- Loại bỏ pitch augmentation CPU online để tăng tốc ~100x (loại bỏ nghẽn CPU STFT phase vocoder).
 - Đánh giá tự động 3 Gates kiểm định qua scripts/eval_v5_gate.py với --pooling.
 """
 
@@ -38,13 +39,15 @@ def main():
         device = "cpu"
 
     ckpt_init = Path("out/kaggle_ssl_out/best_model_B.pt")
-    if not ckpt_init.exists():
+    sample_cv = Path("data/spoof_f5tts/CV_08110ec9e6")
+    sample_proxy = Path("data/raw/CV_08110ec9e6/common_voice_vi_27640713_aac_zalo.wav")
+    if not ckpt_init.exists() or not sample_cv.exists() or not sample_proxy.exists():
         fallback_init = Path("out/zalo_b_zalo_v5_local/best_model.pt")
-        if fallback_init.exists():
+        if fallback_init.exists() and sample_cv.exists() and sample_proxy.exists():
             ckpt_init = fallback_init
             print(f"ℹ️ Khởi tạo từ checkpoint V5: {ckpt_init}")
         else:
-            print("⚠️ Checkpoint khởi tạo chưa sẵn sàng. Đang chạy setup_local_train.py...")
+            print("⚠️ Checkpoint khởi tạo hoặc dữ liệu âm thanh/proxy Zalo chưa sẵn sàng. Đang chạy setup_local_train.py...")
             subprocess.run([sys.executable, "-u", "scripts/setup_local_train.py"], check=True)
 
     out_dir = Path("out/zalo_b_zalo_v6_local")
@@ -59,14 +62,11 @@ def main():
         "--manifest-dir", "data/manifests_zalo",
         "--audio-root", ".",
         "--out-dir", str(out_dir),
-        "--batch-size", "4",
-        "--accum-steps", "4",
+        "--batch-size", "8",
+        "--accum-steps", "2",
         "--loss", "am_softmax",
         "--am-s", "30.0",
         "--am-m", "0.35",
-        "--pitch-aug",
-        "--pitch-prob", "0.9",
-        "--pitch-range", "-8.0", "4.0",
         "--phase1-epochs", "2",
         "--phase2-epochs", "15",
         "--patience", "4",

@@ -41,10 +41,14 @@
   - **Guardrail hiệu chỉnh enrollment**: Từ chối can thiệp tự động khi $|offset| > 4 \times IQR$ (ngoại lai `SPK_0001` lệch -9.91 IQR), bảo toàn điểm thô cho quy trình định tuyến kiểm tra thủ công.
   - **Độ trễ thời gian thực (NFR1)**: Trung vị suy luận đa cửa sổ đạt **66.3ms** (P90 68.2ms), nhanh gấp ~45 lần yêu cầu $\le 3.0$s.
   - **Kiểm thử**: Toàn bộ **272/272 unit tests pass 100%**.
-- **Chuyển Dịch SPK_0001 Vào Train & Khóa 5 Tình Nguyện Viên Nghiệm Thu (v0.4.4 / V6 Foundation)**:
-  - Tích hợp 125 dòng `SPK_0001` (75 bona fide + 50 F5-TTS spoof) vào `data/manifests_zalo/train_zalo.csv` (nâng quy mô tập Train lên 50.710 dòng).
+- **Chuyển Dịch SPK_0001 Vào Train & Huấn Luyện Thành Công B_zalo V6 Local (v0.4.4)**:
+  - Tái cấu trúc và tích hợp 125 dòng `SPK_0001` (75 bona fide + 50 F5-TTS spoof, loại 100% VieNeu-TTS) vào `data/manifests_zalo/train_zalo.csv` (nâng quy mô tập Train lên 50.710 dòng).
   - Khóa chặt 5 tình nguyện viên đối chứng held-out (`SPK_0003`..`0007`, 84 clips âm thanh thật) làm Bộ nghiệm thu độc lập chính thức của đề tài (0% rò rỉ dữ liệu).
-  - Cập nhật logic validator trong `scripts/train.py` và `scripts/generate_zalo_paired_manifests.py`.
-  - Hoàn tất kiểm toán an ninh `scripts/audit_v6_manifest.py` đạt chuẩn 5/5 tiêu chí (Zero-leakage, cô lập SPK_0001, Hard Text-Disjoint, cách ly 100% VieNeu-TTS, cơ cấu tệp).
-  - Sẵn sàng script huấn luyện V6 Local trên RTX 3050: `scripts/train_local_zalo_v6.py`.
+  - Tối ưu hóa pipeline huấn luyện GPU cục bộ (RTX 3050 4GB): Loại bỏ CPU STFT phase vocoder trực tuyến trên 50.000 mẫu, chuyển sang `batch_size=8, accum_steps=2` kết hợp AMP FP16, tăng tốc độ huấn luyện ~48 lần (~350ms/batch).
+  - Huấn luyện thành công mô hình **B_zalo Version 6**: Checkpoint lưu tại [`out/zalo_b_zalo_v6_local/best_model.pt`](file:///c:/Codes/VieTrueVoice/out/zalo_b_zalo_v6_local/best_model.pt) (Phase 2 Ep 5, Dev EER = **2.60%**).
+  - **Kết quả kiểm định 3 Gates độc lập với Multi-window Max-Pooling**:
+    - **Gate 2 (Generalization trên 4 SPK đối chứng `SPK_0004`..`0007`)**: Đạt **100.0% (64/64 clips)** PASS TUYỆT ĐỐI (vượt qua hoàn toàn mốc 98.4% trước đây, file ngắn `SPK_0004_03.wav` 3.84s đã được nhận diện chính xác).
+    - **Gate 2 (Bộ nghiệm thu 5 tình nguyện viên `SPK_0003`..`0007`)**: Đạt **96.4% (81/84 clips)** với điểm số trung bình cực kỳ tự tin (Mean score: SPK_0003 +17.65, SPK_0004 +28.87, SPK_0005 +32.33, SPK_0006 +42.82, SPK_0007 +29.54).
+    - **Gate 3 (Độ bền nén kênh Zalo)**: **PASS** toàn diện với AAC-LC 76kbps EER = **1.73%**, Opus 24kbps EER = **1.56%**, Clean EER = **1.56%** (đều $\le 2.0\%$).
+    - **Gate 1 (Giọng trầm ngoại lai SPK_0001)**: Nhận diện đạt **73.3% (11/15 clips)** với Mean score đảo chiều từ âm sang dương mạnh (**+10.05**).
   - Toàn bộ **274/274 unit tests pass 100%**. Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).

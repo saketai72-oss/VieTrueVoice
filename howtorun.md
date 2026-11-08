@@ -153,19 +153,19 @@ processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'S
 "
 ```
 
-### Chạy Máy Chủ API Phát Triển (FastAPI với Checkpoint V5 Local)
+### Chạy Máy Chủ API Phát Triển (FastAPI với Checkpoint V6 Local)
 ```bash
-# Biến môi trường checkpoint mặc định: out/zalo_b_zalo_v5_local/best_model.pt
+# Biến môi trường checkpoint mặc định: out/zalo_b_zalo_v6_local/best_model.pt
 uvicorn src.app.server:app --reload --port 8000
 ```
 
-### Chạy Đánh Giá 3 Cổng Kiểm Định (Gates 1, 2, 3)
+### Chạy Đánh Giá 3 Cổng Kiểm Định (Gates 1, 2, 3) Cho Checkpoint V6
 ```bash
 # Đánh giá mặc định bật multi-window max-pooling (--pooling)
-python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v5_local/best_model.pt
+python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v6_local/best_model.pt
 
 # Hoặc tắt pooling để so sánh với cách cắt 4s đầu truyền thống:
-python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v5_local/best_model.pt --no-pooling
+python scripts/eval_v5_gate.py --ckpt out/zalo_b_zalo_v6_local/best_model.pt --no-pooling
 ```
 
 ### Chạy Đo Lường Độ Trễ (30 lần lặp)
