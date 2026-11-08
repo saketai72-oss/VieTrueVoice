@@ -159,6 +159,18 @@ processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'S
 uvicorn src.app.server:app --reload --port 8000
 ```
 
+### Chạy Telegram Bot Phát Hiện Giọng Giả (Multi-window Max-Pooling V6)
+```bash
+# 1. Chạy với token trực tiếp từ @BotFather:
+python scripts/run_bot.py --token <TELEGRAM_BOT_TOKEN>
+
+# 2. Hoặc cấu hình file .env (TELEGRAM_BOT_TOKEN=...) và chạy:
+python scripts/run_bot.py
+
+# 3. Chạy với GPU và checkpoint tùy chọn:
+python scripts/run_bot.py --device cuda --checkpoint out/zalo_b_zalo_v6_local/best_model.pt
+```
+
 ### Chạy Đánh Giá 3 Cổng Kiểm Định (Gates 1, 2, 3) Cho Checkpoint V6
 ```bash
 # Đánh giá mặc định bật multi-window max-pooling (--pooling)

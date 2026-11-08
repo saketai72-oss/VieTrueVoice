@@ -14,7 +14,8 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
 from src.app.decision import classify_score
-from src.app.server import DEFAULT_CHECKPOINT, TARGET_SAMPLE_COUNT, _default_model_loader, _load_audio_in_memory, _pad_or_crop
+from src.app.server import DEFAULT_CHECKPOINT, TARGET_SAMPLE_COUNT, _default_model_loader, _load_audio_in_memory
+from src.preprocessing.pooling import extract_window_batch, pool_scores
 
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -69,12 +70,24 @@ async def handle_voice_message(
 
     try:
         audio_data = _load_audio_in_memory(raw_bytes)
-        padded = _pad_or_crop(audio_data, TARGET_SAMPLE_COUNT)
-        tensor_in = torch.tensor(padded, dtype=torch.float32, device=device).unsqueeze(0)
+        # Multi-window extraction (STUBBORN_FACT: repeat padding <64k, single batched forward pass)
+        windows_batch = extract_window_batch(
+            audio_data,
+            win=TARGET_SAMPLE_COUNT,
+            hop=16000,
+            max_windows=5,
+        ).to(device)
+        n_windows = int(windows_batch.shape[0])
 
         with torch.inference_mode():
-            score_out = active_model.score(tensor_in)
-            raw_score = float(score_out.item() if hasattr(score_out, "item") else score_out[0])
+            score_tensor = active_model.score(windows_batch)
+            if isinstance(score_tensor, torch.Tensor):
+                scores_np = score_tensor.squeeze(-1).float().cpu().numpy()
+            else:
+                scores_np = np.asarray(score_tensor)
+            if scores_np.ndim == 0:
+                scores_np = np.array([float(scores_np)])
+            raw_score = float(pool_scores(scores_np, mode="max"))
 
         latency = time.perf_counter() - t0
         decision = classify_score(raw_score, threshold=threshold)
@@ -83,6 +96,7 @@ async def handle_voice_message(
             reply = (
                 f"🛡️ *KẾT QUẢ: GIỌNG NÓI THẬT (BONAFIDE)*\n\n"
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
+                f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
                 f"• *Độ tin cậy*: Chưa hiệu chuẩn xác suất phần trăm\n"
                 f"• *Thời gian xử lý*: `{latency:.2f}s`\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
@@ -92,6 +106,7 @@ async def handle_voice_message(
             reply = (
                 f"🚨 *CẢNH BÁO LỪA ĐẢO: ĐÂY LÀ GIỌNG NÓI GIẢ MẠO (SPOOF)*\n\n"
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
+                f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
                 f"• *Độ tin cậy*: Chưa hiệu chuẩn xác suất phần trăm\n"
                 f"• *Thời gian xử lý*: `{latency:.2f}s`\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
@@ -121,3 +136,67 @@ def build_bot_app(
 
     app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, _on_voice))
     return app
+
+
+def main() -> None:
+    import argparse
+    import os
+
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+
+    parser = argparse.ArgumentParser(description="Khởi chạy ViTrueVoice Telegram Bot")
+    parser.add_argument("--token", default=os.getenv("TELEGRAM_BOT_TOKEN"),
+                        help="Telegram Bot Token từ @BotFather (hoặc đặt biến môi trường TELEGRAM_BOT_TOKEN)")
+    parser.add_argument("--checkpoint", default=str(DEFAULT_CHECKPOINT),
+                        help="Đường dẫn file trọng số checkpoint mô hình")
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu",
+                        help="Thiết bị suy luận (cuda hoặc cpu)")
+    parser.add_argument("--threshold", type=float, default=0.0,
+                        help="Ngưỡng phân định (mặc định: 0.0)")
+    args = parser.parse_args()
+
+    token = args.token
+    if not token:
+        print("❌ LỖI: Chưa cung cấp Telegram Bot Token!")
+        print("👉 Cách lấy token:")
+        print("   1. Mở Telegram Desktop, tìm kiếm bot @BotFather (https://t.me/BotFather)")
+        print("   2. Gửi lệnh /newbot và làm theo hướng dẫn để đặt tên bot")
+        print("   3. Sao chép API Token nhận được (dạng: 123456789:ABCdefGhI...)")
+        print("   4. Chạy lại lệnh: python scripts/run_bot.py --token <TOKEN_CỦA_BẠN>")
+        print("      Hoặc tạo file .env với nội dung: TELEGRAM_BOT_TOKEN=<TOKEN_CỦA_BẠN>")
+        return
+
+    print("=" * 60)
+    print("🛡️ KHỞI ĐỘNG VITRUEVOICE TELEGRAM BOT")
+    print("=" * 60)
+    print(f"📦 Checkpoint: {args.checkpoint}")
+    print(f"⚙️ Thiết bị:   {args.device}")
+    print(f"🎯 Ngưỡng:     {args.threshold:+.4f}")
+    print(f"🌊 Pooling:    Multi-window Max-Pool (win=64k, hop=16k, max=5)")
+    print("🤖 Đang tải mô hình...")
+
+    loaded_model = _default_model_loader(args.checkpoint, args.device)
+    if loaded_model is None:
+        print("❌ LỖI: Không thể nạp mô hình từ checkpoint!")
+        return
+
+    print("✅ Nạp mô hình thành công!")
+    print("🚀 Đang kết nối tới Telegram và bắt đầu lắng nghe tin nhắn thoại...")
+    print("   (Nhấn Ctrl+C để dừng bot)")
+    print("=" * 60)
+
+    app = build_bot_app(
+        token=token,
+        model=loaded_model,
+        device=args.device,
+        threshold=args.threshold,
+    )
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
