@@ -496,8 +496,15 @@ def main():
         "• Minh chứng dữ liệu đi qua thật: Ảnh chụp màn hình hai phía Client Telegram và Server Log ẩn danh SHA-256."
     )
 
+    real_screenshot_path = PROJECT_ROOT / "scratch" / "telegram_bot_real_screenshot.png"
     evidence_img_path = PROJECT_ROOT / "scratch" / "telegram_bot_integration_evidence.png"
-    if evidence_img_path.exists():
+
+    if real_screenshot_path.exists():
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.add_run().add_picture(str(real_screenshot_path), width=Inches(6.0))
+        add_styled_paragraph(doc, "Hình III.1: Minh chứng kiểm định thực tế trên ứng dụng Telegram Desktop (@ViTrueVoice Verification) — Hệ thống nhận diện chính xác Giọng thật (Raw score: +3.5409 > 0.0000, thời gian xử lý: 2.69s <= 3.0s, mã băm ẩn danh SHA-256 de4e26e0ca1003b2...)", font_size=9, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+    elif evidence_img_path.exists():
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(evidence_img_path), width=Inches(6.2))
