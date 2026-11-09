@@ -52,8 +52,10 @@
     - **Gate 3 (Độ bền nén kênh Zalo)**: **PASS** toàn diện với AAC-LC 76kbps EER = **1.73%**, Opus 24kbps EER = **1.56%**, Clean EER = **1.56%** (đều $\le 2.0\%$).
     - **Gate 1 (Giọng trầm ngoại lai SPK_0001)**: Nhận diện đạt **73.3% (11/15 clips)** với Mean score đảo chiều từ âm sang dương mạnh (**+10.05**).
   - Toàn bộ **292/292 unit tests pass 100%**.
-- **Mở Rộng Đo Đạc Unseen TTS Đa Mô Hình (Kokoro, Bark, OmniVoice) (v0.4.5)**:
-  - Tích hợp thành công **Kokoro-Vietnamese** (`contextboxai/Kokoro-Vietnamese`, StyleTTS 2 + iSTFTNet 24kHz), sinh độc lập **375 tệp spoof** (75 clean + 300 tệp 4 codec viễn thông & Zalo) trên 5 tình nguyện viên đối chứng (`SPK_0003`..`0007`) theo nguyên tắc Hard Text-Disjoint.
-  - Đánh giá thực nghiệm với mô hình **B_zalo V6** (Multi-window Max-Pooling): Tỷ lệ phát hiện Spoof đạt **99.73% (374/375)** với Mean Score **-34.21**, EER đạt **0.53%**, minDCF **0.0053**.
-  - Triển khai `BarkAdapter` (Suno Bark GPT + EnCodec) và trích xuất thành công `OmniVoice` (VoiceStudio).
-  - Toàn bộ **298/298 unit tests pass 100%**. Chi tiết báo cáo tại [`docs/BENCHMARK_unseen_tts_multimodel.md`](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_unseen_tts_multimodel.md). Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).
+- **Đo Đạc Mức Độ Suy Giảm: Seen TTS vs. Unseen TTS Đa Mô Hình (v0.4.5)**:
+  - Hoàn tất ma trận kiểm định Giả thuyết H2 trên 5 tình nguyện viên đối chứng held-out (`SPK_0003`..`0007`) với 4 hệ thống TTS và 4 chuẩn nén kênh thoại (tổng cộng **1.584 clips âm thanh** đánh giá qua **B_zalo V6 Multi-window Max-Pooling**):
+    - **Nhóm Seen TTS (F5-TTS & VieNeu-TTS v3, 750 clips)**: Tỷ lệ phát hiện **79.73% (598/750)**, Điểm trung bình **-20.27**, EER **13.33%**, minDCF **0.2413**.
+    - **Nhóm Unseen TTS (Kokoro-Vietnamese & OmniVoice, 750 clips)**: Tỷ lệ phát hiện **73.33% (550/750)**, Điểm trung bình **-16.33**, EER **15.87%**, minDCF **0.3053**.
+    - **Mức độ suy giảm (Seen vs. Unseen Degradation)**: $\Delta\text{EER} = \mathbf{+2.54\%}$ (chỉ tăng từ 13.33% lên 15.87%, duy trì tiệm cận trần $\le 15\%$ của Giả thuyết H2), $\Delta\text{PassRate} = \mathbf{-6.40\%}$, $\Delta\text{Score} = \mathbf{+3.94}$.
+    - **Mức độ suy giảm theo chuẩn nén**: Kênh Zalo AAC-LC 76k / Opus 24k gây suy giảm tỷ lệ chặn 1.33% – 8.00% do thuật toán MDCT làm phẳng méo hài vocoder. Ngược lại, kênh thoại băng hẹp 8kHz (AMR-NB / G.711 A-law) làm tăng tỷ lệ chặn spoof từ +5.3% đến +10.7% nhờ dồn năng lượng về formants trung tâm $300 - 3400$Hz.
+  - Tích hợp `BarkAdapter` (Suno Bark GPT + EnCodec) và toàn bộ **298/298 unit tests pass 100%**. Báo cáo chi tiết tại [`docs/BENCHMARK_seen_vs_unseen_degradation.md`](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_seen_vs_unseen_degradation.md). Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).

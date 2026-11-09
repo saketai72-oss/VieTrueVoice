@@ -17,6 +17,7 @@
 | `docs/LOGIC_models.md` | Baseline AASIST, SSL-AASIST (Wav2Vec2 + HS-GAL), hàm mất mát Weighted CE [0.1, 0.9], huấn luyện 2 pha | Công thức toán xử lý tín hiệu thuần túy | Khi làm việc với kiến trúc mô hình & training |
 | `docs/STANDARDS_api-benchmarks.md` | Schema API FastAPI, giao diện Gradio, Bot Telegram, cấu trúc log ẩn danh SHA-256, eval_metrics.csv | Thuật toán đồ thị và mô hình | Khi làm việc với API & benchmark độ trễ |
 | `docs/REF_developer-reference.md` | Bảng quy ước đặt tên, bảng tra cứu lệnh, hằng số tham chiếu | Mã nguồn triển khai chi tiết | Khi tra cứu quy ước và tham số |
+| `docs/BENCHMARK_seen_vs_unseen_degradation.md` | Báo cáo đo đạc thực nghiệm mức độ suy giảm: Seen TTS (F5, VieNeu) vs. Unseen TTS (Kokoro, OmniVoice) | Chi tiết huấn luyện mô hình | Khi đánh giá năng lực tổng quát hóa TTS và kênh nén |
 | `docs/REF_template.md` | Bản mẫu chuẩn để tạo tệp tài liệu mới | Quy tắc nghiệp vụ cụ thể | Khi tạo thêm tệp doc mới |
 | `docs/REFACTOR_TODO.md` | Kế hoạch và các mục tiêu tái cấu trúc hiện tại | Quy tắc chuẩn mực chính thức | Khi lập kế hoạch refactor |
 
