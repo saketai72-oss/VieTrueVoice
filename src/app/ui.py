@@ -242,6 +242,15 @@ body.theme-light #theme-toggle-btn button {
     border-color: #CBD5E1 !important;
 }
 
+iconify-icon {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+button iconify-icon {
+    pointer-events: none;
+}
+
 .stat-card {
     background: var(--bg-stat);
     border: 1px solid var(--border-color);
@@ -613,8 +622,8 @@ def make_predict_fn(
             verdict_html = f"""
             <div class="verdict-box-bonafide">
                 <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
-                        🛡️
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
+                        <iconify-icon icon="solar:shield-check-bold" width="28" height="28"></iconify-icon>
                     </div>
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
@@ -628,11 +637,15 @@ def make_predict_fn(
                 </div>
                 <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--action-bona-bg); border: 1px solid var(--action-bona-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #10B981; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">✓</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #10B981; color: white; flex-shrink: 0;">
+                            <iconify-icon icon="solar:check-read-bold" width="14" height="14"></iconify-icon>
+                        </span>
                         <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: var(--bona-action-text-bold);">Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">🤝</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; flex-shrink: 0;">
+                            <iconify-icon icon="solar:hand-shake-bold" width="14" height="14"></iconify-icon>
+                        </span>
                         <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: var(--bona-action-text-bold);">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
                     </div>
                 </div>
@@ -644,8 +657,8 @@ def make_predict_fn(
             verdict_html = f"""
             <div class="verdict-box-spoof">
                 <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #EF4444, #B91C1C); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); flex-shrink: 0;">
-                        ⚠️
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #EF4444, #B91C1C); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); flex-shrink: 0;">
+                        <iconify-icon icon="solar:shield-warning-bold" width="28" height="28"></iconify-icon>
                     </div>
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
@@ -659,11 +672,15 @@ def make_predict_fn(
                 </div>
                 <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--action-spoof-bg); border: 1px solid var(--action-spoof-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #EF4444; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">✕</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #EF4444; color: white; flex-shrink: 0;">
+                            <iconify-icon icon="solar:close-circle-bold" width="14" height="14"></iconify-icon>
+                        </span>
                         <span style="font-size: 12px; color: var(--spoof-action-text);"><strong>TUYỆT ĐỐI KHÔNG:</strong> Không chuyển tiền, không đọc mã OTP hoặc gửi mật khẩu.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">📞</span>
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; flex-shrink: 0;">
+                            <iconify-icon icon="solar:phone-calling-bold" width="14" height="14"></iconify-icon>
+                        </span>
                         <span style="font-size: 12px; color: var(--text-primary);"><strong>GỌI LẠI TRỰC TIẾP:</strong> Gọi điện thoại truyền thống hoặc Video Call để nhìn mặt.</span>
                     </div>
                 </div>
@@ -684,9 +701,13 @@ def make_predict_fn(
                 <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(148, 163, 184, 0.8); transform: translateX(-50%); z-index: 2;" title="Ngưỡng phân định θ"></div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-family: 'JetBrains Mono', monospace; margin-top: 0.25rem;">
-                <span style="color: {'#EF4444' if not is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if not is_bonafide else '400'};">🔴 Giả Mạo: {prob_spoof_pct:.1f}%</span>
+                <span style="color: {'#EF4444' if not is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if not is_bonafide else '400'}; display: inline-flex; align-items: center; gap: 4px;">
+                    <iconify-icon icon="solar:danger-circle-bold" width="13" height="13"></iconify-icon> Giả Mạo: {prob_spoof_pct:.1f}%
+                </span>
                 <span style="color: var(--text-muted);">Ngưỡng θ: {threshold:.4f} (50%)</span>
-                <span style="color: {'#10B981' if is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if is_bonafide else '400'};">🟢 Người Thật: {prob_bona_pct:.1f}%</span>
+                <span style="color: {'#10B981' if is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if is_bonafide else '400'}; display: inline-flex; align-items: center; gap: 4px;">
+                    <iconify-icon icon="solar:check-circle-bold" width="13" height="13"></iconify-icon> Người Thật: {prob_bona_pct:.1f}%
+                </span>
             </div>
         </div>
         """
@@ -765,7 +786,7 @@ THEME_TOGGLE_JS = """
         document.body.classList.add('dark');
         localStorage.setItem('vitruevoice_theme', 'dark');
         if (btn) {
-            btn.innerText = '☀️';
+            btn.innerHTML = '<iconify-icon icon="solar:sun-2-bold" width="22" height="22" style="color: #F59E0B; vertical-align: middle;"></iconify-icon>';
             btn.title = 'Chế độ Sáng (Light)';
         }
     } else {
@@ -773,7 +794,7 @@ THEME_TOGGLE_JS = """
         document.body.classList.remove('dark');
         localStorage.setItem('vitruevoice_theme', 'light');
         if (btn) {
-            btn.innerText = '🌙';
+            btn.innerHTML = '<iconify-icon icon="solar:moon-bold" width="20" height="20" style="color: #38BDF8; vertical-align: middle;"></iconify-icon>';
             btn.title = 'Chế độ Tối (Dark)';
         }
     }
@@ -782,6 +803,14 @@ THEME_TOGGLE_JS = """
 
 THEME_INIT_JS = """
 () => {
+    // 1. Ensure Iconify Web Component is loaded in <head>
+    if (!document.querySelector('script[src*="iconify-icon"]')) {
+        const sc = document.createElement('script');
+        sc.src = 'https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js';
+        document.head.appendChild(sc);
+    }
+
+    // 2. Setup theme
     const saved = localStorage.getItem('vitruevoice_theme');
     const urlParams = new URLSearchParams(window.location.search);
     const urlTheme = urlParams.get('__theme');
@@ -791,17 +820,57 @@ THEME_INIT_JS = """
         document.body.classList.add('theme-light');
         document.body.classList.remove('dark');
         if (btn) {
-            btn.innerText = '🌙';
+            btn.innerHTML = '<iconify-icon icon="solar:moon-bold" width="20" height="20" style="color: #38BDF8; vertical-align: middle;"></iconify-icon>';
             btn.title = 'Chế độ Tối (Dark)';
         }
     } else {
         document.body.classList.remove('theme-light');
         document.body.classList.add('dark');
         if (btn) {
-            btn.innerText = '☀️';
+            btn.innerHTML = '<iconify-icon icon="solar:sun-2-bold" width="22" height="22" style="color: #F59E0B; vertical-align: middle;"></iconify-icon>';
             btn.title = 'Chế độ Sáng (Light)';
         }
     }
+
+    // 3. Inject icons into buttons and tabs via Iconify
+    function applyIconifyDecorations() {
+        const submitBtn = document.querySelector("#submit-btn button, #submit-btn");
+        if (submitBtn && !submitBtn.querySelector('iconify-icon')) {
+            submitBtn.innerHTML = '<iconify-icon icon="solar:magnifer-bold" width="18" height="18" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> 2. KIỂM TRA TÍNH XÁC THỰC NGAY';
+        }
+        const s1 = document.querySelector("#sample-spoof-btn button, #sample-spoof-btn");
+        if (s1 && !s1.querySelector('iconify-icon')) {
+            s1.innerHTML = '<iconify-icon icon="solar:danger-circle-bold" width="14" height="14" style="color: #EF4444; vertical-align: middle; margin-right: 4px;"></iconify-icon> Mẫu 1 (Spoof F5-TTS)';
+        }
+        const s2 = document.querySelector("#sample-bona-btn button, #sample-bona-btn");
+        if (s2 && !s2.querySelector('iconify-icon')) {
+            s2.innerHTML = '<iconify-icon icon="solar:check-circle-bold" width="14" height="14" style="color: #10B981; vertical-align: middle; margin-right: 4px;"></iconify-icon> Mẫu 2 (Người Thật)';
+        }
+        const s3 = document.querySelector("#sample-zalo-btn button, #sample-zalo-btn");
+        if (s3 && !s3.querySelector('iconify-icon')) {
+            s3.innerHTML = '<iconify-icon icon="solar:shield-warning-bold" width="14" height="14" style="color: #F59E0B; vertical-align: middle; margin-right: 4px;"></iconify-icon> Mẫu 3 (Spoof Zalo Nén)';
+        }
+        const tabBtns = document.querySelectorAll('button[role="tab"]');
+        if (tabBtns.length >= 3) {
+            if (!tabBtns[0].querySelector('iconify-icon')) {
+                tabBtns[0].innerHTML = '<iconify-icon icon="solar:chart-square-bold" width="15" height="15" style="vertical-align: middle; margin-right: 5px;"></iconify-icon> Mel-Spectrogram (80 Mels, log dBFS)';
+            }
+            if (!tabBtns[1].querySelector('iconify-icon')) {
+                tabBtns[1].innerHTML = '<iconify-icon icon="solar:soundwave-bold" width="15" height="15" style="vertical-align: middle; margin-right: 5px;"></iconify-icon> Sóng Âm Đồng Bộ (Time-Domain Waveform)';
+            }
+            if (!tabBtns[2].querySelector('iconify-icon')) {
+                tabBtns[2].innerHTML = '<iconify-icon icon="solar:radar-2-bold" width="15" height="15" style="vertical-align: middle; margin-right: 5px;"></iconify-icon> Bản Đồ Chú Ý AI (Grad-CAM Temporal Saliency)';
+            }
+        }
+        const accBtn = document.querySelector('#detail-accordion button');
+        if (accBtn && !accBtn.querySelector('iconify-icon')) {
+            const span = accBtn.querySelector('span') || accBtn;
+            span.innerHTML = '<iconify-icon icon="solar:document-text-bold" width="15" height="15" style="vertical-align: middle; margin-right: 5px;"></iconify-icon> Chi tiết dạng văn bản (Screen Reader & API)';
+        }
+    }
+    applyIconifyDecorations();
+    setTimeout(applyIconifyDecorations, 250);
+    setTimeout(applyIconifyDecorations, 800);
 }
 """
 
@@ -834,8 +903,11 @@ def build_ui(
     )
 
     with gr.Blocks(title="ViTrueVoice — Phòng Lab Nhận Diện Deepfake Giọng Nói Tiếng Việt") as demo:
-        # Inject Custom Forensics CSS
-        gr.HTML(f"<style>{CUSTOM_CSS}</style>")
+        # Inject Custom Forensics CSS and Iconify Web Component
+        gr.HTML(
+            f"<style>{CUSTOM_CSS}</style>",
+            head='<script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>',
+        )
 
         # Header Section with Light/Dark Theme Switcher
         with gr.Row(elem_classes=["lab-header"]):
@@ -843,14 +915,14 @@ def build_ui(
                 gr.HTML(
                     """
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #14B8A6, #0F766E); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; box-shadow: 0 4px 20px rgba(20, 184, 166, 0.4); flex-shrink: 0;">
-                            🛡️
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #14B8A6, #0F766E); display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 4px 20px rgba(20, 184, 166, 0.4); flex-shrink: 0;">
+                            <iconify-icon icon="solar:shield-check-bold" width="28" height="28" style="color: white;"></iconify-icon>
                         </div>
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;">ViTrueVoice</span>
-                                <span style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 9999px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">
-                                    <span class="pulse-dot"></span>Mô hình AI: B_zalo V6 Active
+                                <span style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 3px 10px; border-radius: 9999px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span class="pulse-dot"></span><iconify-icon icon="solar:cpu-bolt-bold" width="14" height="14" style="color: var(--teal-accent);"></iconify-icon> Mô hình AI: B_zalo V6 Active
                                 </span>
                             </div>
                             <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
@@ -874,7 +946,7 @@ def build_ui(
         with gr.Row():
             # LEFT COLUMN: Audio Input & Presets
             with gr.Column(scale=5):
-                gr.Markdown("### 🎙️ 1. Tải lên tin nhắn thoại hoặc Bấm ghi âm")
+                gr.Markdown("### <iconify-icon icon='solar:microphone-3-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 1. Tải lên tin nhắn thoại hoặc Bấm ghi âm")
                 audio_input = gr.Audio(
                     label="Hỗ trợ các định dạng .wav, .mp3, .m4a, .opus, .ogg",
                     sources=["upload", "microphone"],
@@ -882,23 +954,24 @@ def build_ui(
                 )
 
                 submit_btn = gr.Button(
-                    "🔍 2. KIỂM TRA TÍNH XÁC THỰC NGAY",
+                    "2. KIỂM TRA TÍNH XÁC THỰC NGAY",
                     variant="primary",
                     size="lg",
+                    elem_id="submit-btn",
                     elem_classes=["btn-primary-teal"],
                 )
 
                 # 1-Click Preset Samples
-                gr.Markdown("#### ⚡ Mẫu âm thanh thử nghiệm đối chứng nhanh:")
+                gr.Markdown("#### <iconify-icon icon='solar:bolt-bold-duotone' width='18' height='18' style='vertical-align: -0.15em; color: #F59E0B;'></iconify-icon> Mẫu âm thanh thử nghiệm đối chứng nhanh:")
                 with gr.Row():
-                    sample_spoof_btn = gr.Button("🔴 Mẫu 1 (Spoof F5-TTS)", size="sm")
-                    sample_bonafide_btn = gr.Button("🟢 Mẫu 2 (Người Thật)", size="sm")
-                    sample_zalo_btn = gr.Button("🟠 Mẫu 3 (Spoof Zalo Nén)", size="sm")
+                    sample_spoof_btn = gr.Button("Mẫu 1 (Spoof F5-TTS)", size="sm", elem_id="sample-spoof-btn")
+                    sample_bonafide_btn = gr.Button("Mẫu 2 (Người Thật)", size="sm", elem_id="sample-bona-btn")
+                    sample_zalo_btn = gr.Button("Mẫu 3 (Spoof Zalo Nén)", size="sm", elem_id="sample-zalo-btn")
 
                 gr.HTML(
                     """
                     <div style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
-                        <span style="font-size: 20px; color: var(--teal-accent);">🛡️</span>
+                        <iconify-icon icon="solar:shield-keyhole-bold-duotone" width="24" height="24" style="color: var(--teal-accent); flex-shrink: 0; margin-top: 2px;"></iconify-icon>
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <strong style="font-size: 12px; color: var(--text-primary);">Cam kết Quyền Riêng Tư & An Toàn Tuyệt Đối</strong>
@@ -914,32 +987,33 @@ def build_ui(
 
             # RIGHT COLUMN: Analytical Verdict & Forensic Stats
             with gr.Column(scale=7):
-                gr.Markdown("### 📊 3. Kết Quả Xác Minh Âm Thanh")
+                gr.Markdown("### <iconify-icon icon='solar:chart-square-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 3. Kết Quả Xác Minh Âm Thanh")
 
                 verdict_html = gr.HTML(
                     """
                     <div style="padding: 1.5rem; border-radius: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
-                        <p style="margin-top: 0.5rem; font-size: 14px;">Bấm nút <strong>'2. KIỂM TRA TÍNH XÁC THỰC NGAY'</strong> để nhận diện giọng thật / giả mạo.</p>
+                        <iconify-icon icon="solar:waveform-bold-duotone" width="38" height="38" style="color: var(--teal-accent); margin-bottom: 8px;"></iconify-icon>
+                        <p style="margin-top: 0.25rem; font-size: 14px;">Bấm nút <strong>'2. KIỂM TRA TÍNH XÁC THỰC NGAY'</strong> để nhận diện giọng thật / giả mạo.</p>
                     </div>
                     """
                 )
                 conf_html = gr.HTML()
                 metrics_html = gr.HTML()
 
-                with gr.Accordion("📋 Chi tiết dạng văn bản (Screen Reader & API)", open=False):
+                with gr.Accordion("Chi tiết dạng văn bản (Screen Reader & API)", open=False, elem_id="detail-accordion"):
                     result_verdict = gr.Textbox(label="Kết quả phân định", interactive=False)
                     result_conf = gr.Textbox(label="Độ tin cậy phân tích", interactive=False)
                     result_detail = gr.Textbox(label="Khuyến cáo an toàn", interactive=False, lines=3)
 
         # SCIENTIFIC VISUALIZATION TABS (Mel-Spectrogram, Waveform, Grad-CAM Attention Map)
         gr.Markdown("---")
-        gr.Markdown("### 🔬 Góc Nhìn Số Liệu Khoa Học Trực Quan (Forensic Scientific Visualizations)")
+        gr.Markdown("### <iconify-icon icon='solar:test-tube-minimalistic-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> Góc Nhìn Số Liệu Khoa Học Trực Quan (Forensic Scientific Visualizations)")
         with gr.Tabs():
-            with gr.TabItem("📊 Mel-Spectrogram (80 Mels, log dBFS)"):
+            with gr.TabItem("Mel-Spectrogram (80 Mels, log dBFS)"):
                 spec_plot = gr.Plot(show_label=False)
-            with gr.TabItem("🌊 Sóng Âm Đồng Bộ (Time-Domain Waveform)"):
+            with gr.TabItem("Sóng Âm Đồng Bộ (Time-Domain Waveform)"):
                 wave_plot = gr.Plot(show_label=False)
-            with gr.TabItem("🎯 Bản Đồ Chú Ý AI (Grad-CAM Temporal Saliency)"):
+            with gr.TabItem("Bản Đồ Chú Ý AI (Grad-CAM Temporal Saliency)"):
                 cam_plot = gr.Plot(show_label=False)
 
         # Presets click handlers
@@ -977,7 +1051,7 @@ def build_ui(
             """
             ---
             <div style="text-align: center; color: #64748B; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 1rem 0;">
-                ViTrueVoice Anti-Spoofing Inference Engine v0.4.4 | Backbone: Wav2Vec2 + AASIST (B_zalo V6) | Multi-Window Max-Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
+                ViTrueVoice Anti-Spoofing Inference Engine v0.4.5 | Backbone: Wav2Vec2 + AASIST (B_zalo V6) | Multi-Window Max-Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
             </div>
             """
         )
