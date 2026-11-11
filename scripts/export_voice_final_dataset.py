@@ -178,14 +178,8 @@ def main():
             for f in sorted(vn_spk_dir.glob("*.wav")):
                 copy_audio_file(f, dst_vn, "02_Unseen_Acceptance", f"Seen_Baseline_Benchmarks/VieNeu_TTS/{spk}", spk, "spoof", "VieNeu-TTS")
 
-    # 2.3. Unseen TTS Engines (Kokoro-Vietnamese & OmniVoice CFM trên 5 SPK nghiệm thu)
+    # 2.3. Unseen TTS Engines (VoiceStudio OmniVoice CFM trên 5 SPK nghiệm thu)
     for spk in speakers:
-        kk_spk_dir = _ROOT / f"data/spoof_unseen/kokoro/{spk}"
-        if kk_spk_dir.exists():
-            dst_kk = DEST_ROOT / "02_Unseen_Acceptance" / "Unseen_TTS_Engines" / "Kokoro_Vietnamese" / spk
-            for f in sorted(kk_spk_dir.glob("*.wav")):
-                copy_audio_file(f, dst_kk, "02_Unseen_Acceptance", f"Unseen_TTS_Engines/Kokoro_Vietnamese/{spk}", spk, "spoof", "Kokoro-Vietnamese")
-
         omni_spk_dir = _ROOT / f"data/spoof_unseen/omnivoice/{spk}"
         if omni_spk_dir.exists():
             dst_omni = DEST_ROOT / "02_Unseen_Acceptance" / "Unseen_TTS_Engines" / "OmniVoice_CFM" / spk
@@ -292,7 +286,7 @@ Toàn bộ dữ liệu âm thanh tham gia vào quá trình huấn luyện và đ
 **BỘ NGHIỆM THU ĐỘC LẬP CHÍNH THỨC CỦA ĐỒ ÁN** — Hoàn toàn cô lập 100% khỏi quá trình huấn luyện, chọn ngưỡng threshold hay calibration:
 - **BonaFide_5Spk_Volunteers** (444 files): 84 phát ngôn giọng thật gốc độc bản từ 5 tình nguyện viên đối chứng (`SPK_0003`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`) nhân với 5 biến thể codec (Clean, Zalo AAC-LC 76k, Zalo Opus 24k, G.711 A-law, AMR-NB) cùng các file chuẩn tham chiếu (Enrollment_Ref).
 - **Seen_Baseline_Benchmarks** (750 files): Tập spoof đối chứng sinh bởi 2 công cụ Seen TTS (`F5_TTS`: 375 files; `VieNeu_TTS`: 375 files) nhằm kiểm định Giả thuyết H1.
-- **Unseen_TTS_Engines** (750 files): Toàn bộ giọng giả sinh bởi các công cụ Unseen TTS Zero-Shot (`Kokoro_Vietnamese`: 375 files; `OmniVoice_CFM`: 375 files) nhằm kiểm định Giả thuyết H2.
+- **Unseen_TTS_Engines** (375 files): Toàn bộ giọng giả sinh bởi công cụ Unseen TTS Zero-Shot VoiceStudio CFM (`OmniVoice_CFM`: 375 files) nhằm kiểm định Giả thuyết H2.
 
 ---
 
@@ -313,7 +307,7 @@ Hội đồng có thể kiểm tra trực tiếp bất kỳ file âm thanh nào 
 ### Cách 1: Chạy kịch bản suy luận CLI
 ```bash
 python scripts/demo_predict.py --audio "02_Unseen_Acceptance/BonaFide_5Spk_Volunteers/SPK_0004/Clean_16k/SPK_0004_01.wav"
-python scripts/demo_predict.py --audio "02_Unseen_Acceptance/Unseen_TTS_Engines/Kokoro_Vietnamese/SPK_0004/SPK_0004_01.wav"
+python scripts/demo_predict.py --audio "02_Unseen_Acceptance/Unseen_TTS_Engines/OmniVoice_CFM/SPK_0004/SPK_0004_omnivoice_prompt_006.wav"
 ```
 
 ### Cách 2: Chạy kiểm định ma trận suy giảm (Degradation Analysis)

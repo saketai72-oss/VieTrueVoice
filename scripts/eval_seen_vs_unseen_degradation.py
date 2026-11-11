@@ -154,21 +154,14 @@ def run_benchmark(
     if vn_files:
         tts_systems["VieNeu-TTS"] = {"type": "Seen", "files": sorted(vn_files)}
 
-    # UNSEEN TTS #1: Kokoro-Vietnamese
-    kk_files = []
-    for spk in speakers:
-        kk_files.extend(list((_ROOT / f"data/spoof_unseen/kokoro/{spk}").glob("*.wav")))
-    if kk_files:
-        tts_systems["Kokoro-Vietnamese"] = {"type": "Unseen", "files": sorted(kk_files)}
-
-    # UNSEEN TTS #2: OmniVoice (nếu có)
+    # UNSEEN TTS: VoiceStudio (OmniVoice CFM) - Zero-shot Voice Cloning
     omni_files = []
     for spk in speakers:
         omni_dir = _ROOT / f"data/spoof_unseen/omnivoice/{spk}"
         if omni_dir.exists():
             omni_files.extend(list(omni_dir.glob("*.wav")))
     if omni_files:
-        tts_systems["OmniVoice"] = {"type": "Unseen", "files": sorted(omni_files)}
+        tts_systems["VoiceStudio (OmniVoice)"] = {"type": "Unseen", "files": sorted(omni_files)}
 
     # UNSEEN TTS #3: Bark (nếu có)
     bark_files = []
