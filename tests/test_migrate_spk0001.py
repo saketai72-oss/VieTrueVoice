@@ -17,6 +17,10 @@ EXPECTED_COLUMNS = [
 ]
 
 
+@pytest.mark.skipif(
+    not Path("data/raw/SPK_0001/SPK_0001_01.wav").exists(),
+    reason="SPK_0001 raw audio not present in CI / fresh clone",
+)
 def test_build_spk0001_rows_structure_and_constraints():
     """Verify build_spk0001_rows produces exactly 125 valid rows conforming to all constraints."""
     rows = build_spk0001_rows()
