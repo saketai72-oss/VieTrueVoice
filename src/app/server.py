@@ -165,6 +165,7 @@ def create_app(
             win=TARGET_SAMPLE_COUNT,
             hop=16000,
             max_windows=5,
+            apply_dither=True,
         ).to(device)
         n_windows = int(windows_batch.shape[0])
 

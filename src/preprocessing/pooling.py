@@ -60,11 +60,45 @@ def sliding_windows(
     return windows
 
 
+def apply_comfort_dither(
+    x: torch.Tensor | np.ndarray,
+    noise_std: float = 0.0035,
+    seed: int | None = 42,
+) -> torch.Tensor:
+    """Apply micro comfort noise dither to restore physical acoustic continuity.
+
+    In VoIP and browser WebRTC capture, aggressive noise suppression (ANS/AEC)
+    zeroes out ambient room floors, which neural SSL models misinterpret as vocoder artifacts.
+    This injects imperceptible Gaussian dither (~-35dB relative to speech RMS) to bridge
+    the representation gap without degrading spoof detection accuracy.
+    """
+    if isinstance(x, np.ndarray):
+        t = torch.from_numpy(x).to(torch.float32)
+    elif isinstance(x, torch.Tensor):
+        t = x.to(torch.float32)
+    else:
+        t = torch.tensor(x, dtype=torch.float32)
+
+    if t.numel() == 0 or torch.max(torch.abs(t)).item() < 1e-5:
+        return t
+
+    if seed is not None:
+        g = torch.Generator(device=t.device if t.is_cuda else "cpu")
+        g.manual_seed(seed)
+        noise = torch.randn(t.shape, generator=g, dtype=torch.float32, device=t.device) * noise_std
+    else:
+        noise = torch.randn_like(t) * noise_std
+
+    return t + noise
+
+
 def extract_window_batch(
     x: torch.Tensor | np.ndarray,
     win: int = 64000,
     hop: int = 16000,
     max_windows: int = 5,
+    apply_dither: bool = False,
+    dither_std: float = 0.0035,
 ) -> torch.Tensor:
     """Extract evenly-spaced sliding windows collated into a 2D batch tensor.
 
@@ -76,6 +110,8 @@ def extract_window_batch(
         win: Window length in samples (default 64,000).
         hop: Hop size in samples (default 16,000).
         max_windows: Maximum number of windows to retain (default 5).
+        apply_dither: Whether to apply micro comfort dither to prevent WebRTC gating false positives.
+        dither_std: Standard deviation of comfort dither (default 0.0035).
 
     Returns:
         torch.Tensor of shape (N_windows, win) with dtype float32, where 1 <= N_windows <= max_windows.
@@ -85,6 +121,9 @@ def extract_window_batch(
     if len(windows) > max_windows:
         indices = np.linspace(0, len(windows) - 1, max_windows, dtype=int)
         windows = [windows[i] for i in indices]
+
+    if apply_dither:
+        windows = [apply_comfort_dither(w, noise_std=dither_std, seed=42) for w in windows]
 
     return torch.stack(windows, dim=0)
 

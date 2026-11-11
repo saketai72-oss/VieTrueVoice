@@ -580,6 +580,7 @@ def make_predict_fn(
             win=TARGET_SAMPLE_COUNT,
             hop=16000,
             max_windows=5,
+            apply_dither=True,
         ).to(device)
         n_windows = int(windows_batch.shape[0])
 
@@ -894,6 +895,30 @@ THEME_INIT_JS = """
     applyIconifyDecorations();
     setTimeout(applyIconifyDecorations, 250);
     setTimeout(applyIconifyDecorations, 800);
+
+    // 4. Dual-Platform Raw Audio Capture Hook: disable aggressive browser noise gating
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        if (!window.__vitruevoice_gum_patched) {
+            window.__vitruevoice_gum_patched = true;
+            const origGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+            navigator.mediaDevices.getUserMedia = function(constraints) {
+                if (constraints && constraints.audio) {
+                    if (typeof constraints.audio === 'object') {
+                        constraints.audio.noiseSuppression = false;
+                        constraints.audio.echoCancellation = false;
+                        constraints.audio.autoGainControl = false;
+                    } else if (constraints.audio === true) {
+                        constraints.audio = {
+                            noiseSuppression: false,
+                            echoCancellation: false,
+                            autoGainControl: false,
+                        };
+                    }
+                }
+                return origGUM(constraints);
+            };
+        }
+    }
 }
 """
 

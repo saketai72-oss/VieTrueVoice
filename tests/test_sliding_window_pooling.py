@@ -13,6 +13,7 @@ import pytest
 import torch
 
 from src.preprocessing.pooling import (
+    apply_comfort_dither,
     extract_window_batch,
     pool_scores,
     sliding_windows,
@@ -221,3 +222,34 @@ def test_pool_scores_empty_input_raises():
     # Act & Assert
     with pytest.raises(ValueError, match="Cannot pool empty"):
         pool_scores([], mode="max")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 7. Adaptive Comfort Dithering Tests (Dual-Platform WebRTC / Upload Support)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_apply_comfort_dither_preserves_shape_and_dtype():
+    """Verify comfort dither preserves tensor length, shape, and float32 dtype."""
+    x = torch.randn(64000, dtype=torch.float32)
+    dithered = apply_comfort_dither(x, noise_std=0.0035, seed=42)
+    assert isinstance(dithered, torch.Tensor)
+    assert dithered.shape == x.shape
+    assert dithered.dtype == torch.float32
+    assert not torch.allclose(dithered, x)
+
+
+def test_apply_comfort_dither_silent_tensor_unchanged():
+    """Verify silence / empty tensor is preserved without adding phantom noise."""
+    zeros = torch.zeros(64000, dtype=torch.float32)
+    dithered = apply_comfort_dither(zeros, noise_std=0.0035)
+    assert torch.allclose(dithered, zeros)
+
+
+def test_extract_window_batch_with_dither_flag():
+    """Verify extract_window_batch applies dither when apply_dither=True."""
+    x = torch.randn(80000, dtype=torch.float32)
+    raw_batch = extract_window_batch(x, win=64000, hop=16000, max_windows=5, apply_dither=False)
+    dither_batch = extract_window_batch(x, win=64000, hop=16000, max_windows=5, apply_dither=True)
+    assert raw_batch.shape == dither_batch.shape == (2, 64000)
+    assert not torch.allclose(raw_batch, dither_batch)
+
