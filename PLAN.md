@@ -13,7 +13,7 @@
 
 ### 0.2. Quy Tắc Phát Triển & Vận Hành Bắt Buộc Cho Agent
 
-1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **298/298 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
+1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **301/301 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
 2. **Quy ước Git Commit**: Mọi bản commit có sự hỗ trợ của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit.
 3. **Quy trình Huấn luyện Hybrid (Local Code <-> Kaggle GPU)**:
    - Phát triển mã nguồn, viết unit tests và quản lý toàn bộ dự án tại máy Local.
