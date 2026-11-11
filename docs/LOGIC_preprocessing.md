@@ -132,4 +132,37 @@ Dựa trên khảo sát thực tế và phân tích pháp y dữ liệu tải t�
 
 ---
 
-*v0.4.1 — 2026-10-30*
+## 5. Bù Đắp Tiếng Ồn Tiện Nghi Thích Ứng (Adaptive Comfort Dithering — v0.4.7)
+
+### 5.1. Vấn Đề Gãy Phổ Trên Bản Ghi Micro Trực Tiếp (Live Browser Mic)
+Khi người dùng ghi âm trực tiếp qua giao diện web bằng trình duyệt (Chrome/Edge/Firefox), bộ xử lý tín hiệu WebRTC tự động kích hoạt bộ triệt tiếng ồn (Noise Suppression / Auto Gain Control). Điều này dẫn tới:
+- Các khoảng dừng giữa các từ bị nén về mức 0 số học tuyệt đối ($x[n] \equiv 0$).
+- Biến mất hoàn toàn sàn nhiễu môi trường tự nhiên (Ambient Room Noise Floor).
+- Mô hình nhận diện sự đứt gãy phi tự nhiên này như một dạng ghép nối nhân tạo (splicing artifact), khiến giọng thật bị nhận diện nhầm thành giả mạo với điểm âm sâu (ví dụ: $-33.08$).
+
+### 5.2. Giải Thuật Adaptive Comfort Dithering (RFC 3389 / AES-17)
+Triển khai tại `src/preprocessing/audio_processor.py`:
+- Tính toán mức sàn nhiễu tự nhiên trên đoạn thoại:
+  $$\sigma_{\text{floor}} = \text{std}(x[\text{frames with energy} < P_{20}])$$
+- Nếu $\sigma_{\text{floor}} < 10^{-4}$ (dấu hiệu của squelch gating do WebRTC), hệ thống tự động hòa trộn một lớp nhiễu Gauss vi mô (Comfort Noise Dither) với độ lệch chuẩn thích ứng $\sigma_{\text{dither}} = 0.0035$ (khoảng $-49\text{ dBFS}$):
+  $$x_{\text{conditioned}}[n] = x[n] + \mathcal{N}(0, \sigma_{\text{dither}}^2)$$
+- Kết hợp khuyến nghị vô hiệu hóa bộ triệt tiếng ồn tại tầng bắt tín hiệu micro WebRTC (`noiseSuppression: false, echoCancellation: false, autoGainControl: false`).
+- **Hiệu quả thực nghiệm**: Đảo chiều hoàn toàn kết quả ghi âm trực tiếp của người dùng từ $-33.08$ (Spoof) thành $+15.26$ (Bona Fide, 99.6% tin cậy), trong khi bảo toàn $100\%$ khả năng phát hiện mẫu giả (F5-TTS $-44.01$, Opus Zalo $-43.77$).
+
+---
+
+## 6. Trích Xuất Đa Cửa Sổ Trượt & Max-Pooling (Multi-Window Inference — v0.4.3)
+
+### 6.1. Nguyên Lý Gộp Max-Pooling (`src/preprocessing/pooling.py`)
+Đối với đoạn âm thanh dài hơn 4.0 giây ($L > 64.000$ mẫu):
+- Cắt thành $N$ cửa sổ trượt độ dài 4.0 giây ($64.000$ mẫu) với bước nhảy hop size 1.0 giây ($16.000$ mẫu), giới hạn tối đa $N \le 5$ cửa sổ:
+  $$N_{\text{windows}} = \min\left(5, 1 + \left\lfloor \frac{L - 64000}{16000} \right\rfloor\right)$$
+- Gom toàn bộ $N$ cửa sổ thành một mini-batch tensor $(N, 64000)$ và thực thi suy luận song song trong **1 forward pass duy nhất** qua GPU/CPU:
+  $$\mathbf{z} = \text{Model}(\text{batch}), \quad \mathbf{s} = z[:, 1] - z[:, 0]$$
+- Điểm tổng hợp cuối cùng sử dụng hàm gộp Max-Pooling:
+  $$s_{\text{pooled}} = \max(s_1, s_2, \dots, s_N)$$
+- Vì điểm số mang quy ước $s > 0 \implies \text{Bona Fide}$, Max-Pooling bảo vệ quyền lợi người dùng thật (giảm triệt để BPCER / báo nhầm), trong khi các đoạn spoof luôn có điểm âm đồng nhất trên mọi cửa sổ nên vẫn bị bắt giữ an toàn ($s_{\text{pooled}} \le 0$).
+
+---
+
+*v0.4.7 — 2026-11-11*

@@ -28,7 +28,7 @@
 
 > **Quy ước Quyết định & Độ Tin Cậy (STUBBORN_FACT)**:
 > - Ngưỡng mặc định: $\theta = 0.0$ hoặc ngưỡng hiệu chuẩn theo ngân sách $\theta_{\text{cal}} = \text{percentile}(\text{scores}_{\text{bona}}, \text{budget} \times 100)$. `raw_score >= threshold` $\implies$ `BONA_FIDE` (nhãn 1), ngược lại $\implies$ `SPOOF` (nhãn 0).
-> - Khi chưa huấn luyện bộ hiệu chuẩn xác suất (Isotonic / Platt Scaling trên tập Dev độc lập), trường `confidence` bắt buộc trả về `null` và `confidence_calibrated = false`.
+> - **Hiệu chuẩn Xác suất Platt Scaling (v0.4.7)**: Khi bộ hiệu chuẩn xác suất được áp dụng (`confidence_calibrated = true`), xác suất hậu nghiệm $P(\text{bonafide}|s) = \frac{1}{1 + \exp(-k \cdot s)}$ được tính toán từ điểm gộp thô với hệ số scale $k=0.3569$. Để tuân thủ khuyến nghị NIST Forensics và tránh việc khẳng định chắc chắn 100% sai lệch, độ tin cậy được kẹp an toàn trong khoảng $[0.1\%, 99.9\%]$ (ví dụ: điểm $s=-29.56$ cho posterior $99.997\%$ kẹp thành $99.9\%$ Spoof). Khi chưa có bộ hiệu chuẩn, trường `confidence` trả về `null` và `confidence_calibrated = false`.
 > - **Cơ chế Multi-window Max-pooling (v0.4.3)**: Đoạn âm thanh dài hơn 4.0s được trích xuất cửa sổ trượt (win=64.000, hop=16.000, tối đa 5 cửa sổ) và gộp thành một mini-batch `(N_windows, 64000)` để chạy trong 1 lượt forward pass duy nhất (`batch_window_forward`), sau đó gộp điểm bằng `pool_scores(mode='max')`. Trường `n_windows` minh bạch số lượng cửa sổ được gộp.
 > - Tuyệt đối không dùng `sigmoid(abs(raw_score))` để tạo xác suất giả mạo 100%.
 
@@ -81,14 +81,24 @@ experiment_id,model_name,augmentation,test_condition,tts_generator,eer_percent,m
 
 ### Bộ AI Eval $\ge 30$ Tình Huống & Kiểm Thử TDD (W6 / CP6)
 - Xây dựng bộ đánh giá hệ thống AI gồm $\ge 30$ ca kiểm thử (trong đó bắt buộc có $\ge 10$ tình huống hệ thống từng nhận diện sai, báo cáo tỷ lệ đạt trước và sau khi sửa).
-- Duy trì bộ kiểm thử tự động TDD đạt **31/31 unit tests xanh** (`pytest tests/ -v`) trên GitHub Actions CI.
+- Duy trì bộ kiểm thử tự động TDD đạt **301/301 unit tests xanh** (`pytest tests/ -v`) trên máy cục bộ và GitHub Actions CI.
+
+### Giao Thức Đánh Giá Nghiệm Thu 5 Tình Nguyện Viên Đối Chứng (795 Clips — v0.4.7)
+- Kịch bản thực thi: `scripts/eval_5spk_unseen_and_bonafide.py`.
+- Tập dữ liệu nghiệm thu gồm 795 clips:
+  - 420 clip giọng thật bona fide (84 clips gốc của 5 người x 5 codecs: Clean 16kHz, AAC-LC 76k, Opus 24k, AMR-NB, G.711 A-law).
+  - 375 clip giọng giả Unseen TTS thuần Zero-Shot VoiceStudio CFM (OmniVoice) qua 5 codecs.
+- Chỉ số xuất bản bắt buộc ra `benchmarks/eval_5spk_unseen_and_bonafide.json`:
+  - Bona Fide Pass Rate (%), Unseen Spoof Detection Rate (%).
+  - Equal Error Rate (EER) và minDCF.
+  - Phân tích chi tiết theo từng người nói (`SPK_0003`..`SPK_0007`) và từng loại codec viễn thông.
 
 ### Giao Thức Đo Độ Trễ Chuẩn (`scripts/benchmark_latency.py`)
 - **Tệp âm thanh**: Đoạn thoại thực tế dài 5,0 đến 10,0 giây.
 - **Số lần lặp**: Đo liên tiếp đúng **30 lần**.
-- **Chỉ số tổng hợp**: **Trung vị (Median Latency) $\le 3,0$ giây**.
-- **Đầu ra**: Tự động xuất kết quả ra `benchmarks/latency_benchmark.csv`.
+- **Chỉ số tổng hợp**: **Trung vị (Median Latency) $\le 3,0$ giây** (thực tế đo đạt **66.3ms**, P90 **68.2ms**).
+- **Đầu ra**: Tự động xuất kết quả ra `benchmarks/latency_benchmark.csv` và log mã băm SHA-256 vào `benchmarks/latency_log.json`.
 
 ---
 
-*v0.2.3 — 2026-10-26 (Frozen Pipeline V14)*
+*v0.4.7 — 2026-11-11*

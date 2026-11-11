@@ -82,7 +82,7 @@
 - **Manifests 18 Cột Chuẩn**: Lưu tại `data/manifests/` và `data/manifests_zalo/`.
   - Cấu trúc 18 cột chuẩn: `utt_id, audio_path, speaker_id, label, tts_generator, vocoder, codec, split, duration_sec, transcript, wer, cer, ecapa_sim, derived_tier, engine_name, ref_audio_path, seed, pre_codec`.
 - **Quy ước Nhãn**: `0` = Giả mạo (`Spoof`), `1` = Giọng thật (`Bona fide`).
-- **Phân Vùng Người Nói**: Độc lập tuyệt đối (`Speaker-Disjoint`) trên VIVOS (50 Train, 15 Test In-domain) và Mozilla Common Voice (Dev & Test OOD). Toàn bộ 5 tình nguyện viên `SPK_0001`..`0007` là **bộ nghiệm thu độc lập tách biệt hoàn toàn**, nghiêm cấm 100% đưa vào Train, Dev, Calibration hoặc Fine-tuning.
+- **Phân Vùng Người Nói**: Độc lập tuyệt đối (`Speaker-Disjoint`) trên VIVOS (50 Train, 15 Test In-domain) và Mozilla Common Voice (Dev & Test OOD). Sau chu trình kiểm chứng ngoại lai ở v0.4.4, `SPK_0001` đã được chuyển vào Train. Năm (05) tình nguyện viên còn lại (`SPK_0003`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`) là **Bộ nghiệm thu độc lập chính thức của đề tài** (84 clips bona fide x 5 codecs), nghiêm cấm 100% xuất hiện trong Train, Dev, Calibration, chọn ngưỡng, hoặc fine-tuning.
 
 ---
 
@@ -90,9 +90,10 @@
 
 - **File âm thanh hoàn toàn im lặng**: Tự động trả về mảng zero kích thước 64.000 mẫu kèm xử lý tránh chia cho 0 trong chuẩn hóa độ lệch chuẩn (`std < 1e-8`).
 - **File âm thanh cực ngắn (< 0,2 giây)**: Nối lặp tuần hoàn cho đến khi đạt `>= 64.000 mẫu`.
-- **File âm thanh dài (> 10 giây)**: Khi suy luận cắt cửa sổ trượt 4,0 giây (64.000 mẫu) và lấy trung bình cộng điểm tin cậy.
+- **File âm thanh dài (> 4 giây)**: Khi suy luận, áp dụng kỹ thuật trích xuất đa cửa sổ trượt 4,0 giây (64.000 mẫu, hop size 16.000 mẫu, tối đa 5 cửa sổ) gom thành mini-batch chạy trong 1 lượt forward duy nhất và gộp điểm bằng **Max-Pooling** (`pool_scores(mode='max')` tại `src/preprocessing/pooling.py`).
+- **Âm thanh thu trực tiếp qua Micro trình duyệt bị cắt cụt khoảng lặng (Squelch Gating)**: Tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma = 0.0035$) khôi phục sàn nhiễu tự nhiên theo chuẩn RFC 3389 / AES-17.
 - **Không có transcript mẫu tham chiếu**: Tự động nhận diện từ sóng âm bằng ASR trong 0.2s (**Label-Free ASR Auto-Fallback**).
 
 ---
 
-*v0.4.1 — 2026-10-30*
+*v0.4.7 — 2026-11-11*

@@ -98,7 +98,7 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 274 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab)*
+*(Yêu cầu: Toàn bộ 301 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
 
 ### Kiểm Toán An Ninh Manifest V6
 ```bash
@@ -338,4 +338,16 @@ python scripts/train_dual_seen.py --batch-size 16 --accum-steps 1 --device cuda
 Quy trình sẽ tự động thực hiện:
 - **Lần 1**: Huấn luyện trên tập không có SPK_0001 (54.225 dòng) và đánh giá trên 15 file bona fide của SPK_0001 với Multi-window Max-Pooling.
 - **Lần 2**: Nếu Lần 1 chưa nhận diện được SPK_0001 (Pass Rate < 80%), tự động kích hoạt đưa SPK_0001 vào tập train (54.400 dòng) và tái huấn luyện.
+
+### 8.3 Đánh giá nghiệm thu toàn diện 5 tình nguyện viên đối chứng (795 Clips)
+Chạy kịch bản đánh giá mô hình B_zalo V7 qua toàn bộ 420 clip bona fide (84 clips x 5 codecs) và 375 clip Unseen Spoof (VoiceStudio OmniVoice CFM Zero-shot) trên 5 tình nguyện viên held-out (`SPK_0003`..`0007`):
+```bash
+python scripts/eval_5spk_unseen_and_bonafide.py --ckpt out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt
+```
+Kết quả chi tiết và báo cáo phân tích lưu tự động tại: `benchmarks/eval_5spk_unseen_and_bonafide.json`.
+
+### 8.4 Kiểm định 2 Nền tảng Thử nghiệm (Dual-Platform Verification)
+Hệ thống tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma = 0.0035$) theo chuẩn RFC 3389 / AES-17 để xử lý đồng thời hai nguồn dữ liệu âm thanh:
+1. **Nền tảng 1 (File âm thanh viễn thông tải lên)**: Hỗ trợ kéo thả trực tiếp tệp `.wav`, `.m4a`, `.opus`, `.ogg`, `.mp3` qua Web UI hoặc Zalo/Telegram Bot.
+2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút Micro trên giao diện Gradio Web. Thuật toán bù đắp dither tự động khôi phục tính liên tục âm học tự nhiên cho các vùng khoảng lặng bị trình duyệt cắt cụt bởi bộ lọc tiếng ồn (noise suppression / AGC), ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
 

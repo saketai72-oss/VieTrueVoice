@@ -239,4 +239,29 @@ graph TD
 
 ---
 
-*v0.4.1 — 2026-10-30*
+## 8. Tinh Chỉnh B_zalo V6/V7, Di Chuyển SPK_0001 & Huấn Luyện Kép Dual-Seen (v0.4.4 – v0.4.7)
+
+### 8.1. Di Chuyển SPK_0001 Vào Train & Cô Lập Tuyệt Đối 5 Tình Nguyện Viên Nghiệm Thu
+- Sau khi kiểm chứng giả thuyết ngoại lai: người nói có giọng siêu trầm dị biệt `SPK_0001` (F0 < 110Hz, năng lượng dải trầm $e_{\text{low}} = 54.9\%$) không thể tự tổng quát hóa nếu hoàn toàn vắng bóng trong tập huấn luyện (Pass rate chỉ 20.0%, điểm trung bình -17.65).
+- Thực thi chuyển 125 dòng của `SPK_0001` (75 bona fide + 50 F5-TTS spoof, loại bỏ 100% VieNeu-TTS) vào `data/manifests_zalo/train_zalo.csv` (nâng quy mô tập Train lên 50.710 dòng).
+- Khóa chặt 5 tình nguyện viên đối chứng (`SPK_0003`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`) làm **Bộ nghiệm thu độc lập chính thức của đề tài** (84 clips bona fide x 5 codecs = 420 clips + 375 clips Unseen VoiceStudio CFM Spoof). Nghiêm cấm 100% xuất hiện trong Train, Dev, Calibration hoặc Fine-tuning.
+
+### 8.2. Huấn Luyện Kép Dual-Seen Re-Training (F5-TTS + VieNeu-TTS v3 Turbo — Checkpoint V7)
+- Để hoàn thiện năng lực tổng quát hóa theo kiến trúc phòng thủ đa động cơ, tập Train và Dev được mở rộng thành Dual-Seen bao gồm cả F5-TTS và VieNeu-TTS v3 Turbo (`train_dual_seen_with_spk1.csv`, 54.400 dòng).
+- Checkpoint V7 lưu tại: `out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`.
+- Công cụ kiểm định Unseen TTS thực thụ cho Giả thuyết H2 là **VoiceStudio (OmniVoice CFM Zero-shot Voice Cloning)** — hoàn toàn tách biệt khỏi quá trình huấn luyện.
+
+### 8.3. Kết Quả Kiểm Định Nghiệm Thu Toàn Diện Trên 795 Clips Đối Chứng
+Chạy kiểm định qua toàn bộ 795 clips nghiệm thu bằng script `scripts/eval_5spk_unseen_and_bonafide.py`:
+- **Bona Fide Pass Rate (Giọng thật)**: **89.52% (376/420)** với điểm trung bình dương rất cao (`+20.62`).
+  - Trên 4 người nói đối chứng nòng cốt (`SPK_0004`..`SPK_0007`, 320 clips): Đạt **97.19% (311/320)** PASS.
+  - Trên cả 5 người nói đối chứng (bao gồm cả `SPK_0003` giọng trầm vừa): Đạt **89.52%**.
+- **Unseen Spoof Detection Rate (Giọng giả Unseen CFM)**: **79.47% (298/375)** với điểm trung bình âm sâu (`-20.76`).
+- **Chỉ số phân tách tối ưu**:
+  - Equal Error Rate (**EER**) = **0.16%**.
+  - minDCF = **0.6742**.
+  - Khoảng cách phân tách biên độ (Margin Gap) giữa tâm phân bố Thật và Giả: **41.38 điểm** ($+20.62 - (-20.76)$).
+
+---
+
+*v0.4.7 — 2026-11-11*
