@@ -152,19 +152,14 @@ def main():
         p1.paragraph_format.line_spacing = 1.15
         p1.paragraph_format.space_after = Pt(0)
         
+        r1 = p1.add_run(col1)
+        r1.font.name = "Times New Roman"
+        r1.font.size = Pt(9.5)
+        if "https://" in col1 or "http://" in col1:
+            r1.font.color.rgb = RGBColor(0, 32, 96)
+            r1.font.underline = True
         if row_idx == 5:
-            r1 = p1.add_run(col1)
-            r1.font.name = "Times New Roman"
-            r1.font.size = Pt(9.5)
             r1.font.bold = True
-            r1.font.highlight_color = WD_COLOR_INDEX.YELLOW
-        else:
-            r1 = p1.add_run(col1)
-            r1.font.name = "Times New Roman"
-            r1.font.size = Pt(9.5)
-            if "https://" in col1 or "http://" in col1:
-                r1.font.color.rgb = RGBColor(0, 32, 96)
-                r1.font.underline = True
                 
         row.cells[0].width = Inches(2.2)
         row.cells[1].width = Inches(4.8)
