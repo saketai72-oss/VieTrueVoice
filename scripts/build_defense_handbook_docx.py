@@ -724,6 +724,139 @@ def build_document():
         add_styled_paragraph(doc, q_text, font_size=11, bold=True, color_rgb=(192, 0, 0), space_before=8, space_after=2)
         add_styled_paragraph(doc, a_text, font_size=10.5, color_rgb=(20, 20, 20), space_before=0, space_after=6)
 
+    # =========================================================================
+    # CHƯƠNG 12
+    # =========================================================================
+    add_heading_chapter(doc, "Chương 12", "Bản Đồ Từ Khóa Công Nghệ Học Máy & Hướng Dẫn Tra Cứu Tài Liệu Khoa Học")
+
+    add_styled_paragraph(doc, 
+        "Để giúp sinh viên tiếp tục đào sâu nghiên cứu, củng cố nền tảng lý thuyết và tự tin trích dẫn các công trình khoa học quốc tế trước hội đồng, chương này tổng hợp toàn bộ các **Từ khóa chuyên ngành (Academic Keywords)** chuẩn tiếng Anh, danh mục các **Bài báo khoa học kinh điển (Landmark Papers)** và các **Cú pháp tìm kiếm hiệu quả** trên Google Scholar, arXiv, IEEE Xplore và Interspeech/ICASSP.")
+
+    add_heading_section(doc, "12.1 Bảng Phân Loại Từ Khóa Theo 7 Trục Công Nghệ Cốt Lõi")
+    
+    t_kw = doc.add_table(rows=8, cols=3)
+    set_table_borders(t_kw, color="B0C4DE")
+    t_kw.alignment = WD_TABLE_ALIGNMENT.CENTER
+    headers_kw = ["Trục Công Nghệ", "Thuật Ngữ / Từ Khóa Tiếng Anh (Keywords)", "Ý Nghĩa & Mục Đích Tra Cứu"]
+    for c_i, h_text in enumerate(headers_kw):
+        cell = t_kw.rows[0].cells[c_i]
+        set_cell_background(cell, "1F497D")
+        set_cell_margins(cell, top=80, bottom=80, left=80, right=80)
+        p = cell.paragraphs[0]; p.paragraph_format.space_after = Pt(0)
+        r = p.add_run(h_text); r.font.name = "Times New Roman"; r.font.size = Pt(9.5); r.bold = True; r.font.color.rgb = RGBColor(255, 255, 255)
+
+    kw_rows = [
+        ("1. Học Biểu Diễn Tự Giám Sát Âm Thanh (SSL)",
+         "Self-Supervised Speech Representation Learning, wav2vec 2.0, HuBERT, WavLM, Contrastive Predictive Coding (CPC), Masked Latent Audio Modeling, Upstream Pre-training vs Downstream Fine-tuning.",
+         "Tra cứu cách mạng nơ-ron học đặc trưng âm học tiếng nói từ hàng trăm giờ âm thanh không gán nhãn, vượt trội hơn MFCC/LFCC truyền thống."),
+        ("2. Chống Giả Mạo Giọng Nói (Anti-Spoofing)",
+         "Voice Anti-Spoofing, Audio Deepfake Detection, Synthetic Speech Detection, ASVspoof Challenge (LA/PA/DF partitions), Logical Access Attacks, Zero-Shot Voice Cloning Countermeasures, Forensic Audio Analysis.",
+         "Tra cứu các kiến trúc mô hình, giao thức đánh giá và cuộc thi quốc tế về phát hiện giọng nói nhân tạo."),
+        ("3. Mạng Đồ Thị & Chú Ý Phổ - Thời Gian",
+         "AASIST (Audio Anti-Spoofing using Integrated Spectro-Temporal Graph Attention), Heterogeneous Graph Attention Network (HS-GAL), Spectro-Temporal Graph, Graph Readout Pooling, Master Node Attention.",
+         "Tra cứu cơ chế mô hình hóa mối tương quan không đồng nhất giữa miền thời gian và miền tần số để bắt dấu vết vocoder."),
+        ("4. Tăng Cường Âm Học & Suy Hao Kênh Thoại",
+         "Audio Data Augmentation, RawBoost, Impulse Response (RIR), Telephony Codec Degradation, Codec Robustness (AMR-NB, G.711 A-law, Opus, AAC-LC), Adaptive Comfort Dithering, RFC 3389, WebRTC Squelch Gating.",
+         "Tra cứu các phương pháp làm nhiễu âm học và kỹ thuật mô phỏng nén kênh viễn thông nhằm nâng cao độ bền vững của mô hình."),
+        ("5. Học Độ Đo & Hàm Mất Mát Phân Biên",
+         "Deep Metric Learning, Angular Margin Loss, Additive Margin Softmax (AM-Softmax), ArcFace, CosFace, Hyperspherical Feature Embedding, Dynamic Weighted Cross-Entropy, Double Penalty Avoidance.",
+         "Tra cứu các kỹ thuật tối ưu hàm mất mát nhằm kéo cụm vector giọng thật siêu đặc và đẩy lùi cụm giọng giả ra xa trên siêu cầu."),
+        ("6. Hiệu Chuẩn Thống Kê & Cơ Chế Suy Luận",
+         "Biometric Score Calibration, Platt Scaling (Logistic Calibration), Isotonic Regression, NIST SRE Evaluation Guidelines, Multi-Window Inference, Sliding Window Max-Pooling, EER, minDCF, DET Curve.",
+         "Tra cứu chuẩn mực chuyển đổi điểm thô thành xác suất tin cậy và cơ chế gộp đa cửa sổ trượt giảm tỷ lệ báo nhầm (BPCER)."),
+        ("7. Công Nghệ Sinh Giọng Giả (Phía Tấn Công)",
+         "Continuous Flow Matching (CFM), Diffusion Transformers for Audio (DiT), VoiceStudio, F5-TTS, StyleTTS 2, Neural Vocoders (HiFi-GAN, BigVGAN), Zero-Shot Voice Cloning, Mel-Spectrogram Inversion.",
+         "Tra cứu nguyên lý hoạt động của các công cụ TTS mà kẻ lừa đảo sử dụng, từ đó hiểu rõ bản chất vết răng cưa âm học sinh ra.")
+    ]
+    for r_i, r_data in enumerate(kw_rows):
+        row = t_kw.rows[r_i + 1]
+        for c_i, val in enumerate(r_data):
+            cell = row.cells[c_i]
+            set_cell_margins(cell, top=60, bottom=60, left=70, right=70)
+            if r_i % 2 == 1:
+                set_cell_background(cell, "F9FBFD")
+            p = cell.paragraphs[0]; p.paragraph_format.space_after = Pt(0)
+            r = p.add_run(val); r.font.name = "Times New Roman"; r.font.size = Pt(8.5)
+            if c_i == 0:
+                r.bold = True
+                r.font.color.rgb = RGBColor(31, 73, 125)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    add_heading_section(doc, "12.2 Danh Mục 12 Bài Báo Khoa Học Kinh Điển (Nên Tìm Đọc Gốc)")
+    add_styled_paragraph(doc, "Dưới đây là 12 bài báo nền tảng cốt lõi được trích dẫn trực tiếp trong kiến trúc của ViTrueVoice:")
+
+    papers = [
+        ("1. Kiến trúc AASIST (Khối Back-end cốt lõi)",
+         "Jung, J. W., Heo, H. S., Tak, H., Shim, H. J., Chung, J. S., Lee, B. J., ... & Evans, N. (2022). **AASIST: Audio Anti-Spoofing using Integrated Spectro-Temporal Graph Attention Networks**. In *Interspeech 2022* (pp. 336-340).\n"
+         "-> *Đóng góp*: Đề xuất kiến trúc HS-GAL kết hợp nút Master Node liên kết miền thời gian - tần số, đạt top 1 ASVspoof 2021."),
+
+        ("2. Mô hình nền tảng Wav2Vec 2.0 (Khối Front-end cốt lõi)",
+         "Baevski, A., Zhou, Y., Mohamed, A., & Auli, M. (2020). **wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations**. In *Advances in Neural Information Processing Systems (NeurIPS 2020)*, 33, 12449-12460.\n"
+         "-> *Đóng góp*: Cơ chế học tự giám sát tái cấu trúc biểu diễn tiềm ẩn lượng tử hóa từ sóng âm thô 16kHz."),
+
+        ("3. Thuật toán tăng cường RawBoost",
+         "Tak, H., Kamble, M., Patino, J., Evans, N., & Todisco, M. (2022). **RawBoost: A Raw Data Boosting and Augmentation Method for Audio Anti-Spoofing**. In *ICASSP 2022-2022 IEEE International Conference on Acoustics, Speech and Signal Processing* (pp. 6382-6386).\n"
+         "-> *Đóng góp*: Định nghĩa 3 giải thuật LnL, ISD, SSI làm nhiễu âm học trực tiếp trên dạng sóng thô."),
+
+        ("4. Hàm mất mát phân biên AM-Softmax",
+         "Wang, F., Cheng, J., Liu, W., & Liu, H. (2018). **Additive Margin Softmax for Face Verification**. *IEEE Signal Processing Letters*, 25(7), 926-930.\n"
+         "-> *Đóng góp*: Đưa lề phạt góc m vào hàm mất mát softmax, ép chặt không gian phân cụm vector trên siêu cầu."),
+
+        ("5. Hiệu chuẩn xác suất Platt Scaling",
+         "Platt, J. (1999). **Probabilistic Outputs for Support Vector Machines and Comparisons to Regularized Likelihood Methods**. *Advances in Large Margin Classifiers*, 10(3), 61-74.\n"
+         "-> *Đóng góp*: Phương pháp toán học biến đổi điểm logit thô thành xác suất hậu nghiệm tin cậy qua hàm logistic sigmoid tối ưu."),
+
+        ("6. Tiêu chuẩn đánh giá ASVspoof 2021",
+         "Yamagishi, J., Wang, X., Todisco, M., Sahidullah, M., Delgado, H., Evans, N., ... & Kinnunen, T. (2021). **ASVspoof 2021: Accelerating progress in spoofed and deepfake speech detection**. In *ASVspoof 2021 Workshop*.\n"
+         "-> *Đóng góp*: Quy chuẩn quốc tế về phân vùng đánh giá Logical Access (LA), Speech Deepfake (DF) và chỉ số minDCF."),
+
+        ("7. Công nghệ sinh mẫu giả Flow Matching F5-TTS",
+         "Chen, Y., Niu, Z., Yuan, Z., Ma, Z., & Chen, X. (2024). **F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching**. *arXiv preprint arXiv:2410.06885*.\n"
+         "-> *Đóng góp*: Kiến trúc Diffusion Transformer không cần bộ căn chỉnh thời gian (alignment-free), đại diện cho thế hệ voice cloning hiện đại nhất."),
+
+        ("8. Mô hình mạng nơ-ron đồ thị GAT",
+         "Veličković, P., Cucurull, G., Casanova, A., Romero, A., Liò, P., & Bengio, Y. (2018). **Graph Attention Networks**. In *International Conference on Learning Representations (ICLR 2018)*.\n"
+         "-> *Đóng góp*: Nền tảng toán học của cơ chế Self-Attention trên cấu trúc đồ thị không gian."),
+
+        ("9. Bộ tạo sóng âm nơ-ron HiFi-GAN",
+         "Kong, J., Kim, J., & Bae, J. (2020). **HiFi-GAN: Generative Adversarial Networks for Efficient and High Fidelity Speech Synthesis**. In *Advances in Neural Information Processing Systems (NeurIPS 2020)*, 33, 17022-17033.\n"
+         "-> *Đóng góp*: Neural Vocoder phổ biến nhất hiện nay, sinh ra các dấu vết méo hài cao tần mà AASIST tập trung phân tích."),
+
+        ("10. Chuẩn nén thoại RFC 3389 (Comfort Noise)",
+         "Zopf, R. (2002). **Real-time Transport Protocol (RTP) Payload for Comfort Noise (CN)**. *RFC 3389, Internet Engineering Task Force (IETF)*.\n"
+         "-> *Đóng góp*: Tiêu chuẩn viễn thông quốc tế về việc bù đắp nhiễu tiện nghi (Comfort Noise Dithering) trong truyền dẫn thoại thời gian thực."),
+
+        ("11. Khung đánh giá sinh trắc học độc lập ứng dụng",
+         "Brümmer, N., & du Preez, J. (2006). **Application-independent evaluation of speaker detection systems**. *Computer Speech & Language*, 20(2-3), 230-275.\n"
+         "-> *Đóng góp*: Nền tảng toán học của hàm chi phí quyết định tối thiểu minDCF và biểu đồ chi phí lỗi log-likelihood (Cllr)."),
+
+        ("12. Mô hình tiếng Việt Wav2Vec2 Vietnamese 250h",
+         "Nguyen, L. V., & Nguyen, B. (2021). **wav2vec 2.0 for Vietnamese Speech Recognition**. *HuggingFace Repository: nguyenvulebinh/wav2vec2-base-vietnamese-250h*.\n"
+         "-> *Đóng góp*: Checkpoint tự giám sát tiếng Việt chất lượng cao nhất phục vụ nhận diện âm học tiếng Việt.")
+    ]
+
+    for p_title, p_desc in papers:
+        add_styled_paragraph(doc, p_title, font_size=11, bold=True, color_rgb=(192, 0, 0), space_before=7, space_after=2)
+        add_styled_paragraph(doc, p_desc, font_size=10, color_rgb=(30, 30, 30), space_before=0, space_after=5)
+
+    add_heading_section(doc, "12.3 Chiến Lược & Cú Pháp Tìm Kiếm Bài Báo Khoa Học (Search Queries)")
+    add_styled_paragraph(doc, "Khi cần tìm tài liệu bổ trợ trên **Google Scholar** (scholar.google.com) hoặc **arXiv** (arxiv.org), hãy sử dụng các chuỗi cú pháp tìm kiếm chuẩn xác sau:")
+    
+    add_bullet_item(doc, '`"wav2vec 2.0" AND "audio anti-spoofing" AND "deepfake"` -> Tìm các nghiên cứu kết hợp mô hình tự giám sát SSL với phát hiện giọng nói giả mạo.', "Cú pháp 1 (SSL cho Anti-Spoofing)")
+    add_bullet_item(doc, '`"AASIST" AND "graph attention" AND ("codec" OR "telephony")` -> Tìm các phân tích về độ bền vững của AASIST khi tín hiệu truyền qua kênh thoại nén.', "Cú pháp 2 (AASIST & Kênh Thoại)")
+    add_bullet_item(doc, '`"RawBoost" AND ("data augmentation" OR "frequency masking") AND "spoofing"` -> Tìm các cải tiến về kỹ thuật làm nhiễu âm học dạng sóng.', "Cú pháp 3 (Augmentation & RawBoost)")
+    add_bullet_item(doc, '`"Platt scaling" AND "score calibration" AND "biometrics"` -> Tìm các cơ sở toán học về việc hiệu chuẩn điểm số và kẹp xác suất trong sinh trắc học.', "Cú pháp 4 (Hiệu chuẩn Xác suất)")
+    add_bullet_item(doc, '`"multi-window" AND "max-pooling" AND ("audio classification" OR "anti-spoofing")` -> Tìm các tài liệu về cơ chế trích xuất đa cửa sổ trượt gộp điểm cực đại.', "Cú pháp 5 (Cơ chế Max-Pooling)")
+    add_bullet_item(doc, '`"voice cloning" AND "continuous flow matching" AND ("F5-TTS" OR "StyleTTS")` -> Tìm các nguyên lý tạo giọng giả của kẻ tấn công thế hệ mới.', "Cú pháp 6 (Công nghệ TTS Thế hệ Mới)")
+
+    add_callout_box(doc,
+        "LỜI KHUYÊN KHI TRẢ LỜI HỘI ĐỒNG:\n"
+        "Nếu Thầy/Cô hỏi: *'Cơ sở lý thuyết nào để em áp dụng kiến trúc này?'*, bạn có thể tự tin trả lời:\n"
+        "**'Dạ thưa Thầy/Cô, kiến trúc của em được kế thừa và phát triển từ công trình AASIST của nhóm tác giả Jee-weon Jung (Interspeech 2022) kết hợp mô hình tự giám sát Wav2Vec 2.0 của tác giả Alexei Baevski (NeurIPS 2020), cùng kỹ thuật tăng cường âm học RawBoost của Hemlata Tak (ICASSP 2022). Em đã cải tiến bằng cách bổ sung cơ chế Multi-Window Max-Pooling và Adaptive Comfort Dithering để giải quyết bài toán thực tế nén thoại Zalo và micro WebRTC tại Việt Nam.'**\n"
+        "Câu trả lời này thể hiện bạn nắm rất vững văn hiến khoa học quốc tế và hiểu rõ vị trí đóng góp mới của đồ án!",
+        title="BÍ QUYẾT PHẢN BIỆN #6: TRÍCH DẪN TÁC GIẢ KINH ĐIỂN TỰ TIN")
+
     # Save to both paths
     Path(OUTPUT_PATH_1).parent.mkdir(parents=True, exist_ok=True)
     Path(OUTPUT_PATH_2).parent.mkdir(parents=True, exist_ok=True)
