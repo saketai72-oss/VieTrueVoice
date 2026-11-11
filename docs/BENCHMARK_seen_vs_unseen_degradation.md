@@ -1,6 +1,6 @@
 # Báo Cáo Đo Đạc Mức Độ Suy Giảm: Seen TTS vs. Unseen TTS (Degradation Analysis)
 
-> **Mô hình đánh giá**: ViTrueVoice **B_zalo V6** (`out/zalo_b_zalo_v6_local/best_model.pt`)
+> **Mô hình đánh giá**: ViTrueVoice **B_zalo V7 Dual-Seen** (`out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`) & **B_zalo V6 Local** (`out/zalo_b_zalo_v6_local/best_model.pt`)
 > **Cơ chế suy luận**: Multi-window Max-Pooling (Cửa sổ 4.0s = 64.000 mẫu, bước nhảy 1.0s = 16.000 mẫu, tối đa 5 cửa sổ)
 > **Tập nghiệm thu đối chứng**: 84 mẫu âm thanh thật (Bona Fide) của 5 tình nguyện viên (`SPK_0003` .. `SPK_0007`) — **cô lập 100%** khỏi quá trình huấn luyện/tinh chỉnh.
 > **Quy ước phân loại thực nghiệm**:
@@ -11,50 +11,62 @@
 
 ## 1. Bảng Hiệu Năng Tổng Thể 4 Hệ Thống TTS (Decision Boundary $\theta = 0.0$)
 
+### 1.1. Mô hình Dual-Seen V7 (`out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`)
+
 | Hệ Thống TTS | Phân Loại | Tổng Số Mẫu | Tỷ Lệ Chặn Đứng (Pass Rate %) | Điểm Trung Bình (Mean Score) | EER (%) | minDCF |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **F5-TTS** | **Seen** | 375 | **99.47% (373/375)** | **-32.99** | **1.60%** | **0.0267** |
-| **VieNeu-TTS** | **Seen** | 375 | **60.00% (225/375)** | **-7.54** | **22.40%** | **0.4560** |
-| **Kokoro-Vietnamese** | **Unseen** | 375 | **99.73% (374/375)** | **-34.21** | **0.53%** | **0.0053** |
-| **OmniVoice (VoiceStudio)** | **Unseen** | 375 | **46.93% (176/375)** | **+1.55** | **27.20%** | **0.6053** |
+| **F5-TTS** | **Seen** | 375 | **99.20% (372/375)** | **-34.95** | **2.38%** | **0.2502** |
+| **VieNeu-TTS** | **Seen** | 375 | **87.73% (329/375)** | **-28.62** | **12.27%** | **0.3622** |
+| **Kokoro-Vietnamese** | **Unseen** | 375 | **100.00% (375/375)** | **-38.86** | **1.19%** | **0.1493** |
+| **OmniVoice (VoiceStudio)** | **Unseen** | 375 | **79.47% (298/375)** | **-20.76** | **14.67%** | **0.5409** |
 
-*Ghi chú*: Điểm Bona Fide trung bình của 5 tình nguyện viên đối chứng đạt **+28.84** với tỷ lệ chấp nhận **96.43% (81/84)**.
+*Ghi chú*: Điểm Bona Fide trung bình của 5 tình nguyện viên đối chứng đạt **+21.49** với tỷ lệ chấp nhận **90.48% (76/84)**; 4 tình nguyện viên đối chứng (`SPK_0004`..`SPK_0007`) đạt **100.0% (64/64)** PASS tuyệt đối.
+
+### 1.2. Đối sánh V6 vs. V7 Dual-Seen: Bước nhảy vọt hiệu năng
+
+| Hệ Thống TTS | Phân Loại | Pass Rate V6 | Pass Rate V7 | EER V6 | EER V7 | Ý Nghĩa Thực Nghiệm |
+|---|:---:|:---:|:---:|:---:|:---:|---|
+| **F5-TTS** | Seen | 99.47% | **99.20%** | 1.60% | 2.38% | Duy trì độ bền vững tuyệt đối ($\approx 99.2\%$) |
+| **VieNeu-TTS** | Seen | 60.00% | **87.73%** | 22.40% | **12.27%** | **Tăng vọt +27.73% Pass Rate**, EER giảm gần một nửa (-10.13%) khi được nạp vào Dual-Seen |
+| **Kokoro-Vietnamese** | Unseen | 99.73% | **100.00%** | 0.53% | **1.19%** | Chặn đứng hoàn toàn 100% không một lỗi sót |
+| **OmniVoice** | Unseen | 46.93% | **79.47%** | 27.20% | **14.67%** | **Tăng vọt +32.54% Pass Rate**, EER giảm từ 27.2% xuống 14.67% (chính thức đạt KPI $\le 15\%$) |
 
 ---
 
 ## 2. Phân Tích Mức Độ Suy Giảm (Seen vs. Unseen Degradation)
 
-So sánh giữa tập hợp nhóm **Seen TTS Pooled** (750 mẫu F5 + VieNeu) và nhóm **Unseen TTS Pooled** (750 mẫu Kokoro + OmniVoice):
+So sánh giữa tập hợp nhóm **Seen TTS Pooled** (750 mẫu F5 + VieNeu) và nhóm **Unseen TTS Pooled** (750 mẫu Kokoro + OmniVoice) trên mô hình Dual-Seen V7:
 
 | Chỉ Số Đánh Giá | Nhóm SEEN TTS (750 mẫu) | Nhóm UNSEEN TTS (750 mẫu) | Mức Độ Suy Giảm ($\Delta = \text{Unseen} - \text{Seen}$) | Đánh Giá Khoa Học |
 |---|:---:|:---:|:---:|---|
-| **Equal Error Rate (EER)** | **13.33%** | **15.87%** | **+2.54%** | ✅ Suy giảm rất nhẹ (+2.54%), duy trì tiệm cận trần $\le 15\%$ của Giả thuyết H2 |
-| **Tỷ Lệ Phát Hiện (Pass Rate)** | **79.73% (598/750)** | **73.33% (550/750)** | **-6.40%** | ✅ Khả năng chặn đứng giọng giả tổng thể vẫn giữ vững trên $73.3\%$ |
-| **Điểm Phân Định (Mean Score)** | **-20.27** | **-16.33** | **+3.94** | ✅ Điểm số trung bình toàn nhóm vẫn duy trì âm sâu dưới ngưỡng $0.0$ |
-| **minDCF** | **0.2413** | **0.3053** | **+0.0640** | ✅ Chi phí rủi ro tăng nhẹ nhưng nằm trong biên độ kiểm soát an toàn |
+| **Equal Error Rate (EER)** | **6.80%** | **9.52%** | **+2.72%** | ✅ Cả hai nhóm đều đạt xuất sắc mục tiêu đề ra (Seen $\le 8.0\%$, Unseen $\le 15.0\%$). $\Delta\text{EER}$ chỉ $+2.72\%$. |
+| **Tỷ Lệ Phát Hiện (Pass Rate)** | **93.47% (701/750)** | **89.73% (673/750)** | **-3.74%** | ✅ Tỷ lệ chặn đứng trung bình toàn nhóm đạt tiệm cận $90\% - 93.5\%$. |
+| **Điểm Phân Định (Mean Score)** | **-31.79** | **-29.81** | **+1.98** | ✅ Khoảng cách điểm số cực kỳ an toàn, cách xa ngưỡng $\theta = 0.0$ gần 30 điểm. |
+| **minDCF** | **0.3062** | **0.3451** | **+0.0389** | ✅ Chi phí rủi ro tăng không đáng kể giữa công cụ đã thấy và công cụ mới lạ. |
 
 ---
 
 ## 3. Bóc Tách Bản Chất Phân Hóa Giữa Các Kiến Trúc Âm Học
 
-1. **Nhóm Dễ Bị Bóc Tách (Pass Rate $> 99.4\%$, EER $\le 1.6\%$): F5-TTS & Kokoro-Vietnamese**:
+1. **Nhóm Dễ Bị Bóc Tách (Pass Rate $99.2\% - 100.0\%$, EER $\le 2.38\%$): F5-TTS & Kokoro-Vietnamese**:
    - Cả hai kiến trúc (Flow-Matching F5 và StyleTTS 2 + iSTFTNet Kokoro) đều để lại các vết cắt pha (phase discontinuity) và độ méo hài cao tần rất nặng nề (năng lượng $>4$kHz chỉ đạt $0.20\% - 0.38\%$).
-   - Mô hình ViTrueVoice B_zalo V6 bóc tách các đặc trưng bất thường này với độ nhạy gần như tuyệt đối (99.47% và 99.73%).
-2. **Nhóm Thách Thức Hệ Thống (Pass Rate $46.9\% - 60.0\%$, EER $22.4\% - 27.2\%$): VieNeu-TTS & OmniVoice**:
-   - **VieNeu-TTS**: Mô hình ngôn ngữ âm học tự hồi quy (Acoustic LM) kết hợp mạng sinh âm thanh giải mã dạng sóng trực tiếp, tái tạo độ biến thiên ngữ điệu tự nhiên cao và ít méo hài vocoder.
-   - **OmniVoice**: Mô hình zero-shot conditional flow-matching tiên tiến nhất của VoiceStudio/Xiaomi, tổng hợp dạng sóng mượt mà với phổ tần số phân bố đồng đều ($>4$kHz đạt $0.38\% - 0.39\%$).
-   - Kết quả này phản ánh chân thực ranh giới kỹ thuật hiện tại của thế giới: các mô hình deepfake giọng nói thế hệ mới nhất sử dụng zero-shot CFM/LM tiệm cận cấu trúc âm học người thật là mối đe dọa tinh vi nhất.
+   - Mô hình ViTrueVoice bóc tách các đặc trưng bất thường này với độ nhạy gần như tuyệt đối (99.20% và 100.00%).
+2. **Nhóm Mô Hình Ngôn Ngữ Âm Học Tự Hồi Quy: VieNeu-TTS**:
+   - Khi chưa được huấn luyện (V6), VieNeu-TTS chỉ đạt 60.0% Pass Rate do giải mã dạng sóng trực tiếp không có lỗi vocoder truyền thống.
+   - Khi được đưa vào huấn luyện Dual-Seen (V7), mô hình đã học được biểu diễn không gian ẩn của LM, nâng tỷ lệ phát hiện lên **87.73%** với điểm trung bình **-28.62**.
+3. **Mô Hình Zero-shot CFM Tiên Tiến Nhất: OmniVoice (VoiceStudio)**:
+   - Dù là Unseen TTS hoàn toàn, việc huấn luyện mô hình trên Dual-Seen (kết hợp cả Flow-Matching F5 và LM VieNeu) đã cung cấp khả năng khái quát hóa gián tiếp mạnh mẽ, đưa Pass Rate của OmniVoice từ 46.93% lên **79.47%**, và EER từ 27.20% xuống **14.67%**, chính thức kiểm chứng thành công **Giả thuyết H2**.
 
 ---
 
-## 4. Mức Độ Suy Giảm Theo Kênh Thoại Nén (Codec Degradation)
+## 4. Mức Độ Suy Giảm Theo Kênh Thoại Nén (Codec Degradation Trên V7)
 
 | Hệ Thống TTS | Clean PCM | AAC-LC 76k (Zalo) | Opus 24k (Zalo) | G.711 A-law | AMR-NB 12.2k | Kênh Suy Giảm Nặng Nhất |
 |---|:---:|:---:|:---:|:---:|:---:|---|
-| **F5-TTS (Seen)** | **100.0%** (-33.38) | **98.67%** (-31.26) | **98.67%** (-33.03) | **100.0%** (-34.29) | **100.0%** (-33.01) | AAC-LC & Opus (-1.33%) |
-| **VieNeu-TTS (Seen)** | **58.67%** (-7.36) | **50.67%** (-1.49) | **60.00%** (-7.53) | **69.33%** (-12.30) | **61.33%** (-9.01) | AAC-LC 76k (-8.00%) |
-| **Kokoro (Unseen)** | **100.0%** (-33.54) | **100.0%** (-33.45) | **98.67%** (-31.41) | **100.0%** (-34.53) | **100.0%** (-38.12) | Opus 24k (-1.33%) |
-| **OmniVoice (Unseen)** | **45.33%** (+1.93) | **45.33%** (+2.22) | **44.00%** (+3.41) | **50.67%** (+0.83) | **49.33%** (-0.63) | Opus 24k (-1.33%) |
+| **F5-TTS (Seen)** | **98.67%** (-34.98) | **100.0%** (-35.49) | **98.67%** (-34.98) | **100.0%** (-34.81) | **98.67%** (-34.48) | Cân bằng đều các kênh |
+| **VieNeu-TTS (Seen)** | **88.00%** (-29.31) | **88.00%** (-27.69) | **88.00%** (-29.20) | **88.00%** (-29.66) | **86.67%** (-27.27) | AMR-NB (-1.33%) |
+| **Kokoro (Unseen)** | **100.0%** (-38.93) | **100.0%** (-39.12) | **100.0%** (-39.05) | **100.0%** (-38.85) | **100.0%** (-38.34) | 100% trên mọi kênh |
+| **OmniVoice (Unseen)** | **80.00%** (-22.33) | **80.00%** (-21.55) | **84.00%** (-22.59) | **74.67%** (-17.27) | **78.67%** (-20.07) | G.711 A-law (-5.33%) |
 
 ### Quy Luật Suy Giảm:
 1. **Kênh Zalo Nén Lossy (AAC-LC 76k & Opus 24k)**: Là kênh gây suy giảm hiệu năng nhiều nhất (giảm từ 1.33% đến 8.00% Pass Rate). Bộ mã hóa MDCT psychoacoustic làm phẳng các méo hài vi mô khiến một số mẫu spoof có điểm số tăng nhẹ về phía ranh giới.

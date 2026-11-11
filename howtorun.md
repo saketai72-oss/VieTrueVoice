@@ -319,3 +319,23 @@ python scripts/simulate_zalo_webhook.py --audio data/spoof_f5tts/CV_08110ec9e6/C
    ```
 5. Hệ thống sẽ tự động xác thực chữ ký số HMAC-SHA256 từ Zalo và tự động phản hồi kết quả kiểm định tới hộp chat của người dùng qua Zalo OpenAPI v3.0 CS Message.
 
+---
+
+## 8. Hướng Dẫn Xuất Bản Dữ Liệu Nghiệm Thu (Voice_Final) & Huấn Luyện Dual-Seen
+
+### 8.1 Xuất bản toàn bộ dữ liệu ra thư mục nghiệm thu Voice_Final
+Thực thi trích xuất và sao chép toàn bộ kho dữ liệu âm thanh phân tách nghiêm ngặt 2 mục lớn (`01_Training_Seen` và `02_Unseen_Acceptance`) kèm bảng chỉ mục SHA-256 và hướng dẫn hội đồng:
+```bash
+python scripts/export_voice_final_dataset.py
+```
+Toàn bộ dữ liệu sẽ được lưu tại: `C:\Users\saket\Documents\Đồ án chuyên ngành\Voice_Final\`
+
+### 8.2 Khởi động quy trình Huấn luyện kép Dual-Seen (F5-TTS + VieNeu-TTS)
+Thực hiện huấn luyện mô hình Dual-Seen và kiểm định cách ly giọng trầm ngoại lai SPK_0001:
+```bash
+python scripts/train_dual_seen.py --batch-size 16 --accum-steps 1 --device cuda
+```
+Quy trình sẽ tự động thực hiện:
+- **Lần 1**: Huấn luyện trên tập không có SPK_0001 (54.225 dòng) và đánh giá trên 15 file bona fide của SPK_0001 với Multi-window Max-Pooling.
+- **Lần 2**: Nếu Lần 1 chưa nhận diện được SPK_0001 (Pass Rate < 80%), tự động kích hoạt đưa SPK_0001 vào tập train (54.400 dòng) và tái huấn luyện.
+

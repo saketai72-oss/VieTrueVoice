@@ -81,9 +81,10 @@ def compute_weights(train_df: pd.DataFrame, branch: str) -> list[float]:
 ACCEPTANCE_VOLUNTEERS = {"SPK_0003", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"}
 
 
-def validate_manifest(train_df: pd.DataFrame, split_name: str) -> None:
-    """Báo lỗi nếu VieNeu hoặc tình nguyện viên nghiệm thu lọt vào train/dev."""
-    check_unseen_excluded(train_df, _VIENEU_PATTERN, split_name)
+def validate_manifest(train_df: pd.DataFrame, split_name: str, allow_vieneu: bool = False) -> None:
+    """Báo lỗi nếu VieNeu (trừ khi dual-seen) hoặc tình nguyện viên nghiệm thu lọt vào train/dev."""
+    if not allow_vieneu:
+        check_unseen_excluded(train_df, _VIENEU_PATTERN, split_name)
     if "speaker_id" in train_df.columns:
         spk_series = train_df["speaker_id"].astype(str)
         # Bộ 5 tình nguyện viên nghiệm thu bị cấm 100% ở mọi split
@@ -177,6 +178,8 @@ def _parse_args():
                    help="Xác suất áp dụng PitchPerturbation (mặc định: 0.7)")
     p.add_argument("--pitch-range", nargs=2, type=float, default=[-7.0, 4.0],
                    help="Dải semitones cho PitchPerturbation (mặc định: -7.0 4.0)")
+    p.add_argument("--dual-seen", action="store_true",
+                   help="Bật chế độ Dual-Seen (cho phép F5-TTS và VieNeu-TTS cùng tham gia tập Train/Dev)")
     return p.parse_args()
 
 
@@ -197,8 +200,8 @@ def main():
     dev_df   = pd.read_csv(dev_path,   keep_default_na=False)
 
     # ── Kiểm tra VieNeu & SPK_xxxx không lọt vào train/dev ──────────────────
-    validate_manifest(train_df, "train")
-    validate_manifest(dev_df,   "dev")
+    validate_manifest(train_df, "train", allow_vieneu=args.dual_seen)
+    validate_manifest(dev_df,   "dev",   allow_vieneu=args.dual_seen)
 
     if args.limit > 0:
         print(f"⚡ Giới hạn số mẫu (--limit {args.limit}) cho kiểm thử nhanh (cân bằng 2 lớp).")

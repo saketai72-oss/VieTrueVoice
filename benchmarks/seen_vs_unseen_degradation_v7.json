@@ -1,0 +1,244 @@
+{
+  "checkpoint": "out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt",
+  "bona_fide_evaluation": {
+    "total": 84,
+    "pass_rate_pct": 90.48,
+    "mean_score": 21.49
+  },
+  "systems": {
+    "F5-TTS": {
+      "type": "Seen",
+      "total_files": 375,
+      "correct_spoof": 372,
+      "pass_rate_pct": 99.2,
+      "mean_score": -34.95,
+      "median_score": -35.97,
+      "eer_pct": 2.38,
+      "eer_threshold": -15.0057,
+      "minDCF": 0.2502,
+      "codec_breakdown": {
+        "aac_zalo_76k": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -35.49,
+          "median_score": -36.23,
+          "ratio_4k_pct": 0.37
+        },
+        "amrnb": {
+          "total": 75,
+          "correct_spoof": 74,
+          "pass_rate_pct": 98.67,
+          "mean_score": -34.48,
+          "median_score": -35.86,
+          "ratio_4k_pct": 0.0
+        },
+        "clean": {
+          "total": 75,
+          "correct_spoof": 74,
+          "pass_rate_pct": 98.67,
+          "mean_score": -34.98,
+          "median_score": -35.76,
+          "ratio_4k_pct": 0.38
+        },
+        "g711": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -34.81,
+          "median_score": -36.08,
+          "ratio_4k_pct": 0.0
+        },
+        "opus_zalo_24k": {
+          "total": 75,
+          "correct_spoof": 74,
+          "pass_rate_pct": 98.67,
+          "mean_score": -34.98,
+          "median_score": -35.95,
+          "ratio_4k_pct": 0.23
+        }
+      }
+    },
+    "VieNeu-TTS": {
+      "type": "Seen",
+      "total_files": 375,
+      "correct_spoof": 329,
+      "pass_rate_pct": 87.73,
+      "mean_score": -28.62,
+      "median_score": -36.46,
+      "eer_pct": 12.27,
+      "eer_threshold": 11.1511,
+      "minDCF": 0.3622,
+      "codec_breakdown": {
+        "aac_zalo_76k": {
+          "total": 75,
+          "correct_spoof": 66,
+          "pass_rate_pct": 88.0,
+          "mean_score": -27.69,
+          "median_score": -36.12,
+          "ratio_4k_pct": 0.15
+        },
+        "amrnb": {
+          "total": 75,
+          "correct_spoof": 65,
+          "pass_rate_pct": 86.67,
+          "mean_score": -27.27,
+          "median_score": -35.88,
+          "ratio_4k_pct": 0.0
+        },
+        "clean": {
+          "total": 75,
+          "correct_spoof": 66,
+          "pass_rate_pct": 88.0,
+          "mean_score": -29.31,
+          "median_score": -36.49,
+          "ratio_4k_pct": 0.16
+        },
+        "g711": {
+          "total": 75,
+          "correct_spoof": 66,
+          "pass_rate_pct": 88.0,
+          "mean_score": -29.66,
+          "median_score": -37.17,
+          "ratio_4k_pct": 0.01
+        },
+        "opus_zalo_24k": {
+          "total": 75,
+          "correct_spoof": 66,
+          "pass_rate_pct": 88.0,
+          "mean_score": -29.2,
+          "median_score": -36.55,
+          "ratio_4k_pct": 0.1
+        }
+      }
+    },
+    "Kokoro-Vietnamese": {
+      "type": "Unseen",
+      "total_files": 375,
+      "correct_spoof": 375,
+      "pass_rate_pct": 100.0,
+      "mean_score": -38.86,
+      "median_score": -39.18,
+      "eer_pct": 1.19,
+      "eer_threshold": -32.9568,
+      "minDCF": 0.1493,
+      "codec_breakdown": {
+        "aac_zalo_76k": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -39.12,
+          "median_score": -39.4,
+          "ratio_4k_pct": 0.2
+        },
+        "amrnb": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -38.34,
+          "median_score": -38.69,
+          "ratio_4k_pct": 0.0
+        },
+        "clean": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -38.93,
+          "median_score": -39.32,
+          "ratio_4k_pct": 0.22
+        },
+        "g711": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -38.85,
+          "median_score": -39.18,
+          "ratio_4k_pct": 0.0
+        },
+        "opus_zalo_24k": {
+          "total": 75,
+          "correct_spoof": 75,
+          "pass_rate_pct": 100.0,
+          "mean_score": -39.05,
+          "median_score": -39.32,
+          "ratio_4k_pct": 0.11
+        }
+      }
+    },
+    "OmniVoice": {
+      "type": "Unseen",
+      "total_files": 375,
+      "correct_spoof": 298,
+      "pass_rate_pct": 79.47,
+      "mean_score": -20.76,
+      "median_score": -31.86,
+      "eer_pct": 14.67,
+      "eer_threshold": 11.4101,
+      "minDCF": 0.5409,
+      "codec_breakdown": {
+        "aac_zalo_76k": {
+          "total": 75,
+          "correct_spoof": 60,
+          "pass_rate_pct": 80.0,
+          "mean_score": -21.55,
+          "median_score": -32.46,
+          "ratio_4k_pct": 0.38
+        },
+        "amrnb": {
+          "total": 75,
+          "correct_spoof": 59,
+          "pass_rate_pct": 78.67,
+          "mean_score": -20.07,
+          "median_score": -31.3,
+          "ratio_4k_pct": 0.0
+        },
+        "clean": {
+          "total": 75,
+          "correct_spoof": 60,
+          "pass_rate_pct": 80.0,
+          "mean_score": -22.33,
+          "median_score": -32.34,
+          "ratio_4k_pct": 0.39
+        },
+        "g711": {
+          "total": 75,
+          "correct_spoof": 56,
+          "pass_rate_pct": 74.67,
+          "mean_score": -17.27,
+          "median_score": -25.82,
+          "ratio_4k_pct": 0.0
+        },
+        "opus_zalo_24k": {
+          "total": 75,
+          "correct_spoof": 63,
+          "pass_rate_pct": 84.0,
+          "mean_score": -22.59,
+          "median_score": -32.63,
+          "ratio_4k_pct": 0.25
+        }
+      }
+    }
+  },
+  "seen_pooled": {
+    "total": 750,
+    "correct": 701,
+    "pass_rate_pct": 93.47,
+    "mean_score": -31.79,
+    "eer_pct": 6.8,
+    "minDCF": 0.3062
+  },
+  "unseen_pooled": {
+    "total": 750,
+    "correct": 673,
+    "pass_rate_pct": 89.73,
+    "mean_score": -29.81,
+    "eer_pct": 9.52,
+    "minDCF": 0.3835
+  },
+  "degradation_analysis": {
+    "delta_eer_pct": 2.72,
+    "delta_pass_rate_pct": -3.74,
+    "delta_mean_score": 1.98,
+    "relative_degradation_descr": "EER tăng thêm +2.72%"
+  }
+}

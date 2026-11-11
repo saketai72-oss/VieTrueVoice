@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.5)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.7)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -41,21 +41,12 @@
   - **Guardrail hiệu chỉnh enrollment**: Từ chối can thiệp tự động khi $|offset| > 4 \times IQR$ (ngoại lai `SPK_0001` lệch -9.91 IQR), bảo toàn điểm thô cho quy trình định tuyến kiểm tra thủ công.
   - **Độ trễ thời gian thực (NFR1)**: Trung vị suy luận đa cửa sổ đạt **66.3ms** (P90 68.2ms), nhanh gấp ~45 lần yêu cầu $\le 3.0$s.
   - **Kiểm thử**: Toàn bộ **272/272 unit tests pass 100%**.
-- **Chuyển Dịch SPK_0001 Vào Train & Huấn Luyện Thành Công B_zalo V6 Local (v0.4.4)**:
-  - Tái cấu trúc và tích hợp 125 dòng `SPK_0001` (75 bona fide + 50 F5-TTS spoof, loại 100% VieNeu-TTS) vào `data/manifests_zalo/train_zalo.csv` (nâng quy mô tập Train lên 50.710 dòng).
-  - Khóa chặt 5 tình nguyện viên đối chứng held-out (`SPK_0003`..`0007`, 84 clips âm thanh thật) làm Bộ nghiệm thu độc lập chính thức của đề tài (0% rò rỉ dữ liệu).
-  - Tối ưu hóa pipeline huấn luyện GPU cục bộ (RTX 3050 4GB): Loại bỏ CPU STFT phase vocoder trực tuyến trên 50.000 mẫu, chuyển sang `batch_size=8, accum_steps=2` kết hợp AMP FP16, tăng tốc độ huấn luyện ~48 lần (~350ms/batch).
-  - Huấn luyện thành công mô hình **B_zalo Version 6**: Checkpoint lưu tại [`out/zalo_b_zalo_v6_local/best_model.pt`](file:///c:/Codes/VieTrueVoice/out/zalo_b_zalo_v6_local/best_model.pt) (Phase 2 Ep 5, Dev EER = **2.60%**).
-  - **Kết quả kiểm định 3 Gates độc lập với Multi-window Max-Pooling**:
-    - **Gate 2 (Generalization trên 4 SPK đối chứng `SPK_0004`..`0007`)**: Đạt **100.0% (64/64 clips)** PASS TUYỆT ĐỐI (vượt qua hoàn toàn mốc 98.4% trước đây, file ngắn `SPK_0004_03.wav` 3.84s đã được nhận diện chính xác).
-    - **Gate 2 (Bộ nghiệm thu 5 tình nguyện viên `SPK_0003`..`0007`)**: Đạt **96.4% (81/84 clips)** với điểm số trung bình cực kỳ tự tin (Mean score: SPK_0003 +17.65, SPK_0004 +28.87, SPK_0005 +32.33, SPK_0006 +42.82, SPK_0007 +29.54).
-    - **Gate 3 (Độ bền nén kênh Zalo)**: **PASS** toàn diện với AAC-LC 76kbps EER = **1.73%**, Opus 24kbps EER = **1.56%**, Clean EER = **1.56%** (đều $\le 2.0\%$).
-    - **Gate 1 (Giọng trầm ngoại lai SPK_0001)**: Nhận diện đạt **73.3% (11/15 clips)** với Mean score đảo chiều từ âm sang dương mạnh (**+10.05**).
-  - Toàn bộ **292/292 unit tests pass 100%**.
-- **Đo Đạc Mức Độ Suy Giảm: Seen TTS vs. Unseen TTS Đa Mô Hình (v0.4.5)**:
-  - Hoàn tất ma trận kiểm định Giả thuyết H2 trên 5 tình nguyện viên đối chứng held-out (`SPK_0003`..`0007`) với 4 hệ thống TTS và 4 chuẩn nén kênh thoại (tổng cộng **1.584 clips âm thanh** đánh giá qua **B_zalo V6 Multi-window Max-Pooling**):
-    - **Nhóm Seen TTS (F5-TTS & VieNeu-TTS v3, 750 clips)**: Tỷ lệ phát hiện **79.73% (598/750)**, Điểm trung bình **-20.27**, EER **13.33%**, minDCF **0.2413**.
-    - **Nhóm Unseen TTS (Kokoro-Vietnamese & OmniVoice, 750 clips)**: Tỷ lệ phát hiện **73.33% (550/750)**, Điểm trung bình **-16.33**, EER **15.87%**, minDCF **0.3053**.
-    - **Mức độ suy giảm (Seen vs. Unseen Degradation)**: $\Delta\text{EER} = \mathbf{+2.54\%}$ (chỉ tăng từ 13.33% lên 15.87%, duy trì tiệm cận trần $\le 15\%$ của Giả thuyết H2), $\Delta\text{PassRate} = \mathbf{-6.40\%}$, $\Delta\text{Score} = \mathbf{+3.94}$.
-    - **Mức độ suy giảm theo chuẩn nén**: Kênh Zalo AAC-LC 76k / Opus 24k gây suy giảm tỷ lệ chặn 1.33% – 8.00% do thuật toán MDCT làm phẳng méo hài vocoder. Ngược lại, kênh thoại băng hẹp 8kHz (AMR-NB / G.711 A-law) làm tăng tỷ lệ chặn spoof từ +5.3% đến +10.7% nhờ dồn năng lượng về formants trung tâm $300 - 3400$Hz.
+- **Chuyển Dịch SPK_0001 Vào Train & Huấn Luyện Thành Công B_zalo V6 Local (v0.4.4)**: Tái cấu trúc 125 dòng `SPK_0001` vào train, khóa chặt 5 tình nguyện viên độc lập làm bộ nghiệm thu (`SPK_0004`..`0007` 100% PASS, 5 tình nguyện viên 96.4% PASS).
+- **Unseen TTS Multi-Model Generalization Expansion & Degradation Benchmark (v0.4.5)**: Mở rộng kiểm định thực nghiệm Giả thuyết H2 trên 5 tình nguyện viên đối chứng held-out (`SPK_0003`..`0007`) với ma trận 4 hệ thống TTS và 4 chuẩn nén kênh thoại (1.584 clips âm thanh).
+- **Must #3 Completion, W06 Official Report & Chapter 3 Draft (v0.4.6)**: Xuất bản Báo cáo W06 chính thức và bản nháp Chương 3 Thiết kế hệ thống; vận hành Docker Compose đa container (`vitruevoice-api` port 8000 và Telegram Daemon).
+- **Dual-Seen Re-Training (F5 + VieNeu), SPK_0001 Verification & Voice_Final Acceptance Export (v0.4.7)**:
+  - **Xuất bản kho nghiệm thu `Voice_Final`**: Đóng gói hoàn chỉnh **66.269 clips âm thanh** (17,6 GB) tại `C:\Users\saket\Documents\Đồ án chuyên ngành\Voice_Final` phân chia rõ ràng `01_Training_Seen` (64.325 files) và `02_Unseen_Acceptance` (1.944 files), đi kèm `VOICE_FINAL_MANIFEST.csv` và `README_NGHIEM_THU.md`.
+  - **Kiểm chứng giả thuyết ngoại lai 2 pha**: Lần 1 không có SPK_0001 xác nhận chỉ đạt 20.0% Pass Rate (-17.65 điểm); Lần 2 đưa SPK_0001 vào huấn luyện tăng điểm +13.28 điểm lên -4.37, nâng Pass Rate lên 46.7% và bảo toàn tuyệt đối **100.0% (64/64)** trên 4 người nói đối chứng độc lập (`SPK_0004`..`0007`).
+  - **Khám phá bước ngoặt Giả thuyết H2**: Huấn luyện Dual-Seen (F5-TTS + VieNeu-TTS) đưa EER của nhóm Seen TTS về **6.80%** (VieNeu-TTS đạt 87.73% Pass Rate, EER 12.27%) và nhóm Unseen TTS (Kokoro + OmniVoice) đạt kỷ lục **9.52% EER** (vượt chuẩn $\le 15.0\%$, Kokoro đạt 100% Pass Rate, EER 1.19%). Mức suy giảm EER cực thấp chỉ $\mathbf{\Delta\text{EER} = +2.72\%}$.
+  - Toàn bộ **298/298 unit tests pass 100%**.
   - Tích hợp `BarkAdapter` (Suno Bark GPT + EnCodec) và toàn bộ **298/298 unit tests pass 100%**. Báo cáo chi tiết tại [`docs/BENCHMARK_seen_vs_unseen_degradation.md`](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_seen_vs_unseen_degradation.md). Sẵn sàng đóng gói Docker và thử nghiệm Pilot (v1.0.0).
