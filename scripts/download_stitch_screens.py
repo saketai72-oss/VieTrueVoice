@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 import requests
 
-API_KEY = "REDACTED_API_KEY"
+import os
+API_KEY = os.environ.get("STITCH_API_KEY", "")
 HEADERS = {"X-Goog-Api-Key": API_KEY}
 PROJECT_ID = "15978844079297582735"
 OUT_DIR = Path("stitch_design")
