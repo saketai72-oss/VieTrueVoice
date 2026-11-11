@@ -32,15 +32,19 @@ from src.preprocessing.audio_loader import load_audio
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 
 DEFAULT_CHECKPOINT = (
-    Path("out/zalo_b_zalo_v6_local/best_model.pt")
-    if Path("out/zalo_b_zalo_v6_local/best_model.pt").exists()
+    Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
+    if Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt").exists()
     else (
-        Path("out/zalo_b_zalo_v5_local/best_model.pt")
-        if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
+        Path("out/zalo_b_zalo_v6_local/best_model.pt")
+        if Path("out/zalo_b_zalo_v6_local/best_model.pt").exists()
         else (
-            Path("out/best_model_B_zalo.pt")
-            if Path("out/best_model_B_zalo.pt").exists()
-            else Path("out/run_B/best_model.pt")
+            Path("out/zalo_b_zalo_v5_local/best_model.pt")
+            if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
+            else (
+                Path("out/best_model_B_zalo.pt")
+                if Path("out/best_model_B_zalo.pt").exists()
+                else Path("out/run_B/best_model.pt")
+            )
         )
     )
 )
@@ -366,11 +370,11 @@ body.theme-light .gradio-container .accordion {
 
 
 def _extract_acoustic_metrics(y: np.ndarray, sr: int = TARGET_SAMPLE_RATE) -> dict[str, Any]:
-    """Extract acoustic forensics: high-frequency cutoff ratio, F0 pitch, energy."""
+    """Extract acoustic forensics: high-frequency cutoff ratio, energy, duration."""
     duration = float(len(y) / sr)
     energy = float(np.mean(y ** 2)) if len(y) > 0 else 0.0
 
-    # High frequency energy ratio (> 4 kHz vs total)
+    # High frequency energy ratio (> 4 kHz vs total) via fast FFT (<10ms)
     if len(y) >= 512:
         fft_mag = np.abs(np.fft.rfft(y))
         freqs = np.fft.rfftfreq(len(y), 1.0 / sr)
@@ -380,23 +384,11 @@ def _extract_acoustic_metrics(y: np.ndarray, sr: int = TARGET_SAMPLE_RATE) -> di
     else:
         hf_ratio = 0.0
 
-    # Mean Pitch F0 estimation
-    try:
-        import librosa
-        if len(y) >= 2048 and energy > 1e-5:
-            f0 = librosa.yin(y, fmin=60, fmax=400, sr=sr)
-            f0_valid = f0[(f0 >= 60) & (f0 <= 400)]
-            mean_f0 = float(np.mean(f0_valid)) if len(f0_valid) > 0 else 0.0
-        else:
-            mean_f0 = 0.0
-    except Exception:
-        mean_f0 = 0.0
-
     return {
         "duration": duration,
         "energy": energy,
         "hf_ratio": hf_ratio,
-        "mean_f0": mean_f0,
+        "mean_f0": 0.0,
     }
 
 
@@ -430,13 +422,15 @@ def _create_forensic_plots(
         spine.set_color("#334155")
     plt.tight_layout()
 
-    # 2. Raw Time-Domain Waveform Figure
+    # 2. Raw Time-Domain Waveform Figure (downsampled for crisp rendering without vector lag)
     fig_wave, ax_wave = plt.subplots(figsize=(8.5, 2.0), facecolor="#0B0F17")
     ax_wave.set_facecolor("#0B0F17")
-    t = np.linspace(0, dur, len(y)) if len(y) > 0 else np.array([0, 1])
     wave_color = "#2ECC71" if is_bonafide else "#EF4444"
     if len(y) > 0:
-        ax_wave.plot(t, y, color=wave_color, linewidth=0.75, alpha=0.9)
+        step = max(1, len(y) // 2000)
+        y_down = y[::step]
+        t_down = np.linspace(0, dur, len(y_down))
+        ax_wave.plot(t_down, y_down, color=wave_color, linewidth=0.75, alpha=0.9)
     ax_wave.axhline(0, color="#334155", linestyle="--", linewidth=0.8)
     ax_wave.set_ylim(-1.05, 1.05)
     ax_wave.tick_params(colors="#94A3B8", labelsize=8)
@@ -469,6 +463,39 @@ def _create_forensic_plots(
     return fig_spec, fig_wave, fig_cam
 
 
+def _warmup_inference_pipeline(
+    model: Any,
+    device: str = "cpu",
+    threshold: float = 0.0,
+) -> None:
+    """Pre-warm model and scientific plotting pipelines to eliminate cold-start latency."""
+    if model is not None and hasattr(model, "score"):
+        try:
+            # 1. Warm-up multi-window batch (5 windows = max 9s audio)
+            dummy_multi = torch.zeros(5, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
+            with torch.inference_mode():
+                _ = model.score(dummy_multi)
+            # 2. Warm-up single window batch (1 window = short audio)
+            dummy_single = torch.zeros(1, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
+            with torch.inference_mode():
+                _ = model.score(dummy_single)
+            if str(device).startswith("cuda") and torch.cuda.is_available():
+                torch.cuda.synchronize()
+        except Exception:
+            pass
+
+    # 3. Pre-warm Matplotlib & Librosa plotting pipeline (font cache, colormaps, canvas)
+    try:
+        dummy_y = np.zeros(TARGET_SAMPLE_COUNT, dtype=np.float32)
+        dummy_scores = np.array([0.0], dtype=np.float32)
+        f1, f2, f3 = _create_forensic_plots(dummy_y, sr=TARGET_SAMPLE_RATE, window_scores=dummy_scores, threshold=threshold)
+        plt.close(f1)
+        plt.close(f2)
+        plt.close(f3)
+    except Exception:
+        pass
+
+
 def make_predict_fn(
     model: Any = None,
     checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
@@ -484,13 +511,9 @@ def make_predict_fn(
 
     if active_model is None and preload and Path(checkpoint_path).exists():
         active_model = loader(checkpoint_path, device)
-        if active_model is not None and hasattr(active_model, "score"):
-            try:
-                dummy = torch.zeros(1, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
-                with torch.inference_mode():
-                    active_model.score(dummy)
-            except Exception:
-                pass
+
+    if active_model is not None:
+        _warmup_inference_pipeline(active_model, device=device, threshold=threshold)
 
     def predict_audio(audio_input: Any) -> Any:
         nonlocal active_model
@@ -922,7 +945,7 @@ def build_ui(
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
                                 <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;">ViTrueVoice</span>
                                 <span style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 3px 10px; border-radius: 9999px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; display: inline-flex; align-items: center; gap: 6px;">
-                                    <span class="pulse-dot"></span><iconify-icon icon="solar:cpu-bolt-bold" width="14" height="14" style="color: var(--teal-accent);"></iconify-icon> Mô hình AI: B_zalo V6 Active
+                                    <span class="pulse-dot"></span><iconify-icon icon="solar:cpu-bolt-bold" width="14" height="14" style="color: var(--teal-accent);"></iconify-icon> Mô hình AI: B_zalo V7 Dual-Seen Active
                                 </span>
                             </div>
                             <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
@@ -1051,7 +1074,7 @@ def build_ui(
             """
             ---
             <div style="text-align: center; color: #64748B; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 1rem 0;">
-                ViTrueVoice Anti-Spoofing Inference Engine v0.4.5 | Backbone: Wav2Vec2 + AASIST (B_zalo V6) | Multi-Window Max-Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
+                ViTrueVoice Anti-Spoofing Inference Engine v0.4.7 | Backbone: Wav2Vec2 + AASIST (B_zalo V7 Dual-Seen) | Multi-Window Max-Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
             </div>
             """
         )

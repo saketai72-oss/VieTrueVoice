@@ -82,15 +82,19 @@ def _default_model_loader(checkpoint_path: Path | str, device: str) -> Any:
 
 
 DEFAULT_CHECKPOINT = (
-    Path("out/zalo_b_zalo_v6_local/best_model.pt")
-    if Path("out/zalo_b_zalo_v6_local/best_model.pt").exists()
+    Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
+    if Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt").exists()
     else (
-        Path("out/zalo_b_zalo_v5_local/best_model.pt")
-        if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
+        Path("out/zalo_b_zalo_v6_local/best_model.pt")
+        if Path("out/zalo_b_zalo_v6_local/best_model.pt").exists()
         else (
-            Path("out/best_model_B_zalo.pt")
-            if Path("out/best_model_B_zalo.pt").exists()
-            else Path("out/run_B/best_model.pt")
+            Path("out/zalo_b_zalo_v5_local/best_model.pt")
+            if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
+            else (
+                Path("out/best_model_B_zalo.pt")
+                if Path("out/best_model_B_zalo.pt").exists()
+                else Path("out/run_B/best_model.pt")
+            )
         )
     )
 )
@@ -109,9 +113,14 @@ def create_app(
     model = loader(ckpt_path, device)
     if model is not None and hasattr(model, "score"):
         try:
-            dummy = torch.zeros(1, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
+            # Comprehensive warm-up: multi-window batch (5 windows = 9s+ clips) and single window
+            dummy_5 = torch.zeros(5, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
+            dummy_1 = torch.zeros(1, TARGET_SAMPLE_COUNT, dtype=torch.float32, device=device)
             with torch.inference_mode():
-                model.score(dummy)
+                model.score(dummy_5)
+                model.score(dummy_1)
+            if str(device).startswith("cuda") and torch.cuda.is_available():
+                torch.cuda.synchronize()
         except Exception:
             pass
 
