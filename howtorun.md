@@ -351,3 +351,14 @@ Hệ thống tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma =
 1. **Nền tảng 1 (File âm thanh viễn thông tải lên)**: Hỗ trợ kéo thả trực tiếp tệp `.wav`, `.m4a`, `.opus`, `.ogg`, `.mp3` qua Web UI hoặc Zalo/Telegram Bot.
 2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút Micro trên giao diện Gradio Web. Thuật toán bù đắp dither tự động khôi phục tính liên tục âm học tự nhiên cho các vùng khoảng lặng bị trình duyệt cắt cụt bởi bộ lọc tiếng ồn (noise suppression / AGC), ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
 
+### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu & Cẩm nang Phản biện Hội đồng
+Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện (21.663 từ, 431 đoạn văn, 27 bảng chuẩn mực) sang cả hai định dạng `.docx` và `.pdf`:
+```bash
+python scripts/build_defense_handbook_docx.py
+```
+Tài liệu được xuất bản và đồng bộ tự động tại:
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.docx`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.pdf`
+- Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
+
+
