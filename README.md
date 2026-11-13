@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.5.1)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.5.2)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -60,4 +60,8 @@
   - **Tự động nhận dạng tiếng nói ASR siêu nhanh (~0.15s)**: Tích hợp mô hình Wav2Vec2 tiếng Việt (`nguyenvulebinh/wav2vec2-base-vietnamese-250h`) nhận diện chính xác văn bản người dùng vừa nói và cấp làm `ref_text` cho VoiceStudio CFM, khôi phục trọn vẹn các formant âm sắc và chất lượng tự nhiên.
   - **Chuẩn hóa âm học đầu ra**: Khử DC offset, Peak-normalization 95% và chuyển đổi sang PCM 16-bit (int16 @ 24kHz), đảm bảo âm thanh to rõ, tự nhiên và tương thích 100% trình duyệt web.
   - **Tái cấu trúc giao diện 2-Card chuyên nghiệp**: Bố cục 2 thẻ đối xứng (1 Bản Người Thật vs 1 Bản Clone VoiceStudio CFM) kèm Ma trận đối soát 2 chiều và quy trình dọn dẹp in-memory stream Zero-persistence theo Luật 91/2025/QH15.
-  - **Bộ kiểm thử tự động TDD**: Toàn bộ **308/308 unit tests pass 100% green**. Sẵn sàng cho Giai đoạn Thử nghiệm Pilot & Nghiệm thu W7–W8 (v1.0.0).
+  - **Voice_Final Proven Pipeline Integration & 1-Click Preset Verification (v0.5.2)**:
+  - **Kế thừa 100% pipeline sinh Unseen TTS từ Voice_Final**: Áp dụng chuẩn xác quy trình từ `scripts/generate_omnivoice_unseen_spoofs.py` (vốn đã sinh thành công 375 mẫu spoof đối chứng hoàn hảo): `num_step=16`, `guidance_scale=2.0`, loại bỏ hoàn toàn tham số `duration` thủ công để flow matching tự ước lượng nhịp điệu tiếng Việt tự nhiên.
+  - **Chuẩn hóa lưu & resample chuẩn Voice_Final**: Lưu qua `save_audio` ở 24kHz từ `omnivoice.utils.audio`, resample về 16kHz PCM_16 qua `librosa` và Peak-Normalize 95%, giải quyết dứt điểm hiện tượng mất tiếng hoặc nghẹt âm.
+  - **Nút kiểm thử 1-Click SPK_0004**: Tích hợp nút *"⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)"* cho phép kiểm thử đối soát trực tiếp tức thì bằng giọng chuẩn nghiệm thu của đề tài mà không cần microphone.
+  - **Bộ kiểm thử tự động TDD**: Toàn bộ **309/309 unit tests pass 100% green**. Sẵn sàng cho Giai đoạn Thử nghiệm Pilot & Nghiệm thu W7–W8 (v1.0.0).

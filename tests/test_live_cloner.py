@@ -51,9 +51,9 @@ def test_live_quad_cloner_streaming_generator():
     model = StubDetector(score_val=3.0)
     user_audio = np.zeros(32000, dtype=np.float32)
 
-    dummy_clone_int16 = np.zeros(24000, dtype=np.int16)
+    dummy_clone_int16 = np.zeros(16000, dtype=np.int16)
 
-    with patch.object(cloner, "clone_omnivoice", return_value=(dummy_clone_int16, 24000, "văn bản mẫu")):
+    with patch.object(cloner, "clone_omnivoice", return_value=(dummy_clone_int16, 16000, "văn bản mẫu")):
         gen = cloner.stream_cloning_and_detection(
             user_audio=user_audio,
             user_sr=16000,
@@ -72,9 +72,41 @@ def test_live_quad_cloner_streaming_generator():
         s1 = next(gen)
         assert s1["step"] == 1
         assert s1["omnivoice"]["status"] == "done"
+        assert s1["omnivoice"]["audio"][0] == 16000
         assert s1["omnivoice"]["audio"][1].dtype == np.int16
         assert s1["omnivoice"]["transcript"] == "văn bản mẫu"
         assert s1["completed"] is True
+
+
+def test_clone_omnivoice_pipeline_mocked(tmp_path):
+    cloner = LiveQuadCloner(target_text="Câu thoại thử nghiệm", device="cpu")
+    mock_model = MagicMock()
+    # Mock model.generate returning dummy audio tensor
+    mock_model.generate.return_value = [torch.zeros(24000)]
+    cloner._omnivoice_model = mock_model
+
+    dummy_ref = tmp_path / "ref.wav"
+    import soundfile as sf
+    sf.write(str(dummy_ref), np.zeros(16000, dtype=np.float32), 16000)
+
+    with patch("omnivoice.utils.audio.save_audio") as mock_save:
+        # Mock save_audio to write a valid 24k wav
+        def fake_save(path, audio, sample_rate):
+            sf.write(path, np.zeros(24000, dtype=np.float32), 24000)
+        mock_save.side_effect = fake_save
+
+        res = cloner.clone_omnivoice(str(dummy_ref), ref_text="câu mẫu")
+        assert res is not None
+        audio_int16, sr, text_used = res
+        assert sr == 16000
+        assert audio_int16.dtype == np.int16
+        assert text_used == "câu mẫu"
+        assert mock_model.generate.called
+        # Verify guidance_scale=2.0 and num_step=16
+        call_kwargs = mock_model.generate.call_args[1]
+        assert call_kwargs["num_step"] == 16
+        assert call_kwargs["guidance_scale"] == 2.0
+        assert "duration" not in call_kwargs
 
 
 def test_live_quad_cloner_error_handling():

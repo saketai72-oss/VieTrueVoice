@@ -389,11 +389,11 @@ python -m src.app.ui
 ```
 Truy cập trình duyệt tại `http://localhost:7860`:
 1. Chuyển sang Tab: **"🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp VoiceStudio CFM (Zero-Shot CFM Cloning)"**.
-2. Bấm biểu tượng Microphone và nói bất kỳ câu tiếng Việt ngắn nào (khuyến nghị 3 – 5 giây).
-3. Bấm nút **"2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM"**:
-   - Hệ thống tự động nhận diện tiếng nói qua ASR Wav2Vec2 tiếng Việt (~0.15s) để căn chỉnh âm sắc chuẩn xác 100%.
+2. **Lựa chọn 1 (1-Click Test tức thì)**: Bấm nút **"⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)"** để nạp giọng tình nguyện viên đối chứng.
+3. **Lựa chọn 2 (Ghi âm Micro cá nhân)**: Bấm biểu tượng Microphone và đọc theo câu chuẩn: *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."* (khuyến nghị 3 – 5 giây).
+4. Bấm nút **"2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM"**:
    - Thẩm định ngay lập tức bản gốc của bạn (~66ms, hiển thị thẻ Người Thật màu xanh).
-   - VoiceStudio CFM sinh câu thoại mẫu 10 từ thuần Việt (`"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."`), chuẩn hóa âm lượng to rõ chuẩn 16-bit PCM.
+   - VoiceStudio CFM thực thi đúng 100% pipeline gốc từ tập `Voice_Final` (`num_step=16`, `guidance_scale=2.0`), sinh câu thoại đích 10 từ thuần Việt (`"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."`), xuất 16kHz PCM to rõ, vang, tự nhiên 100%.
    - Thẩm định bản clone qua ViTrueVoice và hiển thị kết quả phân định Thật / Giả mạo cùng Bảng đối soát 2 chiều.
 
 

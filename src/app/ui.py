@@ -31,10 +31,16 @@ from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE, _default_mod
 from src.preprocessing.audio_loader import load_audio
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 try:
-    from src.vitruevoice.live_cloner import LiveQuadCloner, DEFAULT_TARGET_TEXT, evaluate_audio_sample
+    from src.vitruevoice.live_cloner import (
+        DEFAULT_REF_PROMPT,
+        DEFAULT_TARGET_TEXT,
+        LiveQuadCloner,
+        evaluate_audio_sample,
+    )
 except Exception:
     LiveQuadCloner = None
     DEFAULT_TARGET_TEXT = "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."
+    DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
     evaluate_audio_sample = None
 
 DEFAULT_CHECKPOINT = (
@@ -1132,7 +1138,7 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
     rows = []
     items = [
         ("Bản 1: Người Thật (Bona Fide)", "Microphone Trực Tiếp", "Thật (Bona Fide)", state.get("bonafide")),
-        ("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot CFM (24kHz)", "Giả Mạo (Deepfake)", state.get("omnivoice", {}).get("eval")),
+        ("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot CFM (16kHz PCM)", "Giả Mạo (Deepfake)", state.get("omnivoice", {}).get("eval")),
     ]
 
     for label, engine, truth, ev in items:
@@ -1234,10 +1240,10 @@ def make_live_quad_cloning_fn(
 
         if audio_input is None:
             yield (
-                _render_status_banner("warning", "⚠️ Vui lòng ghi âm giọng nói của bạn qua Microphone (khoảng 3 – 5 giây) trước khi bấm Bắt đầu."),
+                _render_status_banner("warning", "⚠️ Vui lòng ghi âm giọng nói của bạn qua Microphone (khoảng 3 – 5 giây) hoặc bấm Nạp Giọng Mẫu trước khi bấm Bắt đầu."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (16kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1250,7 +1256,7 @@ def make_live_quad_cloning_fn(
                 _render_status_banner("error", "❌ Định dạng âm thanh không hợp lệ."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (16kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1270,7 +1276,7 @@ def make_live_quad_cloning_fn(
                 _render_status_banner("warning", f"⚠️ Đoạn ghi âm quá ngắn ({duration:.2f}s < 1.0s). Vui lòng ghi âm tối thiểu 2-3 giây để mô hình có đủ ngữ âm mẫu."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (16kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1282,7 +1288,7 @@ def make_live_quad_cloning_fn(
                 _render_status_banner("error", "❌ Không tìm thấy module LiveVoiceStudioCloner."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (16kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1306,7 +1312,7 @@ def make_live_quad_cloning_fn(
                 omni_audio_out = state["omnivoice"]["audio"]
 
             if not completed:
-                banner = _render_status_banner("info", "⚡ <strong>Bước 1/2:</strong> Đã xác thực giọng người thật (~66ms)! Đang nhận dạng ASR & tổng hợp VoiceStudio CFM...")
+                banner = _render_status_banner("info", "⚡ <strong>Bước 1/2:</strong> Đã xác thực giọng người thật (~66ms)! Đang tổng hợp VoiceStudio CFM chuẩn Voice_Final...")
             else:
                 banner = _render_status_banner("success", "✅ <strong>HOÀN TẤT ĐỐI CHỨNG VOICESTUDIO CFM:</strong> Đã nhân bản thành công và thẩm định qua mô hình ViTrueVoice!")
 
@@ -1319,7 +1325,7 @@ def make_live_quad_cloning_fn(
             )
             omni_html = _render_quad_card_step(
                 "Bản 2: Clone VoiceStudio CFM",
-                "OmniVoice Zero-Shot Flow Matching (24kHz PCM)",
+                "OmniVoice Zero-Shot Flow Matching (16kHz PCM)",
                 "solar:magic-stick-3-bold",
                 state.get("omnivoice", {}),
                 is_bonafide_truth=False,
@@ -1647,25 +1653,48 @@ def build_ui(
                 with gr.Row():
                     # LEFT COLUMN: Microphone Live Capture & Options
                     with gr.Column(scale=5):
-                        gr.Markdown("### <iconify-icon icon='solar:microphone-3-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 1. Ghi âm giọng nói trực tiếp")
+                        gr.Markdown("### <iconify-icon icon='solar:microphone-3-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 1. Ghi âm hoặc tải giọng mẫu")
                         live_mic_input = gr.Audio(
-                            label="Bấm biểu tượng Micro để ghi âm giọng nói của bạn (khuyến nghị 3 - 5 giây)",
-                            sources=["microphone"],
+                            label="Ghi âm giọng nói (3 - 5 giây) hoặc bấm nạp giọng mẫu chuẩn Voice_Final",
+                            sources=["microphone", "upload"],
                             type="numpy",
                         )
+
+                        def _load_preset_spk0004():
+                            import soundfile as sf
+                            preset_file = _ROOT / "data" / "bonafide_ref" / "SPK_0004" / "SPK_0004_01.wav"
+                            if preset_file.exists():
+                                data, sr = sf.read(str(preset_file))
+                                return (sr, data)
+                            return None
+
+                        load_spk4_btn = gr.Button(
+                            "⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)",
+                            variant="secondary",
+                            size="sm",
+                        )
+                        load_spk4_btn.click(fn=_load_preset_spk0004, inputs=[], outputs=[live_mic_input])
 
                         gr.HTML(
                             f"""
                             <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; margin-top: 0.75rem;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
+                                    <iconify-icon icon="solar:volume-loud-bold" width="18" height="18" style="color: var(--teal-accent);"></iconify-icon>
+                                    <strong style="font-size: 13px; color: var(--text-primary);">Câu đọc gợi ý khi ghi âm (Chuẩn Voice_Final):</strong>
+                                </div>
+                                <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 6px; font-size: 12.5px; color: var(--text-secondary); border-left: 3px solid var(--teal-accent);">
+                                    "{DEFAULT_REF_PROMPT}"
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
                                     <iconify-icon icon="solar:chat-round-dots-bold" width="18" height="18" style="color: var(--teal-accent);"></iconify-icon>
-                                    <strong style="font-size: 13px; color: var(--text-primary);">Câu thoại nhân bản tự động (10 từ thuần Việt):</strong>
+                                    <strong style="font-size: 13px; color: var(--text-primary);">Câu thoại nhân bản tự động (Target Spoof):</strong>
                                 </div>
                                 <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">
                                     "{DEFAULT_TARGET_TEXT}"
                                 </div>
                                 <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
-                                    Mô hình Zero-Shot CFM (VoiceStudio OmniVoice) kết hợp bộ nhận dạng ngữ âm ASR tự động lấy âm sắc từ mic để sinh câu thoại trên với âm thanh chuẩn 16-bit PCM.
+                                    Pipeline Voice_Final: OmniVoice Zero-Shot CFM 16-step flow matching sinh âm thanh 16kHz PCM to rõ, tự nhiên 100%.
                                 </div>
                             </div>
                             """
@@ -1686,7 +1715,7 @@ def build_ui(
                             """
                             <div style="padding: 1.25rem; border-radius: 0.75rem; background: var(--bg-surface); border: 1px dashed var(--border-color); text-align: center; color: var(--text-secondary); font-size: 13px;">
                                 <iconify-icon icon="solar:info-circle-linear" width="28" height="28" style="color: var(--teal-accent); margin-bottom: 6px;"></iconify-icon>
-                                <div>Ghi âm giọng nói của bạn ở cột bên trái và bấm nút <strong>'2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM'</strong>.</div>
+                                <div>Ghi âm giọng nói của bạn ở cột bên trái (hoặc bấm <strong>'1-Click: Nạp Giọng Mẫu'</strong>) rồi bấm <strong>'2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM'</strong>.</div>
                                 <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Kết quả mẫu thật hiển thị ngay lập tức sau ~66ms, tiếp theo là bản clone VoiceStudio CFM sau khi tổng hợp xong.</div>
                             </div>
                             """
@@ -1701,7 +1730,7 @@ def build_ui(
                         bona_card_html = gr.HTML(_render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"))
                         bona_audio = gr.Audio(label="Nghe lại giọng thật của bạn", interactive=False)
                     with gr.Column(scale=1):
-                        omni_card_html = gr.HTML(_render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"))
+                        omni_card_html = gr.HTML(_render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (16kHz PCM)", "solar:magic-stick-3-bold"))
                         omni_audio = gr.Audio(label="Nghe bản clone VoiceStudio CFM (Âm thanh chuẩn 16-bit)", interactive=False)
 
                 matrix_summary_html = gr.HTML("")

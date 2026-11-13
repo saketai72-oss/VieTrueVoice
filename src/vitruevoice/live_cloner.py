@@ -201,82 +201,60 @@ class LiveVoiceStudioCloner:
 
     def clone_omnivoice(self, ref_audio_path: str, ref_text: str = "") -> Optional[Tuple[np.ndarray, int, str]]:
         """
-        Sinh giọng clone qua VoiceStudio OmniVoice CFM.
-        Trả về: (audio_int16, 24000, transcript_used)
+        Sinh giọng clone qua VoiceStudio OmniVoice CFM bằng pipeline chuẩn từ Voice_Final.
+        (scripts/generate_omnivoice_unseen_spoofs.py)
+        Trả về: (audio_int16, 16000, transcript_used)
         """
         model = self._get_omnivoice_model()
         if model is None:
             return None
 
-        # 1. Đọc và tiền xử lý âm thanh mẫu: Cắt bỏ khoảng lặng & Chuẩn hóa RMS
-        clean_ref_path = ref_audio_path
-        tmp_clean_file = None
-        try:
-            import librosa
-            data, sr = sf.read(ref_audio_path)
-            if data.ndim > 1:
-                data = data.mean(axis=-1)
-            # Cắt tỉa khoảng lặng thừa đầu và cuối (tránh làm lệch bộ ước lượng thời lượng)
-            data_trimmed, _ = librosa.effects.trim(data, top_db=25)
-            if len(data_trimmed) >= int(0.5 * sr):
-                data = data_trimmed
-
-            # Chuẩn hóa RMS về mức âm lượng đàm thoại chuẩn ~0.12 để tránh bị OmniVoice hạ âm lượng
-            rms = float(np.sqrt(np.mean(data**2)))
-            if rms > 1e-5:
-                data = data * (0.12 / rms)
-
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tf:
-                tmp_clean_file = tf.name
-                sf.write(tmp_clean_file, data, sr)
-            clean_ref_path = tmp_clean_file
-        except Exception as e:
-            print(f"⚠️ [LiveVoiceStudioCloner] Tiền xử lý ref_audio: {e}")
-
-        try:
-            # 2. Tự động trích xuất transcript từ giọng nói người dùng nếu chưa có
+        # 1. Xác định ref_text từ ASR hoặc câu mẫu chuẩn nếu chưa có
+        if not ref_text or len(ref_text.strip()) == 0:
+            ref_text = transcribe_vietnamese_reference(ref_audio_path, device=self.device)
             if not ref_text or len(ref_text.strip()) == 0:
-                ref_text = transcribe_vietnamese_reference(clean_ref_path, device=self.device)
+                ref_text = DEFAULT_REF_PROMPT
 
-            # 3. Ước lượng thời lượng đích tối ưu cho câu thoại 10 từ (~3.2 - 3.8 giây)
-            target_words = len(self.target_text.split())
-            calc_duration = max(2.5, min(5.0, float(target_words * 0.35)))
+        tmp_dir = Path(tempfile.gettempdir()) / "vitruevoice_clone"
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+        tmp_24k = tmp_dir / f"tmp_omni_{int(time.time()*1000)}_24k.wav"
 
+        try:
+            from omnivoice.utils.audio import save_audio
+            import librosa
+
+            # 2. Sinh giọng CFM theo đúng pipeline gốc của Voice_Final (num_step=16, guidance_scale=2.0, không ép duration)
             audios = model.generate(
                 text=self.target_text,
-                ref_audio=clean_ref_path,
+                ref_audio=ref_audio_path,
                 ref_text=ref_text,
-                duration=calc_duration,
                 language="vi",
-                num_step=32,
+                num_step=16,
                 guidance_scale=2.0,
             )
-            audio_tensor = audios[0]
-            if isinstance(audio_tensor, torch.Tensor):
-                audio_np = audio_tensor.detach().cpu().numpy()
-            else:
-                audio_np = np.asarray(audio_tensor)
-            if audio_np.ndim > 1:
-                audio_np = audio_np.squeeze()
 
-            audio_np = audio_np.astype(np.float32)
+            # 3. Lưu qua save_audio ở 24kHz rồi resample về 16kHz PCM_16 chuẩn
+            save_audio(str(tmp_24k), audios[0], sample_rate=24000)
 
-            # Khử DC offset & Peak Normalization để âm thanh to, rõ, không bị nghẹt
-            audio_np = audio_np - float(np.mean(audio_np))
-            max_abs = float(np.max(np.abs(audio_np)))
+            y_24k, _ = sf.read(str(tmp_24k))
+            if y_24k.ndim > 1:
+                y_24k = y_24k.mean(axis=-1)
+            y_16k = librosa.resample(y_24k, orig_sr=24000, target_sr=16000)
+
+            # Peak Normalization 95% đảm bảo âm thanh to rõ, tự nhiên, không bị rè
+            max_abs = float(np.max(np.abs(y_16k)))
             if max_abs > 1e-6:
-                audio_np = (audio_np / max_abs) * 0.95
+                y_16k = (y_16k / max_abs) * 0.95
 
-            # Chuyển đổi sang PCM 16-bit chuẩn để trình duyệt web phát to và tương thích 100%
-            audio_int16 = (audio_np * 32767.0).astype(np.int16)
-            return audio_int16, 24000, ref_text
+            audio_int16 = (y_16k * 32767.0).astype(np.int16)
+            return audio_int16, 16000, ref_text
         except Exception as e:
             print(f"❌ [LiveVoiceStudioCloner] OmniVoice sinh lỗi: {e}")
             return None
         finally:
-            if tmp_clean_file and os.path.exists(tmp_clean_file):
+            if tmp_24k.exists():
                 try:
-                    os.unlink(tmp_clean_file)
+                    tmp_24k.unlink()
                 except Exception:
                     pass
 
