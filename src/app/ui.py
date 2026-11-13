@@ -30,6 +30,12 @@ from src.app.decision import classify_score, platt_calibrator, PLATT_SCALE_K
 from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE, _default_model_loader, _pad_or_crop
 from src.preprocessing.audio_loader import load_audio
 from src.preprocessing.pooling import extract_window_batch, pool_scores
+try:
+    from src.vitruevoice.live_cloner import LiveQuadCloner, DEFAULT_TARGET_TEXT, evaluate_audio_sample
+except Exception:
+    LiveQuadCloner = None
+    DEFAULT_TARGET_TEXT = "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."
+    evaluate_audio_sample = None
 
 DEFAULT_CHECKPOINT = (
     Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
@@ -365,6 +371,130 @@ body.theme-light .gradio-container .tab-nav button.selected {
 body.theme-light .gradio-container .accordion {
     background: #FFFFFF !important;
     border-color: #CBD5E1 !important;
+}
+
+/* Quad Forensics Live Cloning Styles */
+.quad-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.875rem;
+    padding: 1.1rem;
+    transition: all 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+.quad-card-loading {
+    border-color: #14B8A6 !important;
+    box-shadow: 0 0 16px rgba(20, 184, 166, 0.25) !important;
+    animation: pulseBorder 2s infinite ease-in-out;
+}
+
+@keyframes pulseBorder {
+    0%, 100% { border-color: rgba(20, 184, 166, 0.4); }
+    50% { border-color: rgba(20, 184, 166, 1.0); }
+}
+
+.quad-card-bonafide {
+    border-color: rgba(46, 204, 113, 0.5) !important;
+    background: linear-gradient(180deg, rgba(7, 36, 20, 0.35) 0%, var(--bg-card) 100%) !important;
+}
+
+.quad-card-spoof {
+    border-color: rgba(239, 68, 68, 0.5) !important;
+    background: linear-gradient(180deg, rgba(31, 11, 15, 0.35) 0%, var(--bg-card) 100%) !important;
+}
+
+body.theme-light .quad-card-bonafide {
+    background: linear-gradient(180deg, #F0FDF4 0%, #FFFFFF 100%) !important;
+    border-color: #86EFAC !important;
+}
+
+body.theme-light .quad-card-spoof {
+    background: linear-gradient(180deg, #FEF2F2 0%, #FFFFFF 100%) !important;
+    border-color: #FCA5A5 !important;
+}
+
+.badge-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(20, 184, 166, 0.15);
+    border: 1px solid rgba(20, 184, 166, 0.4);
+    color: var(--teal-accent);
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-waiting {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(100, 116, 139, 0.15);
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    color: var(--text-muted);
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+}
+
+.badge-skipped {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    color: #F59E0B;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+}
+
+.badge-bonafide {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(46, 204, 113, 0.15);
+    border: 1px solid #2ECC71;
+    color: #86EFAC;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+body.theme-light .badge-bonafide {
+    background: #DCFCE7;
+    border-color: #86EFAC;
+    color: #15803D;
+}
+
+.badge-spoof {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #EF4444;
+    color: #F87171;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+body.theme-light .badge-spoof {
+    background: #FEE2E2;
+    border-color: #FCA5A5;
+    color: #B91C1C;
+}
+
+.rotating-spinner {
+    animation: spin 1.2s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 """
 
@@ -801,6 +931,468 @@ def make_predict_fn(
     return predict_audio
 
 
+def _render_status_banner(kind: str, text: str) -> str:
+    """Render a responsive status banner for live cloning progression."""
+    if kind == "info":
+        bg = "rgba(20, 184, 166, 0.12)"
+        border = "rgba(20, 184, 166, 0.4)"
+        color = "var(--text-primary)"
+        icon = '<iconify-icon icon="solar:cpu-bolt-bold" class="rotating-spinner" width="18" height="18" style="color: var(--teal-accent); flex-shrink: 0;"></iconify-icon>'
+    elif kind == "success":
+        bg = "rgba(46, 204, 113, 0.15)"
+        border = "rgba(46, 204, 113, 0.5)"
+        color = "var(--text-primary)"
+        icon = '<iconify-icon icon="solar:check-circle-bold" width="18" height="18" style="color: #2ECC71; flex-shrink: 0;"></iconify-icon>'
+    elif kind == "warning":
+        bg = "rgba(245, 158, 11, 0.15)"
+        border = "rgba(245, 158, 11, 0.5)"
+        color = "#F59E0B"
+        icon = '<iconify-icon icon="solar:danger-triangle-bold" width="18" height="18" style="color: #F59E0B; flex-shrink: 0;"></iconify-icon>'
+    else:  # error
+        bg = "rgba(239, 68, 68, 0.15)"
+        border = "rgba(239, 68, 68, 0.5)"
+        color = "#EF4444"
+        icon = '<iconify-icon icon="solar:close-circle-bold" width="18" height="18" style="color: #EF4444; flex-shrink: 0;"></iconify-icon>'
+
+    return f"""
+    <div style="background: {bg}; border: 1px solid {border}; border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem; color: {color}; font-size: 13px;">
+        {icon}
+        <div>{text}</div>
+    </div>
+    """
+
+
+def _render_quad_card_placeholder(title: str, subtitle: str, icon: str) -> str:
+    """Render a card in idle/waiting state."""
+    return f"""
+    <div class="quad-card">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <iconify-icon icon="{icon}" width="18" height="18" style="color: var(--text-muted);"></iconify-icon>
+                <strong style="color: var(--text-primary); font-size: 13.5px;">{title}</strong>
+            </div>
+            <span class="badge-waiting">Đang chờ</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">{subtitle}</div>
+        <div style="background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 8px; padding: 1.25rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 12px;">
+            <iconify-icon icon="solar:clock-circle-linear" width="24" height="24" style="margin-bottom: 4px; opacity: 0.5;"></iconify-icon>
+            <div>Chưa có dữ liệu xử lý</div>
+        </div>
+    </div>
+    """
+
+
+def _render_quad_card_done(
+    title: str,
+    subtitle: str,
+    icon: str,
+    eval_dict: dict,
+    is_bonafide_truth: bool = False,
+) -> str:
+    """Render a finished card with detection metrics and Platt-scaled verdict."""
+    is_bonafide = bool(eval_dict.get("is_bonafide", False))
+    raw_score = float(eval_dict.get("raw_score", 0.0))
+    prob_bona_pct = float(eval_dict.get("prob_bona_pct", 50.0))
+    prob_spoof_pct = float(eval_dict.get("prob_spoof_pct", 50.0))
+    latency = float(eval_dict.get("latency_s", 0.0))
+    sha256 = str(eval_dict.get("sha256", ""))[:16]
+
+    if is_bonafide:
+        badge = f"""<span class="badge-bonafide"><iconify-icon icon="solar:check-circle-bold" width="13" height="13"></iconify-icon> NGƯỜI THẬT ({prob_bona_pct:.1f}%)</span>"""
+        card_class = "quad-card quad-card-bonafide"
+        score_color = "#10B981"
+    else:
+        badge = f"""<span class="badge-spoof"><iconify-icon icon="solar:danger-circle-bold" width="13" height="13"></iconify-icon> GIẢ MẠO ({prob_spoof_pct:.1f}%)</span>"""
+        card_class = "quad-card quad-card-spoof"
+        score_color = "#EF4444"
+
+    # Ground Truth assessment
+    if is_bonafide_truth:
+        if is_bonafide:
+            verdict_text = "✅ Nhận diện chính xác 100% giọng thật của bạn."
+            verdict_color = "#10B981"
+        else:
+            verdict_text = "⚠️ Báo nhầm (BPCER): Giọng thật bị nghi ngờ giả mạo."
+            verdict_color = "#F59E0B"
+    else:
+        if not is_bonafide:
+            verdict_text = "🛡️ Chặn thành công: Phát hiện chính xác bản Deepfake."
+            verdict_color = "#EF4444"
+        else:
+            verdict_text = "⚠️ Bỏ sót (APCER): Mô hình chưa phát hiện bản giả mạo."
+            verdict_color = "#F59E0B"
+
+    return f"""
+    <div class="{card_class}">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <iconify-icon icon="{icon}" width="18" height="18" style="color: {'#10B981' if is_bonafide else '#EF4444'};"></iconify-icon>
+                <strong style="color: var(--text-primary); font-size: 13.5px;">{title}</strong>
+            </div>
+            {badge}
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">{subtitle}</div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px;">
+                <div style="font-size: 10px; color: var(--text-muted);">Raw Score (θ=0.0)</div>
+                <div style="font-size: 13px; font-weight: 700; color: {score_color}; font-family: 'JetBrains Mono', monospace;">{raw_score:+.4f}</div>
+            </div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px;">
+                <div style="font-size: 10px; color: var(--text-muted);">Thời gian phân tích</div>
+                <div style="font-size: 13px; font-weight: 700; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">{latency*1000:.1f}ms</div>
+            </div>
+        </div>
+
+        <div style="font-size: 11.5px; font-weight: 600; color: {verdict_color}; margin-bottom: 6px;">
+            {verdict_text}
+        </div>
+
+        <div style="font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+            SHA-256: {sha256}...
+        </div>
+    </div>
+    """
+
+
+def _render_quad_card_step(
+    title: str,
+    subtitle: str,
+    icon: str,
+    step_dict: dict,
+    is_bonafide_truth: bool = False,
+) -> str:
+    """Render a card based on current lifecycle status."""
+    status = step_dict.get("status", "waiting")
+    if status == "done":
+        return _render_quad_card_done(
+            title, subtitle, icon, step_dict.get("eval", {}), is_bonafide_truth=is_bonafide_truth
+        )
+    elif status == "loading":
+        msg = step_dict.get("msg", "Đang nạp mô hình & nhân bản giọng...")
+        return f"""
+        <div class="quad-card quad-card-loading">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <iconify-icon icon="{icon}" width="18" height="18" style="color: var(--teal-accent);"></iconify-icon>
+                    <strong style="color: var(--text-primary); font-size: 13.5px;">{title}</strong>
+                </div>
+                <span class="badge-loading"><iconify-icon icon="solar:refresh-circle-bold" class="rotating-spinner" width="12" height="12"></iconify-icon> Đang nhân bản...</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">{subtitle}</div>
+            <div style="background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 8px; padding: 1.25rem 0.5rem; text-align: center;">
+                <iconify-icon icon="solar:cpu-bolt-bold" class="rotating-spinner" width="28" height="28" style="color: var(--teal-accent);"></iconify-icon>
+                <div style="margin-top: 8px; font-size: 12px; color: var(--text-primary); font-weight: 500;">{msg}</div>
+                <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">Vui lòng đợi giây lát...</div>
+            </div>
+        </div>
+        """
+    elif status == "skipped":
+        msg = step_dict.get("msg", "Bỏ qua trong chế độ tiết kiệm VRAM.")
+        return f"""
+        <div class="quad-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <iconify-icon icon="{icon}" width="18" height="18" style="color: var(--text-muted);"></iconify-icon>
+                    <strong style="color: var(--text-primary); font-size: 13.5px;">{title}</strong>
+                </div>
+                <span class="badge-skipped">Đã bỏ qua</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">{subtitle}</div>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 12px;">
+                <iconify-icon icon="solar:forbidden-circle-linear" width="24" height="24" style="margin-bottom: 4px; opacity: 0.6;"></iconify-icon>
+                <div>{msg}</div>
+            </div>
+        </div>
+        """
+    elif status == "error":
+        msg = step_dict.get("msg", "Lỗi trong quá trình sinh giọng.")
+        return f"""
+        <div class="quad-card" style="border-color: #EF4444;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <iconify-icon icon="{icon}" width="18" height="18" style="color: #EF4444;"></iconify-icon>
+                    <strong style="color: var(--text-primary); font-size: 13.5px;">{title}</strong>
+                </div>
+                <span class="badge-spoof">Lỗi</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">{subtitle}</div>
+            <div style="background: var(--bg-surface); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 1.25rem 0.5rem; text-align: center; color: #EF4444; font-size: 12px;">
+                <iconify-icon icon="solar:danger-circle-bold" width="24" height="24" style="margin-bottom: 4px;"></iconify-icon>
+                <div>{msg}</div>
+            </div>
+        </div>
+        """
+    else:
+        return _render_quad_card_placeholder(title, subtitle, icon)
+
+
+def _render_matrix_summary(state: dict, completed: bool = False) -> str:
+    """Render the 4-sample comparison matrix table."""
+    rows = []
+    items = [
+        ("Bản 1: Người Thật (Bona Fide)", "Microphone Trực Tiếp", "Thật (Bona Fide)", state.get("bonafide")),
+        ("Bản 2: Clone F5-TTS", "Flow Matching Non-AR", "Giả Mạo (Deepfake)", state.get("f5", {}).get("eval")),
+        ("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo", "Giả Mạo (Deepfake)", state.get("vieneu", {}).get("eval")),
+        ("Bản 4: Clone VoiceStudio CFM", "OmniVoice Zero-Shot CFM", "Giả Mạo (Deepfake)", state.get("omnivoice", {}).get("eval")),
+    ]
+
+    for label, engine, truth, ev in items:
+        if ev is not None and isinstance(ev, dict) and "raw_score" in ev:
+            is_bona = bool(ev.get("is_bonafide", False))
+            raw_s = float(ev.get("raw_score", 0.0))
+            prob_pct = float(ev.get("prob_bona_pct" if is_bona else "prob_spoof_pct", 50.0))
+            lat = float(ev.get("latency_s", 0.0)) * 1000.0
+
+            if is_bona:
+                decision_badge = '<span style="color: #10B981; font-weight: 700;">Người Thật</span>'
+            else:
+                decision_badge = '<span style="color: #EF4444; font-weight: 700;">Giả Mạo</span>'
+
+            # Match check
+            if (truth.startswith("Thật") and is_bona) or (truth.startswith("Giả") and not is_bona):
+                match_badge = '<span style="color: #10B981; font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 4px;">CHÍNH XÁC</span>'
+            else:
+                match_badge = '<span style="color: #F59E0B; font-weight: 700; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 4px;">CẢNH BÁO</span>'
+
+            row_html = f"""
+            <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 8px 12px; font-weight: 600; color: var(--text-primary);">{label}</td>
+                <td style="padding: 8px 12px; color: var(--text-secondary);">{engine}</td>
+                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
+                <td style="padding: 8px 12px;">{decision_badge}</td>
+                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{prob_pct:.1f}%</td>
+                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: {'#10B981' if is_bona else '#EF4444'};">{raw_s:+.4f}</td>
+                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; color: var(--teal-accent);">{lat:.1f}ms</td>
+                <td style="padding: 8px 12px;">{match_badge}</td>
+            </tr>
+            """
+        else:
+            status_txt = "Đang chờ..."
+            if label.startswith("Bản 2") and state.get("f5", {}).get("status") == "skipped":
+                status_txt = "Đã bỏ qua (VRAM Opt)"
+            elif label.startswith("Bản 3") and state.get("vieneu", {}).get("status") == "skipped":
+                status_txt = "Đã bỏ qua (VRAM Opt)"
+
+            row_html = f"""
+            <tr style="border-bottom: 1px solid var(--border-color); opacity: 0.6;">
+                <td style="padding: 8px 12px; font-weight: 600; color: var(--text-primary);">{label}</td>
+                <td style="padding: 8px 12px; color: var(--text-muted);">{engine}</td>
+                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
+                <td style="padding: 8px 12px; color: var(--text-muted); font-style: italic;">{status_txt}</td>
+                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
+                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
+                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
+                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
+            </tr>
+            """
+        rows.append(row_html)
+
+    header_status = "HOÀN TẤT KIỂM ĐỊNH" if completed else "TIẾN TRÌNH ĐANG XỬ LÝ"
+    header_color = "#10B981" if completed else "var(--teal-accent)"
+
+    return f"""
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.875rem; padding: 1.25rem; margin-top: 1.25rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px;">
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <iconify-icon icon="solar:checklist-minimalistic-bold" width="18" height="18" style="color: {header_color};"></iconify-icon>
+                BẢNG ĐỐI SOÁT TOÀN DIỆN 4 CHIỀU (QUAD-FORENSICS BENCHMARK MATRIX)
+            </div>
+            <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: {header_color}; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 9999px;">
+                {header_status}
+            </span>
+        </div>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 11px;">
+                        <th style="padding: 8px 12px;">Mẫu Thử</th>
+                        <th style="padding: 8px 12px;">Mô Hình / Nguồn</th>
+                        <th style="padding: 8px 12px;">Ground Truth</th>
+                        <th style="padding: 8px 12px;">Kết Luận AI</th>
+                        <th style="padding: 8px 12px;">Độ Tin Cậy</th>
+                        <th style="padding: 8px 12px;">Điểm Raw</th>
+                        <th style="padding: 8px 12px;">Độ Trễ</th>
+                        <th style="padding: 8px 12px;">Đối Soát</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {''.join(rows)}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    """
+
+
+def make_live_quad_cloning_fn(
+    model: Any = None,
+    checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
+    device: str = "cpu",
+    threshold: float = 0.0,
+):
+    """Factory creating the generator function for live 4-way voice cloning & forensics."""
+    loaded_model = model
+
+    def stream_quad_cloning(
+        audio_input: Any,
+        only_omnivoice: bool = False,
+    ):
+        nonlocal loaded_model
+        if loaded_model is None:
+            loaded_model = _default_model_loader(checkpoint_path, device=device)
+
+        if audio_input is None:
+            yield (
+                _render_status_banner("warning", "⚠️ Vui lòng ghi âm giọng nói của bạn qua Microphone (khoảng 3 – 5 giây) trước khi bấm Bắt đầu."),
+                _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                None,
+                "",
+            )
+            return
+
+        if isinstance(audio_input, tuple):
+            sr, data = audio_input
+        else:
+            yield (
+                _render_status_banner("error", "❌ Định dạng âm thanh không hợp lệ."),
+                _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                None,
+                "",
+            )
+            return
+
+        if data.ndim > 1:
+            data = data.mean(axis=-1)
+        if np.issubdtype(data.dtype, np.integer):
+            max_val = float(np.iinfo(data.dtype).max)
+            data = data.astype(np.float32) / max_val
+        else:
+            data = data.astype(np.float32)
+
+        duration = len(data) / float(sr)
+        if duration < 1.0:
+            yield (
+                _render_status_banner("warning", f"⚠️ Đoạn ghi âm quá ngắn ({duration:.2f}s < 1.0s). Vui lòng ghi âm tối thiểu 2-3 giây để mô hình có đủ ngữ âm mẫu."),
+                _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                None,
+                "",
+            )
+            return
+
+        cloner_device = "cuda" if (torch.cuda.is_available() and "cuda" in str(device).lower()) else "cpu"
+        if LiveQuadCloner is None:
+            yield (
+                _render_status_banner("error", "❌ Không tìm thấy module LiveQuadCloner."),
+                _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
+                None,
+                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                None,
+                "",
+            )
+            return
+
+        cloner = LiveQuadCloner(
+            target_text=DEFAULT_TARGET_TEXT,
+            device=cloner_device,
+            priority_only_omnivoice=bool(only_omnivoice),
+        )
+
+        bona_audio_out = (sr, data)
+        f5_audio_out = None
+        vn_audio_out = None
+        omni_audio_out = None
+
+        for state in cloner.stream_cloning_and_detection(
+            data, sr, detector_model=loaded_model, threshold=threshold
+        ):
+            step = state.get("step", 0)
+            completed = state.get("completed", False)
+
+            if state.get("f5", {}).get("status") == "done" and "audio" in state["f5"]:
+                f5_audio_out = state["f5"]["audio"]
+            if state.get("vieneu", {}).get("status") == "done" and "audio" in state["vieneu"]:
+                vn_audio_out = state["vieneu"]["audio"]
+            if state.get("omnivoice", {}).get("status") == "done" and "audio" in state["omnivoice"]:
+                omni_audio_out = state["omnivoice"]["audio"]
+
+            if not completed:
+                if step == 0:
+                    banner = _render_status_banner("info", "⚡ <strong>Bước 1/4:</strong> Đã xác thực giọng người thật (~66ms)! Đang nạp mô hình F5-TTS...")
+                elif step == 1:
+                    banner = _render_status_banner("info", "⚡ <strong>Bước 2/4:</strong> Đã hoàn tất nhân bản F5-TTS! Đang chuyển sang VieNeu-TTS v3 Turbo...")
+                elif step == 2:
+                    banner = _render_status_banner("info", "⚡ <strong>Bước 3/4:</strong> Đã hoàn tất nhân bản VieNeu-TTS! Đang nạp VoiceStudio CFM...")
+                else:
+                    banner = _render_status_banner("info", "⚡ Đang xử lý các bước còn lại...")
+            else:
+                banner = _render_status_banner("success", "✅ <strong>HOÀN TẤT THỬ THÁCH NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU TOÀN DIỆN!</strong>")
+
+            bona_html = _render_quad_card_done(
+                "Bản 1: Người Thật (Bona Fide)",
+                "Giọng nói gốc trực tiếp từ Microphone",
+                "solar:user-bold",
+                state.get("bonafide", {}),
+                is_bonafide_truth=True,
+            )
+            f5_html = _render_quad_card_step(
+                "Bản 2: Clone F5-TTS",
+                "Flow Matching Non-Autoregressive",
+                "solar:cpu-bold",
+                state.get("f5", {}),
+                is_bonafide_truth=False,
+            )
+            vn_html = _render_quad_card_step(
+                "Bản 3: Clone VieNeu-TTS",
+                "Fast DiT v3 Turbo (48kHz)",
+                "solar:bolt-bold",
+                state.get("vieneu", {}),
+                is_bonafide_truth=False,
+            )
+            omni_html = _render_quad_card_step(
+                "Bản 4: Clone VoiceStudio CFM",
+                "OmniVoice Continuous Flow Matching",
+                "solar:magic-stick-3-bold",
+                state.get("omnivoice", {}),
+                is_bonafide_truth=False,
+            )
+
+            matrix_html = _render_matrix_summary(state, completed=completed)
+
+            yield (
+                banner,
+                bona_html, bona_audio_out,
+                f5_html, f5_audio_out,
+                vn_html, vn_audio_out,
+                omni_html, omni_audio_out,
+                matrix_html,
+            )
+
+    return stream_quad_cloning
+
+
 THEME_TOGGLE_JS = """
 () => {
     const isLight = document.body.classList.contains('theme-light');
@@ -861,6 +1453,10 @@ THEME_INIT_JS = """
         const submitBtn = document.querySelector("#submit-btn button, #submit-btn");
         if (submitBtn && !submitBtn.querySelector('iconify-icon')) {
             submitBtn.innerHTML = '<iconify-icon icon="solar:magnifer-bold" width="18" height="18" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> 2. KIỂM TRA TÍNH XÁC THỰC NGAY';
+        }
+        const qBtn = document.querySelector("#start-quad-btn button, #start-quad-btn");
+        if (qBtn && !qBtn.querySelector('iconify-icon')) {
+            qBtn.innerHTML = '<iconify-icon icon="solar:rocket-bold" width="18" height="18" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> 2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU';
         }
         const s1 = document.querySelector("#sample-spoof-btn button, #sample-spoof-btn");
         if (s1 && !s1.querySelector('iconify-icon')) {
@@ -940,6 +1536,12 @@ def build_ui(
         calibrator=calibrator,
         return_rich=True,
     )
+    live_quad_cloning_fn = make_live_quad_cloning_fn(
+        model=model,
+        checkpoint_path=checkpoint_path,
+        device=device,
+        threshold=threshold,
+    )
 
     theme = gr.themes.Monochrome(
         primary_hue="teal",
@@ -991,109 +1593,206 @@ def build_ui(
                     )
                 theme_btn.click(fn=None, js=THEME_TOGGLE_JS)
 
-        with gr.Row():
-            # LEFT COLUMN: Audio Input & Presets
-            with gr.Column(scale=5):
-                gr.Markdown("### <iconify-icon icon='solar:microphone-3-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 1. Tải lên tin nhắn thoại hoặc Bấm ghi âm")
-                audio_input = gr.Audio(
-                    label="Hỗ trợ các định dạng .wav, .mp3, .m4a, .opus, .ogg",
-                    sources=["upload", "microphone"],
-                    type="numpy",
-                )
-
-                submit_btn = gr.Button(
-                    "2. KIỂM TRA TÍNH XÁC THỰC NGAY",
-                    variant="primary",
-                    size="lg",
-                    elem_id="submit-btn",
-                    elem_classes=["btn-primary-teal"],
-                )
-
-                # 1-Click Preset Samples
-                gr.Markdown("#### <iconify-icon icon='solar:bolt-bold-duotone' width='18' height='18' style='vertical-align: -0.15em; color: #F59E0B;'></iconify-icon> Mẫu âm thanh thử nghiệm đối chứng nhanh:")
+        with gr.Tabs(elem_id="main-app-tabs") as main_tabs:
+            with gr.TabItem("🛡️ Chế Độ 1: Thẩm Định Nhanh Đơn Mẫu (Single-File Analysis)", id="tab_single"):
                 with gr.Row():
-                    sample_spoof_btn = gr.Button("Mẫu 1 (Spoof F5-TTS)", size="sm", elem_id="sample-spoof-btn")
-                    sample_bonafide_btn = gr.Button("Mẫu 2 (Người Thật)", size="sm", elem_id="sample-bona-btn")
-                    sample_zalo_btn = gr.Button("Mẫu 3 (Spoof Zalo Nén)", size="sm", elem_id="sample-zalo-btn")
+                    # LEFT COLUMN: Audio Input & Presets
+                    with gr.Column(scale=5):
+                        gr.Markdown("### <iconify-icon icon='solar:microphone-3-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 1. Tải lên tin nhắn thoại hoặc Bấm ghi âm")
+                        audio_input = gr.Audio(
+                            label="Hỗ trợ các định dạng .wav, .mp3, .m4a, .opus, .ogg",
+                            sources=["upload", "microphone"],
+                            type="numpy",
+                        )
 
-                gr.HTML(
-                    """
-                    <div style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
-                        <iconify-icon icon="solar:shield-keyhole-bold-duotone" width="24" height="24" style="color: var(--teal-accent); flex-shrink: 0; margin-top: 2px;"></iconify-icon>
-                        <div>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <strong style="font-size: 12px; color: var(--text-primary);">Cam kết Quyền Riêng Tư & An Toàn Tuyệt Đối</strong>
-                                <span style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.4); color: var(--teal-accent); font-size: 10px; padding: 1px 6px; border-radius: 4px;">Luật 91/2025/QH15</span>
+                        submit_btn = gr.Button(
+                            "2. KIỂM TRA TÍNH XÁC THỰC NGAY",
+                            variant="primary",
+                            size="lg",
+                            elem_id="submit-btn",
+                            elem_classes=["btn-primary-teal"],
+                        )
+
+                        # 1-Click Preset Samples
+                        gr.Markdown("#### <iconify-icon icon='solar:bolt-bold-duotone' width='18' height='18' style='vertical-align: -0.15em; color: #F59E0B;'></iconify-icon> Mẫu âm thanh thử nghiệm đối chứng nhanh:")
+                        with gr.Row():
+                            sample_spoof_btn = gr.Button("Mẫu 1 (Spoof F5-TTS)", size="sm", elem_id="sample-spoof-btn")
+                            sample_bonafide_btn = gr.Button("Mẫu 2 (Người Thật)", size="sm", elem_id="sample-bona-btn")
+                            sample_zalo_btn = gr.Button("Mẫu 3 (Spoof Zalo Nén)", size="sm", elem_id="sample-zalo-btn")
+
+                        gr.HTML(
+                            """
+                            <div style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+                                <iconify-icon icon="solar:shield-keyhole-bold-duotone" width="24" height="24" style="color: var(--teal-accent); flex-shrink: 0; margin-top: 2px;"></iconify-icon>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <strong style="font-size: 12px; color: var(--text-primary);">Cam kết Quyền Riêng Tư & An Toàn Tuyệt Đối</strong>
+                                        <span style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.4); color: var(--teal-accent); font-size: 10px; padding: 1px 6px; border-radius: 4px;">Luật 91/2025/QH15</span>
+                                    </div>
+                                    <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">
+                                        Âm thanh được phân tích trực tiếp trên RAM và xóa hủy ngay lập tức sau 0.4s. Không lưu trữ, không sao chép và không chia sẻ giọng nói gốc.
+                                    </p>
+                                </div>
                             </div>
-                            <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">
-                                Âm thanh được phân tích trực tiếp trên RAM và xóa hủy ngay lập tức sau 0.4s. Không lưu trữ, không sao chép và không chia sẻ giọng nói gốc.
-                            </p>
-                        </div>
-                    </div>
-                    """
+                            """
+                        )
+
+                    # RIGHT COLUMN: Analytical Verdict & Forensic Stats
+                    with gr.Column(scale=7):
+                        gr.Markdown("### <iconify-icon icon='solar:chart-square-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 3. Kết Quả Xác Minh Âm Thanh")
+
+                        verdict_html = gr.HTML(
+                            """
+                            <div style="padding: 1.5rem; border-radius: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+                                <iconify-icon icon="solar:waveform-bold-duotone" width="38" height="38" style="color: var(--teal-accent); margin-bottom: 8px;"></iconify-icon>
+                                <p style="margin-top: 0.25rem; font-size: 14px;">Bấm nút <strong>'2. KIỂM TRA TÍNH XÁC THỰC NGAY'</strong> để nhận diện giọng thật / giả mạo.</p>
+                            </div>
+                            """
+                        )
+                        conf_html = gr.HTML()
+                        metrics_html = gr.HTML()
+
+                        with gr.Accordion("Chi tiết dạng văn bản (Screen Reader & API)", open=False, elem_id="detail-accordion"):
+                            result_verdict = gr.Textbox(label="Kết quả phân định", interactive=False)
+                            result_conf = gr.Textbox(label="Độ tin cậy phân tích", interactive=False)
+                            result_detail = gr.Textbox(label="Khuyến cáo an toàn", interactive=False, lines=3)
+
+                # SCIENTIFIC VISUALIZATION TABS (Mel-Spectrogram, Waveform, Grad-CAM Attention Map)
+                gr.Markdown("---")
+                gr.Markdown("### <iconify-icon icon='solar:test-tube-minimalistic-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> Góc Nhìn Số Liệu Khoa Học Trực Quan (Forensic Scientific Visualizations)")
+                with gr.Tabs():
+                    with gr.TabItem("Mel-Spectrogram (80 Mels, log dBFS)"):
+                        spec_plot = gr.Plot(show_label=False)
+                    with gr.TabItem("Sóng Âm Đồng Bộ (Time-Domain Waveform)"):
+                        wave_plot = gr.Plot(show_label=False)
+                    with gr.TabItem("Bản Đồ Chú Ý AI (Grad-CAM Temporal Saliency)"):
+                        cam_plot = gr.Plot(show_label=False)
+
+                # Presets click handlers
+                samples_dir = Path(__file__).resolve().parent / "samples"
+                sample_spoof_path = str(samples_dir / "sample_spoof_f5tts.wav")
+                sample_bonafide_path = str(samples_dir / "sample_bonafide_spk0004.wav")
+                sample_zalo_path = str(samples_dir / "sample_spoof_zalo_opus.wav")
+
+                def _load_sample_audio(path: str) -> str:
+                    p = Path(path)
+                    return str(p) if p.exists() else ""
+
+                sample_spoof_btn.click(fn=lambda: _load_sample_audio(sample_spoof_path), outputs=[audio_input])
+                sample_bonafide_btn.click(fn=lambda: _load_sample_audio(sample_bonafide_path), outputs=[audio_input])
+                sample_zalo_btn.click(fn=lambda: _load_sample_audio(sample_zalo_path), outputs=[audio_input])
+
+                # Main Submit Action
+                submit_btn.click(
+                    fn=predict_rich_fn,
+                    inputs=[audio_input],
+                    outputs=[
+                        result_verdict,
+                        result_conf,
+                        result_detail,
+                        verdict_html,
+                        conf_html,
+                        metrics_html,
+                        spec_plot,
+                        wave_plot,
+                        cam_plot,
+                    ],
                 )
 
-            # RIGHT COLUMN: Analytical Verdict & Forensic Stats
-            with gr.Column(scale=7):
-                gr.Markdown("### <iconify-icon icon='solar:chart-square-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 3. Kết Quả Xác Minh Âm Thanh")
+            with gr.TabItem("🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp 4 Chiều (Quad-Forensics)", id="tab_quad"):
+                with gr.Row():
+                    # LEFT COLUMN: Microphone Live Capture & Options
+                    with gr.Column(scale=5):
+                        gr.Markdown("### <iconify-icon icon='solar:microphone-3-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 1. Ghi âm giọng nói trực tiếp")
+                        live_mic_input = gr.Audio(
+                            label="Bấm biểu tượng Micro để ghi âm giọng nói của bạn (khuyến nghị 3 - 5 giây)",
+                            sources=["microphone"],
+                            type="numpy",
+                        )
 
-                verdict_html = gr.HTML(
-                    """
-                    <div style="padding: 1.5rem; border-radius: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
-                        <iconify-icon icon="solar:waveform-bold-duotone" width="38" height="38" style="color: var(--teal-accent); margin-bottom: 8px;"></iconify-icon>
-                        <p style="margin-top: 0.25rem; font-size: 14px;">Bấm nút <strong>'2. KIỂM TRA TÍNH XÁC THỰC NGAY'</strong> để nhận diện giọng thật / giả mạo.</p>
-                    </div>
-                    """
+                        gr.HTML(
+                            f"""
+                            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; margin-top: 0.75rem;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <iconify-icon icon="solar:chat-round-dots-bold" width="18" height="18" style="color: var(--teal-accent);"></iconify-icon>
+                                    <strong style="font-size: 13px; color: var(--text-primary);">Câu thoại nhân bản tự động (10 từ thuần Việt):</strong>
+                                </div>
+                                <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">
+                                    "{DEFAULT_TARGET_TEXT}"
+                                </div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
+                                    Ba mô hình TTS Zero-Shot (F5-TTS, VieNeu-TTS v3 Turbo, VoiceStudio CFM) sẽ tự động lấy âm sắc giọng vừa ghi âm của bạn làm mẫu để sinh câu thoại trên.
+                                </div>
+                            </div>
+                            """
+                        )
+
+                        with gr.Row():
+                            only_omnivoice_cb = gr.Checkbox(
+                                label="Chế độ tiết kiệm VRAM (Chỉ chạy VoiceStudio CFM)",
+                                value=False,
+                                info="Bỏ qua F5-TTS và VieNeu-TTS để tối ưu bộ nhớ GPU",
+                            )
+
+                        start_quad_btn = gr.Button(
+                            "2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU",
+                            variant="primary",
+                            size="lg",
+                            elem_id="start-quad-btn",
+                            elem_classes=["btn-primary-teal"],
+                        )
+
+                    # RIGHT COLUMN: Progress Banner
+                    with gr.Column(scale=7):
+                        gr.Markdown("### <iconify-icon icon='solar:chart-square-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 3. Tiến Trình Nhân Bản & Thẩm Định Thời Gian Thực")
+                        status_banner_html = gr.HTML(
+                            """
+                            <div style="padding: 1.25rem; border-radius: 0.75rem; background: var(--bg-surface); border: 1px dashed var(--border-color); text-align: center; color: var(--text-secondary); font-size: 13px;">
+                                <iconify-icon icon="solar:info-circle-linear" width="28" height="28" style="color: var(--teal-accent); margin-bottom: 6px;"></iconify-icon>
+                                <div>Ghi âm giọng nói của bạn ở cột bên trái và bấm nút <strong>'2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU'</strong>.</div>
+                                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Kết quả từng mẫu sẽ hiển thị tuần tự theo thời gian thực (Progressive Real-Time Streaming).</div>
+                            </div>
+                            """
+                        )
+
+                # 4-Card Comparison Grid
+                gr.Markdown("---")
+                gr.Markdown("### <iconify-icon icon='solar:tuning-square-2-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> Kết Quả Đối Soát 4 Mẫu Âm Thanh (1 Người Thật vs 3 Deepfake Spoof)")
+
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        bona_card_html = gr.HTML(_render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"))
+                        bona_audio = gr.Audio(label="Nghe lại giọng thật của bạn", interactive=False)
+                    with gr.Column(scale=1):
+                        f5_card_html = gr.HTML(_render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Mô hình Flow Matching Non-Autoregressive", "solar:cpu-bold"))
+                        f5_audio = gr.Audio(label="Nghe bản clone F5-TTS", interactive=False)
+
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        vn_card_html = gr.HTML(_render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Mô hình Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"))
+                        vn_audio = gr.Audio(label="Nghe bản clone VieNeu-TTS", interactive=False)
+                    with gr.Column(scale=1):
+                        omni_card_html = gr.HTML(_render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "Mô hình OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"))
+                        omni_audio = gr.Audio(label="Nghe bản clone VoiceStudio CFM", interactive=False)
+
+                matrix_summary_html = gr.HTML("")
+
+                start_quad_btn.click(
+                    fn=live_quad_cloning_fn,
+                    inputs=[live_mic_input, only_omnivoice_cb],
+                    outputs=[
+                        status_banner_html,
+                        bona_card_html,
+                        bona_audio,
+                        f5_card_html,
+                        f5_audio,
+                        vn_card_html,
+                        vn_audio,
+                        omni_card_html,
+                        omni_audio,
+                        matrix_summary_html,
+                    ],
                 )
-                conf_html = gr.HTML()
-                metrics_html = gr.HTML()
-
-                with gr.Accordion("Chi tiết dạng văn bản (Screen Reader & API)", open=False, elem_id="detail-accordion"):
-                    result_verdict = gr.Textbox(label="Kết quả phân định", interactive=False)
-                    result_conf = gr.Textbox(label="Độ tin cậy phân tích", interactive=False)
-                    result_detail = gr.Textbox(label="Khuyến cáo an toàn", interactive=False, lines=3)
-
-        # SCIENTIFIC VISUALIZATION TABS (Mel-Spectrogram, Waveform, Grad-CAM Attention Map)
-        gr.Markdown("---")
-        gr.Markdown("### <iconify-icon icon='solar:test-tube-minimalistic-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> Góc Nhìn Số Liệu Khoa Học Trực Quan (Forensic Scientific Visualizations)")
-        with gr.Tabs():
-            with gr.TabItem("Mel-Spectrogram (80 Mels, log dBFS)"):
-                spec_plot = gr.Plot(show_label=False)
-            with gr.TabItem("Sóng Âm Đồng Bộ (Time-Domain Waveform)"):
-                wave_plot = gr.Plot(show_label=False)
-            with gr.TabItem("Bản Đồ Chú Ý AI (Grad-CAM Temporal Saliency)"):
-                cam_plot = gr.Plot(show_label=False)
-
-        # Presets click handlers
-        samples_dir = Path(__file__).resolve().parent / "samples"
-        sample_spoof_path = str(samples_dir / "sample_spoof_f5tts.wav")
-        sample_bonafide_path = str(samples_dir / "sample_bonafide_spk0004.wav")
-        sample_zalo_path = str(samples_dir / "sample_spoof_zalo_opus.wav")
-
-        def _load_sample_audio(path: str) -> str:
-            p = Path(path)
-            return str(p) if p.exists() else ""
-
-        sample_spoof_btn.click(fn=lambda: _load_sample_audio(sample_spoof_path), outputs=[audio_input])
-        sample_bonafide_btn.click(fn=lambda: _load_sample_audio(sample_bonafide_path), outputs=[audio_input])
-        sample_zalo_btn.click(fn=lambda: _load_sample_audio(sample_zalo_path), outputs=[audio_input])
-
-        # Main Submit Action
-        submit_btn.click(
-            fn=predict_rich_fn,
-            inputs=[audio_input],
-            outputs=[
-                result_verdict,
-                result_conf,
-                result_detail,
-                verdict_html,
-                conf_html,
-                metrics_html,
-                spec_plot,
-                wave_plot,
-                cam_plot,
-            ],
-        )
 
         gr.Markdown(
             """

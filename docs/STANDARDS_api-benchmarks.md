@@ -101,4 +101,29 @@ experiment_id,model_name,augmentation,test_condition,tts_generator,eer_percent,m
 
 ---
 
-*v0.4.7 — 2026-11-11*
+## 5. Quy Chuẩn Thử Thách Nhân Bản Giọng Trực Tiếp 4 Chiều (Quad-Forensics Benchmark — v0.5.0)
+
+Nhằm phục vụ đánh giá năng lực phát hiện Deepfake tương tác trực tiếp với người dùng và hội đồng bảo vệ, hệ thống chuẩn hóa luồng thử nghiệm đối chứng 4 chiều (`src/vitruevoice/live_cloner.py` & `src/app/ui.py` Tab 2):
+
+### 5.1. Luồng Sinh Mẫu Zero-Shot Tự Động & Câu Thoại Chuẩn
+1. **Âm thanh tham chiếu (Reference Audio)**: Ghi âm trực tiếp qua Microphone trình duyệt (3 - 5 giây).
+2. **Câu thoại nhân bản cố định (Target Text)**:
+   > `"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."` (10 từ thuần Việt, không cần cấu hình tùy chọn để tránh phân tán).
+3. **Bộ 3 Mô hình TTS Zero-Shot nhân bản**:
+   - `Bản 2 (F5-TTS)`: Mô hình Flow Matching Non-Autoregressive (`hynt/F5-TTS-Vietnamese-ViVoice`).
+   - `Bản 3 (VieNeu-TTS v3 Turbo)`: Mô hình Fast DiT 48kHz (`pnnbao-ump/VieNeu-TTS-v3-Turbo`).
+   - `Bản 4 (VoiceStudio CFM)`: Mô hình Continuous Flow Matching thuần Zero-Shot (`k2-fsa/OmniVoice`).
+
+### 5.2. Cơ Chế Progressive Real-Time Streaming & Quản Trị Bộ Nhớ
+- **Streaming Generator (`yield`)**:
+  - `Bước 0 (~66ms)`: Trả kết quả thẩm định bản Người Thật (Bona Fide) ngay lập tức kèm Audio player. 3 thẻ còn lại hiển thị trạng thái `Loading` (animated spinner).
+  - `Bước 1 (~3.4s)`: Hoàn tất nhân bản F5-TTS, hiển thị kết quả thẩm định và Audio player cho Bản 2; thẻ 3 & 4 tiếp tục nạp.
+  - `Bước 2 (~3.9s)`: Hoàn tất nhân bản VieNeu-TTS v3 Turbo, hiển thị kết quả thẩm định và Audio player cho Bản 3.
+  - `Bước 3 (~3.5s)`: Hoàn tất nhân bản VoiceStudio CFM, hiển thị kết quả Bản 4 và xuất bản Bảng Ma Trận Đối Soát 4 Chiều (Quad-Forensics Matrix).
+- **Phân luồng an toàn**: Tải file lên chỉ chạy kiểm định đơn bản (<100ms) tại Chế độ 1; chỉ ghi âm trực tiếp qua mic mới kích hoạt nhân bản 3 bản clone tại Chế độ 2.
+- **Tối ưu VRAM GPU < 4GB**: Hỗ trợ checkbox *"Chế độ tiết kiệm VRAM"* (chỉ chạy VoiceStudio CFM) và lệnh giải phóng đệm CUDA `torch.cuda.empty_cache()` + `gc.collect()` sau mỗi vòng sinh giọng.
+- **Bảo mật sinh trắc học (Luật 91/2025/QH15)**: Âm thanh xử lý in-memory stream trên RAM, file tham chiếu tạm xóa hủy ngay lập tức trong khối `finally`.
+
+---
+
+*v0.5.0 — 2026-11-13*

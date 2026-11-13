@@ -6,7 +6,9 @@ import numpy as np
 import pytest
 import torch
 
-from src.app.ui import build_ui, make_predict_fn
+from unittest.mock import patch
+
+from src.app.ui import build_ui, make_live_quad_cloning_fn, make_predict_fn
 
 
 class StubModel:
@@ -103,3 +105,52 @@ def test_make_predict_fn_rich_none():
     verdict, conf, detail, verdict_html, conf_html, metrics_html, spec_fig, wave_fig, cam_fig = res
     assert "Chưa cung cấp" in verdict
     plt.close("all")
+
+
+def test_make_live_quad_cloning_fn_none():
+    quad_fn = make_live_quad_cloning_fn(model=StubModel(), device="cpu")
+    outputs = list(quad_fn(None, False))
+    assert len(outputs) == 1
+    banner, bona_h, bona_a, f5_h, f5_a, vn_h, vn_a, omni_h, omni_a, matrix_h = outputs[0]
+    assert "Vui lòng ghi âm" in banner
+    assert bona_a is None
+
+
+def test_make_live_quad_cloning_fn_short_audio():
+    quad_fn = make_live_quad_cloning_fn(model=StubModel(), device="cpu")
+    short_audio = (16000, np.zeros(4000, dtype=np.float32))  # 0.25s
+    outputs = list(quad_fn(short_audio, False))
+    assert len(outputs) == 1
+    banner, *_ = outputs[0]
+    assert "quá ngắn" in banner
+
+
+def test_make_live_quad_cloning_fn_streaming():
+    model = StubModel(score_val=2.5)
+    quad_fn = make_live_quad_cloning_fn(model=model, device="cpu")
+    audio = (16000, np.zeros(32000, dtype=np.float32))  # 2.0s
+
+    dummy_clone = np.zeros(24000, dtype=np.float32)
+
+    with patch("src.vitruevoice.live_cloner.LiveQuadCloner.clone_f5", return_value=(dummy_clone, 24000)), \
+         patch("src.vitruevoice.live_cloner.LiveQuadCloner.clone_vieneu", return_value=(dummy_clone, 48000)), \
+         patch("src.vitruevoice.live_cloner.LiveQuadCloner.clone_omnivoice", return_value=(dummy_clone, 24000)):
+        
+        yields = list(quad_fn(audio, False))
+        assert len(yields) == 4
+
+        # Step 0: Immediate Bonafide result
+        b0, bona_h0, bona_a0, f5_h0, f5_a0, vn_h0, vn_a0, omni_h0, omni_a0, matrix_h0 = yields[0]
+        assert "Bước 1/4" in b0
+        assert "Bona Fide" in bona_h0
+        assert bona_a0 is not None
+        assert f5_a0 is None
+
+        # Step 3: Complete
+        b3, bona_h3, bona_a3, f5_h3, f5_a3, vn_h3, vn_a3, omni_h3, omni_a3, matrix_h3 = yields[3]
+        assert "HOÀN TẤT" in b3
+        assert f5_a3 is not None
+        assert vn_a3 is not None
+        assert omni_a3 is not None
+        assert "QUAD-FORENSICS BENCHMARK MATRIX" in matrix_h3
+

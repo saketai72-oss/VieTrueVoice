@@ -196,20 +196,41 @@ python scripts/benchmark_latency.py --no-pooling
 Hệ thống cung cấp 4 phương thức demo linh hoạt:
 
 ### Cách 1: Giao diện Web Trực Quan (Gradio Web UI — Khuyên Dùng Cho Người Dùng & Thuyết Trình)
-Giao diện Dark Forensics Lab đạt chuẩn thiết kế Stitch v2.4, tối giản $\le 3$ thao tác cho người cao tuổi, tích hợp toàn diện các góc nhìn số liệu khoa học:
+Giao diện Dark Forensics Lab đạt chuẩn thiết kế Stitch v2.4, tối giản $\le 3$ thao tác cho người cao tuổi, tích hợp toàn diện 2 chế độ chuyên sâu:
 ```bash
 python scripts/demo_predict.py --web
-# hoặc: python src/app/ui.py
+# hoặc: python -m src.app.ui
 ```
 - Mở trình duyệt tại: `http://localhost:7860` (hoặc `http://localhost:8000` khi chạy bằng Docker).
+- **Chuyển đổi giao diện Sáng / Tối (Light/Dark Theme Switcher)**: 1-click nút `☀️`/`🌙` trên góc phải thanh tiêu đề.
+
+#### 🛡️ Chế Độ 1: Thẩm Định Nhanh Đơn Mẫu (Single-File Analysis)
+- **Tải lên hoặc Ghi âm nhanh**: Hỗ trợ mọi định dạng âm thanh (.wav, .mp3, .m4a, .opus, .ogg).
 - **Thử nghiệm nhanh**: 3 nút Preset mẫu đối chứng 1-click (Spoof F5-TTS, Giọng thật SPK_0004, Spoof Zalo Opus nén).
 - **Kết quả trực quan**: Thẻ cảnh báo nổi bật (Xanh: Giọng thật / Đỏ: Cảnh báo Deepfake kèm khuyến cáo khẩn cấp chống chuyển tiền và bảo vệ mã OTP).
 - **Thanh đo độ tin cậy**: Thang đo phần trăm xác suất đã hiệu chuẩn Platt Scaling (0% - 100%).
-- **Chỉ số kỹ thuật**: Điểm Raw Score, Thời gian suy luận (latency), Cửa sổ phân tích Multi-window Max-Pooling, Tỷ lệ năng lượng cao tần >4kHz phát hiện vết vocoder.
+- **Chỉ số kỹ thuật**: Điểm Raw Score, Thời gian suy luận (latency ~66ms), Cửa sổ phân tích Multi-window Max-Pooling, Tỷ lệ năng lượng cao tần >4kHz phát hiện vết vocoder.
 - **Biểu đồ khoa học trực quan**:
   1. *Mel-Spectrogram (80 Mels, log dBFS)*: Thể hiện dải tần 0 - 8kHz kèm đường ranh giới cắt cao tần 4.0kHz của vocoder HiFi-GAN.
   2. *Biểu đồ sóng âm đồng bộ (Raw Time-Domain Waveform)*: Hiển thị dạng sóng thời gian thực.
   3. *Bản đồ chú ý nơ-ron (Grad-CAM Temporal Saliency)*: Trọng số kích hoạt phát hiện chính xác vùng thời gian phát sinh tín hiệu giả mạo.
+
+#### 🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp 4 Chiều (Quad-Forensics Live Cloning)
+- **Ghi âm trực tiếp qua Microphone**: Người dùng thu âm một đoạn thoại ngắn 3 - 5 giây làm giọng tham chiếu (Reference Voice).
+- **Tự động nhân bản 3 bản clone Zero-Shot**: Hệ thống lấy đặc trưng âm sắc của người dùng để tự động sinh 3 bản clone nói câu thoại chuẩn 10 từ thuần Việt:
+  > *"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."*
+  qua 3 mô hình TTS Zero-Shot của dự án:
+  1. `F5-TTS` (Flow Matching Non-Autoregressive)
+  2. `VieNeu-TTS v3 Turbo` (Fast DiT 48kHz)
+  3. `VoiceStudio CFM` (OmniVoice Continuous Flow Matching)
+- **Cơ chế Progressive Real-Time Streaming (`yield`)**:
+  - Trả kết quả bản Người Thật (Bona Fide) ngay lập tức (~66ms) kèm audio player để người dùng nghe lại giọng mình.
+  - Ba ô kết quả clone hiển thị trạng thái `Loading` (animated spinner quay vòng).
+  - Từng bản clone khi sinh xong sẽ tự động cập nhật kết quả thẩm định và nạp audio player tương ứng để người dùng bấm nghe trực tiếp.
+- **Tùy chọn tiết kiệm VRAM**: Hỗ trợ checkbox *"Chế độ tiết kiệm VRAM"* cho phép bỏ qua F5-TTS và VieNeu-TTS, chỉ chạy VoiceStudio CFM nhằm đảm bảo an toàn bộ nhớ trên GPU < 4GB.
+- **Bảng đối soát toàn diện 4 chiều (Quad-Forensics Benchmark Matrix)**:
+  Bảng tổng kết so sánh trực quan Ground Truth vs Kết luận AI ViTrueVoice, độ tin cậy %, điểm Raw Score và độ trễ suy luận trên cả 4 mẫu âm thanh.
+- **Tuân thủ Quyền riêng tư (Luật 91/2025/QH15)**: Âm thanh xử lý in-memory trên RAM, dọn dẹp file tạm ngay lập tức sau khi suy luận.
 
 ### Cách 2: Thử Nghiệm Nhanh Trên Dòng Lệnh (CLI Demo)
 Thực hiện phân loại tức thời trên terminal:

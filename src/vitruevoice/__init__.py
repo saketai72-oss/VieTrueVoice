@@ -34,6 +34,12 @@ except Exception:
     TelephonyCompressor = None
     BatchDatasetProcessor = None
 
+try:
+    from .live_cloner import LiveQuadCloner, evaluate_audio_sample
+except Exception:
+    LiveQuadCloner = None
+    evaluate_audio_sample = None
+
 __all__ = [
     "SynthesisRequest",
     "SynthesisResult",
@@ -52,5 +58,7 @@ __all__ = [
     "PipelineMode",
     "DatasetPartitioner",
     "TelephonyCompressor",
-    "BatchDatasetProcessor"
+    "BatchDatasetProcessor",
+    "LiveQuadCloner",
+    "evaluate_audio_sample",
 ]
