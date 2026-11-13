@@ -1128,13 +1128,11 @@ def _render_quad_card_step(
 
 
 def _render_matrix_summary(state: dict, completed: bool = False) -> str:
-    """Render the 4-sample comparison matrix table."""
+    """Render the 2-sample comparison matrix table (Bona Fide vs VoiceStudio CFM)."""
     rows = []
     items = [
         ("Bản 1: Người Thật (Bona Fide)", "Microphone Trực Tiếp", "Thật (Bona Fide)", state.get("bonafide")),
-        ("Bản 2: Clone F5-TTS", "Flow Matching Non-AR", "Giả Mạo (Deepfake)", state.get("f5", {}).get("eval")),
-        ("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo", "Giả Mạo (Deepfake)", state.get("vieneu", {}).get("eval")),
-        ("Bản 4: Clone VoiceStudio CFM", "OmniVoice Zero-Shot CFM", "Giả Mạo (Deepfake)", state.get("omnivoice", {}).get("eval")),
+        ("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot CFM (24kHz)", "Giả Mạo (Deepfake)", state.get("omnivoice", {}).get("eval")),
     ]
 
     for label, engine, truth, ev in items:
@@ -1157,38 +1155,33 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
 
             row_html = f"""
             <tr style="border-bottom: 1px solid var(--border-color);">
-                <td style="padding: 8px 12px; font-weight: 600; color: var(--text-primary);">{label}</td>
-                <td style="padding: 8px 12px; color: var(--text-secondary);">{engine}</td>
-                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
-                <td style="padding: 8px 12px;">{decision_badge}</td>
-                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{prob_pct:.1f}%</td>
-                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: {'#10B981' if is_bona else '#EF4444'};">{raw_s:+.4f}</td>
-                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; color: var(--teal-accent);">{lat:.1f}ms</td>
-                <td style="padding: 8px 12px;">{match_badge}</td>
+                <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">{label}</td>
+                <td style="padding: 10px 14px; color: var(--text-secondary);">{engine}</td>
+                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
+                <td style="padding: 10px 14px;">{decision_badge}</td>
+                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{prob_pct:.1f}%</td>
+                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: {'#10B981' if is_bona else '#EF4444'};">{raw_s:+.4f}</td>
+                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; color: var(--teal-accent);">{lat:.1f}ms</td>
+                <td style="padding: 10px 14px;">{match_badge}</td>
             </tr>
             """
         else:
-            status_txt = "Đang chờ..."
-            if label.startswith("Bản 2") and state.get("f5", {}).get("status") == "skipped":
-                status_txt = "Đã bỏ qua (VRAM Opt)"
-            elif label.startswith("Bản 3") and state.get("vieneu", {}).get("status") == "skipped":
-                status_txt = "Đã bỏ qua (VRAM Opt)"
-
+            status_txt = "Đang xử lý..."
             row_html = f"""
             <tr style="border-bottom: 1px solid var(--border-color); opacity: 0.6;">
-                <td style="padding: 8px 12px; font-weight: 600; color: var(--text-primary);">{label}</td>
-                <td style="padding: 8px 12px; color: var(--text-muted);">{engine}</td>
-                <td style="padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
-                <td style="padding: 8px 12px; color: var(--text-muted); font-style: italic;">{status_txt}</td>
-                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
-                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
-                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
-                <td style="padding: 8px 12px; color: var(--text-muted);">-</td>
+                <td style="padding: 10px 14px; font-weight: 600; color: var(--text-primary);">{label}</td>
+                <td style="padding: 10px 14px; color: var(--text-muted);">{engine}</td>
+                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
+                <td style="padding: 10px 14px; color: var(--text-muted); font-style: italic;">{status_txt}</td>
+                <td style="padding: 10px 14px; color: var(--text-muted);">-</td>
+                <td style="padding: 10px 14px; color: var(--text-muted);">-</td>
+                <td style="padding: 10px 14px; color: var(--text-muted);">-</td>
+                <td style="padding: 10px 14px; color: var(--text-muted);">-</td>
             </tr>
             """
         rows.append(row_html)
 
-    header_status = "HOÀN TẤT KIỂM ĐỊNH" if completed else "TIẾN TRÌNH ĐANG XỬ LÝ"
+    header_status = "HOÀN TẤT ĐỐI CHỨNG" if completed else "TIẾN TRÌNH ĐANG XỬ LÝ"
     header_color = "#10B981" if completed else "var(--teal-accent)"
 
     return f"""
@@ -1196,7 +1189,7 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px;">
             <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
                 <iconify-icon icon="solar:checklist-minimalistic-bold" width="18" height="18" style="color: {header_color};"></iconify-icon>
-                BẢNG ĐỐI SOÁT TOÀN DIỆN 4 CHIỀU (QUAD-FORENSICS BENCHMARK MATRIX)
+                BẢNG ĐỐI SOÁT ĐỐI CHỨNG: NGƯỜI THẬT VS CLONE VOICESTUDIO CFM
             </div>
             <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: {header_color}; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 9999px;">
                 {header_status}
@@ -1206,14 +1199,14 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
                 <thead>
                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 11px;">
-                        <th style="padding: 8px 12px;">Mẫu Thử</th>
-                        <th style="padding: 8px 12px;">Mô Hình / Nguồn</th>
-                        <th style="padding: 8px 12px;">Ground Truth</th>
-                        <th style="padding: 8px 12px;">Kết Luận AI</th>
-                        <th style="padding: 8px 12px;">Độ Tin Cậy</th>
-                        <th style="padding: 8px 12px;">Điểm Raw</th>
-                        <th style="padding: 8px 12px;">Độ Trễ</th>
-                        <th style="padding: 8px 12px;">Đối Soát</th>
+                        <th style="padding: 10px 14px;">Mẫu Thử</th>
+                        <th style="padding: 10px 14px;">Mô Hình / Nguồn</th>
+                        <th style="padding: 10px 14px;">Ground Truth</th>
+                        <th style="padding: 10px 14px;">Kết Luận AI</th>
+                        <th style="padding: 10px 14px;">Độ Tin Cậy</th>
+                        <th style="padding: 10px 14px;">Điểm Raw</th>
+                        <th style="padding: 10px 14px;">Độ Trễ</th>
+                        <th style="padding: 10px 14px;">Đối Soát</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1231,13 +1224,10 @@ def make_live_quad_cloning_fn(
     device: str = "cpu",
     threshold: float = 0.0,
 ):
-    """Factory creating the generator function for live 4-way voice cloning & forensics."""
+    """Factory creating the generator function for live VoiceStudio CFM cloning & forensics."""
     loaded_model = model
 
-    def stream_quad_cloning(
-        audio_input: Any,
-        only_omnivoice: bool = False,
-    ):
+    def stream_quad_cloning(audio_input: Any):
         nonlocal loaded_model
         if loaded_model is None:
             loaded_model = _default_model_loader(checkpoint_path, device=device)
@@ -1247,11 +1237,7 @@ def make_live_quad_cloning_fn(
                 _render_status_banner("warning", "⚠️ Vui lòng ghi âm giọng nói của bạn qua Microphone (khoảng 3 – 5 giây) trước khi bấm Bắt đầu."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1264,11 +1250,7 @@ def make_live_quad_cloning_fn(
                 _render_status_banner("error", "❌ Định dạng âm thanh không hợp lệ."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1288,11 +1270,7 @@ def make_live_quad_cloning_fn(
                 _render_status_banner("warning", f"⚠️ Đoạn ghi âm quá ngắn ({duration:.2f}s < 1.0s). Vui lòng ghi âm tối thiểu 2-3 giây để mô hình có đủ ngữ âm mẫu."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1301,14 +1279,10 @@ def make_live_quad_cloning_fn(
         cloner_device = "cuda" if (torch.cuda.is_available() and "cuda" in str(device).lower()) else "cpu"
         if LiveQuadCloner is None:
             yield (
-                _render_status_banner("error", "❌ Không tìm thấy module LiveQuadCloner."),
+                _render_status_banner("error", "❌ Không tìm thấy module LiveVoiceStudioCloner."),
                 _render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"),
                 None,
-                _render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Flow Matching Non-Autoregressive", "solar:cpu-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"),
-                None,
-                _render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"),
+                _render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"),
                 None,
                 "",
             )
@@ -1317,12 +1291,9 @@ def make_live_quad_cloning_fn(
         cloner = LiveQuadCloner(
             target_text=DEFAULT_TARGET_TEXT,
             device=cloner_device,
-            priority_only_omnivoice=bool(only_omnivoice),
         )
 
         bona_audio_out = (sr, data)
-        f5_audio_out = None
-        vn_audio_out = None
         omni_audio_out = None
 
         for state in cloner.stream_cloning_and_detection(
@@ -1331,24 +1302,13 @@ def make_live_quad_cloning_fn(
             step = state.get("step", 0)
             completed = state.get("completed", False)
 
-            if state.get("f5", {}).get("status") == "done" and "audio" in state["f5"]:
-                f5_audio_out = state["f5"]["audio"]
-            if state.get("vieneu", {}).get("status") == "done" and "audio" in state["vieneu"]:
-                vn_audio_out = state["vieneu"]["audio"]
             if state.get("omnivoice", {}).get("status") == "done" and "audio" in state["omnivoice"]:
                 omni_audio_out = state["omnivoice"]["audio"]
 
             if not completed:
-                if step == 0:
-                    banner = _render_status_banner("info", "⚡ <strong>Bước 1/4:</strong> Đã xác thực giọng người thật (~66ms)! Đang nạp mô hình F5-TTS...")
-                elif step == 1:
-                    banner = _render_status_banner("info", "⚡ <strong>Bước 2/4:</strong> Đã hoàn tất nhân bản F5-TTS! Đang chuyển sang VieNeu-TTS v3 Turbo...")
-                elif step == 2:
-                    banner = _render_status_banner("info", "⚡ <strong>Bước 3/4:</strong> Đã hoàn tất nhân bản VieNeu-TTS! Đang nạp VoiceStudio CFM...")
-                else:
-                    banner = _render_status_banner("info", "⚡ Đang xử lý các bước còn lại...")
+                banner = _render_status_banner("info", "⚡ <strong>Bước 1/2:</strong> Đã xác thực giọng người thật (~66ms)! Đang nhận dạng ASR & tổng hợp VoiceStudio CFM...")
             else:
-                banner = _render_status_banner("success", "✅ <strong>HOÀN TẤT THỬ THÁCH NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU TOÀN DIỆN!</strong>")
+                banner = _render_status_banner("success", "✅ <strong>HOÀN TẤT ĐỐI CHỨNG VOICESTUDIO CFM:</strong> Đã nhân bản thành công và thẩm định qua mô hình ViTrueVoice!")
 
             bona_html = _render_quad_card_done(
                 "Bản 1: Người Thật (Bona Fide)",
@@ -1357,23 +1317,9 @@ def make_live_quad_cloning_fn(
                 state.get("bonafide", {}),
                 is_bonafide_truth=True,
             )
-            f5_html = _render_quad_card_step(
-                "Bản 2: Clone F5-TTS",
-                "Flow Matching Non-Autoregressive",
-                "solar:cpu-bold",
-                state.get("f5", {}),
-                is_bonafide_truth=False,
-            )
-            vn_html = _render_quad_card_step(
-                "Bản 3: Clone VieNeu-TTS",
-                "Fast DiT v3 Turbo (48kHz)",
-                "solar:bolt-bold",
-                state.get("vieneu", {}),
-                is_bonafide_truth=False,
-            )
             omni_html = _render_quad_card_step(
-                "Bản 4: Clone VoiceStudio CFM",
-                "OmniVoice Continuous Flow Matching",
+                "Bản 2: Clone VoiceStudio CFM",
+                "OmniVoice Zero-Shot Flow Matching (24kHz PCM)",
                 "solar:magic-stick-3-bold",
                 state.get("omnivoice", {}),
                 is_bonafide_truth=False,
@@ -1384,8 +1330,6 @@ def make_live_quad_cloning_fn(
             yield (
                 banner,
                 bona_html, bona_audio_out,
-                f5_html, f5_audio_out,
-                vn_html, vn_audio_out,
                 omni_html, omni_audio_out,
                 matrix_html,
             )
@@ -1456,7 +1400,7 @@ THEME_INIT_JS = """
         }
         const qBtn = document.querySelector("#start-quad-btn button, #start-quad-btn");
         if (qBtn && !qBtn.querySelector('iconify-icon')) {
-            qBtn.innerHTML = '<iconify-icon icon="solar:rocket-bold" width="18" height="18" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> 2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU';
+            qBtn.innerHTML = '<iconify-icon icon="solar:rocket-bold" width="18" height="18" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> 2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM';
         }
         const s1 = document.querySelector("#sample-spoof-btn button, #sample-spoof-btn");
         if (s1 && !s1.querySelector('iconify-icon')) {
@@ -1699,7 +1643,7 @@ def build_ui(
                     ],
                 )
 
-            with gr.TabItem("🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp 4 Chiều (Quad-Forensics)", id="tab_quad"):
+            with gr.TabItem("🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp VoiceStudio CFM (Zero-Shot CFM Cloning)", id="tab_quad"):
                 with gr.Row():
                     # LEFT COLUMN: Microphone Live Capture & Options
                     with gr.Column(scale=5):
@@ -1720,22 +1664,15 @@ def build_ui(
                                 <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">
                                     "{DEFAULT_TARGET_TEXT}"
                                 </div>
-                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; line-height: 1.4;">
-                                    Ba mô hình TTS Zero-Shot (F5-TTS, VieNeu-TTS v3 Turbo, VoiceStudio CFM) sẽ tự động lấy âm sắc giọng vừa ghi âm của bạn làm mẫu để sinh câu thoại trên.
+                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
+                                    Mô hình Zero-Shot CFM (VoiceStudio OmniVoice) kết hợp bộ nhận dạng ngữ âm ASR tự động lấy âm sắc từ mic để sinh câu thoại trên với âm thanh chuẩn 16-bit PCM.
                                 </div>
                             </div>
                             """
                         )
 
-                        with gr.Row():
-                            only_omnivoice_cb = gr.Checkbox(
-                                label="Chế độ tiết kiệm VRAM (Chỉ chạy VoiceStudio CFM)",
-                                value=False,
-                                info="Bỏ qua F5-TTS và VieNeu-TTS để tối ưu bộ nhớ GPU",
-                            )
-
                         start_quad_btn = gr.Button(
-                            "2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU",
+                            "2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM",
                             variant="primary",
                             size="lg",
                             elem_id="start-quad-btn",
@@ -1749,45 +1686,33 @@ def build_ui(
                             """
                             <div style="padding: 1.25rem; border-radius: 0.75rem; background: var(--bg-surface); border: 1px dashed var(--border-color); text-align: center; color: var(--text-secondary); font-size: 13px;">
                                 <iconify-icon icon="solar:info-circle-linear" width="28" height="28" style="color: var(--teal-accent); margin-bottom: 6px;"></iconify-icon>
-                                <div>Ghi âm giọng nói của bạn ở cột bên trái và bấm nút <strong>'2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG 4 CHIỀU'</strong>.</div>
-                                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Kết quả từng mẫu sẽ hiển thị tuần tự theo thời gian thực (Progressive Real-Time Streaming).</div>
+                                <div>Ghi âm giọng nói của bạn ở cột bên trái và bấm nút <strong>'2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM'</strong>.</div>
+                                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Kết quả mẫu thật hiển thị ngay lập tức sau ~66ms, tiếp theo là bản clone VoiceStudio CFM sau khi tổng hợp xong.</div>
                             </div>
                             """
                         )
 
-                # 4-Card Comparison Grid
+                # 2-Card Comparison Grid
                 gr.Markdown("---")
-                gr.Markdown("### <iconify-icon icon='solar:tuning-square-2-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> Kết Quả Đối Soát 4 Mẫu Âm Thanh (1 Người Thật vs 3 Deepfake Spoof)")
+                gr.Markdown("### <iconify-icon icon='solar:tuning-square-2-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> Kết Quả Đối Soát 2 Mẫu Âm Thanh (1 Người Thật vs 1 Deepfake VoiceStudio CFM)")
 
                 with gr.Row():
                     with gr.Column(scale=1):
                         bona_card_html = gr.HTML(_render_quad_card_placeholder("Bản 1: Người Thật (Bona Fide)", "Giọng nói gốc trực tiếp từ Microphone", "solar:user-bold"))
                         bona_audio = gr.Audio(label="Nghe lại giọng thật của bạn", interactive=False)
                     with gr.Column(scale=1):
-                        f5_card_html = gr.HTML(_render_quad_card_placeholder("Bản 2: Clone F5-TTS", "Mô hình Flow Matching Non-Autoregressive", "solar:cpu-bold"))
-                        f5_audio = gr.Audio(label="Nghe bản clone F5-TTS", interactive=False)
-
-                with gr.Row():
-                    with gr.Column(scale=1):
-                        vn_card_html = gr.HTML(_render_quad_card_placeholder("Bản 3: Clone VieNeu-TTS", "Mô hình Fast DiT v3 Turbo (48kHz)", "solar:bolt-bold"))
-                        vn_audio = gr.Audio(label="Nghe bản clone VieNeu-TTS", interactive=False)
-                    with gr.Column(scale=1):
-                        omni_card_html = gr.HTML(_render_quad_card_placeholder("Bản 4: Clone VoiceStudio CFM", "Mô hình OmniVoice Continuous Flow Matching", "solar:magic-stick-3-bold"))
-                        omni_audio = gr.Audio(label="Nghe bản clone VoiceStudio CFM", interactive=False)
+                        omni_card_html = gr.HTML(_render_quad_card_placeholder("Bản 2: Clone VoiceStudio CFM", "OmniVoice Zero-Shot Flow Matching (24kHz PCM)", "solar:magic-stick-3-bold"))
+                        omni_audio = gr.Audio(label="Nghe bản clone VoiceStudio CFM (Âm thanh chuẩn 16-bit)", interactive=False)
 
                 matrix_summary_html = gr.HTML("")
 
                 start_quad_btn.click(
                     fn=live_quad_cloning_fn,
-                    inputs=[live_mic_input, only_omnivoice_cb],
+                    inputs=[live_mic_input],
                     outputs=[
                         status_banner_html,
                         bona_card_html,
                         bona_audio,
-                        f5_card_html,
-                        f5_audio,
-                        vn_card_html,
-                        vn_audio,
                         omni_card_html,
                         omni_audio,
                         matrix_summary_html,

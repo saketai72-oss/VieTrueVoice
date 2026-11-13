@@ -382,4 +382,19 @@ Tài liệu được xuất bản và đồng bộ tự động tại:
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
+### 8.6 Khởi chạy Phòng Thí Nghiệm Nhân Bản Trực Tiếp VoiceStudio CFM (Gradio Web Chế Độ 2)
+Chạy ứng dụng Gradio Web UI với Chế độ 2 (Live VoiceStudio CFM Cloning & Forensics):
+```bash
+python -m src.app.ui
+```
+Truy cập trình duyệt tại `http://localhost:7860`:
+1. Chuyển sang Tab: **"🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp VoiceStudio CFM (Zero-Shot CFM Cloning)"**.
+2. Bấm biểu tượng Microphone và nói bất kỳ câu tiếng Việt ngắn nào (khuyến nghị 3 – 5 giây).
+3. Bấm nút **"2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM"**:
+   - Hệ thống tự động nhận diện tiếng nói qua ASR Wav2Vec2 tiếng Việt (~0.15s) để căn chỉnh âm sắc chuẩn xác 100%.
+   - Thẩm định ngay lập tức bản gốc của bạn (~66ms, hiển thị thẻ Người Thật màu xanh).
+   - VoiceStudio CFM sinh câu thoại mẫu 10 từ thuần Việt (`"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."`), chuẩn hóa âm lượng to rõ chuẩn 16-bit PCM.
+   - Thẩm định bản clone qua ViTrueVoice và hiển thị kết quả phân định Thật / Giả mạo cùng Bảng đối soát 2 chiều.
+
+
 

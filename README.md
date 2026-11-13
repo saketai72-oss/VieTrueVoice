@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.4.7)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.5.1)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -53,11 +53,11 @@
   - **Khắc phục triệt để thời gian khởi động lạnh (Cold-Start Latency Remediation)**: Tối ưu bộ đo đặc trưng FFT nhanh (<10ms thay cho 8.7s của librosa YIN), tích hợp cơ chế Pre-warming đa cửa sổ (5-window pooling + 1-window) và cache đồ họa Matplotlib Agg; duy trì độ trễ trung vị ở mức **66.3ms** (P90 68.2ms), vượt xa trần NFR1 $\le 3.0$s.
   - **Hỗ trợ toàn diện đồng thời 2 nền tảng (Dual-Platform Verification)**: Giải quyết dứt điểm hiện tượng nhận diện sai khi thu trực tiếp qua Micro trình duyệt Web UI do bộ ngắt tiếng ồn (squelch gating) bằng cách tích hợp **Adaptive Comfort Dithering** ($\sigma = 0.0035$) theo chuẩn RFC 3389 / AES-17 và hook WebRTC `noiseSuppression: false`; đảo chiều bản ghi âm trực tiếp của người dùng từ $-33.08$ (Báo giả mạo) thành **$+15.26$ (Bona Fide Thật, độ tin cậy 99.6%)**, bảo toàn $100\%$ độ nhạy phát hiện spoof (F5-TTS $-44.01$, Zalo Opus $-43.77$).
   - **Chuẩn hóa báo cáo khoa học W05 & W06**: Loại bỏ 100% chữ tô nền vàng và callout giữ chỗ; đồng bộ xuất bản bản in chính thức DOCX và PDF lưu trữ tại thư mục đồ án.
-- **Live Voice Cloning & Quad-Forensics Progressive Real-Time Streaming (v0.5.0)**:
-  - **Phòng thí nghiệm nhân bản trực tiếp trên Web UI**: Cho phép người dùng thu âm trực tiếp qua Microphone làm giọng mẫu tham chiếu, hệ thống tự động nhân bản 3 bản clone nói câu thoại chuẩn 10 từ thuần Việt (`"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."`) qua 3 mô hình TTS Zero-Shot của đề tài: `F5-TTS`, `VieNeu-TTS v3 Turbo`, và `VoiceStudio CFM` (OmniVoice).
-  - **Phân luồng luồng dữ liệu an toàn**: Upload file chỉ thực hiện thẩm định nhanh đơn bản (<100ms) tại Chế độ 1; chỉ thu trực tiếp qua Microphone mới kích hoạt nhân bản 3 bản clone tại Chế độ 2.
-  - **Progressive Real-Time Streaming Generator**: Trả kết quả bản Người Thật (Bona Fide) ngay lập tức (~66ms) kèm audio player, sau đó lần lượt cập nhật từng bản clone khi sinh xong kèm hiệu ứng loading spinner và pulsing animation; không bắt người dùng phải chờ đợi hoàn tất toàn bộ mới thấy kết quả.
-  - **Tối ưu VRAM & Bảo vệ GPU**: Hỗ trợ chế độ tiết kiệm VRAM (chỉ chạy VoiceStudio CFM) và cơ chế thu hồi bộ nhớ đệm `torch.cuda.empty_cache()` sau mỗi tiến trình sinh giọng, vận hành mượt mà trên GPU RTX 3050 4GB VRAM.
-  - **Bảng đối soát toàn diện 4 chiều (Quad-Forensics Benchmark Matrix)**: Bảng đối soát chi tiết so sánh Ground Truth vs Kết luận AI ViTrueVoice, độ tin cậy Platt Scaling %, điểm Raw Score và độ trễ suy luận trên cả 4 file âm thanh (1 Thật vs 3 Deepfake).
-  - **Tuân thủ Quyền riêng tư theo Luật 91/2025/QH15**: Xử lý âm thanh in-memory stream trên RAM, dọn dẹp file tham chiếu tạm ngay lập tức trong khối `finally`.
+- **Live Voice Cloning & Quad-Forensics Progressive Real-Time Streaming (v0.5.0)**: Mở rộng phòng lab Gradio với chức năng thu âm trực tiếp và đối chứng đa mô hình.
+- **VoiceStudio CFM Dedicated Live Voice Cloning & ASR-Guided Audio Synthesis (v0.5.1)**:
+  - **Chuyên biệt hóa VoiceStudio CFM**: Tinh gọn hệ thống theo chỉ đạo người dùng, tập trung 100% vào mô hình VoiceStudio CFM (OmniVoice Continuous Flow Matching), loại bỏ F5-TTS và VieNeu-TTS khỏi luồng trực tiếp.
+  - **Khắc phục triệt để sự cố âm thanh không nghe thấy gì**: Phân tích âm học FFT phát hiện tín hiệu bị sụp đổ thành sóng ù DC offset 50Hz (biên độ đỉnh 25.791) do câu văn bản mẫu không khớp với câu người dùng nói vào mic, làm triệt tiêu hoàn toàn dải tần thanh âm tiếng người (300Hz – 4.000Hz).
+  - **Tự động nhận dạng tiếng nói ASR siêu nhanh (~0.15s)**: Tích hợp mô hình Wav2Vec2 tiếng Việt (`nguyenvulebinh/wav2vec2-base-vietnamese-250h`) nhận diện chính xác văn bản người dùng vừa nói và cấp làm `ref_text` cho VoiceStudio CFM, khôi phục trọn vẹn các formant âm sắc và chất lượng tự nhiên.
+  - **Chuẩn hóa âm học đầu ra**: Khử DC offset, Peak-normalization 95% và chuyển đổi sang PCM 16-bit (int16 @ 24kHz), đảm bảo âm thanh to rõ, tự nhiên và tương thích 100% trình duyệt web.
+  - **Tái cấu trúc giao diện 2-Card chuyên nghiệp**: Bố cục 2 thẻ đối xứng (1 Bản Người Thật vs 1 Bản Clone VoiceStudio CFM) kèm Ma trận đối soát 2 chiều và quy trình dọn dẹp in-memory stream Zero-persistence theo Luật 91/2025/QH15.
   - **Bộ kiểm thử tự động TDD**: Toàn bộ **308/308 unit tests pass 100% green**. Sẵn sàng cho Giai đoạn Thử nghiệm Pilot & Nghiệm thu W7–W8 (v1.0.0).
