@@ -1276,7 +1276,7 @@ def make_live_quad_cloning_fn(
             )
             return
 
-        cloner_device = "cuda" if (torch.cuda.is_available() and "cuda" in str(device).lower()) else "cpu"
+        cloner_device = "cuda" if torch.cuda.is_available() else "cpu"
         if LiveQuadCloner is None:
             yield (
                 _render_status_banner("error", "❌ Không tìm thấy module LiveVoiceStudioCloner."),
@@ -1466,7 +1466,7 @@ THEME_INIT_JS = """
 def build_ui(
     model: Any = None,
     checkpoint_path: Path | str = DEFAULT_CHECKPOINT,
-    device: str = "cpu",
+    device: str = "cuda" if torch.cuda.is_available() else "cpu",
     threshold: float = 0.0,
     preload: bool = True,
     calibrator: Callable[..., float] | None = platt_calibrator,

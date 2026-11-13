@@ -81,7 +81,7 @@ def transcribe_vietnamese_reference(audio_path: str, device: str = "cpu") -> str
             logits = _ASR_MODEL(**inputs).logits
         pred_ids = torch.argmax(logits, dim=-1)
         transcription = _ASR_PROCESSOR.batch_decode(pred_ids)[0].strip()
-        if len(transcription.split()) >= 2:
+        if len(transcription) > 0:
             return transcription
     except Exception as e:
         print(f"⚠️ [ASR] Nhận diện ASR tham chiếu tự động: {e}")
@@ -208,17 +208,47 @@ class LiveVoiceStudioCloner:
         if model is None:
             return None
 
-        # Tự động trích xuất transcript từ giọng nói người dùng nếu chưa có
-        if not ref_text or len(ref_text.strip()) == 0:
-            ref_text = transcribe_vietnamese_reference(ref_audio_path, device=self.device)
+        # 1. Đọc và tiền xử lý âm thanh mẫu: Cắt bỏ khoảng lặng & Chuẩn hóa RMS
+        clean_ref_path = ref_audio_path
+        tmp_clean_file = None
+        try:
+            import librosa
+            data, sr = sf.read(ref_audio_path)
+            if data.ndim > 1:
+                data = data.mean(axis=-1)
+            # Cắt tỉa khoảng lặng thừa đầu và cuối (tránh làm lệch bộ ước lượng thời lượng)
+            data_trimmed, _ = librosa.effects.trim(data, top_db=25)
+            if len(data_trimmed) >= int(0.5 * sr):
+                data = data_trimmed
+
+            # Chuẩn hóa RMS về mức âm lượng đàm thoại chuẩn ~0.12 để tránh bị OmniVoice hạ âm lượng
+            rms = float(np.sqrt(np.mean(data**2)))
+            if rms > 1e-5:
+                data = data * (0.12 / rms)
+
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tf:
+                tmp_clean_file = tf.name
+                sf.write(tmp_clean_file, data, sr)
+            clean_ref_path = tmp_clean_file
+        except Exception as e:
+            print(f"⚠️ [LiveVoiceStudioCloner] Tiền xử lý ref_audio: {e}")
 
         try:
+            # 2. Tự động trích xuất transcript từ giọng nói người dùng nếu chưa có
+            if not ref_text or len(ref_text.strip()) == 0:
+                ref_text = transcribe_vietnamese_reference(clean_ref_path, device=self.device)
+
+            # 3. Ước lượng thời lượng đích tối ưu cho câu thoại 10 từ (~3.2 - 3.8 giây)
+            target_words = len(self.target_text.split())
+            calc_duration = max(2.5, min(5.0, float(target_words * 0.35)))
+
             audios = model.generate(
                 text=self.target_text,
-                ref_audio=ref_audio_path,
+                ref_audio=clean_ref_path,
                 ref_text=ref_text,
+                duration=calc_duration,
                 language="vi",
-                num_step=16,
+                num_step=32,
                 guidance_scale=2.0,
             )
             audio_tensor = audios[0]
@@ -243,6 +273,12 @@ class LiveVoiceStudioCloner:
         except Exception as e:
             print(f"❌ [LiveVoiceStudioCloner] OmniVoice sinh lỗi: {e}")
             return None
+        finally:
+            if tmp_clean_file and os.path.exists(tmp_clean_file):
+                try:
+                    os.unlink(tmp_clean_file)
+                except Exception:
+                    pass
 
     def stream_cloning_and_detection(
         self,
