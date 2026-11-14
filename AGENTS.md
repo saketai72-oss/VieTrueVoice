@@ -75,11 +75,12 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Chuẩn hoá làm biến dạng từ tiếng Việt ("toàn" $\rightarrow$ "tòan") | Chỉ chuẩn hoá dấu thanh cuối từ (`_fix_tone_token`) |
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
-## Giao Thức Trước Khi Commit (Pre-Commit Protocol)
-1. **Kiểm thử**: Chạy `pytest tests/ -v`. Toàn bộ 301 bài test phải pass 100%.
-2. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
-3. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
-4. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
+## Giao Thức Trước Khi Commit & Push (Pre-Commit & Pre-Push Protocol)
+1. **Kiểm thử CI Bắt buộc**: Chạy `pytest tests/ -v`. Toàn bộ 310 bài test phải pass 100%. BẮT BUỘC kiểm tra các mock module (như `external/VoiceStudio`, `omnivoice`) đảm bảo không phụ thuộc tài nguyên local/git-ignored làm gãy CI trên môi trường GitHub Actions Ubuntu.
+2. **Quy tắc Kiểm thử CI Trước Khi Push (Pre-Push CI Rule)**: TUYỆT ĐỐI không push lên remote khi chưa chạy kiểm thử toàn diện cục bộ; sau khi push, BẮT BUỘC theo dõi kết quả GitHub Actions CI (`gh run list` / `gh run watch`) để xác nhận pipeline xanh 100% (Success). Không bao giờ để commit trên remote bị lỗi đỏ CI.
+3. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
+4. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
+5. **Git**: Thông điệp commit bắt đầu bằng `[AI]`. Chỉ commit khi code thực tế đã chạy thành công. Không push khi người dùng chưa đồng ý.
 
 ## Các Cột Mốc Nghiệm Thu (Milestones)
 - [x] v0.1.0: Khởi tạo khung dự án, requirements, pipeline CI xanh, module tiền xử lý kèm unit tests TDD.

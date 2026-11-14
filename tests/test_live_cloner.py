@@ -134,12 +134,16 @@ def test_clone_omnivoice_pipeline_mocked(tmp_path):
     import soundfile as sf
     sf.write(str(dummy_ref), np.zeros(16000, dtype=np.float32), 16000)
 
-    with patch("omnivoice.utils.audio.save_audio") as mock_save:
-        # Mock save_audio to write a valid 24k wav
-        def fake_save(path, audio, sample_rate):
-            sf.write(path, np.zeros(24000, dtype=np.float32), 24000)
-        mock_save.side_effect = fake_save
+    mock_audio_mod = MagicMock()
+    def fake_save(path, audio, sample_rate):
+        sf.write(path, np.zeros(24000, dtype=np.float32), 24000)
+    mock_audio_mod.save_audio = fake_save
 
+    with patch.dict("sys.modules", {
+        "omnivoice": MagicMock(),
+        "omnivoice.utils": MagicMock(),
+        "omnivoice.utils.audio": mock_audio_mod,
+    }):
         res = cloner.clone_omnivoice(str(dummy_ref), ref_text="câu mẫu")
         assert res is not None
         audio_int16, sr, text_used = res
