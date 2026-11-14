@@ -41,8 +41,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY src/ /app/src/
 COPY scripts/ /app/scripts/
 
-# Create directories for models, Hugging Face cache, and logs with non-root ownership
-RUN mkdir -p /home/appuser/.cache/huggingface /app/out /app/benchmarks && \
+# Create directories for models, Hugging Face cache, data, external, and logs with non-root ownership
+RUN mkdir -p /home/appuser/.cache/huggingface /app/out /app/benchmarks /app/data /app/external && \
     chown -R appuser:appgroup /home/appuser /app
 
 # Switch to non-root user

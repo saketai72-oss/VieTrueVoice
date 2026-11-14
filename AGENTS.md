@@ -1,10 +1,10 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.5.1) — 2026-11-13
+# Bối Cảnh Agent — ViTrueVoice (v0.5.4) — 2026-11-14
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.5.1 (VoiceStudio CFM Dedicated Live Voice Cloning & ASR-Guided Audio Synthesis) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.5.4 (Docker Rebuild & Preset Volume Mount Integration) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [deep-voice-generalization.md](deep-voice-generalization.md)
@@ -98,10 +98,12 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - [x] v0.5.1: VoiceStudio CFM Dedicated Live Voice Cloning & ASR-Guided High-Fidelity Audio Synthesis — Tối ưu hóa chuyên biệt Chế độ 2 Gradio Web UI theo yêu cầu người dùng: (1) Tập trung 100% vào mô hình VoiceStudio CFM (OmniVoice Continuous Flow Matching), loại bỏ hoàn toàn các mô hình trung gian (F5-TTS, VieNeu-TTS); (2) Chẩn đoán và giải quyết triệt để sự cố âm thanh không nghe thấy gì trên file clone mẫu: Phân tích FFT cho thấy năng lượng bị sụp đổ thành sóng ù tần số thấp 50Hz (DC offset) do lệch từ giữa ref_text mặc định và lời nói thực tế của người dùng; (3) Tích hợp tự động nhận diện tiếng nói ASR siêu nhanh (~0.15s) qua Wav2Vec2 tiếng Việt (`nguyenvulebinh/wav2vec2-base-vietnamese-250h`) tạo cặp (ref_audio, ref_text) chuẩn xác 100%, khôi phục hoàn toàn các formant âm sắc tự nhiên (F1, F2, F3); (4) Chuẩn hóa âm học đầu ra: Khử DC offset, Peak-normalization 95% và chuyển đổi sang PCM 16-bit (int16 @ 24kHz) giúp phát to rõ, vang sáng trên mọi trình duyệt web; (5) Tái cấu trúc giao diện 2-Card chuyên nghiệp (1 Bản Người Thật vs 1 Bản Clone VoiceStudio CFM) kèm Ma trận đối soát 2 chiều; (6) 308/308 unit tests pass 100% green.
 - [x] v0.5.2: Voice_Final Proven Pipeline Integration & 1-Click SPK_0004 Preset Verification — Kế thừa trọn vẹn và chuẩn xác 100% pipeline sinh giọng Unseen TTS từ `scripts/generate_omnivoice_unseen_spoofs.py` (vốn đã sinh thành công toàn bộ tập `Voice_Final` không lỗi): (1) Loại bỏ hoàn toàn việc can thiệp thủ công tham số `duration`, để CFM tự động ước lượng độ dài tự nhiên theo nhịp điệu tiếng Việt; (2) Giữ nguyên cấu hình chuẩn: `num_step=16`, `guidance_scale=2.0`, xuất 24kHz qua `save_audio` từ `omnivoice.utils.audio`, resample về 16kHz PCM_16 chuẩn và Peak-Normalize 95%; (3) Tích hợp nút kiểm thử 1-Click: "⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)" cho phép thẩm định tức thì bằng giọng mẫu của đồ án mà không bắt buộc dùng micro; (4) Hiển thị trực quan câu đọc mẫu gợi ý chuẩn Voice_Final (`DEFAULT_REF_PROMPT`) và câu thoại nhân bản đích (`DEFAULT_TARGET_TEXT`); (5) Âm thanh clone sinh ra to rõ, vang, tự nhiên 100% (đã kiểm chứng qua ASR đạt độ chính xác từ vựng 100%); (6) Toàn bộ 309/309 unit tests pass 100% green.
 - [x] v0.5.3: Dither Isolation & 48kHz Microphone Resampling Fix — Giải quyết dứt điểm 2 lỗi cốt lõi trên Chế độ 2 Gradio Web theo kế hoạch `fix-live-clone-forensics.md`: (1) Sửa lỗi bỏ sót APCER trên bản clone VoiceStudio CFM: Thực nghiệm bóc tách chứng minh cờ `apply_dither=True` bị gán cứng trước đó đã bơm nhiễu Gaussian làm mờ các đặc trưng phổ - thời gian vi mô (đảo chiều điểm số từ -24.3 thành +23.4); tách riêng tham số `apply_dither`, khóa cứng `apply_dither=False` cho mọi bản clone sinh nhân tạo, đưa điểm số về **-16.69 đến -40.25** (phát hiện chính xác 100% Deepfake, hiển thị nhãn xanh CHÍNH XÁC); (2) Sửa lỗi mất tiếng / sóng ù 50Hz khi thu âm trực tiếp qua mic: Bổ sung pipeline tiền xử lý chuẩn hóa audio mic tự động chuyển đổi từ tần số WebRTC (44.1k/48k) về đúng 16.000 Hz Mono PCM_16, cắt tỉa khoảng lặng thừa đầu/cuối (`trim top_db=25`) và peak-normalize 95% trước khi chuyển cho VoiceStudio CFM, khôi phục chất lượng âm thanh to rõ (RMS 0.1712); (3) Cập nhật toàn diện ma trận đối soát Gradio Web hiển thị cả 2 bản đều đạt **CHÍNH XÁC 100%**; (4) Bộ kiểm thử tăng lên **310/310 unit tests pass 100% green**.
+- [x] v0.5.4: Docker Rebuild & Preset Volume Mount Integration — Đóng gói và chuẩn hóa toàn diện cụm Docker Compose: (1) Cập nhật `docker-compose.yml` gắn kết volume `./data/bonafide_ref:/app/data/bonafide_ref:ro` và `./external:/app/external:ro` đảm bảo container truy cập đầy đủ mẫu tham chiếu và thư viện VoiceStudio CFM mà không làm phình kích thước image; (2) Chuẩn hóa `Dockerfile` phân quyền non-root `appuser` cho `/app/data` và `/app/external`; (3) Rebuild sạch toàn bộ container (`vitruevoice-api` và `vitruevoice-bot`), kiểm chứng trạng thái healthy qua `/health` và giao diện Web UI qua cổng 8000 đạt HTTP 200 OK; (4) Bộ kiểm thử duy trì **310/310 unit tests pass 100% green**.
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
 - `pytest tests/ -v`: Chạy toàn bộ 310 bài kiểm thử unit test.
+- `docker compose up -d --build`: Rebuild và khởi động toàn bộ cụm dịch vụ ViTrueVoice.
 - `python scripts/build_defense_handbook_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu Toàn diện & Cẩm nang Phản biện Hội đồng sang .docx và .pdf.
 - `python scripts/export_voice_final_dataset.py`: Xuất bản kho dữ liệu nghiệm thu 66.269 files vào `Voice_Final/`.
 - `python scripts/train_dual_seen.py --batch-size 8 --accum-steps 2`: Huấn luyện kép Dual-Seen (F5-TTS + VieNeu-TTS) kèm kiểm định SPK_0001.
@@ -117,4 +119,4 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 
 ---
 
-*v0.5.1 — 2026-11-13*
+*v0.5.4 — 2026-11-14*

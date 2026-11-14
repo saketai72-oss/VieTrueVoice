@@ -20,6 +20,8 @@ services:
     volumes:
       - ./out:/app/out:ro
       - ./benchmarks:/app/benchmarks
+      - ./data/bonafide_ref:/app/data/bonafide_ref:ro
+      - ./external:/app/external:ro
       - hf_cache:/home/appuser/.cache/huggingface
     restart: unless-stopped
     healthcheck:

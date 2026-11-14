@@ -273,6 +273,8 @@ Hệ thống ViTrueVoice được đóng gói container hóa theo chuẩn bảo 
      --name vitruevoice-api \
      -p 8000:8000 \
      -v ${PWD}/out:/app/out:ro \
+     -v ${PWD}/data/bonafide_ref:/app/data/bonafide_ref:ro \
+     -v ${PWD}/external:/app/external:ro \
      vitruevoice:latest
    ```
 3. **Truy cập các giao diện trực tiếp tại cổng 8000**:
