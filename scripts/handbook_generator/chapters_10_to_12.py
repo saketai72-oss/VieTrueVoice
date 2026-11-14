@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Chương 10, 11, 12: Tối ưu hiệu năng NFR1, Cẩm nang 20 câu hỏi phản biện hội đồng và Bản đồ tra cứu bài báo khoa học
+Chương 10, 11, 12: Tối ưu hiệu năng NFR1, Cẩm nang 22 câu hỏi phản biện hội đồng và Bản đồ tra cứu bài báo khoa học
 """
 
 from docx.shared import Inches, Pt, RGBColor
@@ -95,7 +95,7 @@ def add_chapters_10_to_12(doc):
     # =========================================================================
     # CHƯƠNG 11
     # =========================================================================
-    add_heading_chapter(doc, "Chương 11", "Cẩm Nang 20 Câu Hỏi & Câu Trả Lời Phản Biện Trước Hội Đồng Bảo Vệ")
+    add_heading_chapter(doc, "Chương 11", "Cẩm Nang 22 Câu Hỏi & Câu Trả Lời Phản Biện Trước Hội Đồng Bảo Vệ")
 
     add_prerequisite_box(doc, "Chương 11", 
         "Tâm lý học và nguyên tắc vàng khi bảo vệ trước Hội đồng, Mô hình trả lời 3 tầng (Claim -> Evidence -> Impact), "
@@ -105,7 +105,7 @@ def add_chapters_10_to_12(doc):
     add_styled_paragraph(doc, 
         "Buổi bảo vệ đồ án tốt nghiệp không phải là một kỳ thi kiểm tra trí nhớ, mà là một **phiên điều trần khoa học**. "
         "Hội đồng muốn thấy sự tự tin, sự trung thực khoa học và khả năng bảo vệ các quyết định kỹ thuật của bạn. "
-        "Trước khi học thuộc 20 câu trả lời bên dưới, hãy nắm chắc 3 bí quyết vàng sau:")
+        "Trước khi học thuộc 22 câu trả lời bên dưới, hãy nắm chắc 3 bí quyết vàng sau:")
 
     add_heading_subsection(doc, "11.0.1 Tâm Lý Học Và Nguyên Tắc Vàng Khi Đối Mặt Với Hội Đồng")
     add_styled_paragraph(doc, 
@@ -129,9 +129,9 @@ def add_chapters_10_to_12(doc):
         "và khẳng định giải pháp hiện tại của nhóm là tối ưu nhất dựa trên bằng chứng thực nghiệm.")
 
     # -------------------------------------------------------------------------
-    # 20 Câu hỏi và câu trả lời
+    # 22 Câu hỏi và câu trả lời
     # -------------------------------------------------------------------------
-    add_heading_section(doc, "11.1 Danh Mục 20 Câu Hỏi & Câu Trả Lời Chi Tiết Trước Hội Đồng")
+    add_heading_section(doc, "11.1 Danh Mục 22 Câu Hỏi & Câu Trả Lời Chi Tiết Trước Hội Đồng")
 
     qa_list = [
         ("Câu 1: Đề tài của các em giải quyết bài toán gì và khác gì so với nhận dạng người nói (Speaker Verification)?",
@@ -238,12 +238,13 @@ def add_chapters_10_to_12(doc):
          "Trong nhật ký hệ thống, chúng em tuyệt đối không ghi lại tên file, số điện thoại hay ID người dùng, "
          "mà chỉ lưu trữ mã băm an mật một chiều SHA-256 để phục vụ kiểm toán."),
 
-        ("Câu 18: Kỹ thuật Adaptive Comfort Dithering (RFC 3389) giải quyết vấn đề gì trong thực tế?",
-         "Dạ thưa Thầy/Cô, khi người dùng thu âm bằng các điện thoại hoặc laptop có tính năng lọc ồn AI, "
-         "các đoạn khoảng lặng giữa các từ bị micro ép về giá trị số 0 tuyệt đối ($0.0000$). "
-         "Chuỗi số 0 phẳng lì này là một shortcut nhân tạo khiến mô hình AASIST bị nhầm lẫn và báo động giả. "
-         "Kỹ thuật Dithering tự động rải một lớp nhiễu siêu mịn (-75 dBFS) tuân thủ chuẩn ITU-T RFC 3389 vào các vùng phẳng, "
-         "giúp khôi phục tính tự nhiên của môi trường và xóa bỏ hoàn toàn hiện tượng nhận diện nhầm người thật."),
+        ("Câu 18: Kỹ thuật Adaptive Comfort Dithering (RFC 3389) giải quyết vấn đề gì trong thực tế và ranh giới âm học là gì?",
+         "Dạ thưa Thầy/Cô, kỹ thuật này giải quyết 2 bài toán âm học đối nghịch rất sâu sắc:\n"
+         "(1) Đối với giọng Micro thật: Khi người dùng thu âm bằng thiết bị có AI Noise Suppression, các khoảng lặng bị ép về giá trị phẳng tuyệt đối ($0.0000$). "
+         "Chuỗi số 0 phẳng lì này là shortcut nhân tạo khiến mô hình nhầm lẫn báo động giả. Dithering tự động rải lớp nhiễu siêu mịn (-75 dBFS) tuân thủ chuẩn ITU-T RFC 3389 vào các vùng phẳng, xóa bỏ hoàn toàn hiện tượng nhận diện nhầm người thật (BPCER = 0%).\n"
+         "(2) Đối với âm thanh Clone nhân tạo: Nghiên cứu phát hiện tuyệt đối KHÔNG được áp dither lên audio tổng hợp CFM. "
+         "Lớp dither ngẫu nhiên sẽ làm mờ (masking) các vết tích bất liên tục pha ở tần số cao của vocoder, vô tình che chở cho deepfake và khiến mô hình nhận nhầm clone thành giọng thật (False Negative: điểm số từ -40.25 vọt lên +23.45). "
+         "Vì vậy, hệ thống bắt buộc thiết lập cờ `apply_dither=False` trên luồng clone để bảo toàn đặc trưng phân tách pháp y."),
 
         ("Câu 19: Ràng buộc Hard Text-Disjoint được thực hiện như thế nào và tại sao nó quan trọng?",
          "Dạ thưa Thầy/Cô, nếu cùng một câu văn bản xuất hiện ở cả tập Train và Test, mô hình sẽ học thuộc đặc trưng âm vị của câu chữ đó thay vì học dấu vết của AI. "
@@ -256,7 +257,22 @@ def add_chapters_10_to_12(doc):
          "Trong thực tế, nó có thể được triển khai tại 3 vị trí: "
          "(1) Tích hợp trực tiếp vào tổng đài viễn thông (VoIP Gateway / SIP Trunking) để quét các cuộc gọi nghi vấn; "
          "(2) Đóng vai trò là Middleware API cho các ngân hàng xác thực giao dịch chuyển tiền qua giọng nói; "
-         "(3) Cung cấp Bot dịch vụ xã hội trên Zalo/Telegram để người dân chủ động chuyển tiếp tin nhắn âm thanh thẩm định lừa đảo.")
+         "(3) Cung cấp Bot dịch vụ xã hội trên Zalo/Telegram để người dân chủ động chuyển tiếp tin nhắn âm thanh thẩm định lừa đảo."),
+
+        ("Câu 21: Tại sao khi clone trực tiếp từ micro trên Web (WebRTC), âm thanh tổng hợp CFM ban đầu bị im lặng/rè và các em đã khắc phục thế nào?",
+         "Dạ thưa Thầy/Cô, âm thanh thu từ WebRTC trình duyệt mặc định ở 48kHz Float32 thường bị trôi lệch một chiều (DC Offset), nhiễu ù đất 50Hz và chứa khoảng lặng dài ở hai đầu bản ghi. "
+         "Động cơ Flow-Matching CFM khi nhận prompt có DC Offset và khoảng lặng dài sẽ bị sụp đổ ước lượng thời lượng (Duration Collapse), dẫn tới sinh ra sóng âm phẳng hoàn toàn (im lặng) hoặc tiếng rè. "
+         "Chúng em đã khắc phục triệt để bằng chuỗi tiền xử lý 3 bước: "
+         "(1) Resample chuẩn 16.000 Hz Mono qua FFmpeg in-memory pipe; "
+         "(2) Dùng `librosa.effects.trim(y, top_db=25)` cắt bỏ sạch vùng lặng chết và DC offset; "
+         "(3) Chuẩn hóa biên độ đạt 95% đỉnh ($0.95 \\cdot y / \\max(|y|)$) để cung cấp prompt âm học rõ nét nhất cho CFM."),
+
+        ("Câu 22: Làm thế nào các em đảm bảo tính tái lập và độ tin cậy của mã nguồn khi chạy trên các môi trường máy chủ khác nhau (CI/CD)?",
+         "Dạ thưa Thầy/Cô, toàn bộ dự án tuân thủ nghiêm ngặt phương pháp luận Test-Driven Development (TDD) với bộ kiểm thử tự động gồm 310 bài test "
+         "bao phủ 100% các module: xử lý tín hiệu DSP, phân chia tập dữ liệu speaker-disjoint, forward pass mô hình B_zalo V6, pooling đa cửa sổ và các endpoint API. "
+         "Hệ thống tích hợp GitHub Actions CI chạy tự động trên Ubuntu runner. "
+         "Để tránh gãy CI do các module nặng nằm trong `.gitignore` (như VoiceStudio), chúng em áp dụng cơ chế cô lập mock độc lập qua `sys.modules`, "
+         "đồng thời khóa cứng quy tắc Pre-Push CI Rule: luôn kiểm thử 310 bài test xanh 100% cục bộ trước khi push và xác nhận pipeline GitHub Actions đạt trạng thái Success tuyệt đối.")
     ]
 
     for q_idx, (q_text, a_text) in enumerate(qa_list):

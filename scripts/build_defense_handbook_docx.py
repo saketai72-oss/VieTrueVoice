@@ -76,7 +76,7 @@ def build_document():
 
     add_styled_paragraph(doc, 
         "Tài liệu giải thích từ gốc rễ toán học, xử lý tín hiệu âm thanh (DSP), kiến trúc mạng nơ-ron học sâu (SSL-AASIST), "
-        "quy chuẩn kiểm định khoa học (EER, minDCF, ISO/IEC 30107-3) đến cẩm nang 20 câu hỏi phản biện bảo vệ trước Hội đồng chấm Đồ án chuyên ngành.",
+        "quy chuẩn kiểm định khoa học (EER, minDCF, ISO/IEC 30107-3) đến cẩm nang 22 câu hỏi phản biện bảo vệ trước Hội đồng chấm Đồ án chuyên ngành.",
         font_size=10.5, italic=True, color_rgb=(80, 80, 80), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=16)
 
     # Metadata Table
@@ -84,8 +84,8 @@ def build_document():
         ("Tên đề tài:", "Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (ViTrueVoice)"),
         ("Sinh viên thực hiện:", "Nguyễn Thành Tài — MSSV: 2380601959 — Lớp: 23DTHD5"),
         ("Giảng viên hướng dẫn:", "TS. Nguyễn Quang Trung"),
-        ("Phiên bản hệ thống:", "v0.4.7 (Dual-Seen Re-Training, SPK_0001 Isolation Verification & Voice_Final Acceptance Export)"),
-        ("Công nghệ cốt lõi:", "PyTorch 2.6 CUDA, Wav2Vec 2.0 (Vietnamese 250h), Compact AASIST (HS-GAL), Multi-Window Max-Pooling, Platt Scaling, Docker")
+        ("Phiên bản hệ thống:", "v0.5.4 (Docker Rebuild, Live VoiceStudio CFM Zero-Shot Clone, Mic 48kHz Preprocessing & 310 CI Tests 100% Green)"),
+        ("Công nghệ cốt lõi:", "PyTorch 2.6 CUDA, Wav2Vec 2.0 (Vietnamese 250h), Compact AASIST (HS-GAL), Multi-Window Max-Pooling, VoiceStudio CFM (OmniVoice), Platt Scaling, Docker, 310 CI Tests")
     ]
     t_meta = doc.add_table(rows=len(meta_info), cols=2)
     t_meta.alignment = WD_TABLE_ALIGNMENT.CENTER

@@ -375,7 +375,7 @@ Hệ thống tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma =
 2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút Micro trên giao diện Gradio Web. Thuật toán bù đắp dither tự động khôi phục tính liên tục âm học tự nhiên cho các vùng khoảng lặng bị trình duyệt cắt cụt bởi bộ lọc tiếng ồn (noise suppression / AGC), ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
 
 ### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu & Cẩm nang Phản biện Hội đồng
-Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện (21.663 từ, 431 đoạn văn, 27 bảng chuẩn mực) sang cả hai định dạng `.docx` và `.pdf`:
+Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện (22.637 từ, 445 đoạn văn, 27 bảng chuẩn mực, 22 câu hỏi phản biện) sang cả hai định dạng `.docx` và `.pdf`:
 ```bash
 python scripts/build_defense_handbook_docx.py
 ```

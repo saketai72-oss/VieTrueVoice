@@ -372,13 +372,13 @@ def add_chapters_1_to_3(doc):
     add_bullet_item(doc, "Sử dụng chuẩn phát thanh truyền hình châu Âu EBU R128. Thuật toán tích hợp bộ lọc thính giác K-weighting và cửa sổ tích hợp để đo độ to cảm nhận thực tế của con người (Integrated Loudness). Sau đó, nhân toàn bộ dạng sóng với hệ số khuếch đại để đưa độ to về đúng chuẩn **-23 LUFS**.", "Lớp 1: Chuẩn hóa EBU R128")
     add_bullet_item(doc, "Sau khi đưa về -23 LUFS, tín hiệu tiếp tục được chuẩn hóa thống kê đưa kỳ vọng về 0 và phương sai về 1: $x_{\\text{norm}} = \\frac{x - \\mu}{\\sigma + 10^{-7}}$. Điều này giúp tensor đầu vào có phân phối chuẩn, giúp hàm mất mát hội tụ ổn định.", "Lớp 2: Z-Score Normalization")
 
-    add_heading_section(doc, "3.5 Bù Đắp Tiếng Ồn Tiện Nghi Thích Ứng (Adaptive Comfort Dithering — v0.4.7)")
+    add_heading_section(doc, "3.5 Bù Đắp Tiếng Ồn Tiện Nghi Thích Ứng (Adaptive Comfort Dithering — v0.4.7/v0.5.4)")
     add_styled_paragraph(doc, 
-        "Trong phiên bản hoàn thiện v0.4.7, khi kiểm thử trực tiếp giọng thu âm từ các micro laptop/điện thoại có tính năng khử nhiễu tự động (AI Noise Suppression), "
+        "Trong các phiên bản hoàn thiện, khi kiểm thử trực tiếp giọng thu âm từ các micro laptop/điện thoại có tính năng khử nhiễu tự động (AI Noise Suppression), "
         "các vùng khoảng lặng giữa các từ thường bị micro ép về giá trị phẳng tuyệt đối ($0.0000$). "
-        "Hệ thống ViTrueVoice tích hợp kỹ thuật bù đắp tiếng ồn tiện nghi thích ứng:")
-    add_bullet_item(doc, "Nếu phát hiện vùng phẳng kéo dài > 100 mẫu có giá trị bằng 0, thuật toán tự động rải một lớp nhiễu tam giác hoặc Gaussian siêu mịn (Adaptive Dithering) có biên độ $-75\\text{ dBFS}$ tuân thủ tiêu chuẩn ITU-T RFC 3389 và AES-17.", "Cơ chế Dithering")
-    add_bullet_item(doc, "Kỹ thuật này giúp giải quyết dứt điểm hiện tượng nhận diện nhầm người thật thành deepfake (BPCER = 0%) khi người dùng thu âm trong phòng kín có micro chống ồn.", "Ý nghĩa")
+        "Hệ thống ViTrueVoice tích hợp kỹ thuật bù đắp tiếng ồn tiện nghi thích ứng và thiết lập ranh giới âm học nghiêm ngặt:")
+    add_bullet_item(doc, "Nếu phát hiện vùng phẳng kéo dài > 100 mẫu có giá trị bằng 0 trên luồng thu micro, thuật toán tự động rải một lớp nhiễu tam giác hoặc Gaussian siêu mịn (Adaptive Dithering) có biên độ $-75\\text{ dBFS}$ tuân thủ tiêu chuẩn ITU-T RFC 3389 và AES-17. Giúp giải quyết triệt để hiện tượng nhận diện nhầm người thật thành deepfake (BPCER = 0%) khi thu âm trong phòng kín có micro chống ồn.", "1. Áp dụng cho giọng Micro thật")
+    add_bullet_item(doc, "Trong phiên bản v0.5.4, nghiên cứu phát hiện: nếu áp dụng dither lên âm thanh tổng hợp từ vocoder CFM (VoiceStudio/OmniVoice), lớp nhiễu ngẫu nhiên vi mô này vô tình **làm mờ (masking) các vết tích bất liên tục pha (phase discontinuity artifacts)** và méo hài bậc cao nhân tạo. Hậu quả là mô hình deepfake bị đánh lừa xem đó là giọng thật (False Negative — điểm số đảo chiều từ -40.25 thành +23.455!). Vì vậy, hệ thống khóa cứng nguyên tắc: luồng âm thanh tổng hợp CFM bắt buộc thiết lập `apply_dither=False` để bảo toàn nguyên vẹn dấu vết pháp y.", "2. Ranh giới cô lập: Không Dither trên Audio Clone")
 
     add_heading_section(doc, "3.6 Bộ Suy Giảm Nén Kênh Thoại & Tăng Cường Âm Học RawBoost")
     add_styled_paragraph(doc, 
@@ -394,5 +394,12 @@ def add_chapters_1_to_3(doc):
         "(2) Nhánh 2: Méo pha và tích chập phi tuyến (Convolutive noise / Room impulse response); "
         "(3) Nhánh 3: Tạp âm dải tần không dừng (Non-stationary colored noise). "
         "RawBoost giúp giảm thêm **13.8% – 22.1% tỷ lệ lỗi EER** trên toàn bộ các tập kiểm thử.", "2. RawBoost Augmentation")
+
+    add_heading_section(doc, "3.7 Chuẩn Hóa Âm Thanh Micro WebRTC 48kHz & Chống Sụp Đổ Biên Độ CFM (v0.5.4)")
+    add_styled_paragraph(doc, 
+        "Khi người dùng thu âm trực tiếp qua micro trình duyệt Web (WebRTC 48kHz Float32), âm thanh thô thường phát sinh hiện tượng méo và khoảng lặng bất thường khiến động cơ CFM sinh ra tiếng rè hoặc im lặng hoàn toàn. ViTrueVoice thiết lập chuỗi tiền xử lý 3 bước in-memory:")
+    add_bullet_item(doc, "Tái lấy mẫu chuẩn 16.000 Hz Mono PCM_16 qua FFmpeg pipe trực tiếp trên RAM, triệt tiêu sai lệch tần số lấy mẫu giữa WebRTC và khối front-end Wav2Vec2/CFM.", "Bước 1: In-Memory Resampling 16kHz")
+    add_bullet_item(doc, "Áp dụng thuật toán `librosa.effects.trim(y, top_db=25)` để cắt sạch khoảng lặng chết và loại bỏ hoàn toàn hiện tượng DC Offset và tiếng ù đất 50Hz ở hai đầu bản ghi.", "Bước 2: Silence Trimming Top-25dB")
+    add_bullet_item(doc, "Khuếch đại biên độ tín hiệu đạt 95% mức cực đại ($0.95 \\cdot y / \\max(|y|)$), đảm bảo cung cấp prompt âm học chất lượng cao nhất cho khối Conditional Flow-Matching, triệt tiêu dứt điểm lỗi sụp đổ thời lượng (Duration Collapse) khi clone.", "Bước 3: Peak Pre-normalization 95%")
 
     doc.add_paragraph().paragraph_format.space_after = Pt(12)

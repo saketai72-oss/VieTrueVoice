@@ -299,8 +299,15 @@ def add_chapters_7_to_9(doc):
     add_bullet_item(doc, "Sử dụng EC2 GPU Instance `g4dn.xlarge` (NVIDIA T4 GPU 16GB VRAM) hoặc máy chủ cục bộ RTX 3050. "
         "Hình ảnh Docker được xây dựng trên nền tảng `nvidia/cuda:12.4.1-runtime-ubuntu22.04`.", "Môi trường Chạy")
     add_bullet_item(doc, "Quản trị viên chỉ cần thực thi lệnh duy nhất: `docker-compose up -d`. "
-        "Cả hai container `vitruevoice-api` và `vitruevoice-bot` sẽ tự động khởi tạo, kiểm tra tính toàn vẹn của mô hình qua Health Check endpoint "
-        "và sẵn sàng phục vụ người dùng mà không cần cấu hình thủ công.", "Khởi Chạy 1-Lệnh")
+        "Cả hai container `vitruevoice-api` và `vitruevoice-bot` sẽ tự động khởi tạo, kiểm tra tính toàn vẹn của mô hình qua Health Check endpoint, "
+        "tự động liên kết các Preset Volume Mounts (`data/bonafide_ref`) và sẵn sàng phục vụ người dùng mà không cần cấu hình thủ công.", "Khởi Chạy 1-Lệnh")
+
+    add_heading_section(doc, "9.4 Mô Phỏng Tấn Công Giả Mạo Trực Tiếp: Live Voice Cloning Quad-Forensics & CFM (v0.5.4)")
+    add_styled_paragraph(doc, 
+        "Để chứng minh tính năng #3 chạy đầu-cuối và phục vụ kịch bản kiểm thử thẩm định trực quan, ViTrueVoice tích hợp phân hệ Live Voice Cloning trực tiếp trên giao diện Web Gradio:")
+    add_bullet_item(doc, "Tập trung duy nhất vào VoiceStudio CFM (OmniVoice) làm động cơ sinh mẫu giả Zero-Shot Unseen thực thụ từ audio người dùng. Dự án loại bỏ hoàn toàn các mô hình TTS preset không có năng lực clone từ audio mẫu (như Kokoro-TTS) nhằm bảo toàn tính liêm chính khoa học.", "1. Động cơ Zero-Shot CFM độc quyền")
+    add_bullet_item(doc, "Người dùng chọn mẫu giọng thật (Preset SPK hoặc thu âm qua Micro) -> Chuỗi tiền xử lý (Resample 16kHz, Silence trimming `top_db=25`, Peak norm 95%) -> Khối Conditional Flow-Matching sinh dạng sóng clone -> Luồng audio clone được chuyển thẳng in-memory vào AI Core với cờ `apply_dither=False` -> Hiển thị kết quả thẩm định song song với mẫu giọng thật.", "2. Luồng Quad-Forensics Pipeline")
+    add_bullet_item(doc, "Hệ thống Docker Compose v0.5.4 tích hợp sẵn Volume Mounts cho các tệp âm thanh tham chiếu mẫu, cho phép sinh viên và hội đồng kiểm thử tính năng Live Clone 1-click ngay trên môi trường Docker mà không cần cấu hình phức tạp.", "3. Docker Volume Mounts")
 
     add_callout_box(doc,
         "Khi hội đồng hỏi: 'Hệ thống của các em có nguy cơ làm lộ thông tin bí mật đời tư hay giọng nói của người dân không?', bạn trả lời: **'Dạ thưa Thầy/Cô, hệ thống ViTrueVoice được thiết kế tuân thủ nghiêm ngặt Luật Bảo vệ Dữ liệu Cá nhân 91/2025/QH15 theo nguyên tắc Zero-Persistence. Luồng âm thanh được xử lý in-memory trực tiếp trên RAM và giải phóng ngay lập tức sau 66ms suy luận. Toàn bộ nhật ký kiểm toán chỉ lưu mã băm an mật một chiều SHA-256, hoàn toàn không lưu trữ bất kỳ file âm thanh thô hay định danh cá nhân nào trên máy chủ, triệt tiêu 100% nguy cơ rò rỉ dữ liệu sinh trắc học.'**",
