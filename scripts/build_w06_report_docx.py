@@ -13,7 +13,7 @@ from pathlib import Path
 import docx
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_COLOR_INDEX
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
@@ -55,6 +55,25 @@ def set_table_borders(table, color="D3D3D3", sz="4", val="single"):
     )
     tblPr.append(borders)
 
+def add_runs_with_formatting(paragraph, text, font_size=10.5, default_bold=False, default_italic=False, color_rgb=(0,0,0)):
+    """Parse text with **bold** and ==yellow highlight== markdown."""
+    hl_parts = text.split("==")
+    for h_idx, hl_segment in enumerate(hl_parts):
+        is_highlighted = (h_idx % 2 == 1)
+        b_parts = hl_segment.split("**")
+        for b_idx, b_segment in enumerate(b_parts):
+            if not b_segment:
+                continue
+            is_bold = (b_idx % 2 == 1) or default_bold
+            run = paragraph.add_run(b_segment)
+            run.font.name = "Times New Roman"
+            run.font.size = Pt(font_size)
+            run.bold = is_bold
+            run.font.italic = default_italic
+            run.font.color.rgb = RGBColor(*color_rgb)
+            if is_highlighted:
+                run.font.highlight_color = WD_COLOR_INDEX.YELLOW
+
 def add_styled_paragraph(doc, text="", font_size=10.5, bold=False, italic=False, color_rgb=(0,0,0), align=WD_ALIGN_PARAGRAPH.LEFT, space_before=0, space_after=5, line_spacing=1.15):
     p = doc.add_paragraph()
     p.alignment = align
@@ -63,16 +82,7 @@ def add_styled_paragraph(doc, text="", font_size=10.5, bold=False, italic=False,
     p.paragraph_format.line_spacing = line_spacing
     
     if text:
-        parts = text.split("**")
-        for i, part in enumerate(parts):
-            if not part:
-                continue
-            run = p.add_run(part)
-            run.font.name = "Times New Roman"
-            run.font.size = Pt(font_size)
-            run.bold = (i % 2 == 1) or bold
-            run.font.italic = italic
-            run.font.color.rgb = RGBColor(*color_rgb)
+        add_runs_with_formatting(p, text, font_size=font_size, default_bold=bold, default_italic=italic, color_rgb=color_rgb)
     return p
 
 def add_heading_1(doc, text):
@@ -126,7 +136,7 @@ def main():
         ("GVHD", "TS. Nguyễn Quang Trung"),
         ("Tên đề tài", "Phát triển ViTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát"),
         ("Link repo GitHub (bắt buộc dán LMS)", "https://github.com/saketai72-oss/VieTrueVoice"),
-        ("Link Web Demo & Bot (bắt buộc dán LMS)", "Web Forensics: http://localhost:8000 · Telegram Bot: https://t.me/vitruevoice_bot (@vitruevoice_bot)"),
+        ("Link Web Demo & Bot (bắt buộc dán LMS)", "Web Forensics: http://localhost:8000 · Telegram Bot: https://t.me/vitruevoice_bot (@vitruevoice_bot)\n==[TÙY CHỌN BỔ SUNG: Nếu có link video demo Google Drive hoặc YouTube không công khai, dán bổ sung tại đây (nếu không có, link Web và Bot ở trên đã đầy đủ 100%)]=="),
         ("Link Commit W06 chính thức", "https://github.com/saketai72-oss/VieTrueVoice/commit/56a5241 (Chuỗi commit [AI] nâng cấp Iconify Solar, Multi-window Max-Pooling, Dither isolation, Docker rebuild)"),
         ("Hạn nộp & Báo cáo", "Hạn nộp: trước 12:00 thứ Sáu 20/11/2026 · Buổi báo cáo & vấn đáp: 13:30–16:30 thứ Sáu 20/11/2026"),
         ("Tên file nộp", "DACN_2380601959_NguyenThanhTai_W06.pdf (xuất trực tiếp từ file Word này)"),
@@ -143,11 +153,7 @@ def main():
         r0 = p0.add_run(col0); r0.font.name = "Times New Roman"; r0.font.size = Pt(9); r0.font.bold = True; r0.font.color.rgb = RGBColor(31, 73, 125)
         
         p1 = row.cells[1].paragraphs[0]; p1.paragraph_format.line_spacing = 1.15; p1.paragraph_format.space_after = Pt(0)
-        r1 = p1.add_run(col1); r1.font.name = "Times New Roman"; r1.font.size = Pt(9)
-        if "https://" in col1 or "http://" in col1:
-            r1.font.color.rgb = RGBColor(0, 32, 96); r1.font.underline = True
-        if row_idx in (4, 5):
-            r1.font.bold = True
+        add_runs_with_formatting(p1, col1, font_size=9, default_bold=(row_idx in (4, 5)))
                 
         row.cells[0].width = Inches(2.2)
         row.cells[1].width = Inches(4.8)
@@ -160,7 +166,7 @@ def main():
     add_heading_1(doc, "1. BỔ SUNG TUẦN TRƯỚC (TỪ BUỔI BÁO CÁO W05) & PHẢN HỒI GVHD")
     add_styled_paragraph(doc, "Rà soát đối chiếu các nội dung góp ý từ buổi vấn đáp xác minh Checkpoint 5 (13/11/2026) và tiến độ xử lý hoàn thiện trong W06:")
     
-    t_supp = doc.add_table(rows=4, cols=3)
+    t_supp = doc.add_table(rows=5, cols=3)
     set_table_borders(t_supp, color="CCCCCC")
     t_supp.alignment = WD_TABLE_ALIGNMENT.CENTER
     
@@ -181,19 +187,23 @@ def main():
          "Mục 4.1 (Hình 3.2, Hình 3.3)"),
         ("3. Soạn thảo bản nháp Chương 3 (Thiết kế hệ thống 3–6 trang)", 
          "Đã hoàn thành bản nháp Chương 3 đầy đủ 3 mục trọng tâm theo đúng yêu cầu đề bài: (3.1) Phân tích và thiết kế hệ thống (Use case, C4 Level 2 Container Diagram, Bảng thành phần kiến trúc), (3.2) Cài đặt các tính năng (In-memory Zero-Persistence, Multi-window Max-Pooling, Web/Bot, Live VoiceStudio CFM Cloning), (3.3) Kiểm thử hệ thống (TDD unit tests, E2E Playwright, Ma trận Unseen TTS, Độ trễ NFR-1). Đánh số hình/bảng chuẩn theo chương.",
-         "Mục 5 (Toàn văn Chương 3 nháp)")
+         "Mục 5 (Toàn văn Chương 3 nháp)"),
+        ("==4. [TÙY CHỌN BỔ SUNG]: Góp ý riêng khác của GVHD tại buổi W05 (nếu có)==",
+         "==[TÙY CHỌN]: Nếu trong buổi vấn đáp W05 (13/11), Thầy Trung có nhắc nhở riêng bạn điều gì khác ngoài 3 mục kỹ thuật này, bạn có thể gõ thêm vào đây. Nếu không có dặn thêm, 3 mục kỹ thuật trên đã đầy đủ 100%.==",
+         "Phần 1")
     ]
     
     for r_idx, row_data in enumerate(supp_data):
         row = t_supp.rows[r_idx + 1]
         bg = "FFFFFF" if r_idx % 2 == 0 else "F9FAFC"
+        if r_idx == 3:
+            bg = "FFFDE7"  # Nền vàng nhạt cho mục tùy chọn
         for c_idx, val in enumerate(row_data):
             cell = row.cells[c_idx]
             set_cell_background(cell, bg)
             set_cell_margins(cell, top=50, bottom=50, left=70, right=70)
             p = cell.paragraphs[0]; p.paragraph_format.line_spacing = 1.15; p.paragraph_format.space_after = Pt(0)
-            r = p.add_run(val); r.font.name = "Times New Roman"; r.font.size = Pt(8.5)
-            if c_idx == 0: r.font.bold = True
+            add_runs_with_formatting(p, val, font_size=8.5, default_bold=(c_idx == 0))
         row.cells[0].width = Inches(2.2); row.cells[1].width = Inches(3.6); row.cells[2].width = Inches(1.4)
 
     add_styled_paragraph(doc, "", space_after=6)
@@ -231,7 +241,8 @@ def main():
          "• Ảnh minh chứng kiến trúc C4 Container Diagram: C4.png (Hình 3.1)\n"
          "• Ảnh minh chứng Docker port 8000 Healthy & Web Forensics: live_docker_port8000.png (Hình 3.2)\n"
          "• Ảnh minh chứng Telegram Bot (@vitruevoice_bot) tương tác: telegram_bot_real_screenshot.png (Hình 3.3)\n"
-         "• Ảnh minh chứng Phòng Lab Live VoiceStudio CFM Cloning 2 chiều: live_clone_verified.png (Hình 3.4)"),
+         "• Ảnh minh chứng Phòng Lab Live VoiceStudio CFM Cloning 2 chiều: live_clone_verified.png (Hình 3.4)\n"
+         "==• [TÙY CHỌN BỔ SUNG]: Link video quay màn hình chạy demo (nếu có): https://...=="),
         ("Khó khăn\n(Điều đang vướng và cách em đã thử)",
          "1. Vướng mắc về hiện tượng False Negative trên bản clone VoiceStudio CFM: Khi kiểm thử Chế độ 2, bản clone bị phân loại nhầm thành Bona Fide (+23.45 điểm). Sinh viên đã dùng kỹ thuật bóc tách spectrogram và phát hiện cờ apply_dither=True trước đó bơm nhiễu Gaussian đã làm mờ các đặc trưng vi mô của CFM. Cách giải quyết: Tách riêng tham số apply_dither, khóa cứng apply_dither=False cho mẫu tổng hợp, đưa điểm số về đúng -16.69 (Giả mạo 99.7%).\n"
          "2. Vướng mắc khi thu âm mic trình duyệt WebRTC: Trình duyệt gửi audio 48kHz stereo không khớp với CFM (yêu cầu 16kHz mono), dẫn đến trường diffusion sụp đổ thành sóng ù DC offset 50Hz. Cách giải quyết: Tích hợp module resample 16kHz Mono PCM_16, cắt khoảng lặng P20 và peak-normalize 95% trước khi chuyển cho CFM."),
@@ -257,7 +268,7 @@ def main():
         r0 = p0.add_run(col0); r0.font.name = "Times New Roman"; r0.font.size = Pt(8.5); r0.font.bold = True
         
         p1 = row.cells[1].paragraphs[0]; p1.paragraph_format.line_spacing = 1.15; p1.paragraph_format.space_after = Pt(0)
-        r1 = p1.add_run(col1); r1.font.name = "Times New Roman"; r1.font.size = Pt(8.5)
+        add_runs_with_formatting(p1, col1, font_size=8.5)
         
         row.cells[0].width = Inches(2.2); row.cells[1].width = Inches(4.8)
 
