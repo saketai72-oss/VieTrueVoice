@@ -1,0 +1,59 @@
+{
+  "total_cases": 30,
+  "accuracy_pct": 96.67,
+  "threshold": 0.0,
+  "scoring_method": "PyTorch inference with Multi-window Max-Pooling + Human Spot-check 10 recordings",
+  "groups": {
+    "group_1_bona_fide_difficult": {
+      "count": 10,
+      "passed": 10,
+      "pass_rate_pct": 100.0,
+      "cases": [
+        {"id": "BF-01", "desc": "Giọng nam cao đọc tự nhiên qua điện thoại yên tĩnh", "speaker": "SPK_0004", "codec": "clean", "ground_truth": "bonafide", "score": 25.56, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-02", "desc": "Giọng nữ thanh điệu tự nhiên qua Zalo AAC 76k", "speaker": "SPK_0005", "codec": "aac_zalo_76k", "ground_truth": "bonafide", "score": 24.39, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-03", "desc": "Giọng nam đọc ngắt quãng qua Zalo Opus 24k", "speaker": "SPK_0006", "codec": "opus_zalo_24k", "ground_truth": "bonafide", "score": 21.15, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-04", "desc": "Giọng người lớn tuổi nói chậm rãi qua AMR-NB", "speaker": "SPK_0007", "codec": "amrnb", "ground_truth": "bonafide", "score": 18.92, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-05", "desc": "Giọng nữ thì thầm trong phòng kín", "speaker": "SPK_0004", "codec": "clean", "ground_truth": "bonafide", "score": 14.82, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-06", "desc": "Giọng nam nói trong quán cà phê có tiếng nhạc nhẹ", "speaker": "SPK_0005", "codec": "g711", "ground_truth": "bonafide", "score": 17.65, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-07", "desc": "Giọng nam miền Trung nói qua Zalo AAC", "speaker": "SPK_0003", "codec": "aac_zalo_76k", "ground_truth": "bonafide", "score": 16.20, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-08", "desc": "Đoạn thoại ngắn 2.5s được nối lặp Repeat Padding", "speaker": "SPK_0006", "codec": "clean", "ground_truth": "bonafide", "score": 22.04, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-09", "desc": "Giọng đọc nhanh qua mạng di động 4G", "speaker": "SPK_0007", "codec": "opus_zalo_24k", "ground_truth": "bonafide", "score": 19.45, "prediction": "bonafide", "status": "PASS"},
+        {"id": "BF-10", "desc": "Giọng nữ miền Bắc ngữ điệu tự nhiên qua mic laptop", "speaker": "SPK_0004", "codec": "clean", "ground_truth": "bonafide", "score": 26.11, "prediction": "bonafide", "status": "PASS"}
+      ]
+    },
+    "group_2_seen_tts_spoof": {
+      "count": 10,
+      "passed": 10,
+      "pass_rate_pct": 100.0,
+      "cases": [
+        {"id": "ST-01", "desc": "F5-TTS giả giọng con cái giục chuyển tiền gấp", "engine": "F5-TTS", "codec": "clean", "ground_truth": "spoof", "score": -35.97, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-02", "desc": "F5-TTS giả nhân viên ngân hàng qua Zalo AAC 76k", "engine": "F5-TTS", "codec": "aac_zalo_76k", "ground_truth": "spoof", "score": -35.49, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-03", "desc": "F5-TTS nén qua kênh thoại AMR-NB", "engine": "F5-TTS", "codec": "amrnb", "ground_truth": "spoof", "score": -34.48, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-04", "desc": "F5-TTS nén qua kênh thoại cố định G.711", "engine": "F5-TTS", "codec": "g711", "ground_truth": "spoof", "score": -34.81, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-05", "desc": "F5-TTS nén qua Zalo Opus 24k", "engine": "F5-TTS", "codec": "opus_zalo_24k", "ground_truth": "spoof", "score": -34.98, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-06", "desc": "VieNeu-TTS v3 giả mạo công an điều tra qua điện thoại", "engine": "VieNeu-TTS", "codec": "clean", "ground_truth": "spoof", "score": -29.31, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-07", "desc": "VieNeu-TTS v3 nén qua Zalo AAC 76k", "engine": "VieNeu-TTS", "codec": "aac_zalo_76k", "ground_truth": "spoof", "score": -27.69, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-08", "desc": "VieNeu-TTS v3 nén qua AMR-NB", "engine": "VieNeu-TTS", "codec": "amrnb", "ground_truth": "spoof", "score": -27.27, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-09", "desc": "VieNeu-TTS v3 nén qua G.711 A-law", "engine": "VieNeu-TTS", "codec": "g711", "ground_truth": "spoof", "score": -29.66, "prediction": "spoof", "status": "PASS"},
+        {"id": "ST-10", "desc": "VieNeu-TTS v3 nén qua Zalo Opus 24k", "engine": "VieNeu-TTS", "codec": "opus_zalo_24k", "ground_truth": "spoof", "score": -29.20, "prediction": "spoof", "status": "PASS"}
+      ]
+    },
+    "group_3_real_development_failures": {
+      "count": 10,
+      "passed": 9,
+      "pass_rate_pct": 90.0,
+      "cases": [
+        {"id": "EV-01", "desc": "SPK_0001 (giọng nam siêu trầm F0 95Hz) ban đầu sụp điểm âm", "type": "Bona / Clean", "ground_truth": "bonafide", "score": 10.05, "prediction": "bonafide", "status": "PASS (Đã sửa V7)"},
+        {"id": "EV-02", "desc": "SPK_0001 đọc ngắt quãng, nghẹn giọng qua điện thoại", "type": "Bona / AMR-NB", "ground_truth": "bonafide", "score": 7.54, "prediction": "bonafide", "status": "PASS (Đã sửa V7)"},
+        {"id": "EV-03", "desc": "F5-TTS hạ cao độ pitch-shift -6 semitones mạo danh con cái", "type": "F5 / Clean", "ground_truth": "spoof", "score": -18.42, "prediction": "spoof", "status": "PASS (Đã sửa Pitch Aug)"},
+        {"id": "EV-04", "desc": "VieNeu-TTS hạ pitch -4st giục chuyển tiền trong quán ăn ồn", "type": "VieNeu / G.711", "ground_truth": "spoof", "score": -12.35, "prediction": "spoof", "status": "PASS (Đã sửa AM-Softmax)"},
+        {"id": "EV-05", "desc": "VoiceStudio CFM có dither gán cứng ban đầu lọt lưới", "type": "CFM / AAC 76k", "ground_truth": "spoof", "score": -16.69, "prediction": "spoof", "status": "PASS (Đã sửa Dither Iso)"},
+        {"id": "EV-06", "desc": "Thu âm mic WebRTC 48kHz dính ù 50Hz ban đầu mất tiếng", "type": "Mic WebRTC", "ground_truth": "bonafide", "score": 15.26, "prediction": "bonafide", "status": "PASS (Đã sửa Resample 16k)"},
+        {"id": "EV-07", "desc": "SPK_0007 thoại cực ngắn 1.8s ban đầu méo phổ AASIST", "type": "Bona / Opus 24k", "ground_truth": "bonafide", "score": 18.92, "prediction": "bonafide", "status": "PASS (Đã sửa Repeat Pad)"},
+        {"id": "EV-08", "desc": "SPK_0004_03 dài 3.84s chỉ có 1 cửa sổ trượt", "type": "Bona / AAC 76k", "ground_truth": "bonafide", "score": 14.30, "prediction": "bonafide", "status": "PASS (Đã sửa Dynamic Hop)"},
+        {"id": "EV-09", "desc": "Zalo AAC 76kbps nén MDCT làm phẳng hài vi mô vocoder", "type": "CFM / AAC 76k", "ground_truth": "spoof", "score": -8.45, "prediction": "spoof", "status": "PASS (Đã sửa Max-Pool)"},
+        {"id": "EV-10", "desc": "Kokoro-Vietnamese hạ pitch -6st kết hợp chèn tạp âm mưa lớn", "type": "Kokoro / Clean", "ground_truth": "spoof", "score": 2.14, "prediction": "bonafide", "status": "FAIL (Lỗi ngoại lai)"}
+      ]
+    }
+  }
+}
