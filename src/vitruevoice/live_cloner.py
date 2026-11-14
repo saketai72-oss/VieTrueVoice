@@ -96,9 +96,13 @@ def evaluate_audio_sample(
     device: str = "cpu",
     threshold: float = 0.0,
     calibrator: Any = platt_calibrator,
+    apply_dither: bool = False,
 ) -> Dict[str, Any]:
     """
     Thẩm định 1 mẫu âm thanh qua detector ViTrueVoice (Multi-window Max-Pooling + Platt Scaling).
+    - apply_dither: Chỉ bật khi âm thanh thu từ microphone WebRTC bị squelch noise-gating.
+                    Tuyệt đối tắt (False) khi thẩm định âm thanh nhân bản (Clone / Spoof) để
+                    tránh nhiễu che lấp các đặc trưng âm học vi mô.
     """
     if audio.ndim > 1:
         audio = audio.mean(axis=-1)
@@ -116,13 +120,13 @@ def evaluate_audio_sample(
     raw_bytes = audio.tobytes()
     sha256_hash = hashlib.sha256(raw_bytes).hexdigest()
 
-    # Multi-window sliding window extraction with comfort dithering
+    # Multi-window sliding window extraction with optional comfort dithering
     windows_batch = extract_window_batch(
         audio,
         win=TARGET_SAMPLE_COUNT,
         hop=16000,
         max_windows=5,
-        apply_dither=True,
+        apply_dither=apply_dither,
     ).to(device)
 
     t0 = time.perf_counter()
@@ -264,18 +268,46 @@ class LiveVoiceStudioCloner:
         user_sr: int,
         detector_model: Any,
         threshold: float = 0.0,
+        is_live_mic: bool = False,
+        custom_ref_text: str = "",
     ) -> Generator[Dict[str, Any], None, None]:
         """
         Generator 2 bước thời gian thực (Progressive Real-Time Streaming):
         - Yield 0: Thẩm định xong bản Người Thật (Bona Fide) ngay lập tức (~66ms).
                    Bản VoiceStudio CFM ở trạng thái Loading.
         - Yield 1: Clone xong qua VoiceStudio CFM (~3.5s), chuẩn hóa âm thanh to rõ,
-                   thẩm định Deepfake Spoof và xuất bản Ma trận đối soát 2 chiều.
+                   thẩm định Deepfake Spoof (không dither) và xuất bản Ma trận đối soát 2 chiều.
         """
-        # Lưu file tạm an toàn trong khối try...finally
+        import librosa
+
+        # 1. Tiền xử lý chuẩn hóa reference audio: Chuyển đổi về 16.000 Hz Mono PCM_16 sạch,
+        # cắt tỉa khoảng lặng thừa và peak-normalize để VoiceStudio CFM căn chỉnh chuẩn 100%.
+        ref_audio_16k = user_audio.copy()
+        if ref_audio_16k.ndim > 1:
+            ref_audio_16k = ref_audio_16k.mean(axis=-1)
+        if np.issubdtype(ref_audio_16k.dtype, np.integer):
+            max_v = float(np.iinfo(ref_audio_16k.dtype).max)
+            ref_audio_16k = ref_audio_16k.astype(np.float32) / max_v
+        else:
+            ref_audio_16k = ref_audio_16k.astype(np.float32)
+
+        if user_sr != TARGET_SAMPLE_RATE:
+            ref_audio_16k = librosa.resample(ref_audio_16k, orig_sr=user_sr, target_sr=TARGET_SAMPLE_RATE)
+
+        # Cắt tỉa khoảng lặng thừa đầu và cuối nếu có
+        ref_trimmed, _ = librosa.effects.trim(ref_audio_16k, top_db=25)
+        if len(ref_trimmed) >= int(0.5 * TARGET_SAMPLE_RATE):
+            ref_audio_16k = ref_trimmed
+
+        # Peak normalization 95%
+        max_abs = float(np.max(np.abs(ref_audio_16k)))
+        if max_abs > 1e-6:
+            ref_audio_16k = (ref_audio_16k / max_abs) * 0.95
+
+        # Lưu file tạm chuẩn 16kHz mono an toàn trong khối try...finally
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_ref:
             tmp_ref_path = tmp_ref.name
-            sf.write(tmp_ref_path, user_audio, user_sr)
+            sf.write(tmp_ref_path, ref_audio_16k, TARGET_SAMPLE_RATE, subtype="PCM_16")
 
         try:
             # -------------------------------------------------------------
@@ -287,13 +319,14 @@ class LiveVoiceStudioCloner:
                 detector_model=detector_model,
                 device=self.device,
                 threshold=threshold,
+                apply_dither=is_live_mic,
             )
 
             state = {
                 "step": 0,
                 "target_text": self.target_text,
                 "bonafide": bona_res,
-                "omnivoice": {"status": "loading", "msg": "Đang nhận dạng ASR & khởi tạo VoiceStudio CFM..."},
+                "omnivoice": {"status": "loading", "msg": "Đang xử lý âm thanh & khởi tạo VoiceStudio CFM..."},
                 "completed": False,
             }
             yield state
@@ -301,7 +334,7 @@ class LiveVoiceStudioCloner:
             # -------------------------------------------------------------
             # BƯỚC 1: Clone qua VoiceStudio OmniVoice CFM & Thẩm định
             # -------------------------------------------------------------
-            omni_out = self.clone_omnivoice(tmp_ref_path)
+            omni_out = self.clone_omnivoice(tmp_ref_path, ref_text=custom_ref_text)
             self._cleanup_gpu()
 
             if omni_out is not None:
@@ -314,6 +347,7 @@ class LiveVoiceStudioCloner:
                     detector_model=detector_model,
                     device=self.device,
                     threshold=threshold,
+                    apply_dither=False,  # Tuyệt đối False: Không bơm dither vào audio sinh nhân tạo
                 )
                 state["omnivoice"] = {
                     "status": "done",

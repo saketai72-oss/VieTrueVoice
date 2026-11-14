@@ -1301,9 +1301,14 @@ def make_live_quad_cloning_fn(
 
         bona_audio_out = (sr, data)
         omni_audio_out = None
+        is_live_mic = bool(sr > 16000)
 
         for state in cloner.stream_cloning_and_detection(
-            data, sr, detector_model=loaded_model, threshold=threshold
+            data,
+            sr,
+            detector_model=loaded_model,
+            threshold=threshold,
+            is_live_mic=is_live_mic,
         ):
             step = state.get("step", 0)
             completed = state.get("completed", False)
@@ -1661,11 +1666,9 @@ def build_ui(
                         )
 
                         def _load_preset_spk0004():
-                            import soundfile as sf
-                            preset_file = _ROOT / "data" / "bonafide_ref" / "SPK_0004" / "SPK_0004_01.wav"
+                            preset_file = ROOT / "data" / "bonafide_ref" / "SPK_0004" / "SPK_0004_01.wav"
                             if preset_file.exists():
-                                data, sr = sf.read(str(preset_file))
-                                return (sr, data)
+                                return str(preset_file)
                             return None
 
                         load_spk4_btn = gr.Button(

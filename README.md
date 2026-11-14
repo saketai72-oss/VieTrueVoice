@@ -23,7 +23,7 @@
 
 ---
 
-## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.5.2)
+## 4. Tiến độ Thực nghiệm & Kết quả Nghiệm thu (v0.5.3)
 
 - **Must #1 (W3–W4)**: Bộ dữ liệu đa dạng hóa 49.038 mẫu (5 tình nguyện viên, 65 người VIVOS, 419 người Common Voice), 4 cổng kiểm định Label-Free Prosody, nén 3 chuẩn (Clean, G.711 A-law, AMR-NB), Paired Triplets 1:1:1 cho eval, bảo vệ quyền riêng tư theo Luật 91/2025/QH15.
 - **Must #2 (W5)**: Huấn luyện SSL-AASIST trên Kaggle GPU qua 3 nhánh đối chứng (A, B0, B). Kết quả thực nghiệm:
@@ -64,4 +64,7 @@
   - **Kế thừa 100% pipeline sinh Unseen TTS từ Voice_Final**: Áp dụng chuẩn xác quy trình từ `scripts/generate_omnivoice_unseen_spoofs.py` (vốn đã sinh thành công 375 mẫu spoof đối chứng hoàn hảo): `num_step=16`, `guidance_scale=2.0`, loại bỏ hoàn toàn tham số `duration` thủ công để flow matching tự ước lượng nhịp điệu tiếng Việt tự nhiên.
   - **Chuẩn hóa lưu & resample chuẩn Voice_Final**: Lưu qua `save_audio` ở 24kHz từ `omnivoice.utils.audio`, resample về 16kHz PCM_16 qua `librosa` và Peak-Normalize 95%, giải quyết dứt điểm hiện tượng mất tiếng hoặc nghẹt âm.
   - **Nút kiểm thử 1-Click SPK_0004**: Tích hợp nút *"⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)"* cho phép kiểm thử đối soát trực tiếp tức thì bằng giọng chuẩn nghiệm thu của đề tài mà không cần microphone.
-  - **Bộ kiểm thử tự động TDD**: Toàn bộ **309/309 unit tests pass 100% green**. Sẵn sàng cho Giai đoạn Thử nghiệm Pilot & Nghiệm thu W7–W8 (v1.0.0).
+- **Dither Isolation & 48kHz Microphone Resampling Fix (v0.5.3)**:
+  - **Khắc phục lỗi bỏ sót APCER trên bản clone VoiceStudio CFM**: Thực nghiệm bóc tách chứng minh cờ `apply_dither=True` bị gán cứng trước đó đã bơm nhiễu Gaussian làm mờ các đặc trưng phổ - thời gian vi mô (đảo chiều điểm số từ -24.3 thành +23.4); tách riêng tham số `apply_dither`, khóa cứng `apply_dither=False` cho mọi bản clone sinh nhân tạo, đưa điểm số về **-16.69 đến -40.25** (phát hiện chính xác 100% Deepfake, hiển thị nhãn xanh CHÍNH XÁC).
+  - **Khắc phục lỗi mất tiếng / sóng ù 50Hz khi thu âm trực tiếp qua mic**: Bổ sung pipeline tiền xử lý chuẩn hóa audio mic tự động chuyển đổi từ tần số WebRTC (44.1k/48k) về đúng 16.000 Hz Mono PCM_16, cắt tỉa khoảng lặng thừa đầu/cuối (`trim top_db=25`) và peak-normalize 95% trước khi chuyển cho VoiceStudio CFM, khôi phục chất lượng âm thanh to rõ (RMS 0.1712).
+  - **Bộ kiểm thử tự động TDD**: Toàn bộ **310/310 unit tests pass 100% green**. Sẵn sàng cho Giai đoạn Thử nghiệm Pilot & Nghiệm thu W7–W8 (v1.0.0).

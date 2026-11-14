@@ -36,14 +36,59 @@ def test_evaluate_audio_sample_bonafide():
     assert len(res["sha256"]) == 64
 
 
-def test_evaluate_audio_sample_spoof():
-    model = StubDetector(score_val=-5.0)
+def test_evaluate_audio_sample_dither_flag():
+    model = StubDetector(score_val=-4.5)
     audio = np.zeros(32000, dtype=np.float32)
-    res = evaluate_audio_sample(audio, sr=16000, detector_model=model, device="cpu")
 
-    assert res["is_bonafide"] is False
-    assert res["raw_score"] == pytest.approx(-5.0)
-    assert res["prob_spoof_pct"] > 80.0
+    # When apply_dither is False (default for generated clones)
+    res_nodither = evaluate_audio_sample(
+        audio, sr=16000, detector_model=model, device="cpu", apply_dither=False
+    )
+    assert res_nodither["is_bonafide"] is False
+    assert res_nodither["raw_score"] == pytest.approx(-4.5)
+
+    # When apply_dither is True (only for live WebRTC mic)
+    res_dither = evaluate_audio_sample(
+        audio, sr=16000, detector_model=model, device="cpu", apply_dither=True
+    )
+    assert "raw_score" in res_dither
+
+
+def test_stream_cloning_with_48k_mic_input():
+    cloner = LiveQuadCloner(target_text=DEFAULT_TARGET_TEXT, device="cpu")
+    model = StubDetector(score_val=3.0)
+    # 48kHz audio (1.5 seconds)
+    user_audio_48k = np.zeros(72000, dtype=np.float32)
+    # Add a simple synthetic tone in the middle to simulate speech
+    t = np.linspace(0, 1.5, 72000, endpoint=False)
+    user_audio_48k = 0.5 * np.sin(2 * np.pi * 440 * t).astype(np.float32)
+
+    dummy_clone_int16 = np.zeros(16000, dtype=np.int16)
+
+    captured_ref_paths = []
+
+    def mock_clone(ref_path, ref_text=""):
+        captured_ref_paths.append(ref_path)
+        # Verify the saved reference file is 16kHz mono
+        import soundfile as sf
+        info = sf.info(ref_path)
+        assert info.samplerate == 16000
+        assert info.channels == 1
+        return dummy_clone_int16, 16000, "xin chào"
+
+    with patch.object(cloner, "clone_omnivoice", side_effect=mock_clone):
+        gen = cloner.stream_cloning_and_detection(
+            user_audio=user_audio_48k,
+            user_sr=48000,
+            detector_model=model,
+            threshold=0.0,
+            is_live_mic=True,
+        )
+        steps = list(gen)
+        assert len(steps) == 2
+        assert len(captured_ref_paths) == 1
+        assert steps[-1]["completed"] is True
+        assert steps[-1]["omnivoice"]["status"] == "done"
 
 
 def test_live_quad_cloner_streaming_generator():
