@@ -18,6 +18,8 @@
 | `docs/STANDARDS_api-benchmarks.md` | Schema API FastAPI, giao diện Gradio, Bot Telegram, cấu trúc log ẩn danh SHA-256, eval_metrics.csv | Thuật toán đồ thị và mô hình | Khi làm việc với API & benchmark độ trễ |
 | `docs/REF_developer-reference.md` | Bảng quy ước đặt tên, bảng tra cứu lệnh, hằng số tham chiếu | Mã nguồn triển khai chi tiết | Khi tra cứu quy ước và tham số |
 | `docs/BENCHMARK_seen_vs_unseen_degradation.md` | Báo cáo đo đạc thực nghiệm mức độ suy giảm: Seen TTS (F5, VieNeu) vs. Unseen TTS (Kokoro, OmniVoice) | Chi tiết huấn luyện mô hình | Khi đánh giá năng lực tổng quát hóa TTS và kênh nén |
+| `docs/STANDARDS_pilot-ux-evaluation.md` | Tiêu chuẩn đánh giá trải nghiệm Pilot, khảo sát Likert 5 mức độ, 3 góp ý người dùng thật & biên bản nghiệm thu W07/W08 | Logic mô hình học sâu | Khi làm việc với thử nghiệm pilot, UX feedback |
+| `docs/ARCH_aws-cost-and-runbook.md` | Dự toán chi phí đám mây AWS (100/1k/10k user), Sổ tay xử lý sự cố Runbook 1 trang, công thức hoàn thành W08 | Cấu trúc dữ liệu âm thanh | Khi làm việc với hạ tầng AWS, chi phí, runbook |
 | `docs/REF_template.md` | Bản mẫu chuẩn để tạo tệp tài liệu mới | Quy tắc nghiệp vụ cụ thể | Khi tạo thêm tệp doc mới |
 | `docs/REFACTOR_TODO.md` | Kế hoạch và các mục tiêu tái cấu trúc hiện tại | Quy tắc chuẩn mực chính thức | Khi lập kế hoạch refactor |
 
@@ -35,6 +37,8 @@ Agent chỉ nạp các tệp liên quan đến tác vụ hiện tại — không
 | Thay đổi Tính năng / Thuật toán (Mô hình & Huấn luyện) | `AGENTS.md` + `docs/GUIDE_developer.md` + `docs/LOGIC_models.md` |
 | Thay đổi Kiến trúc / Luồng dữ liệu / Bảo mật | `AGENTS.md` + `docs/ARCH_technical-specs.md` |
 | Thay đổi Giao diện / API / Định dạng Benchmark | `AGENTS.md` + `docs/STANDARDS_api-benchmarks.md` |
+| Thử nghiệm Pilot & Đánh giá UX (W07/W08) | `AGENTS.md` + `docs/STANDARDS_pilot-ux-evaluation.md` |
+| Quản lý Chi phí AWS & Sổ tay Sự cố Runbook (W08) | `AGENTS.md` + `docs/ARCH_aws-cost-and-runbook.md` |
 | Tra cứu quy ước & lệnh CLI | `docs/REF_developer-reference.md` |
 | Lập kế hoạch tái cấu trúc | `docs/REFACTOR_TODO.md` |
 | Quản trị hệ thống tài liệu | `docs/ARCH_documentation-governance.md` |

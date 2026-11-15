@@ -398,5 +398,15 @@ Truy cập trình duyệt tại `http://localhost:7860`:
    - VoiceStudio CFM thực thi đúng 100% pipeline gốc từ tập `Voice_Final` (`num_step=16`, `guidance_scale=2.0`), sinh câu thoại đích 10 từ thuần Việt (`"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."`), xuất 16kHz PCM to rõ, vang, tự nhiên 100%.
    - Thẩm định bản clone qua ViTrueVoice và hiển thị kết quả phân định Thật / Giả mạo cùng Bảng đối soát 2 chiều.
 
+### 8.7 Xuất bản Bộ Tài liệu Thử nghiệm Pilot & Dự toán Chi phí AWS Runbook (W07 & W08)
+Tự động biên dịch Phiếu khảo sát UX Pilot, Biên bản nghiệm thu có chữ ký, Bảng dự toán chi phí đám mây AWS (100 / 1.000 / 10.000 users) và Sổ tay xử lý sự cố (Troubleshooting Runbook) 1 trang sang cả hai định dạng `.docx` và `.pdf`:
+```bash
+python scripts/build_pilot_and_w08_docs.py
+```
+Tài liệu được xuất bản và đồng bộ tự động tại:
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.docx` & `.pdf`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\Bang_Chi_Phi_AWS_Va_So_Tay_Su_Co_Runbook.docx` & `.pdf`
+- Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
+
 
 

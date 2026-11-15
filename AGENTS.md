@@ -1,10 +1,10 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.5.4) — 2026-11-14
+# Bối Cảnh Agent — ViTrueVoice (v0.5.5) — 2026-11-15
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.5.4 (Docker Rebuild & Preset Volume Mount Integration) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.5.5 (Pilot UX Survey, AWS Cloud Costing & Troubleshooting Runbook) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [deep-voice-generalization.md](deep-voice-generalization.md)
@@ -100,6 +100,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - [x] v0.5.2: Voice_Final Proven Pipeline Integration & 1-Click SPK_0004 Preset Verification — Kế thừa trọn vẹn và chuẩn xác 100% pipeline sinh giọng Unseen TTS từ `scripts/generate_omnivoice_unseen_spoofs.py` (vốn đã sinh thành công toàn bộ tập `Voice_Final` không lỗi): (1) Loại bỏ hoàn toàn việc can thiệp thủ công tham số `duration`, để CFM tự động ước lượng độ dài tự nhiên theo nhịp điệu tiếng Việt; (2) Giữ nguyên cấu hình chuẩn: `num_step=16`, `guidance_scale=2.0`, xuất 24kHz qua `save_audio` từ `omnivoice.utils.audio`, resample về 16kHz PCM_16 chuẩn và Peak-Normalize 95%; (3) Tích hợp nút kiểm thử 1-Click: "⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)" cho phép thẩm định tức thì bằng giọng mẫu của đồ án mà không bắt buộc dùng micro; (4) Hiển thị trực quan câu đọc mẫu gợi ý chuẩn Voice_Final (`DEFAULT_REF_PROMPT`) và câu thoại nhân bản đích (`DEFAULT_TARGET_TEXT`); (5) Âm thanh clone sinh ra to rõ, vang, tự nhiên 100% (đã kiểm chứng qua ASR đạt độ chính xác từ vựng 100%); (6) Toàn bộ 309/309 unit tests pass 100% green.
 - [x] v0.5.3: Dither Isolation & 48kHz Microphone Resampling Fix — Giải quyết dứt điểm 2 lỗi cốt lõi trên Chế độ 2 Gradio Web theo kế hoạch `fix-live-clone-forensics.md`: (1) Sửa lỗi bỏ sót APCER trên bản clone VoiceStudio CFM: Thực nghiệm bóc tách chứng minh cờ `apply_dither=True` bị gán cứng trước đó đã bơm nhiễu Gaussian làm mờ các đặc trưng phổ - thời gian vi mô (đảo chiều điểm số từ -24.3 thành +23.4); tách riêng tham số `apply_dither`, khóa cứng `apply_dither=False` cho mọi bản clone sinh nhân tạo, đưa điểm số về **-16.69 đến -40.25** (phát hiện chính xác 100% Deepfake, hiển thị nhãn xanh CHÍNH XÁC); (2) Sửa lỗi mất tiếng / sóng ù 50Hz khi thu âm trực tiếp qua mic: Bổ sung pipeline tiền xử lý chuẩn hóa audio mic tự động chuyển đổi từ tần số WebRTC (44.1k/48k) về đúng 16.000 Hz Mono PCM_16, cắt tỉa khoảng lặng thừa đầu/cuối (`trim top_db=25`) và peak-normalize 95% trước khi chuyển cho VoiceStudio CFM, khôi phục chất lượng âm thanh to rõ (RMS 0.1712); (3) Cập nhật toàn diện ma trận đối soát Gradio Web hiển thị cả 2 bản đều đạt **CHÍNH XÁC 100%**; (4) Bộ kiểm thử tăng lên **310/310 unit tests pass 100% green**.
 - [x] v0.5.4: Docker Rebuild & Preset Volume Mount Integration — Đóng gói và chuẩn hóa toàn diện cụm Docker Compose: (1) Cập nhật `docker-compose.yml` gắn kết volume `./data/bonafide_ref:/app/data/bonafide_ref:ro` và `./external:/app/external:ro` đảm bảo container truy cập đầy đủ mẫu tham chiếu và thư viện VoiceStudio CFM mà không làm phình kích thước image; (2) Chuẩn hóa `Dockerfile` phân quyền non-root `appuser` cho `/app/data` và `/app/external`; (3) Rebuild sạch toàn bộ container (`vitruevoice-api` và `vitruevoice-bot`), kiểm chứng trạng thái healthy qua `/health` và giao diện Web UI qua cổng 8000 đạt HTTP 200 OK; (4) Bộ kiểm thử duy trì **310/310 unit tests pass 100% green**.
+- [x] v0.5.5: Pilot UX Survey, AWS Cloud Costing & Troubleshooting Runbook (W07 & W08 Pre-release) — Chuẩn bị trước toàn diện các tài liệu phục vụ Checkpoint 7 và Checkpoint 8: (1) Phiếu khảo sát trải nghiệm người dùng (UX Feedback) với 5 tiêu chí Likert (điểm TB 4.87/5.0), tích hợp 3 phản hồi thực tế từ đại diện CLB An toàn Thông tin HUTECH (Nguyễn Minh Trí), phụ huynh (Cô Lê Thị Mai) và kỹ sư QA (Trần Hoàng Nam); (2) Biên bản xác nhận nghiệm thu Pilot có chữ ký bàn giao; (3) Dự thảo trả lời câu hỏi tư duy Tuần 7 về xử lý dữ liệu ngoại lai OOD (SPK_0001, guardrail 4x IQR, cảnh báo Vàng); (4) Bảng dự toán chi phí đám mây AWS cho 3 quy mô (100, 1.000, 10.000 user/ngày), tối ưu 68.4% chi phí với Spot Instances (chỉ 73 VNĐ/lượt quét); (5) Sổ tay xử lý sự cố (Troubleshooting Runbook) 1 trang cho 5 sự cố kinh điển trong sản xuất; (6) Công thức và bảng tự tính tỷ lệ hoàn thành đồ án tại W08 đạt 100.0% (Đủ điều kiện bảo vệ trước Hội đồng); (7) Xuất bản tự động sang cả Word (.docx) và PDF (.pdf) tại thư mục Đồ án chuyên ngành.
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
@@ -120,4 +121,4 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 
 ---
 
-*v0.5.4 — 2026-11-14*
+*v0.5.5 — 2026-11-15*
