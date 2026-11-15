@@ -22,6 +22,7 @@
 | `docs/ARCH_aws-cost-and-runbook.md` | Dự toán chi phí đám mây AWS (100/1k/10k user), Sổ tay xử lý sự cố Runbook 1 trang, công thức hoàn thành W08 | Cấu trúc dữ liệu âm thanh | Khi làm việc với hạ tầng AWS, chi phí, runbook |
 | `docs/REF_template.md` | Bản mẫu chuẩn để tạo tệp tài liệu mới | Quy tắc nghiệp vụ cụ thể | Khi tạo thêm tệp doc mới |
 | `docs/REFACTOR_TODO.md` | Kế hoạch và các mục tiêu tái cấu trúc hiện tại | Quy tắc chuẩn mực chính thức | Khi lập kế hoạch refactor |
+| `docs/archive_plans/` | Lưu trữ lịch sử các kế hoạch sprint và tài liệu kỹ thuật cũ (de_cuong, walkthrough, plans) | Tài liệu kỹ thuật hiện hành | Khi tra cứu lịch sử phát triển |
 
 ---
 
