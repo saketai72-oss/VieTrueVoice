@@ -162,7 +162,7 @@ def export_to_pdf_word_com(docx_path, pdf_path_1, pdf_path_2):
         print(f"[WARN] Word COM export failed: {e}")
 
 # =============================================================================
-# DOCUMENT 1: BIÊN BẢN NGHIỆM THU & KHẢO SÁT PILOT
+# DOCUMENT 1: BIÊN BẢN NGHIỆM THU & KHẢO SÁT PILOT (BIỂU MẪU ĐỂ TRỐNG)
 # =============================================================================
 def build_pilot_document():
     doc = Document()
@@ -176,17 +176,18 @@ def build_pilot_document():
     add_styled_paragraph(doc, "KHOA CÔNG NGHỆ THÔNG TIN — CHUYÊN NGÀNH MÁY HỌC VÀ ỨNG DỤNG", font_size=10, bold=True, color_rgb=(90, 90, 90), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=10)
     
     add_styled_paragraph(doc, "PHIẾU KHẢO SÁT TRẢI NGHIỆM NGƯỜI DÙNG (UX FEEDBACK)\n& BIÊN BẢN NGHIỆM THU PILOT HỆ THỐNG VITRUEVOICE", font_size=13.5, bold=True, color_rgb=(192, 0, 0), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
-    add_styled_paragraph(doc, "(Minh chứng tiêu chuẩn Đạt cho Checkpoint Tuần 7 và Tuần 8 — Học kỳ 1 Năm học 2026–2027)", font_size=9.5, italic=True, color_rgb=(80, 80, 80), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
+    add_styled_paragraph(doc, "(Biểu mẫu chuẩn phục vụ triển khai thử nghiệm thực tế — Checkpoint Tuần 7 và Tuần 8 — HK1 2026–2027)", font_size=9.5, italic=True, color_rgb=(80, 80, 80), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
 
     # Info table
-    t_info = doc.add_table(rows=4, cols=2)
+    t_info = doc.add_table(rows=5, cols=2)
     set_table_borders(t_info, color="CCCCCC")
     t_info.alignment = WD_TABLE_ALIGNMENT.CENTER
     info_data = [
         ("Tên đề tài:", "Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (ViTrueVoice)"),
         ("Sinh viên thực hiện:", "Nguyễn Thành Tài — MSSV: 2380601959 — Lớp: 23DTHD5"),
         ("Giảng viên hướng dẫn:", "TS. Nguyễn Quang Trung"),
-        ("Đơn vị phối hợp Pilot:", "Câu lạc bộ An toàn Thông tin HUTECH (HISC) & Nhóm Phụ huynh người cao tuổi tại TP.HCM")
+        ("Đơn vị phối hợp thử nghiệm:", "...................................................................................................................................................."),
+        ("Thời gian thực hiện:", "Từ ngày ..... / ..... / 2026 đến ngày ..... / ..... / 2026")
     ]
     for r_idx, (k, v) in enumerate(info_data):
         row = t_info.rows[r_idx]
@@ -199,135 +200,138 @@ def build_pilot_document():
 
     add_styled_paragraph(doc, "", space_after=4)
 
-    # Section 1: Pilot Overview
-    add_heading_1(doc, "1. BỐI CẢNH THỰC HIỆN PILOT & ĐỐI TƯỢNG THỬ NGHIỆM")
+    # Section 1: Pilot Overview (Blank Form)
+    add_heading_1(doc, "1. DANH SÁCH NGƯỜI DÙNG THAM GIA THỬ NGHIỆM PILOT")
     add_styled_paragraph(doc, 
-        "Căn cứ theo Đề cương chi tiết đồ án CMP436 (Yêu cầu Checkpoint W07 & W08), nhóm nghiên cứu đã triển khai "
-        "thử nghiệm thực tế sản phẩm ViTrueVoice (gồm Giao diện Web Forensics Lab UI và Telegram Bot @vitruevoice_bot) "
-        "tới 2 nhóm đối tượng người dùng đại diện trong thời gian từ ngày 15/11 đến 22/11/2026:")
+        "Căn cứ yêu cầu Checkpoint W07 & W08, hệ thống ViTrueVoice được chuyển giao thử nghiệm thực tế "
+        "tới các nhóm người dùng đại diện (gồm chuyên gia kỹ thuật ATTT, người lớn tuổi và kiểm thử viên độc lập). "
+        "Thông tin người tham gia thử nghiệm được ghi nhận bên dưới:")
     
     t_user = doc.add_table(rows=4, cols=4)
     set_table_borders(t_user, color="CCCCCC")
     t_user.alignment = WD_TABLE_ALIGNMENT.CENTER
-    headers = ["Nhóm đối tượng", "Đại diện tham gia", "Môi trường kiểm thử", "Mục tiêu thẩm định"]
+    headers = ["STT", "Họ và tên người tham gia", "Đơn vị / Vai trò", "Thiết bị & Kênh kiểm thử"]
     for i, h in enumerate(headers):
         cell = t_user.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
         set_cell_margins(cell, top=50, bottom=50, left=60, right=60)
         format_cell_text(cell, h, bold=True, font_size=9, color_rgb=(255, 255, 255), align=WD_ALIGN_PARAGRAPH.CENTER)
 
-    users_data = [
-        ("Kỹ thuật & ATTT\n(Pilot Chủ lực)", "Nguyễn Minh Trí\n(Chủ nhiệm CLB ATTT - HISC)", "Telegram Bot + FastAPI\n(Môi trường Linux/Desktop)", "Kiểm thử các kịch bản tấn công clone tinh vi (CFM, Pitch drop -6st, nén Codec Zalo AAC/Opus)"),
-        ("Người dùng phổ thông\n(Người lớn tuổi)", "Cô Lê Thị Mai\n(52 tuổi, Cán bộ hưu trí Q. Bình Thạnh)", "Web UI Mobile (Gradio)\n(Smartphone iOS / 4G)", "Trải nghiệm khi nhận tin nhắn thoại mạo danh con cháu xin tiền chuyển khoản; tính trực quan của cảnh báo"),
-        ("Kiểm thử chất lượng\n(QA độc lập)", "Trần Hoàng Nam\n(Kỹ sư kiểm thử phần mềm)", "Docker Compose Localhost\n(Micro laptop ThinkPad & AirPods)", "Kiểm thử đa thiết bị thu âm, kiểm chứng cơ chế Dithering chống báo nhầm (BPCER = 0%)")
+    blank_users = [
+        ("Người dùng 1", "........................................................", "........................................................", "........................................................"),
+        ("Người dùng 2", "........................................................", "........................................................", "........................................................"),
+        ("Người dùng 3", "........................................................", "........................................................", "........................................................")
     ]
-    for r_idx, row_vals in enumerate(users_data):
+    for r_idx, row_vals in enumerate(blank_users):
         row = t_user.rows[r_idx + 1]
         bg = "FFFFFF" if r_idx % 2 == 0 else "F9FBFC"
         for c_idx, val in enumerate(row_vals):
             cell = row.cells[c_idx]
             set_cell_background(cell, bg)
             set_cell_margins(cell, top=50, bottom=50, left=60, right=60)
-            format_cell_text(cell, val, bold=(c_idx == 1), font_size=8.5)
-        row.cells[0].width = Inches(1.5); row.cells[1].width = Inches(1.8)
-        row.cells[2].width = Inches(1.7); row.cells[3].width = Inches(2.0)
+            align = WD_ALIGN_PARAGRAPH.CENTER if c_idx in (0, 3) else WD_ALIGN_PARAGRAPH.LEFT
+            format_cell_text(cell, val, bold=(c_idx == 0), font_size=8.5, align=align)
+        row.cells[0].width = Inches(1.2); row.cells[1].width = Inches(2.0)
+        row.cells[2].width = Inches(1.9); row.cells[3].width = Inches(1.8)
 
-    # Section 2: UX Likert Survey
-    add_heading_1(doc, "2. BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ TRẢI NGHIỆM (THANG ĐO LIKERT 5 MỨC ĐỘ)")
+    # Section 2: UX Likert Survey (Blank Form)
+    add_heading_1(doc, "2. BẢNG KHẢO SÁT ĐÁNH GIÁ TRẢI NGHIỆM NGƯỜI DÙNG (THANG ĐO LIKERT 1 ĐẾN 5)")
     add_styled_paragraph(doc, 
-        "Khảo sát được thực hiện trên 5 tiêu chí trải nghiệm cốt lõi theo thang đo chuẩn từ 1 (Rất không hài lòng) đến 5 (Rất hài lòng):")
+        "Người tham gia đánh giá cho điểm từ 1 đến 5 theo quy ước: "
+        "[1: Rất không hài lòng  |  2: Không hài lòng  |  3: Bình thường  |  4: Hài lòng  |  5: Rất hài lòng]")
 
     t_survey = doc.add_table(rows=6, cols=6)
     set_table_borders(t_survey, color="CCCCCC")
     t_survey.alignment = WD_TABLE_ALIGNMENT.CENTER
-    s_headers = ["Tiêu chí đánh giá", "Nguyễn Minh Trí (ATTT)", "Cô Lê Thị Mai (Phụ huynh)", "Trần Hoàng Nam (QA)", "Điểm TB", "Mức độ hài lòng"]
+    s_headers = ["Tiêu chí đánh giá trải nghiệm", "Người 1", "Người 2", "Người 3", "Điểm TB", "Ghi chú / Nhận xét"]
     for i, h in enumerate(s_headers):
         cell = t_survey.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
         set_cell_margins(cell, top=50, bottom=50, left=50, right=50)
         format_cell_text(cell, h, bold=True, font_size=8.5, color_rgb=(255, 255, 255), align=WD_ALIGN_PARAGRAPH.CENTER)
 
-    survey_data = [
-        ("1. Tốc độ phản hồi (Độ trễ < 1.5s, không bị giật lag)", "5/5", "5/5", "4.8/5", "4.93 / 5.0", "Rất hài lòng (P50 66ms)"),
-        ("2. Độ chính xác nhận diện (Bắt bài đúng giọng clone AI)", "4.8/5", "4.9/5", "4.8/5", "4.83 / 5.0", "Rất hài lòng (96.7% pass)"),
-        ("3. Giao diện trực quan (Màu sắc Xanh/Đỏ, dễ hiểu)", "4.7/5", "5/5", "4.6/5", "4.77 / 5.0", "Rất hài lòng (WCAG AAA)"),
-        ("4. Đạo đức dữ liệu (Yên tâm, không lưu file âm thanh)", "5/5", "5/5", "5/5", "5.00 / 5.0", "Xuất sắc (Zero-Persistence)"),
-        ("5. Khả năng tương thích Micro (Không bị báo động giả)", "4.8/5", "4.7/5", "4.9/5", "4.80 / 5.0", "Rất hài lòng (Dither RFC 3389)")
+    blank_survey = [
+        ("1. Tốc độ phản hồi (Độ trễ < 1.5s, không bị giật lag)", "[   ] / 5", "[   ] / 5", "[   ] / 5", "[   ] / 5", ".............................."),
+        ("2. Độ chính xác nhận diện (Bắt bài đúng giọng clone AI)", "[   ] / 5", "[   ] / 5", "[   ] / 5", "[   ] / 5", ".............................."),
+        ("3. Giao diện trực quan (Màu sắc Xanh/Đỏ, dễ hiểu)", "[   ] / 5", "[   ] / 5", "[   ] / 5", "[   ] / 5", ".............................."),
+        ("4. Đạo đức dữ liệu (Yên tâm, không lưu file âm thanh)", "[   ] / 5", "[   ] / 5", "[   ] / 5", "[   ] / 5", ".............................."),
+        ("5. Khả năng tương thích Micro (Không bị báo động giả)", "[   ] / 5", "[   ] / 5", "[   ] / 5", "[   ] / 5", "..............................")
     ]
-    for r_idx, row_vals in enumerate(survey_data):
+    for r_idx, row_vals in enumerate(blank_survey):
         row = t_survey.rows[r_idx + 1]
         bg = "FFFFFF" if r_idx % 2 == 0 else "F9FBFC"
         for c_idx, val in enumerate(row_vals):
             cell = row.cells[c_idx]
             set_cell_background(cell, bg)
             set_cell_margins(cell, top=45, bottom=45, left=50, right=50)
-            align = WD_ALIGN_PARAGRAPH.CENTER if c_idx >= 1 else WD_ALIGN_PARAGRAPH.LEFT
+            align = WD_ALIGN_PARAGRAPH.CENTER if 1 <= c_idx <= 4 else WD_ALIGN_PARAGRAPH.LEFT
             format_cell_text(cell, val, bold=(c_idx in (0, 4)), font_size=8.5, align=align)
-        row.cells[0].width = Inches(2.2); row.cells[1].width = Inches(0.9)
-        row.cells[2].width = Inches(0.9); row.cells[3].width = Inches(0.9)
-        row.cells[4].width = Inches(0.9); row.cells[5].width = Inches(1.2)
+        row.cells[0].width = Inches(2.3); row.cells[1].width = Inches(0.8)
+        row.cells[2].width = Inches(0.8); row.cells[3].width = Inches(0.8)
+        row.cells[4].width = Inches(0.8); row.cells[5].width = Inches(1.4)
 
-    # Section 3: User Testimonials
-    add_heading_1(doc, "3. Ý KIẾN ĐÁNH GIÁ CHI TIẾT & ĐÓNG GÓP TỪ NGƯỜI DÙNG THẬT (≥ 3 GÓP Ý UX)")
+    # Section 3: User Feedback (Blank Form)
+    add_heading_1(doc, "3. PHIẾU THU THẬP Ý KIẾN ĐÓNG GÓP CHI TIẾT TỪ NGƯỜI DÙNG THẬT (≥ 3 GÓP Ý UX)")
     
-    add_heading_2(doc, "Góp ý 1: Nguyễn Minh Trí — Chủ nhiệm CLB An toàn Thông tin HUTECH (HISC)")
-    add_styled_paragraph(doc, 
-        "\"Em đã trực tiếp dùng các công cụ deepfake mới nhất như VoiceStudio CFM và Kokoro để giả giọng của chính mình "
-        "rồi gửi file nén qua Telegram Bot. Kết quả bất ngờ là ViTrueVoice nhận diện chính xác 100% các đoạn thoại giả mạo "
-        "kèm điểm số âm sâu (-28 đến -42). Đặc biệt, hệ thống phản hồi cực nhanh (gần như tức thì sau 1 giây), không làm gián đoạn "
-        "trải nghiệm trò chuyện. Góp ý UX: Nhóm nên tích hợp sẵn một nút 'Chia sẻ cảnh báo nhanh' sang nhóm chat Zalo/Telegram gia đình "
-        "để người dùng có thể cảnh báo người thân ngay lập tức khi phát hiện cuộc gọi lừa đảo.\"", italic=True, space_after=4)
+    for u_idx in range(1, 4):
+        add_heading_2(doc, f"3.{u_idx} Phiếu Ý Kiến Đóng Góp — Người Dùng {u_idx}")
+        add_styled_paragraph(doc, 
+            "Họ và tên: ............................................................................ Đơn vị / Chức vụ: ............................................................................\n"
+            "Thiết bị sử dụng: ................................................................ Kênh kiểm thử: [  ] Web UI   [  ] Telegram Bot   [  ] REST API\n"
+            "a) Nhận xét về độ nhạy, tính chính xác và tốc độ nhận diện giọng giả mạo của hệ thống:\n"
+            "........................................................................................................................................................................................\n"
+            "........................................................................................................................................................................................\n"
+            "b) Nhận xét về giao diện, tính dễ hiểu của các khuyến cáo an toàn và trải nghiệm chung (UX):\n"
+            "........................................................................................................................................................................................\n"
+            "........................................................................................................................................................................................\n"
+            "c) Đề xuất góp ý cải thiện hoặc tính năng mong muốn bổ sung:\n"
+            "........................................................................................................................................................................................\n"
+            "........................................................................................................................................................................................",
+            space_after=6)
 
-    add_heading_2(doc, "Góp ý 2: Cô Lê Thị Mai (52 tuổi, Phụ huynh) — Trải nghiệm Web Forensics trên Di động")
-    add_styled_paragraph(doc, 
-        "\"Tôi lớn tuổi nên rất sợ các vụ lừa đảo giả giọng con cái gọi điện xin tiền viện phí hay đóng tiền phạt. "
-        "Khi thử trang web của cháu Tài, tôi thấy giao diện rất rõ ràng. Cứ file âm thanh thật thì hiện màu Xanh lá 'AN TOÀN', "
-        "còn giọng giả do máy làm thì hiện màu Đỏ cảnh báo 'NGUY CƠ GIẢ MẠO'. Đặc biệt, tôi rất thích dòng chữ hướng dẫn: "
-        "'Hãy giữ bình tĩnh, cúp máy và gọi lại vào số điện thoại thông thường của con'. Lời khuyên này rất thiết thực giúp người già "
-        "không bị hoảng loạn. Góp ý UX: Chữ trên điện thoại nên to hơn một chút để người mắt kém dễ đọc hơn mà không cần đeo kính.\"", italic=True, space_after=4)
-
-    add_heading_2(doc, "Góp ý 3: Trần Hoàng Nam (Kỹ sư QA Độc Lập) — Đánh giá Khả năng Khử Nhiễu & Tương Thích")
-    add_styled_paragraph(doc, 
-        "\"Tôi đã thử nghiệm kịch bản khó: thu âm giọng thật bằng laptop ThinkPad trong phòng có bật tính năng khử ồn AI (AI Noise Suppression). "
-        "Thông thường, các khoảng lặng bị ép về 0.0000 sẽ khiến mô hình deepfake bắt nhầm là giọng máy. Tuy nhiên, nhờ thuật toán "
-        "Adaptive Comfort Dithering của ViTrueVoice, hệ thống vẫn nhận diện đúng 100% là người thật (BPCER = 0%). "
-        "Góp ý kỹ thuật: Nên bổ sung tài liệu hướng dẫn xử lý sự cố (Runbook) cho các trường hợp người dùng dùng trình duyệt Safari trên iOS "
-        "chưa cấp quyền truy cập Microphone WebRTC.\"", italic=True, space_after=6)
-
-    # Section 4: Acceptance Confirmation Form
+    # Section 4: Acceptance Confirmation Form (Blank Form)
     add_heading_1(doc, "4. BIÊN BẢN XÁC NHẬN NGHIỆM THU PILOT (BÀN GIAO THỬ NGHIỆM)")
     add_styled_paragraph(doc, 
-        "Hôm nay, ngày 22 tháng 11 năm 2026, tại Phòng Thực hành An toàn Thông tin - Trường ĐH Công nghệ TP.HCM (HUTECH), "
+        "Hôm nay, ngày ..... tháng ..... năm 2026, tại ........................................................................................................................, "
         "đại diện các bên tham gia thử nghiệm đã tiến hành đánh giá và ký xác nhận nghiệm thu chương trình Pilot:")
     
-    t_acc = doc.add_table(rows=5, cols=3)
+    t_acc = doc.add_table(rows=5, cols=4)
     set_table_borders(t_acc, color="CCCCCC")
     t_acc.alignment = WD_TABLE_ALIGNMENT.CENTER
-    acc_headers = ["Hạng mục nghiệm thu", "Tiêu chuẩn cam kết", "Kết quả thẩm định thực tế"]
+    acc_headers = ["Hạng mục nghiệm thu", "Tiêu chuẩn cam kết", "Kết quả đo đạc thực tế", "Đánh giá"]
     for i, h in enumerate(acc_headers):
         cell = t_acc.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
-        set_cell_margins(cell, top=45, bottom=45, left=60, right=60)
-        format_cell_text(cell, h, bold=True, font_size=9, color_rgb=(255, 255, 255), align=WD_ALIGN_PARAGRAPH.CENTER)
+        set_cell_margins(cell, top=45, bottom=45, left=50, right=50)
+        format_cell_text(cell, h, bold=True, font_size=8.5, color_rgb=(255, 255, 255), align=WD_ALIGN_PARAGRAPH.CENTER)
 
-    acc_data = [
-        ("Năng lực phân loại (Accuracy)", "EER nén <= 8.0%, EER Unseen <= 15.0%", "ĐẠT (EER Seen 6.80%, EER Unseen 14.67%, Pass 96.7%)"),
-        ("Thời gian phản hồi (NFR1)", "Trung vị thời gian xử lý <= 3.0 giây", "ĐẠT (P50 = 66.3ms qua API, < 1.2s qua Telegram Bot)"),
-        ("Tính sẵn sàng của hệ thống", "Khởi chạy 1-lệnh bằng Docker Compose", "ĐẠT (Container vitruevoice-api và bot chạy ổn định 100%)"),
-        ("Đạo đức sinh trắc học (NFR3)", "Không lưu vết file âm thanh, băm SHA-256", "ĐẠT (Tuân thủ nghiêm ngặt Luật 91/2025/QH15)")
+    blank_acc_data = [
+        ("Năng lực phân loại (Accuracy)", "EER nén <= 8.0%, EER Unseen <= 15.0%", "........................................................", "[  ] Đạt   [  ] Không đạt"),
+        ("Thời gian phản hồi (NFR1)", "Trung vị thời gian xử lý <= 3.0 giây", "........................................................", "[  ] Đạt   [  ] Không đạt"),
+        ("Tính sẵn sàng của hệ thống", "Khởi chạy 1-lệnh bằng Docker Compose", "........................................................", "[  ] Đạt   [  ] Không đạt"),
+        ("Đạo đức sinh trắc học (NFR3)", "Không lưu vết file âm thanh, băm SHA-256", "........................................................", "[  ] Đạt   [  ] Không đạt")
     ]
-    for r_idx, row_vals in enumerate(acc_data):
+    for r_idx, row_vals in enumerate(blank_acc_data):
         row = t_acc.rows[r_idx + 1]
         bg = "FFFFFF" if r_idx % 2 == 0 else "F9FBFC"
         for c_idx, val in enumerate(row_vals):
             cell = row.cells[c_idx]
             set_cell_background(cell, bg)
-            set_cell_margins(cell, top=45, bottom=45, left=60, right=60)
-            format_cell_text(cell, val, bold=(c_idx == 2), font_size=8.5)
-        row.cells[0].width = Inches(2.2); row.cells[1].width = Inches(2.3); row.cells[2].width = Inches(2.4)
+            set_cell_margins(cell, top=45, bottom=45, left=50, right=50)
+            align = WD_ALIGN_PARAGRAPH.CENTER if c_idx == 3 else WD_ALIGN_PARAGRAPH.LEFT
+            format_cell_text(cell, val, bold=(c_idx == 0), font_size=8.0, align=align)
+        row.cells[0].width = Inches(1.8); row.cells[1].width = Inches(2.0)
+        row.cells[2].width = Inches(1.8); row.cells[3].width = Inches(1.3)
+
+    add_styled_paragraph(doc, "", space_after=4)
+    add_styled_paragraph(doc, 
+        "Nhận xét và kết luận chung của Đơn vị phối hợp thử nghiệm:\n"
+        "........................................................................................................................................................................................\n"
+        "........................................................................................................................................................................................\n"
+        "Kết luận nghiệm thu:   [  ] Đồng ý nghiệm thu thông qua          [  ] Yêu cầu chỉnh sửa bổ sung",
+        space_after=8)
 
     # Signatures
-    add_styled_paragraph(doc, "", space_after=8)
     t_sign = doc.add_table(rows=1, cols=2)
     t_sign.alignment = WD_TABLE_ALIGNMENT.CENTER
     c_s0, c_s1 = t_sign.rows[0].cells[0], t_sign.rows[0].cells[1]
@@ -339,29 +343,13 @@ def build_pilot_document():
     p0.add_run("MSSV: 2380601959").font.name = "Times New Roman"
 
     p1 = c_s1.paragraphs[0]; p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    p1.add_run("ĐẠI DIỆN NHÓM NGƯỜI DÙNG PILOT\n(Chủ nhiệm CLB An toàn Thông tin HUTECH)\n\n\n\n").font.name = "Times New Roman"
-    r1 = p1.add_run("Nguyễn Minh Trí\n"); r1.bold = True; r1.font.name = "Times New Roman"
-    p1.add_run("Chủ nhiệm CLB HISC - HUTECH").font.name = "Times New Roman"
-
-    # Section 5: Question Thinking W07
-    add_heading_1(doc, "5. TRẢ LỜI CÂU HỎI TƯ DUY TUẦN 7 (DẪN VỀ NGUYÊN LÝ VÀ SỐ ĐO)")
-    add_styled_paragraph(doc, 
-        "Câu hỏi của GVHD (Mục F Đề cương v4): \"Hệ thống hỏng thế nào khi đầu vào khác dữ liệu huấn luyện? Em phát hiện và báo cho người dùng ra sao?\"", bold=True, color_rgb=(192, 0, 0))
-    add_styled_paragraph(doc, 
-        "Trả lời (dẫn chứng từ thực nghiệm người nói ngoại lai SPK_0001 và 1.584 mẫu Unseen TTS):", bold=True)
-    add_styled_paragraph(doc, 
-        "1. Cách hệ thống bị hỏng khi gặp dữ liệu ngoại lai (Out-of-Distribution - OOD): Khi gặp người nói có đặc trưng âm học lệch chuẩn "
-        "(như ca SPK_0001 có F0 trung bình 98.4 Hz, lệch -9.91 IQR so với trung vị tập Dev), hoặc âm thanh thu qua micro WebRTC 48kHz có DC Offset, "
-        "mô hình ban đầu bị sụt giảm độ tự tin nghiêm trọng (EER tăng từ 2.6% lên 21.8% đối với công cụ lạ, hoặc điểm số giọng thật bị kéo tụt thành âm).\n"
-        "2. Cách phát hiện tự động: Hệ thống triển khai 2 lớp chẩn đoán in-memory: (a) Lớp thống kê: tự động đo độ lệch phân vị so với phân phối chuẩn, "
-        "kích hoạt guardrail khi |offset| > 4 x IQR; (b) Lớp vật lý âm học: kiểm tra tỷ lệ vùng phẳng kéo dài > 100 mẫu để phát hiện méo nén hoặc lọc ồn quá mức.\n"
-        "3. Cách báo cho người dùng: Khi phát hiện tín hiệu rơi vào vùng bất định (điểm logit nằm trong khoảng [-1.5, +1.5]), giao diện Web và Bot Telegram "
-        "tuyệt đối không ép ra kết luận nhị phân giả tạo, mà hiển thị Trạng thái Màu Vàng: 'Độ bất định cao — Khuyến nghị thực hiện xác minh 2 bước qua cuộc gọi thông thường'.")
+    p1.add_run("ĐẠI DIỆN ĐƠN VỊ / NHÓM NGƯỜI DÙNG PILOT\n(Ký, ghi rõ họ tên và đóng dấu nếu có)\n\n\n\n").font.name = "Times New Roman"
+    p1.add_run("................................................................\nChức vụ: ................................................................").font.name = "Times New Roman"
 
     output_docx = DIR_OUT_2 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.docx"
     doc.save(str(output_docx))
     shutil.copy2(output_docx, DIR_OUT_1 / output_docx.name)
-    print(f"[OK] Built Pilot DOCX: {output_docx}")
+    print(f"[OK] Built Pilot DOCX (Blank Template): {output_docx}")
 
     output_pdf_1 = DIR_OUT_1 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.pdf"
     output_pdf_2 = DIR_OUT_2 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.pdf"
