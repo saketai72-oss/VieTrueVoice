@@ -98,6 +98,15 @@ def test_pool_scores_max_and_mean_modes():
     assert pool_scores(scores, mode="mean") == pytest.approx(5.0)
 
 
+def test_pool_scores_default_is_max():
+    """Verify default pooling mode is max-pooling for production anti-spoofing."""
+    scores = [1.0, 5.0, 9.0]
+    assert pool_scores(scores) == pytest.approx(9.0)
+    # Even if scores contain negative values with min < -12.0, default max mode takes maximum
+    scores_with_low = [-25.0, 2.0, 4.0]
+    assert pool_scores(scores_with_low) == pytest.approx(4.0)
+
+
 @pytest.mark.parametrize("mode", ["max", "mean", "min", "asymmetric_veto", "adaptive"])
 def test_pool_scores_input_types(mode):
     """Verify pool_scores accepts list, numpy array, and torch tensor."""

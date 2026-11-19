@@ -46,7 +46,7 @@ def evaluate_system_files(
     device: str,
     system_name: str,
     system_type: str,
-    pooling_mode: str = "asymmetric_veto",
+    pooling_mode: str = "max",
 ) -> pd.DataFrame:
     records = []
     for idx, f in enumerate(files):
@@ -96,7 +96,7 @@ def run_benchmark(
     ckpt_path: str = "out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt",
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
     output_json: str = "benchmarks/seen_vs_unseen_degradation.json",
-    pooling_mode: str = "asymmetric_veto",
+    pooling_mode: str = "max",
 ):
     print("=" * 90)
     print("🔬 ĐO ĐẠC SO SÁNH SEEN TTS VS UNSEEN TTS & ĐÁNH GIÁ MỨC ĐỘ SUY GIẢM")
@@ -322,7 +322,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ckpt", type=str, default="out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--pooling", type=str, default="asymmetric_veto", help="Pooling mode (asymmetric_veto, max, mean, min)")
+    parser.add_argument("--pooling", type=str, default="max", help="Pooling mode (max, asymmetric_veto, mean, min)")
     parser.add_argument("--out", type=str, default="benchmarks/seen_vs_unseen_degradation.json")
     args = parser.parse_args()
 

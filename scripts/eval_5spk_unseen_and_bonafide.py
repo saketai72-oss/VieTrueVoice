@@ -52,7 +52,7 @@ def evaluate_dataset(
     model,
     device: str,
     apply_dither: bool = True,
-    pooling_mode: str = "asymmetric_veto",
+    pooling_mode: str = "max",
 ) -> pd.DataFrame:
     records = []
 
@@ -154,7 +154,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ckpt", type=str, default="out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--pooling", type=str, default="asymmetric_veto", help="Pooling mode (asymmetric_veto, max, mean, min)")
+    parser.add_argument("--pooling", type=str, default="max", help="Pooling mode (max, asymmetric_veto, mean, min)")
     parser.add_argument("--dither", action="store_true", help="Apply comfort dithering (default: False)")
     parser.add_argument("--out", type=str, default="benchmarks/eval_5spk_unseen_and_bonafide.json")
     args = parser.parse_args()

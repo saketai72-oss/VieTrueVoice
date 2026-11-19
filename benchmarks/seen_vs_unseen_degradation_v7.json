@@ -1,5 +1,6 @@
 {
   "checkpoint": "out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt",
+  "pooling": "max",
   "bona_fide_evaluation": {
     "total": 84,
     "pass_rate_pct": 90.48,
