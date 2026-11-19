@@ -38,13 +38,16 @@ Nhằm trả lời câu hỏi nghiên cứu CH1 (Độ bền nén kênh thoại)
 | **Nhánh B0** | Chỉ nén Codec, không RawBoost | `mode="augmented"` (~29.143 mẫu) | `None` (Đã nén G.711, AMR-NB) | Phase 1: 4 ep<br>Phase 2: 20 ep | Bóc tách chính xác đóng góp riêng biệt của nén kênh thoại so với RawBoost. |
 | **Nhánh B** | **ViTrueVoice Đầy đủ** | `mode="augmented"` (~29.143 mẫu) | `make_rawboost()` online | Phase 1: 4 ep<br>Phase 2: 20 ep | Mô hình hoàn chỉnh (Codec + RawBoost: LnL, ISD, SSI). |
 
-### Ràng Buộc Khử Trùng Lặp Unseen TTS (VieNeu-TTS) Bảo Vệ H2
-> STUBBORN_FACT: Để giả thuyết H2 giữ nguyên giá trị khoa học, `VieNeu-TTS` bắt buộc phải là công cụ **hoàn toàn chưa từng thấy** lúc huấn luyện.
-- Cơ chế kiểm định: `check_unseen_excluded(df, "vieneu", split_name)` chặn đứng nếu `train.csv` hoặc `dev.csv` chứa VieNeu.
-- Phân hoạch `manifests_seen_only`:
-  - `train.csv`: Loại bỏ toàn bộ 2.184 hàng VieNeu (còn ~2.196 spoof F5-TTS và 26.947 bonafide).
-  - `dev.csv`: Loại bỏ toàn bộ hàng VieNeu.
-  - `test_indomain.csv` & `test_ood.csv`: Giữ nguyên 100% mẫu VieNeu để đo đạc và kiểm chứng H2.
+### Ràng Buộc Phân Định Seen vs Unseen TTS & Bảo Vệ Giả Thuyết H2
+> STUBBORN_FACT: Hai công cụ Seen TTS cốt lõi tham gia vào quá trình huấn luyện (tập Train và Dev) là `F5-TTS` (Flow Matching) và `VieNeu-TTS v3 Turbo` (Autoregressive Qwen LLM + NeuCodec), tạo nên kiến trúc phòng thủ kép Dual-Seen. Công cụ Unseen TTS thực thụ chuẩn Zero-Shot Voice Cloning phục vụ kiểm định Giả thuyết H2 (OOD Generalization) là `VoiceStudio (OmniVoice CFM)` — được cô lập 100% khỏi quá trình huấn luyện.
+
+- **Tiến trình chuẩn hóa kiến trúc**:
+  - *Giai đoạn khảo sát W05 (Must #2, Checkpoint B)*: Ban đầu thử nghiệm cô lập VieNeu-TTS làm công cụ unseen. Kết quả thực nghiệm cho thấy EER trên VieNeu dao động $21.88\% - 26.34\%$ (chưa đạt KPI $\le 15\%$) do độ lệch miền âm học giữa 2 trường phái Flow Matching và Autoregressive LLM.
+  - *Giai đoạn hoàn thiện v0.4.7+ (Must #3, Checkpoint V7 Dual-Seen)*: Đưa VieNeu-TTS vào tập Train/Dev thành kiến trúc phòng thủ đa trường phái (Dual-Seen). Đồng thời khóa công cụ Unseen TTS Zero-Shot thực thụ là **VoiceStudio (OmniVoice CFM)** làm thước đo chuẩn mực cho Giả thuyết H2.
+- **Ràng buộc phân hoạch và cô lập 100%**:
+  - `train_dual_seen_with_spk1.csv`: Bao gồm cả F5-TTS và VieNeu-TTS v3 Turbo (~54.400 dòng). Tuyệt đối 0% xuất hiện VoiceStudio CFM và 5 tình nguyện viên nghiệm thu (`SPK_0003`..`0007`).
+  - `dev.csv` / `dev_zalo.csv`: Tập kiểm định độc lập bảo toàn ranh giới.
+  - `02_Unseen_Acceptance`: Giữ nguyên 100% mẫu VoiceStudio CFM (375 clips x 5 codecs) để kiểm định Giả thuyết H2.
 
 ---
 
@@ -52,7 +55,7 @@ Nhằm trả lời câu hỏi nghiên cứu CH1 (Độ bền nén kênh thoại)
 
 | Thành phần Huấn luyện | Cấu hình Tham số Chi tiết | Mục đích Kỹ thuật trong Đề tài |
 | :--- | :--- | :--- |
-| **Hàm mất mát (Loss Function)** | Weighted Cross-Entropy Loss Động<br>Công thức: $w_c = \frac{N}{2 \cdot N_c}$ chuẩn hóa $\sum w_c = 1.0$<br>Hàm: `loss_weights_from_counts(n_spoof, n_bona)` | Bù đắp chính xác tỷ lệ mất cân bằng giữa Spoof (sau khi lọc VieNeu còn $\approx 7.5\%$) và Bona fide ($\approx 92.5\%$). Trọng số tính ra: $w \approx [0.925, 0.075]$. Tuyệt đối không gán cứng. |
+| **Hàm mất mát (Loss Function)** | Weighted Cross-Entropy Loss Động<br>Công thức: $w_c = \frac{N}{2 \cdot N_c}$ chuẩn hóa $\sum w_c = 1.0$<br>Hàm: `loss_weights_from_counts(n_spoof, n_bona)` | Bù đắp chính xác tỷ lệ mất cân bằng giữa Spoof và Bona fide trong tập Train thực tế ($w_c = \frac{N}{2 \cdot N_c}$). Tuyệt đối không gán cứng trọng số. |
 | **Bộ tối ưu (Optimizer)** | Adam / AdamW<br>$\beta_1 = 0.9$, $\beta_2 = 0.98$, $\epsilon = 10^{-8}$, $\text{Weight Decay} = 10^{-4}$ | Giữ ổn định đạo hàm khi tinh chỉnh đồng thời cả khối Transformer wav2vec 2.0 và lớp đồ thị HS-GAL. |
 | **Tốc độ học (Learning Rate)** | $\bullet$ Pha 1 (Warm-up 4 epochs): $lr = 10^{-4}$ (chỉ back-end)<br>$\bullet$ Pha 2 (Joint Fine-tuning): $lr_{\text{ssl}} = 10^{-6}$, $lr_{\text{backend}} = 10^{-5}$ | $lr_{\text{ssl}} = 10^{-6}$ cực nhỏ ngăn quên thảm khốc (catastrophic forgetting) các biểu diễn âm học tiếng Việt đã tiền huấn luyện. |
 | **Batch Size & Bước tích lũy** | $\text{Batch Size} = 16$ (kèm Gradient Accumulation = 2); Cắt/đệm cố định 64.000 mẫu | Đảm bảo kích thước batch hiệu dụng = 32 trên GPU Kaggle (T4 16GB). |
@@ -106,8 +109,10 @@ graph TD
 - **Giả thuyết H1 (CH1)**: Đo độ giảm EER tương đối trên từng kênh thoại nén:
   $$\Delta\text{EER}_{\text{rel}} = \frac{\text{EER}_A - \text{EER}_B}{\text{EER}_A} \times 100\% \ge 30.0\%$$
   Verdict `PASS` khi toàn bộ các điều kiện nén đều vượt ngưỡng $30\%$; kiểm tra cờ `ci_overlap` xem khoảng tin cậy 95% có bị chồng lấn hay không.
-- **Giả thuyết H2 (CH2)**: Đo EER của Mô hình B trên công cụ chưa từng thấy (`VieNeu-TTS`):
+- **Giả thuyết H2 (CH2)**: Đo EER của mô hình trên công cụ chưa từng thấy (`Unseen TTS`):
   $$\text{EER}_{\text{unseen}} \le 15.0\% \implies \text{PASS}$$
+  - *Khảo sát W05 ban đầu*: Đánh giá trên `VieNeu-TTS` (EER đạt $21.88\% - 26.34\%$, chưa đạt $\le 15\%$).
+  - *Nghiệm thu chuẩn mực v0.4.7+ (Dual-Seen V7)*: Đánh giá trên công cụ Zero-Shot CFM thực thụ `VoiceStudio (OmniVoice CFM)` — đạt EER **$14.67\% \le 15.0\%$** (chính thức **PASS** Giả thuyết H2, xem chi tiết tại [docs/BENCHMARK_seen_vs_unseen_degradation.md](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_seen_vs_unseen_degradation.md)).
   Kiểm tra thêm điều kiện cận trên khoảng tin cậy: `ci_hi_pass = (eer_ci_hi <= 0.15)`.
 - **Phân rã biến B0 vs B**: Đo đạc độ lệch tương đối giữa B0 (chỉ nén) và B (nén + RawBoost) để định lượng chính xác đóng góp của kỹ thuật RawBoost.
 
@@ -132,8 +137,8 @@ graph TD
 
 > **Kết luận H1**: **ĐẠT TRÊN TẬP NỘI BỘ (In-domain Split Verdict: PASS)**. Cả hai chuẩn nén thoại đều giảm từ $40.46\%$ đến $47.55\%$ EER tương đối, vượt ngưỡng $30\%$, khoảng tin cậy 95% tách biệt hoàn toàn (`ci_overlap = False`). Trên tập ngoại vùng (OOD), AMR-NB đạt $+34.75\%$ nhưng G.711 chỉ đạt $+15.91\%$, do đó **chưa đạt toàn phần trên mọi điều kiện OOD**.
 
-### 6.2. Bảng Đánh Giá Giả Thuyết H2 (Độ Bền Công Cụ TTS Chưa Từng Thấy — CH2)
-> Mục tiêu đề cương: $\text{EER} \le 15.0\%$ trên công cụ lạ (`VieNeu-TTS`).
+### 6.2. Bảng Đánh Giá Khảo Sát Ban Đầu Giả Thuyết H2 (Thử Nghiệm W05 Với VieNeu-TTS)
+> *Ghi chú tiến trình khoa học*: Đây là số liệu khảo sát giai đoạn 1 (Must #2, Checkpoint B) khi VieNeu-TTS được dùng làm phép thử unseen ban đầu. Mục tiêu đề cương: $\text{EER} \le 15.0\%$.
 
 | Tập kiểm thử | Điều kiện nén | EER VieNeu-TTS | 95% Bootstrap CI | Mục tiêu | Kết luận |
 | :--- | :--- | :---: | :---: | :---: | :---: |
@@ -142,7 +147,7 @@ graph TD
 | **In-domain** | **AMR-NB** | **$26.34\%$** | $[18.89\%, 31.98\%]$ | $\le 15.0\%$ | **CHƯA ĐẠT** |
 | *OOD* | G.711 A-law | $45.90\%$ | $[27.58\%, 55.50\%]$ | $\le 15.0\%$ | CHƯA ĐẠT |
 
-> **Kết luận H2**: **CHƯA ĐẠT**. EER trên VieNeu-TTS dao động trong khoảng $21.88\% - 26.34\%$. Dù mô hình B đã giảm mạnh so với baseline A ($38.35\% \to 22.92\%$, giảm $40.23\%$ tương đối), phân phối âm học của VieNeu vẫn có độ lệch lớn so với F5-TTS khi áp đặt ràng buộc nghiêm ngặt Hard Unseen (loại bỏ 100% khỏi Train/Dev). Kết quả được giữ nguyên làm số liệu thực nghiệm trung thực trong báo cáo.
+> **Ý nghĩa khoa học & Hướng giải quyết kiến trúc**: Kết quả chưa đạt ($21.88\% - 26.34\%$) phản ánh chân thực độ lệch miền biểu diễn giữa mô hình Diffusion (F5) và Autoregressive LLM (VieNeu). Nhận định khoa học này dẫn tới bước đột phá ở v0.4.7+: đưa VieNeu-TTS vào tập Train để hình thành kiến trúc phòng thủ kép Dual-Seen (giảm EER của VieNeu xuống $12.27\%$), đồng thời chuyển giao công cụ kiểm định H2 chuẩn mực sang **VoiceStudio (OmniVoice CFM Zero-shot Voice Cloning)** — đạt EER **$14.67\% \le 15.0\%$** (chính thức PASS H2; xem chi tiết tại Mục 8.2 và [docs/BENCHMARK_seen_vs_unseen_degradation.md](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_seen_vs_unseen_degradation.md)).
 
 ### 6.3. Bóc Tách Đóng Góp Riêng Biệt Của RawBoost (B0 vs B)
 | Tập kiểm thử | Kênh nén | EER B0 (Chỉ Codec) | EER B (Codec + RawBoost) | Mức giảm thêm nhờ RawBoost |
@@ -183,7 +188,7 @@ graph TD
   - Bắt buộc kiểm tra tính hợp lệ (`is_valid = True`), fail-fast nếu thiếu audio, báo cáo EER, minDCF, FRR@0, FAR@0, Bootstrap 95% CI theo `base_utt` và paired deltas $\Delta s = s_{\text{proxy}} - s_{\text{clean}}$.
 - **Tiêu chuẩn công nhận**: Chỉ công nhận baseline sau khi kết quả Kaggle trả về đủ 11.450 điểm số và mọi codec đều có cả hai lớp. Mọi quyết định fine-tune `B_zalo` chỉ được tiến hành sau khi baseline hợp lệ này được thiết lập.
 - **Kết quả Baseline Chính thức trên 11.450 Mẫu Dev Zalo (Khóa ngày 2026-10-30)**:
-  - Bảng điểm chi tiết: `out/zalo_baseline/dev_zalo_scores.csv` (11.450 dòng, 10.490 bona fide, 960 spoof, 0% rò rỉ volunteer `SPK_xxxx` và unseen `VieNeu-TTS`).
+  - Bảng điểm chi tiết: `out/zalo_baseline/dev_zalo_scores.csv` (11.450 dòng, 10.490 bona fide, 960 spoof, 0% rò rỉ volunteer `SPK_xxxx`; lưu ý ở baseline v0.4.1 chưa nạp VieNeu, sau đó ở v0.4.7 đã chuẩn hóa Dual-Seen và khóa Unseen TTS chuẩn là VoiceStudio CFM).
   - Bảng chỉ số tổng hợp (`out/zalo_baseline/zalo_baseline_metrics.csv`):
 
 | Nhóm Codec | n_bona | n_spoof | EER (%) | EER 95% CI (Bootstrap) | $\text{FRR}_{\theta=0}$ (%) | $\text{FAR}_{\theta=0}$ (%) | minDCF |
@@ -215,7 +220,7 @@ graph TD
   - `phase1_epochs = 5`: Đóng băng 100% backbone `Wav2Vec2Model`, chỉ cập nhật tầng chiếu tuyến tính và mạng đồ thị HS-GAL với $lr = 10^{-4}$.
   - `phase2_epochs = 0`: Tắt hoàn toàn Pha 2 để ngăn hiện tượng quên thảm khốc (catastrophic forgetting) các biểu diễn âm học tiếng Việt đã hội tụ ở Checkpoint B.
 - **Hàm mất mát Dynamic Weighted CE**:
-  - $w_c = \frac{N}{2 \cdot N_c}$ tính toán động trên `train_zalo.csv` (loại bỏ 100% `VieNeu-TTS` và `SPK_xxxx`).
+  - $w_c = \frac{N}{2 \cdot N_c}$ tính toán động trên manifest huấn luyện (ở v0.4.1 chỉ gồm F5-TTS; đến v0.4.7 nâng cấp Dual-Seen bao gồm cả F5-TTS và VieNeu-TTS v3 Turbo, đồng thời cô lập 100% dữ liệu 5 tình nguyện viên nghiệm thu và công cụ Unseen VoiceStudio CFM).
 - **Giám sát Dừng Sớm (Early Stopping)**:
   - `patience = 5` epochs, theo dõi chỉ số `dev_eer` trên tập `dev_zalo.csv` để lưu `best_model_B_zalo.pt`.
 

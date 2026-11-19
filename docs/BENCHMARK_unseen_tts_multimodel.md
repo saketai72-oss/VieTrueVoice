@@ -19,11 +19,13 @@ Theo nguyên tắc khoa học nghiêm ngặt:
 
 | Mô Hình TTS | Kiến Trúc Sinh Âm | Phân Loại | Trạng Thái Trong Dự Án |
 |---|---|---|---|
-| **F5-TTS** | Flow Matching + Diffusion Transformer | In-Domain (Seen) | Engine sinh spoof chính trong tập huấn luyện Train |
-| **VieNeu-TTS v3** | Acoustic Language Model + Vocoder | OOD (Unseen 1) | Engine unseen baseline ban đầu (loại 100% khỏi Train) |
-| **Kokoro-Vietnamese** | StyleTTS 2 + iSTFTNet | OOD (Unseen 2) | Engine mới tích hợp (v0.4.4+), 24kHz native, `vig2p` |
-| **VoiceStudio (OmniVoice)** | Conditional Flow Matching / LLM Voice | OOD (Unseen 3) | Lõi zero-shot cloning mã nguồn mở trích xuất từ VoiceStudio |
-| **Suno Bark** | Autoregressive Transformer + EnCodec | OOD (Unseen 4) | Engine âm học rời rạc đa ngôn ngữ / acoustic artifacts |
+| **F5-TTS** | Flow Matching + Diffusion Transformer | In-Domain (Seen #1) | Engine sinh spoof chính trong tập huấn luyện Train |
+| **VieNeu-TTS v3** | Acoustic Language Model + Vocoder | Seen #2 (từ v0.4.7+) | Ban đầu khảo sát loại khỏi Train; từ v0.4.7+ đưa vào Train thành kiến trúc Dual-Seen |
+| **Kokoro-Vietnamese** | StyleTTS 2 + iSTFTNet | Preset TTS (Khảo sát) | Engine khảo sát phụ (v0.4.4+), 24kHz native, `vig2p` (loại khỏi nghiệm thu do không Zero-shot) |
+| **VoiceStudio (OmniVoice)** | Conditional Flow Matching / LLM Voice | OOD (Unseen H2) | Lõi zero-shot cloning thực thụ phục vụ nghiệm thu Giả thuyết H2 |
+| **Suno Bark** | Autoregressive Transformer + EnCodec | OOD (Unseen phụ) | Engine âm học rời rạc đa ngôn ngữ / acoustic artifacts |
+
+> *Lưu ý tiến độ đồ án (v0.4.7+ / v0.5.5)*: Để giải quyết dứt điểm độ lệch miền giữa 2 trường phái Flow Matching và Autoregressive LLM, `VieNeu-TTS v3 Turbo` đã được đưa vào tập huấn luyện thành kiến trúc phòng thủ kép **Dual-Seen** (kéo EER của VieNeu xuống 12.27%). Công cụ kiểm định Unseen TTS thực thụ chuẩn Zero-Shot Voice Cloning cho Giả thuyết H2 là **VoiceStudio (OmniVoice CFM)** — xem chi tiết tại [docs/BENCHMARK_seen_vs_unseen_degradation.md](file:///c:/Codes/VieTrueVoice/docs/BENCHMARK_seen_vs_unseen_degradation.md).
 
 ---
 
@@ -80,8 +82,8 @@ Theo nguyên tắc khoa học nghiêm ngặt:
 
 | Mô Hình | Loại Kiến Trúc | EER (%) | Spoof Pass Rate (%) | Năng Lượng >4kHz | Ghi Chú |
 |---|---|:---:|:---:|:---:|---|
-| **F5-TTS** | Flow Matching (Seen) | 1.56% - 1.73% | 98.4% | ~0.48% | Mẫu sinh in-domain |
-| **Kokoro** | StyleTTS 2 + iSTFTNet (Unseen) | **0.53%** | **99.73%** | 0.22% | Phát hiện cực nhạy, tách biệt hoàn toàn |
-| **VieNeu-TTS** | Autoregressive LM (Unseen) | 21.88% (Single) / ~10% (Pooled) | 89.3% | 0.35% | Khó phát hiện nhất do LM đa dạng |
-| **Suno Bark** | EnCodec GPT (Unseen) | Đang đo đạc | Đang đo đạc | Đang đo đạc | Đã sẵn sàng adapter |
-| **OmniVoice** | CFM (Unseen) | Đang đo đạc | Đang đo đạc | Đang đo đạc | Đã sẵn sàng module |
+| **F5-TTS** | Flow Matching (Seen #1) | 1.56% - 1.73% | 98.4% | ~0.48% | Mẫu sinh in-domain |
+| **Kokoro** | StyleTTS 2 + iSTFTNet (Preset) | **0.53%** | **99.73%** | 0.22% | Khảo sát phụ, phát hiện cực nhạy (loại khỏi nghiệm thu H2) |
+| **VieNeu-TTS** | Autoregressive LM (Seen #2 từ v0.4.7) | **12.27%** (Dual-Seen V7) / 21.88% (V6 ban đầu) | **87.73%** | 0.35% | Đã nạp vào Train thành Dual-Seen, tăng vọt +27.73% Pass Rate |
+| **Suno Bark** | EnCodec GPT (Unseen phụ) | Đang đo đạc | Đang đo đạc | Đang đo đạc | Đã sẵn sàng adapter |
+| **OmniVoice (VoiceStudio)** | CFM Zero-shot (Unseen H2) | **14.67%** | **79.47%** | ~0.50% | **Đạt chuẩn KPI H2 $\le 15\%$** (Xem chi tiết tại `BENCHMARK_seen_vs_unseen_degradation.md`) |

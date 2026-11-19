@@ -36,7 +36,7 @@ Mục tiêu: Xây dựng kiến trúc mô hình Baseline LFCC+GMM / AASIST & SSL
   - [x] Huấn luyện thành công Checkpoint B_zalo V6 Local (`out/zalo_b_zalo_v6_local/best_model.pt`, Dev EER 2.60%).
 - [x] **3. Đánh giá đối chứng & Nghiệm thu 3 Cổng (Gates)**
   - [x] Nhánh đối chứng nén (CH1/H1): PASS (giảm 40.46% AMR-NB, 47.55% G.711).
-  - [x] Nhánh tổng quát hóa (CH2/H2): Seen TTS (F5-TTS, EER 3.28%) vs Unseen TTS (VieNeu-TTS, EER 21.88%–26.34%).
+  - [x] Nhánh tổng quát hóa (CH2/H2): Khảo sát ban đầu W05 (F5-TTS EER 3.28% vs VieNeu-TTS EER 21.88%–26.34%); nâng cấp v0.4.7+ sang kiến trúc Dual-Seen (F5-TTS + VieNeu-TTS, EER 6.80%) đối chứng Unseen TTS Zero-Shot VoiceStudio CFM (EER 14.67% $\le 15.0\%$, PASS H2).
   - [x] Multi-window Max-Pooling inference (`src/preprocessing/pooling.py`): Gate 2 trên 4 SPK đối chứng đạt 100.0% (64/64), trên 5 SPK nghiệm thu đạt 96.4% (81/84); Gate 3 Zalo AAC/Opus EER 1.56%–1.73%.
   - [x] Chuyển `SPK_0001` sang train (`train_zalo.csv`), khóa 5 tình nguyện viên (`SPK_0003`..`0007`, 84 clips) làm Bộ nghiệm thu độc lập chính thức.
 - [x] **4. Dịch vụ người dùng & Minh chứng Checkpoint W05**

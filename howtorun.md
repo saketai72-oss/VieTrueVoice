@@ -98,7 +98,7 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 301 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
+*(Yêu cầu: Toàn bộ 310 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
 
 ### Kiểm Toán An Ninh Manifest V6
 ```bash

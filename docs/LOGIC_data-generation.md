@@ -55,7 +55,7 @@
 ### Khung Sinh Kép (`PipelineMode.DUAL_OUTPUT`)
 - Kích hoạt song song cả 2 engine trên GPU Kaggle:
   - **Engine #1: F5-TTS-Vietnamese (Seen TTS #1)**: Flow Matching + Vocos vocoder (24kHz Mono), Peak Headroom Scaling $\le 0.95$.
-  - **Engine #2: VieNeu-TTS v3 Turbo (Seen #2 / Unseen TTS)**: Autoregressive Qwen LLM + `MOSS_48kHz` / `NeuCodec`, `denoise=False`, Peak Headroom Scaling $\le 0.95$.
+  - **Engine #2: VieNeu-TTS v3 Turbo (Seen TTS #2)**: Autoregressive Qwen LLM + `MOSS_48kHz` / `NeuCodec`, `denoise=False`, Peak Headroom Scaling $\le 0.95$. Động cơ Seen TTS thứ hai song hành cùng F5-TTS trong kiến trúc phòng thủ đa trường phái âm học (Dual-Seen).
 - Tỷ lệ sinh: 15 prompt độc lập cho mỗi người nói mục tiêu qua 2 engine, bảo đảm $\ge 2.000$ mẫu spoof độc lập trước khi nhân bản codec.
 
 ---
