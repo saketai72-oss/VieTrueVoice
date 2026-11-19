@@ -62,70 +62,81 @@ DEFAULT_CHECKPOINT = (
 )
 
 CUSTOM_CSS = """
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800&family=JetBrains+Mono:wght@600;700&display=swap');
 
 :root {
-    /* Dark Mode Defaults (Lab Kỹ thuật) */
-    --bg-page: #0B0F17;
-    --bg-surface: #131B2E;
-    --bg-card: #111827;
-    --bg-stat: #111827;
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
-    --text-muted: #64748B;
-    --border-color: #334155;
-    --header-bg: rgba(19, 27, 46, 0.95);
-    --header-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    --btn-primary-bg: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
-    --btn-primary-border: #71F8E4;
-    --btn-primary-text: #00201C;
-    --btn-secondary-bg: #1E293B;
-    --btn-secondary-text: #F8FAFC;
-    --btn-secondary-border: #334155;
-    --spoof-box-bg: #1F0B0F;
+    /* 1win Design System Tokens - Canvas & Surface Ladder */
+    --bg-page: #141415;         /* {colors.canvas} */
+    --bg-surface: #2E3035;      /* {colors.surface} */
+    --bg-card: #2E3035;         /* {colors.surface} */
+    --bg-stat: #2E3035;         /* {colors.surface} */
+    --text-primary: #F0F2F5;    /* {colors.ink} */
+    --text-secondary: #9AA1B1;  /* {colors.muted} */
+    --text-muted: #9AA1B1;      /* {colors.muted} */
+    --text-faint: #53575F;      /* {colors.faint} */
+    --border-color: #2D2F33;    /* {colors.hairline} */
+    --header-bg: #141415;       /* {colors.canvas} */
+    --header-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+    /* Action Two-Signal System */
+    --btn-primary-bg: #00B24B;       /* Action Green {colors.primary} */
+    --btn-primary-border: #00B24B;
+    --btn-primary-text: #FFFFFF;     /* {colors.on-primary} */
+    --btn-secondary-bg: #0075FF;     /* Electric Blue {colors.secondary} */
+    --btn-secondary-text: #FFFFFF;   /* {colors.on-primary} */
+    --btn-secondary-border: #0075FF;
+    --btn-tertiary-bg: #2E3035;      /* {colors.surface} */
+    --btn-tertiary-border: #2D2F33;  /* {colors.hairline} */
+    --btn-tertiary-text: #F0F2F5;    /* {colors.ink} */
+
+    /* Spoof & Bonafide Card Fills */
+    --spoof-box-bg: #2E3035;
     --spoof-box-border: #EF4444;
     --spoof-title-color: #F87171;
     --spoof-desc-color: #FCA5A5;
     --spoof-action-text: #FCA5A5;
-    --action-spoof-bg: #18080B;
+    --action-spoof-bg: #1E2024;
     --action-spoof-border: rgba(239, 68, 68, 0.4);
-    --bona-box-bg: #072414;
-    --bona-box-border: #2ECC71;
+
+    --bona-box-bg: #2E3035;
+    --bona-box-border: #00B24B;
     --bona-title-color: #86EFAC;
     --bona-desc-color: #86EFAC;
-    --bona-action-text: #F8FAFC;
-    --bona-action-text-bold: #86EFAC;
-    --action-bona-bg: #072414;
-    --action-bona-border: rgba(46, 204, 113, 0.4);
-    --conf-box-bg: #111827;
-    --track-bg: #0F172A;
-    --hash-row-bg: #0B0F17;
-    --hash-row-border: #1E293B;
-    --plot-card-bg: #0B0F17;
-    --teal-accent: #71F8E4;
-    --toggle-bg: rgba(20, 184, 166, 0.12);
-    --toggle-border: rgba(20, 184, 166, 0.4);
-    --toggle-text: #71F8E4;
+    --bona-action-text: #F0F2F5;
+    --bona-action-text-bold: #00B24B;
+    --action-bona-bg: #1E2024;
+    --action-bona-border: rgba(0, 178, 75, 0.4);
+
+    --conf-box-bg: #2E3035;
+    --track-bg: #141415;
+    --hash-row-bg: #141415;
+    --hash-row-border: #2D2F33;
+    --plot-card-bg: #141415;
+    --teal-accent: #0075FF;          /* Electric Blue for secondary signals / tabs */
+    --action-green: #00B24B;         /* Action Green for confirms */
+    --toggle-bg: rgba(0, 117, 255, 0.12);
+    --toggle-border: rgba(0, 117, 255, 0.4);
+    --toggle-text: #0075FF;
 }
 
 body.theme-light {
-    /* Light Mode Variables (ViTrueVoice Light) */
-    --bg-page: #F8F9FF;
+    /* Light Mode Complementary Polarity */
+    --bg-page: #F0F2F5;         /* {colors.ink} */
     --bg-surface: #FFFFFF;
-    --bg-card: #EFF4FF;
+    --bg-card: #FFFFFF;
     --bg-stat: #FFFFFF;
-    --text-primary: #0B1C30;
-    --text-secondary: #3E4947;
-    --text-muted: #64748B;
-    --border-color: #D3E4FE;
+    --text-primary: #141415;    /* {colors.canvas} */
+    --text-secondary: #53575F;  /* {colors.faint} */
+    --text-muted: #9AA1B1;      /* {colors.muted} */
+    --border-color: #D3D8E2;
     --header-bg: #FFFFFF;
-    --header-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
-    --btn-primary-bg: linear-gradient(135deg, #007A6E 0%, #005C55 100%);
-    --btn-primary-border: #004D47;
+    --header-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --btn-primary-bg: #00B24B;
+    --btn-primary-border: #009940;
     --btn-primary-text: #FFFFFF;
-    --btn-secondary-bg: #F1F5F9;
-    --btn-secondary-text: #0F172A;
-    --btn-secondary-border: #CBD5E1;
+    --btn-secondary-bg: #0075FF;
+    --btn-secondary-text: #FFFFFF;
+    --btn-secondary-border: #0075FF;
     --spoof-box-bg: #FEF2F2;
     --spoof-box-border: #EF4444;
     --spoof-title-color: #B91C1C;
@@ -134,11 +145,11 @@ body.theme-light {
     --action-spoof-bg: #FFFFFF;
     --action-spoof-border: #FECACA;
     --bona-box-bg: #F0FDF4;
-    --bona-box-border: #16A34A;
+    --bona-box-border: #00B24B;
     --bona-title-color: #15803D;
     --bona-desc-color: #166534;
     --bona-action-text: #1E293B;
-    --bona-action-text-bold: #15803D;
+    --bona-action-text-bold: #00B24B;
     --action-bona-bg: #FFFFFF;
     --action-bona-border: #BBF7D0;
     --conf-box-bg: #FFFFFF;
@@ -146,17 +157,19 @@ body.theme-light {
     --hash-row-bg: #F8FAFC;
     --hash-row-border: #E2E8F0;
     --plot-card-bg: #FFFFFF;
-    --teal-accent: #0F766E;
+    --teal-accent: #0075FF;
+    --action-green: #00B24B;
     --toggle-bg: #EFF4FF;
     --toggle-border: #93C5FD;
-    --toggle-text: #1D4ED8;
+    --toggle-text: #0075FF;
 }
 
 body, .gradio-container {
     background-color: var(--bg-page) !important;
-    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 600 !important;
     color: var(--text-primary) !important;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 .gradio-container .block,
@@ -193,7 +206,7 @@ body, .gradio-container {
 .lab-header {
     background: var(--header-bg);
     border: 1px solid var(--border-color);
-    border-radius: 1rem;
+    border-radius: 16px; /* {rounded.card} */
     padding: 1.25rem 1.75rem;
     margin-bottom: 1.5rem;
     box-shadow: var(--header-shadow);
@@ -237,19 +250,19 @@ body, .gradio-container {
     justify-content: center !important;
     font-size: 19px !important;
     line-height: 1 !important;
-    border-radius: 8px !important;
+    border-radius: 10px !important; /* {rounded.lg} */
     background: var(--bg-card) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-primary) !important;
     cursor: pointer !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
     transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease !important;
 }
 
 #theme-toggle-btn:hover,
 #theme-toggle-btn button:hover {
-    transform: scale(1.08) !important;
-    border-color: #14B8A6 !important;
+    transform: scale(1.05) !important;
+    border-color: #0075FF !important;
 }
 
 body.theme-light #theme-toggle-btn,
@@ -270,7 +283,7 @@ button iconify-icon {
 .stat-card {
     background: var(--bg-stat);
     border: 1px solid var(--border-color);
-    border-radius: 0.75rem;
+    border-radius: 16px; /* {rounded.card} */
     padding: 0.85rem 1rem;
     transition: all 0.3s ease;
 }
@@ -283,22 +296,22 @@ body.theme-light .stat-card {
     display: inline-block;
     width: 8px;
     height: 8px;
-    background: #2ECC71;
+    background: #00B24B; /* Action Green {colors.primary} */
     border-radius: 50%;
     margin-right: 6px;
     animation: pulse 1.8s infinite;
 }
 
 @keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-    70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 178, 75, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(0, 178, 75, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 178, 75, 0); }
 }
 
 .verdict-box-spoof {
     background: var(--spoof-box-bg);
     border: 2px solid var(--spoof-box-border);
-    border-radius: 1rem;
+    border-radius: 16px; /* {rounded.card} */
     padding: 1.5rem;
     box-shadow: 0 8px 30px rgba(239, 68, 68, 0.15);
     transition: all 0.3s ease;
@@ -307,16 +320,16 @@ body.theme-light .stat-card {
 .verdict-box-bonafide {
     background: var(--bona-box-bg);
     border: 2px solid var(--bona-box-border);
-    border-radius: 1rem;
+    border-radius: 16px; /* {rounded.card} */
     padding: 1.5rem;
-    box-shadow: 0 8px 30px rgba(46, 204, 113, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 178, 75, 0.15);
     transition: all 0.3s ease;
 }
 
 .progress-track {
     background: var(--track-bg);
     border: 1px solid var(--border-color);
-    border-radius: 9999px;
+    border-radius: 999px; /* {rounded.full} */
     height: 14px;
     overflow: hidden;
     margin: 8px 0;
@@ -332,28 +345,70 @@ body.theme-light .stat-card {
 }
 
 .progress-fill-bonafide {
-    background: linear-gradient(90deg, #10B981, #2ECC71);
-    box-shadow: 0 0 12px rgba(46, 204, 113, 0.6);
+    background: linear-gradient(90deg, #00B24B, #2ECC71);
+    box-shadow: 0 0 12px rgba(0, 178, 75, 0.6);
     height: 100%;
     transition: width 0.6s ease-in-out;
 }
 
-.btn-primary-teal {
-    background: var(--btn-primary-bg) !important;
-    border: 1px solid var(--btn-primary-border) !important;
-    color: var(--btn-primary-text) !important;
-    font-weight: 700 !important;
-    font-size: 1.05rem !important;
-    box-shadow: 0 4px 20px rgba(20, 184, 166, 0.35) !important;
+.btn-primary-teal,
+#submit-btn button,
+#start-quad-btn button {
+    background: #00B24B !important; /* Action Green {colors.primary} */
+    border: 1px solid #00B24B !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    border-radius: 10px !important; /* {rounded.lg} */
+    padding: 8px 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 178, 75, 0.35) !important;
     transition: all 0.2s ease-in-out !important;
 }
 
-.btn-primary-teal:hover {
+.btn-primary-teal:hover,
+#submit-btn button:hover,
+#start-quad-btn button:hover {
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 24px rgba(20, 184, 166, 0.5) !important;
+    box-shadow: 0 6px 24px rgba(0, 178, 75, 0.5) !important;
 }
 
-/* Light Mode specific overrides for Gradio native components */
+/* Secondary & Sample utility buttons */
+#sample-spoof-btn button,
+#sample-bona-btn button,
+#sample-zalo-btn button,
+.gradio-container button.secondary {
+    background: #2E3035 !important;
+    border: 1px solid #2D2F33 !important;
+    color: #F0F2F5 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important; /* {rounded.lg} */
+    padding: 8px 12px !important;
+    transition: all 0.15s ease !important;
+}
+
+#sample-spoof-btn button:hover,
+#sample-bona-btn button:hover,
+#sample-zalo-btn button:hover,
+.gradio-container button.secondary:hover {
+    border-color: #0075FF !important;
+    color: #0075FF !important;
+}
+
+/* Tabs: Electric Blue active state */
+.gradio-container .tab-nav button {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+}
+
+.gradio-container .tab-nav button.selected {
+    color: #0075FF !important; /* Electric Blue {colors.secondary} */
+    border-bottom: 2px solid #0075FF !important;
+    font-weight: 800 !important;
+}
+
 body.theme-light button:not(.btn-primary-teal) {
     background: #F1F5F9 !important;
     border: 1px solid #CBD5E1 !important;
@@ -365,13 +420,13 @@ body.theme-light button:not(.btn-primary-teal):hover {
 }
 
 body.theme-light .gradio-container .tab-nav button {
-    color: #475569 !important;
+    color: #53575F !important;
 }
 
 body.theme-light .gradio-container .tab-nav button.selected {
-    color: #0F766E !important;
-    border-bottom: 2px solid #0F766E !important;
-    font-weight: 700 !important;
+    color: #0075FF !important;
+    border-bottom: 2px solid #0075FF !important;
+    font-weight: 800 !important;
 }
 
 body.theme-light .gradio-container .accordion {
@@ -383,31 +438,31 @@ body.theme-light .gradio-container .accordion {
 .quad-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 0.875rem;
+    border-radius: 16px; /* {rounded.card} */
     padding: 1.1rem;
     transition: all 0.3s ease;
     margin-bottom: 0.5rem;
 }
 
 .quad-card-loading {
-    border-color: #14B8A6 !important;
-    box-shadow: 0 0 16px rgba(20, 184, 166, 0.25) !important;
+    border-color: #0075FF !important;
+    box-shadow: 0 0 16px rgba(0, 117, 255, 0.25) !important;
     animation: pulseBorder 2s infinite ease-in-out;
 }
 
 @keyframes pulseBorder {
-    0%, 100% { border-color: rgba(20, 184, 166, 0.4); }
-    50% { border-color: rgba(20, 184, 166, 1.0); }
+    0%, 100% { border-color: rgba(0, 117, 255, 0.4); }
+    50% { border-color: rgba(0, 117, 255, 1.0); }
 }
 
 .quad-card-bonafide {
-    border-color: rgba(46, 204, 113, 0.5) !important;
-    background: linear-gradient(180deg, rgba(7, 36, 20, 0.35) 0%, var(--bg-card) 100%) !important;
+    border-color: rgba(0, 178, 75, 0.5) !important;
+    background: linear-gradient(180deg, rgba(0, 178, 75, 0.15) 0%, var(--bg-card) 100%) !important;
 }
 
 .quad-card-spoof {
     border-color: rgba(239, 68, 68, 0.5) !important;
-    background: linear-gradient(180deg, rgba(31, 11, 15, 0.35) 0%, var(--bg-card) 100%) !important;
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.15) 0%, var(--bg-card) 100%) !important;
 }
 
 body.theme-light .quad-card-bonafide {
@@ -424,11 +479,11 @@ body.theme-light .quad-card-spoof {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(20, 184, 166, 0.15);
-    border: 1px solid rgba(20, 184, 166, 0.4);
-    color: var(--teal-accent);
+    background: rgba(0, 117, 255, 0.15);
+    border: 1px solid rgba(0, 117, 255, 0.4);
+    color: #0075FF;
     padding: 2px 8px;
-    border-radius: 9999px;
+    border-radius: 999px;
     font-size: 11px;
     font-weight: 600;
 }
@@ -436,11 +491,11 @@ body.theme-light .quad-card-spoof {
 .badge-waiting {
     display: inline-flex;
     align-items: center;
-    background: rgba(100, 116, 139, 0.15);
-    border: 1px solid rgba(100, 116, 139, 0.4);
+    background: rgba(83, 87, 95, 0.2);
+    border: 1px solid #2D2F33;
     color: var(--text-muted);
     padding: 2px 8px;
-    border-radius: 9999px;
+    border-radius: 999px;
     font-size: 11px;
 }
 
@@ -451,7 +506,7 @@ body.theme-light .quad-card-spoof {
     border: 1px solid rgba(245, 158, 11, 0.4);
     color: #F59E0B;
     padding: 2px 8px;
-    border-radius: 9999px;
+    border-radius: 999px;
     font-size: 11px;
 }
 
@@ -459,13 +514,13 @@ body.theme-light .quad-card-spoof {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(46, 204, 113, 0.15);
-    border: 1px solid #2ECC71;
+    background: rgba(0, 178, 75, 0.15);
+    border: 1px solid #00B24B;
     color: #86EFAC;
     padding: 2px 8px;
-    border-radius: 9999px;
+    border-radius: 999px;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 body.theme-light .badge-bonafide {
@@ -482,9 +537,9 @@ body.theme-light .badge-bonafide {
     border: 1px solid #EF4444;
     color: #F87171;
     padding: 2px 8px;
-    border-radius: 9999px;
+    border-radius: 999px;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 body.theme-light .badge-spoof {
@@ -540,8 +595,8 @@ def _create_forensic_plots(
     dur = float(len(y) / sr) if len(y) > 0 else 1.0
 
     # 1. Mel-Spectrogram Figure
-    fig_spec, ax_spec = plt.subplots(figsize=(8.5, 2.8), facecolor="#0B0F17")
-    ax_spec.set_facecolor("#0B0F17")
+    fig_spec, ax_spec = plt.subplots(figsize=(8.5, 2.8), facecolor="#141415")
+    ax_spec.set_facecolor("#141415")
     if len(y) >= 512:
         S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=80, fmax=8000)
         S_dB = librosa.power_to_db(S, ref=np.max)
@@ -549,37 +604,37 @@ def _create_forensic_plots(
         ax_spec.axhline(4000, color="#EF4444", linestyle="--", linewidth=1.2, alpha=0.75)
         ax_spec.text(0.08, 4200, "Ranh giới Vocoder HiFi-GAN (4.0 kHz)", color="#FCA5A5", fontsize=8, weight="bold")
     else:
-        ax_spec.text(0.5, 0.5, "Đoạn âm thanh quá ngắn để tạo phổ Mel", color="#94A3B8", ha="center")
-    ax_spec.tick_params(colors="#94A3B8", labelsize=8)
-    ax_spec.set_xlabel("Thời gian (giây)", color="#94A3B8", fontsize=9)
-    ax_spec.set_ylabel("Tần số (Hz)", color="#94A3B8", fontsize=9)
-    ax_spec.set_title("Mel-Spectrogram (80 Filterbanks - Phân bố Năng lượng Tần số Log-Scale)", color="#F8FAFC", fontsize=10, weight="bold")
+        ax_spec.text(0.5, 0.5, "Đoạn âm thanh quá ngắn để tạo phổ Mel", color="#9AA1B1", ha="center")
+    ax_spec.tick_params(colors="#9AA1B1", labelsize=8)
+    ax_spec.set_xlabel("Thời gian (giây)", color="#9AA1B1", fontsize=9)
+    ax_spec.set_ylabel("Tần số (Hz)", color="#9AA1B1", fontsize=9)
+    ax_spec.set_title("Mel-Spectrogram (80 Filterbanks - Phân bố Năng lượng Tần số Log-Scale)", color="#F0F2F5", fontsize=10, weight="bold")
     for spine in ax_spec.spines.values():
-        spine.set_color("#334155")
+        spine.set_color("#2D2F33")
     plt.tight_layout()
 
     # 2. Raw Time-Domain Waveform Figure (downsampled for crisp rendering without vector lag)
-    fig_wave, ax_wave = plt.subplots(figsize=(8.5, 2.0), facecolor="#0B0F17")
-    ax_wave.set_facecolor("#0B0F17")
-    wave_color = "#2ECC71" if is_bonafide else "#EF4444"
+    fig_wave, ax_wave = plt.subplots(figsize=(8.5, 2.0), facecolor="#141415")
+    ax_wave.set_facecolor("#141415")
+    wave_color = "#00B24B" if is_bonafide else "#EF4444"
     if len(y) > 0:
         step = max(1, len(y) // 2000)
         y_down = y[::step]
         t_down = np.linspace(0, dur, len(y_down))
         ax_wave.plot(t_down, y_down, color=wave_color, linewidth=0.75, alpha=0.9)
-    ax_wave.axhline(0, color="#334155", linestyle="--", linewidth=0.8)
+    ax_wave.axhline(0, color="#2D2F33", linestyle="--", linewidth=0.8)
     ax_wave.set_ylim(-1.05, 1.05)
-    ax_wave.tick_params(colors="#94A3B8", labelsize=8)
-    ax_wave.set_xlabel("Thời gian (giây)", color="#94A3B8", fontsize=9)
-    ax_wave.set_ylabel("Biên độ (-1.0 .. +1.0)", color="#94A3B8", fontsize=9)
-    ax_wave.set_title("Biểu Đồ Sóng Âm Đồng Bộ Thời Gian (Raw Time-Domain Waveform)", color="#F8FAFC", fontsize=10, weight="bold")
+    ax_wave.tick_params(colors="#9AA1B1", labelsize=8)
+    ax_wave.set_xlabel("Thời gian (giây)", color="#9AA1B1", fontsize=9)
+    ax_wave.set_ylabel("Biên độ (-1.0 .. +1.0)", color="#9AA1B1", fontsize=9)
+    ax_wave.set_title("Biểu Đồ Sóng Âm Đồng Bộ Thời Gian (Raw Time-Domain Waveform)", color="#F0F2F5", fontsize=10, weight="bold")
     for spine in ax_wave.spines.values():
-        spine.set_color("#334155")
+        spine.set_color("#2D2F33")
     plt.tight_layout()
 
     # 3. Grad-CAM / Temporal Window Attention Saliency Figure
-    fig_cam, ax_cam = plt.subplots(figsize=(8.5, 1.8), facecolor="#0B0F17")
-    ax_cam.set_facecolor("#0B0F17")
+    fig_cam, ax_cam = plt.subplots(figsize=(8.5, 1.8), facecolor="#141415")
+    ax_cam.set_facecolor("#141415")
     if window_scores is not None and len(window_scores) > 0:
         scores_arr = np.array(window_scores, dtype=np.float32)
         # Saliency risk mapping: score < threshold indicates high risk (spoof)
@@ -587,13 +642,13 @@ def _create_forensic_plots(
         cam_grid = np.repeat(risk_weights[np.newaxis, :], 20, axis=0)
         im = ax_cam.imshow(cam_grid, aspect="auto", cmap="turbo", extent=[0, dur, 0, 1], vmin=0.0, vmax=1.0)
         ax_cam.set_yticks([])
-        ax_cam.tick_params(colors="#94A3B8", labelsize=8)
-        ax_cam.set_xlabel("Thời gian (giây) - Trục Độ Chú Ý Anomaly Risk (0.0: Bình thường → 1.0: Điểm Kích Hoạt Giả Mạo)", color="#94A3B8", fontsize=9)
-        ax_cam.set_title(f"Bản Đồ Chú Ý Mạng Nơ-ron Grad-CAM ({len(scores_arr)} Cửa Sổ Trượt Multi-Window)", color="#F8FAFC", fontsize=10, weight="bold")
+        ax_cam.tick_params(colors="#9AA1B1", labelsize=8)
+        ax_cam.set_xlabel("Thời gian (giây) - Trục Độ Chú Ý Anomaly Risk (0.0: Bình thường → 1.0: Điểm Kích Hoạt Giả Mạo)", color="#9AA1B1", fontsize=9)
+        ax_cam.set_title(f"Bản Đồ Chú Ý Mạng Nơ-ron Grad-CAM ({len(scores_arr)} Cửa Sổ Trượt Multi-Window)", color="#F0F2F5", fontsize=10, weight="bold")
     else:
-        ax_cam.text(0.5, 0.5, "Chưa có dữ liệu attention", color="#94A3B8", ha="center")
+        ax_cam.text(0.5, 0.5, "Chưa có dữ liệu attention", color="#9AA1B1", ha="center")
     for spine in ax_cam.spines.values():
-        spine.set_color("#334155")
+        spine.set_color("#2D2F33")
     plt.tight_layout()
 
     return fig_spec, fig_wave, fig_cam
@@ -660,10 +715,10 @@ def make_predict_fn(
             d_text = "Vui lòng ghi âm hoặc tải lên một đoạn tin nhắn thoại."
             if not return_rich:
                 return v_text, c_text, d_text
-            empty_fig, _ = plt.subplots(figsize=(4, 1), facecolor="#0B0F17")
+            empty_fig, _ = plt.subplots(figsize=(4, 1), facecolor="#141415")
             return (
                 v_text, c_text, d_text,
-                """<div style="padding: 1.5rem; border-radius: 1rem; background: #131B2E; border: 1px solid #334155; text-align: center; color: #94A3B8;">
+                """<div style="padding: 1.5rem; border-radius: 16px; background: #2E3035; border: 1px solid #2D2F33; text-align: center; color: #9AA1B1;">
                     <p style="margin-top: 0.5rem; font-size: 14px;">Vui lòng tải lên file âm thanh hoặc chọn mẫu thử nghiệm bên trái để phân tích.</p>
                 </div>""",
                 "", "",
@@ -679,7 +734,7 @@ def make_predict_fn(
                 d_text = f"Không thể nạp trọng số từ {checkpoint_path}."
                 if not return_rich:
                     return v_text, c_text, d_text
-                empty_fig, _ = plt.subplots(figsize=(4, 1), facecolor="#0B0F17")
+                empty_fig, _ = plt.subplots(figsize=(4, 1), facecolor="#141415")
                 return v_text, c_text, d_text, f"<div style='color:red;'>{v_text}</div>", "", "", empty_fig, empty_fig, empty_fig
 
         # Gradio audio input can be a filepath (str) or a tuple (sample_rate, numpy_array)
@@ -704,7 +759,7 @@ def make_predict_fn(
             d_text = "Không thể phân tích dữ liệu."
             if not return_rich:
                 return v_text, c_text, d_text
-            empty_fig, _ = plt.subplots(figsize=(4, 1), facecolor="#0B0F17")
+            empty_fig, _ = plt.subplots(figsize=(4, 1), facecolor="#141415")
             return v_text, c_text, d_text, f"<div style='color:red;'>{v_text}</div>", "", "", empty_fig, empty_fig, empty_fig
 
         raw_bytes = data.tobytes()
@@ -782,55 +837,55 @@ def make_predict_fn(
             verdict_html = f"""
             <div class="verdict-box-bonafide">
                 <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3); flex-shrink: 0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #00B24B; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 16px rgba(0, 178, 75, 0.35); flex-shrink: 0;">
                         <iconify-icon icon="solar:shield-check-bold" width="28" height="28"></iconify-icon>
                     </div>
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                            <span style="font-size: 1.25rem; font-weight: 700; color: var(--bona-title-color);">XÁC THỰC: GIỌNG NÓI TỰ NHIÊN</span>
-                            <span style="padding: 2px 10px; border-radius: 9999px; background: #10B981; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase;">Bonafide Audio</span>
+                            <span style="font-size: 1.25rem; font-weight: 800; color: var(--bona-title-color);">XÁC THỰC: GIỌNG NÓI TỰ NHIÊN</span>
+                            <span style="padding: 2px 10px; border-radius: 999px; background: #00B24B; color: white; font-size: 11px; font-weight: 800; text-transform: uppercase;">Bonafide Audio</span>
                         </div>
                         <p style="margin-top: 0.5rem; font-size: 13.5px; color: var(--bona-desc-color); line-height: 1.5;">
                             Không tìm thấy bất kỳ dấu hiệu tổng hợp âm thanh bằng AI hay cắt ghép giả mạo. Đường nét cao độ thanh quản và nhiễu vi mô hoàn toàn trùng khớp giọng nói người thật.
                         </p>
                     </div>
                 </div>
-                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--action-bona-bg); border: 1px solid var(--action-bona-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 12px; background: var(--action-bona-bg); border: 1px solid var(--action-bona-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #10B981; color: white; flex-shrink: 0;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #00B24B; color: white; flex-shrink: 0;">
                             <iconify-icon icon="solar:check-read-bold" width="14" height="14"></iconify-icon>
                         </span>
                         <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: var(--bona-action-text-bold);">Âm sắc Người Thật:</strong> Phổ sinh học đầy đủ, phản xạ hơi thở tự nhiên.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; flex-shrink: 0;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0075FF; color: white; flex-shrink: 0;">
                             <iconify-icon icon="solar:hand-shake-bold" width="14" height="14"></iconify-icon>
                         </span>
-                        <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: var(--bona-action-text-bold);">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
+                        <span style="font-size: 12px; color: var(--bona-action-text);"><strong style="color: #0075FF;">An Tâm Giao Tiếp:</strong> Đoạn thoại an toàn và không bị can thiệp.</span>
                     </div>
                 </div>
             </div>
             """
-            conf_color = "#10B981"
+            conf_color = "#00B24B"
             conf_label = "Tự Nhiên (Bonafide)"
         else:
             verdict_html = f"""
             <div class="verdict-box-spoof">
                 <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #EF4444, #B91C1C); display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); flex-shrink: 0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #EF4444; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4); flex-shrink: 0;">
                         <iconify-icon icon="solar:shield-warning-bold" width="28" height="28"></iconify-icon>
                     </div>
                     <div style="flex: 1;">
                         <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                            <span style="font-size: 1.25rem; font-weight: 700; color: var(--spoof-title-color);">CẢNH BÁO: GIỌNG NÓI GIẢ MẠO</span>
-                            <span style="padding: 2px 10px; border-radius: 9999px; background: #EF4444; color: white; font-size: 11px; font-weight: 700; text-transform: uppercase;">Phát hiện Deepfake</span>
+                            <span style="font-size: 1.25rem; font-weight: 800; color: var(--spoof-title-color);">CẢNH BÁO: GIỌNG NÓI GIẢ MẠO</span>
+                            <span style="padding: 2px 10px; border-radius: 999px; background: #EF4444; color: white; font-size: 11px; font-weight: 800; text-transform: uppercase;">Phát hiện Deepfake</span>
                         </div>
                         <p style="margin-top: 0.5rem; font-size: 13.5px; color: var(--spoof-desc-color); line-height: 1.5;">
                             Hệ thống AI nhận diện thấy dấu vết biến điệu nhân tạo (AI Voice Cloning / TTS Synthesis). Có nguy cơ cao đây là cuộc gọi hoặc tin nhắn giả danh để lừa đảo.
                         </p>
                     </div>
                 </div>
-                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 0.75rem; background: var(--action-spoof-bg); border: 1px solid var(--action-spoof-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="margin-top: 1rem; padding: 0.75rem 1rem; border-radius: 12px; background: var(--action-spoof-bg); border: 1px solid var(--action-spoof-border); display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #EF4444; color: white; flex-shrink: 0;">
                             <iconify-icon icon="solar:close-circle-bold" width="14" height="14"></iconify-icon>
@@ -838,7 +893,7 @@ def make_predict_fn(
                         <span style="font-size: 12px; color: var(--spoof-action-text);"><strong>TUYỆT ĐỐI KHÔNG:</strong> Không chuyển tiền, không đọc mã OTP hoặc gửi mật khẩu.</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0F766E; color: white; flex-shrink: 0;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: #0075FF; color: white; flex-shrink: 0;">
                             <iconify-icon icon="solar:phone-calling-bold" width="14" height="14"></iconify-icon>
                         </span>
                         <span style="font-size: 12px; color: var(--text-primary);"><strong>GỌI LẠI TRỰC TIẾP:</strong> Gọi điện thoại truyền thống hoặc Video Call để nhìn mặt.</span>
@@ -850,7 +905,7 @@ def make_predict_fn(
             conf_label = "Giả Mạo (Deepfake Spoof)"
 
         conf_html = f"""
-        <div style="background: var(--conf-box-bg); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 1rem; margin-top: 0.75rem;">
+        <div style="background: var(--conf-box-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 1rem; margin-top: 0.75rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Độ tin cậy phân tích (Platt Scaling Calibrated):</span>
                 <span style="font-size: 15px; font-weight: 700; color: {conf_color}; font-family: 'JetBrains Mono', monospace;">{conf_pct:.1f}% {conf_label}</span>
@@ -865,7 +920,7 @@ def make_predict_fn(
                     <iconify-icon icon="solar:danger-circle-bold" width="13" height="13"></iconify-icon> Giả Mạo: {prob_spoof_pct:.1f}%
                 </span>
                 <span style="color: var(--text-muted);">Ngưỡng θ: {threshold:.4f} (50%)</span>
-                <span style="color: {'#10B981' if is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if is_bonafide else '400'}; display: inline-flex; align-items: center; gap: 4px;">
+                <span style="color: {'#00B24B' if is_bonafide else 'var(--text-muted)'}; font-weight: {'700' if is_bonafide else '400'}; display: inline-flex; align-items: center; gap: 4px;">
                     <iconify-icon icon="solar:check-circle-bold" width="13" height="13"></iconify-icon> Người Thật: {prob_bona_pct:.1f}%
                 </span>
             </div>
@@ -874,7 +929,7 @@ def make_predict_fn(
 
         hf_val = acoustics['hf_ratio']
         if is_bonafide:
-            hf_color = "#10B981"
+            hf_color = "#00B24B"
             hf_sub = "Dải cao tần tự nhiên"
         else:
             if hf_val < 1.0:
@@ -940,15 +995,15 @@ def make_predict_fn(
 def _render_status_banner(kind: str, text: str) -> str:
     """Render a responsive status banner for live cloning progression."""
     if kind == "info":
-        bg = "rgba(20, 184, 166, 0.12)"
-        border = "rgba(20, 184, 166, 0.4)"
+        bg = "rgba(0, 117, 255, 0.12)"
+        border = "rgba(0, 117, 255, 0.4)"
         color = "var(--text-primary)"
         icon = '<iconify-icon icon="solar:cpu-bolt-bold" class="rotating-spinner" width="18" height="18" style="color: var(--teal-accent); flex-shrink: 0;"></iconify-icon>'
     elif kind == "success":
-        bg = "rgba(46, 204, 113, 0.15)"
-        border = "rgba(46, 204, 113, 0.5)"
+        bg = "rgba(0, 178, 75, 0.15)"
+        border = "rgba(0, 178, 75, 0.5)"
         color = "var(--text-primary)"
-        icon = '<iconify-icon icon="solar:check-circle-bold" width="18" height="18" style="color: #2ECC71; flex-shrink: 0;"></iconify-icon>'
+        icon = '<iconify-icon icon="solar:check-circle-bold" width="18" height="18" style="color: #00B24B; flex-shrink: 0;"></iconify-icon>'
     elif kind == "warning":
         bg = "rgba(245, 158, 11, 0.15)"
         border = "rgba(245, 158, 11, 0.5)"
@@ -961,7 +1016,7 @@ def _render_status_banner(kind: str, text: str) -> str:
         icon = '<iconify-icon icon="solar:close-circle-bold" width="18" height="18" style="color: #EF4444; flex-shrink: 0;"></iconify-icon>'
 
     return f"""
-    <div style="background: {bg}; border: 1px solid {border}; border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem; color: {color}; font-size: 13px;">
+    <div style="background: {bg}; border: 1px solid {border}; border-radius: 16px; padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.75rem; color: {color}; font-size: 13px;">
         {icon}
         <div>{text}</div>
     </div>
@@ -1006,7 +1061,7 @@ def _render_quad_card_done(
     if is_bonafide:
         badge = f"""<span class="badge-bonafide"><iconify-icon icon="solar:check-circle-bold" width="13" height="13"></iconify-icon> NGƯỜI THẬT ({prob_bona_pct:.1f}%)</span>"""
         card_class = "quad-card quad-card-bonafide"
-        score_color = "#10B981"
+        score_color = "#00B24B"
     else:
         badge = f"""<span class="badge-spoof"><iconify-icon icon="solar:danger-circle-bold" width="13" height="13"></iconify-icon> GIẢ MẠO ({prob_spoof_pct:.1f}%)</span>"""
         card_class = "quad-card quad-card-spoof"
@@ -1016,7 +1071,7 @@ def _render_quad_card_done(
     if is_bonafide_truth:
         if is_bonafide:
             verdict_text = "✅ Nhận diện chính xác 100% giọng thật của bạn."
-            verdict_color = "#10B981"
+            verdict_color = "#00B24B"
         else:
             verdict_text = "⚠️ Báo nhầm (BPCER): Giọng thật bị nghi ngờ giả mạo."
             verdict_color = "#F59E0B"
@@ -1032,7 +1087,7 @@ def _render_quad_card_done(
     <div class="{card_class}">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-                <iconify-icon icon="{icon}" width="18" height="18" style="color: {'#10B981' if is_bonafide else '#EF4444'};"></iconify-icon>
+                <iconify-icon icon="{icon}" width="18" height="18" style="color: {'#00B24B' if is_bonafide else '#EF4444'};"></iconify-icon>
                 <strong style="color: var(--text-primary); font-size: 13.5px;">{title}</strong>
             </div>
             {badge}
@@ -1149,15 +1204,15 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
             lat = float(ev.get("latency_s", 0.0)) * 1000.0
 
             if is_bona:
-                decision_badge = '<span style="color: #10B981; font-weight: 700;">Người Thật</span>'
+                decision_badge = '<span style="color: #00B24B; font-weight: 800;">Người Thật</span>'
             else:
-                decision_badge = '<span style="color: #EF4444; font-weight: 700;">Giả Mạo</span>'
+                decision_badge = '<span style="color: #EF4444; font-weight: 800;">Giả Mạo</span>'
 
             # Match check
             if (truth.startswith("Thật") and is_bona) or (truth.startswith("Giả") and not is_bona):
-                match_badge = '<span style="color: #10B981; font-weight: 700; background: rgba(16, 185, 129, 0.15); padding: 2px 8px; border-radius: 4px;">CHÍNH XÁC</span>'
+                match_badge = '<span style="color: #00B24B; font-weight: 800; background: rgba(0, 178, 75, 0.15); padding: 2px 8px; border-radius: 999px;">CHÍNH XÁC</span>'
             else:
-                match_badge = '<span style="color: #F59E0B; font-weight: 700; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 4px;">CẢNH BÁO</span>'
+                match_badge = '<span style="color: #F59E0B; font-weight: 800; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 999px;">CẢNH BÁO</span>'
 
             row_html = f"""
             <tr style="border-bottom: 1px solid var(--border-color);">
@@ -1166,7 +1221,7 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
                 <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px;">{truth}</td>
                 <td style="padding: 10px 14px;">{decision_badge}</td>
                 <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600;">{prob_pct:.1f}%</td>
-                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: {'#10B981' if is_bona else '#EF4444'};">{raw_s:+.4f}</td>
+                <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: {'#00B24B' if is_bona else '#EF4444'};">{raw_s:+.4f}</td>
                 <td style="padding: 10px 14px; font-family: 'JetBrains Mono', monospace; color: var(--teal-accent);">{lat:.1f}ms</td>
                 <td style="padding: 10px 14px;">{match_badge}</td>
             </tr>
@@ -1188,16 +1243,16 @@ def _render_matrix_summary(state: dict, completed: bool = False) -> str:
         rows.append(row_html)
 
     header_status = "HOÀN TẤT ĐỐI CHỨNG" if completed else "TIẾN TRÌNH ĐANG XỬ LÝ"
-    header_color = "#10B981" if completed else "var(--teal-accent)"
+    header_color = "#00B24B" if completed else "var(--teal-accent)"
 
     return f"""
-    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.875rem; padding: 1.25rem; margin-top: 1.25rem;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 1.25rem; margin-top: 1.25rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 8px;">
             <div style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
                 <iconify-icon icon="solar:checklist-minimalistic-bold" width="18" height="18" style="color: {header_color};"></iconify-icon>
                 BẢNG ĐỐI SOÁT ĐỐI CHỨNG: NGƯỜI THẬT VS CLONE VOICESTUDIO CFM
             </div>
-            <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: {header_color}; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 9999px;">
+            <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: {header_color}; font-weight: 600; background: var(--bg-card); border: 1px solid var(--border-color); padding: 2px 10px; border-radius: 999px;">
                 {header_status}
             </span>
         </div>
@@ -1499,12 +1554,12 @@ def build_ui(
     )
 
     theme = gr.themes.Monochrome(
-        primary_hue="teal",
-        neutral_hue="slate",
+        primary_hue="green",
+        neutral_hue="neutral",
     ).set(
-        body_background_fill="#0B0F17",
-        block_background_fill="#131B2E",
-        block_border_color="#334155",
+        body_background_fill="#141415",
+        block_background_fill="#2E3035",
+        block_border_color="#2D2F33",
     )
 
     with gr.Blocks(title="ViTrueVoice — Phòng Lab Nhận Diện Deepfake Giọng Nói Tiếng Việt") as demo:
@@ -1520,17 +1575,17 @@ def build_ui(
                 gr.HTML(
                     """
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #14B8A6, #0F766E); display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 4px 20px rgba(20, 184, 166, 0.4); flex-shrink: 0;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: #00B24B; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 4px 16px rgba(0, 178, 75, 0.4); flex-shrink: 0;">
                             <iconify-icon icon="solar:shield-check-bold" width="28" height="28" style="color: white;"></iconify-icon>
                         </div>
                         <div>
                             <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                <span style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;">ViTrueVoice</span>
-                                <span style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 3px 10px; border-radius: 9999px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; display: inline-flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.02em;">ViTrueVoice</span>
+                                <span style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 3px 10px; border-radius: 999px; font-size: 12px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; display: inline-flex; align-items: center; gap: 6px;">
                                     <span class="pulse-dot"></span><iconify-icon icon="solar:cpu-bolt-bold" width="14" height="14" style="color: var(--teal-accent);"></iconify-icon> Mô hình AI: B_zalo V7 Dual-Seen Active
                                 </span>
                             </div>
-                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px; font-weight: 600;">
                                 Phòng Lab phân tích âm thanh Forensics Deepfake qua kênh thoại nén tiếng Việt
                             </div>
                         </div>
@@ -1577,12 +1632,12 @@ def build_ui(
 
                         gr.HTML(
                             """
-                            <div style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <div style="margin-top: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 0.85rem 1rem; display: flex; align-items: flex-start; gap: 0.75rem;">
                                 <iconify-icon icon="solar:shield-keyhole-bold-duotone" width="24" height="24" style="color: var(--teal-accent); flex-shrink: 0; margin-top: 2px;"></iconify-icon>
                                 <div>
                                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                                         <strong style="font-size: 12px; color: var(--text-primary);">Cam kết Quyền Riêng Tư & An Toàn Tuyệt Đối</strong>
-                                        <span style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.4); color: var(--teal-accent); font-size: 10px; padding: 1px 6px; border-radius: 4px;">Luật 91/2025/QH15</span>
+                                        <span style="background: rgba(0, 117, 255, 0.15); border: 1px solid rgba(0, 117, 255, 0.4); color: var(--teal-accent); font-size: 10px; padding: 1px 6px; border-radius: 999px;">Luật 91/2025/QH15</span>
                                     </div>
                                     <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">
                                         Âm thanh được phân tích trực tiếp trên RAM và xóa hủy ngay lập tức sau 0.4s. Không lưu trữ, không sao chép và không chia sẻ giọng nói gốc.
@@ -1598,7 +1653,7 @@ def build_ui(
 
                         verdict_html = gr.HTML(
                             """
-                            <div style="padding: 1.5rem; border-radius: 1rem; background: var(--bg-surface); border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
+                            <div style="padding: 1.5rem; border-radius: 16px; background: var(--bg-surface); border: 1px solid var(--border-color); text-align: center; color: var(--text-secondary);">
                                 <iconify-icon icon="solar:waveform-bold-duotone" width="38" height="38" style="color: var(--teal-accent); margin-bottom: 8px;"></iconify-icon>
                                 <p style="margin-top: 0.25rem; font-size: 14px;">Bấm nút <strong>'2. KIỂM TRA TÍNH XÁC THỰC NGAY'</strong> để nhận diện giọng thật / giả mạo.</p>
                             </div>
@@ -1680,12 +1735,12 @@ def build_ui(
 
                         gr.HTML(
                             f"""
-                            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 0.75rem; padding: 0.85rem 1rem; margin-top: 0.75rem;">
+                            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 0.85rem 1rem; margin-top: 0.75rem;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <iconify-icon icon="solar:volume-loud-bold" width="18" height="18" style="color: var(--teal-accent);"></iconify-icon>
                                     <strong style="font-size: 13px; color: var(--text-primary);">Câu đọc gợi ý khi ghi âm (Chuẩn Voice_Final):</strong>
                                 </div>
-                                <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 6px; font-size: 12.5px; color: var(--text-secondary); border-left: 3px solid var(--teal-accent);">
+                                <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 8px; font-size: 12.5px; color: var(--text-secondary); border-left: 3px solid #00B24B;">
                                     "{DEFAULT_REF_PROMPT}"
                                 </div>
 
@@ -1693,7 +1748,7 @@ def build_ui(
                                     <iconify-icon icon="solar:chat-round-dots-bold" width="18" height="18" style="color: var(--teal-accent);"></iconify-icon>
                                     <strong style="font-size: 13px; color: var(--text-primary);">Câu thoại nhân bản tự động (Target Spoof):</strong>
                                 </div>
-                                <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">
+                                <div style="margin-top: 6px; padding: 8px 12px; background: var(--bg-card); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--teal-accent); font-family: 'JetBrains Mono', monospace;">
                                     "{DEFAULT_TARGET_TEXT}"
                                 </div>
                                 <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4;">
@@ -1716,7 +1771,7 @@ def build_ui(
                         gr.Markdown("### <iconify-icon icon='solar:chart-square-bold-duotone' width='22' height='22' style='vertical-align: -0.2em; color: var(--teal-accent);'></iconify-icon> 3. Tiến Trình Nhân Bản & Thẩm Định Thời Gian Thực")
                         status_banner_html = gr.HTML(
                             """
-                            <div style="padding: 1.25rem; border-radius: 0.75rem; background: var(--bg-surface); border: 1px dashed var(--border-color); text-align: center; color: var(--text-secondary); font-size: 13px;">
+                            <div style="padding: 1.25rem; border-radius: 16px; background: var(--bg-surface); border: 1px dashed var(--border-color); text-align: center; color: var(--text-secondary); font-size: 13px;">
                                 <iconify-icon icon="solar:info-circle-linear" width="28" height="28" style="color: var(--teal-accent); margin-bottom: 6px;"></iconify-icon>
                                 <div>Ghi âm giọng nói của bạn ở cột bên trái (hoặc bấm <strong>'1-Click: Nạp Giọng Mẫu'</strong>) rồi bấm <strong>'2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM'</strong>.</div>
                                 <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">Kết quả mẫu thật hiển thị ngay lập tức sau ~66ms, tiếp theo là bản clone VoiceStudio CFM sau khi tổng hợp xong.</div>
