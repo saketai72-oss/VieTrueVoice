@@ -1236,14 +1236,6 @@
         <span class="tag">SPOOF</span>
         <span>Zalo Opus 24kbps Spoof</span>
       </button>
-      <button class="preset-chip bonafide" onclick="generateSyntheticSample(true)">
-        <span class="tag">TEST</span>
-        <span>Synthesize Harmonic Wave</span>
-      </button>
-      <button class="preset-chip spoof" onclick="generateSyntheticSample(false)">
-        <span class="tag">TEST</span>
-        <span>Synthesize Glitch Spoof</span>
-      </button>
     </section>
 
     <!-- MODE 1: SINGLE-FILE ANALYSIS VIEW -->
@@ -1940,9 +1932,8 @@
         } catch (e) {}
       }
 
-      // If static samples not reachable via HTTP (e.g. standalone HTML file), synthesize authentic waveform
-      logConsole('WARN', `Could not fetch ${filename} directly. Generating synthesized forensic wave.`);
-      generateSyntheticSample(presetKey === 'spk0004');
+      logConsole('ERR', `Could not fetch ${filename} from static samples.`);
+      alert(`Không thể tải tệp mẫu âm thanh ${filename}. Vui lòng thử lại.`);
     }
 
     // --- Synthetic Audio Waveform Generator ---
