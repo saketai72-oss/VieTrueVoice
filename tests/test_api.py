@@ -154,3 +154,29 @@ def test_predict_alias_route(client):
     assert payload["prediction"] == "BONA_FIDE"
     assert payload["raw_score"] == 1.0
 
+
+def test_clone_and_audit_endpoint(client, tmp_path):
+    audio_bytes = make_wav_bytes(duration_sec=1.0)
+    response = client.post(
+        "/api/v1/clone-and-audit",
+        files={"file": ("mic_record.wav", audio_bytes, "audio/wav")},
+        data={"target_text": "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "success"
+    assert "bonafide" in payload
+    assert "clone" in payload
+    assert payload["bonafide"]["prediction"] == "BONA_FIDE"
+    assert payload["clone"]["audio_base64"].startswith("data:audio/wav;base64,")
+    assert payload["clone"]["prediction"] in ("BONA_FIDE", "SPOOF")
+
+    # Verify alias route
+    response_alias = client.post(
+        "/clone-and-audit",
+        files={"file": ("mic_alias.wav", audio_bytes, "audio/wav")},
+    )
+    assert response_alias.status_code == 200
+    assert response_alias.json()["status"] == "success"
+
+

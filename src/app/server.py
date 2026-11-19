@@ -1,16 +1,20 @@
 """FastAPI inference service for ViTrueVoice anti-spoofing detection."""
 
 from __future__ import annotations
+import base64
 import hashlib
 import io
 import json
+import logging
+import os
+import tempfile
 import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -18,8 +22,19 @@ import numpy as np
 import soundfile as sf
 import torch
 
-from src.app.decision import classify_score
+from src.app.decision import PLATT_SCALE_K, classify_score
 from src.preprocessing.pooling import extract_window_batch, pool_scores
+
+try:
+    from src.vitruevoice.live_cloner import (
+        DEFAULT_REF_PROMPT,
+        DEFAULT_TARGET_TEXT,
+        LiveVoiceStudioCloner,
+    )
+except Exception:
+    LiveVoiceStudioCloner = None
+    DEFAULT_TARGET_TEXT = "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."
+    DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
 
 SUPPORTED_EXTS = {".wav", ".mp3", ".m4a", ".ogg", ".opus", ".flac"}
 SUPPORTED_TYPES = {
@@ -237,6 +252,215 @@ def create_app(
         _append_latency_log(log_path, log_entry)
 
         return result
+
+    @app.post("/api/v1/clone-and-audit")
+    @app.post("/clone-and-audit")
+    async def clone_and_audit(
+        file: UploadFile = File(...),
+        target_text: str = Form(DEFAULT_TARGET_TEXT),
+        custom_ref_text: str = Form(""),
+    ) -> dict[str, Any]:
+        if not _is_supported(file.filename, file.content_type):
+            raise HTTPException(status_code=415, detail="Unsupported audio format")
+
+        raw_bytes = await file.read()
+        if not raw_bytes:
+            raise HTTPException(status_code=400, detail="Empty audio file")
+
+        try:
+            audio_data = _load_audio_in_memory(raw_bytes)
+        except Exception as exc:
+            raise HTTPException(status_code=400, detail=f"Failed to decode audio: {exc}")
+
+        if len(audio_data) < int(0.5 * TARGET_SAMPLE_RATE):
+            raise HTTPException(status_code=400, detail="Đoạn âm thanh quá ngắn (< 0.5s)")
+
+        if model is None:
+            raise HTTPException(status_code=503, detail="Model is not loaded")
+
+        # 1. Thẩm định bản gốc Bona Fide
+        t0_bona = time.perf_counter()
+        windows_bona = extract_window_batch(
+            audio_data,
+            win=TARGET_SAMPLE_COUNT,
+            hop=16000,
+            max_windows=5,
+            apply_dither=True,
+        ).to(device)
+        with torch.inference_mode():
+            score_tensor = model.score(windows_bona)
+            if isinstance(score_tensor, torch.Tensor):
+                scores_np = score_tensor.detach().cpu().numpy()
+            else:
+                scores_np = np.asarray(score_tensor)
+            if scores_np.ndim > 1:
+                scores_np = scores_np.squeeze(-1)
+            elif scores_np.ndim == 0:
+                scores_np = np.array([scores_np.item()], dtype=np.float32)
+            raw_score_bona = float(pool_scores(scores_np, mode="max"))
+
+        lat_bona = time.perf_counter() - t0_bona
+        dec_bona = classify_score(raw_score_bona, threshold=threshold)
+        diff_bona = raw_score_bona - threshold
+        prob_bona = float(1.0 / (1.0 + np.exp(-PLATT_SCALE_K * diff_bona)))
+        prob_bona = max(0.001, min(0.999, prob_bona))
+        sha_bona = hashlib.sha256(raw_bytes).hexdigest()
+
+        bona_dict = {
+            "prediction": dec_bona.prediction,
+            "label": dec_bona.label,
+            "raw_score": round(dec_bona.raw_score, 4),
+            "threshold": dec_bona.threshold,
+            "prob_bona_pct": round(prob_bona * 100.0, 1),
+            "prob_spoof_pct": round((1.0 - prob_bona) * 100.0, 1),
+            "confidence": round(prob_bona * 100.0, 1) if dec_bona.is_bonafide else round((1.0 - prob_bona) * 100.0, 1),
+            "latency_sec": round(lat_bona, 4),
+            "audio_sha256": sha_bona,
+            "duration_s": round(float(len(audio_data) / TARGET_SAMPLE_RATE), 2),
+            "n_windows": int(windows_bona.shape[0]),
+        }
+
+        # 2. Nhân bản Zero-Shot CFM qua VoiceStudio (OmniVoice)
+        t0_clone = time.perf_counter()
+        cloned_audio_int16 = None
+        cloned_sr = TARGET_SAMPLE_RATE
+        ref_used = ""
+        clone_status = "done"
+
+        if LiveVoiceStudioCloner is not None:
+            try:
+                cloner = LiveVoiceStudioCloner(
+                    target_text=target_text or DEFAULT_TARGET_TEXT,
+                    device="cuda" if (torch.cuda.is_available() and "cuda" in str(device).lower()) else "cpu",
+                )
+                with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_f:
+                    tmp_path = tmp_f.name
+                    sf.write(tmp_path, audio_data, TARGET_SAMPLE_RATE, subtype="PCM_16")
+
+                try:
+                    res = cloner.clone_omnivoice(tmp_path, ref_text=custom_ref_text)
+                    if res is not None:
+                        cloned_audio_int16, cloned_sr, ref_used = res
+                finally:
+                    if os.path.exists(tmp_path):
+                        try:
+                            os.unlink(tmp_path)
+                        except Exception:
+                            pass
+            except Exception as exc:
+                logging.getLogger(__name__).warning("VoiceStudio live cloning failed: %s", exc)
+
+        # Fallback to high-quality CFM reference preset if model synthesis was unavailable
+        if cloned_audio_int16 is None:
+            clone_status = "fallback"
+            preset_spoof = Path("data/bonafide_ref/sample_spoof_f5tts.wav")
+            if not preset_spoof.exists():
+                preset_spoof = Path("src/app/samples/sample_spoof_f5tts.wav")
+            if preset_spoof.exists():
+                try:
+                    y_p, sr_p = sf.read(str(preset_spoof))
+                    if y_p.ndim > 1:
+                        y_p = y_p.mean(axis=-1)
+                    if sr_p != TARGET_SAMPLE_RATE:
+                        import librosa
+                        y_p = librosa.resample(y_p, orig_sr=sr_p, target_sr=TARGET_SAMPLE_RATE)
+                    cloned_audio_int16 = (y_p * 32767.0).astype(np.int16)
+                    cloned_sr = TARGET_SAMPLE_RATE
+                    ref_used = "F5-TTS CFM Preset Sample (Fallback)"
+                except Exception as e:
+                    logging.getLogger(__name__).warning("Preset spoof fallback failed: %s", e)
+
+        if cloned_audio_int16 is None:
+            raise HTTPException(status_code=500, detail="Không thể tổng hợp giọng clone và không tìm thấy tệp mẫu dự phòng")
+
+        # 3. Thẩm định bản clone CFM
+        cloned_float = (cloned_audio_int16.astype(np.float32) / 32768.0)
+        windows_clone = extract_window_batch(
+            cloned_float,
+            win=TARGET_SAMPLE_COUNT,
+            hop=16000,
+            max_windows=5,
+            apply_dither=False,
+        ).to(device)
+
+        with torch.inference_mode():
+            score_clone_tensor = model.score(windows_clone)
+            if isinstance(score_clone_tensor, torch.Tensor):
+                sc_np = score_clone_tensor.detach().cpu().numpy()
+            else:
+                sc_np = np.asarray(score_clone_tensor)
+            if sc_np.ndim > 1:
+                sc_np = sc_np.squeeze(-1)
+            elif sc_np.ndim == 0:
+                sc_np = np.array([sc_np.item()], dtype=np.float32)
+            raw_score_clone = float(pool_scores(sc_np, mode="max"))
+
+        lat_clone = time.perf_counter() - t0_clone
+        dec_clone = classify_score(raw_score_clone, threshold=threshold)
+        diff_clone = raw_score_clone - threshold
+        prob_clone_bona = float(1.0 / (1.0 + np.exp(-PLATT_SCALE_K * diff_clone)))
+        prob_clone_bona = max(0.001, min(0.999, prob_clone_bona))
+        prob_clone_spoof = 1.0 - prob_clone_bona
+
+        buf = io.BytesIO()
+        sf.write(buf, cloned_audio_int16, cloned_sr, format="WAV", subtype="PCM_16")
+        clone_wav_bytes = buf.getvalue()
+        audio_b64 = "data:audio/wav;base64," + base64.b64encode(clone_wav_bytes).decode("ascii")
+        sha_clone = hashlib.sha256(clone_wav_bytes).hexdigest()
+
+        clone_dict = {
+            "status": clone_status,
+            "prediction": dec_clone.prediction,
+            "label": dec_clone.label,
+            "raw_score": round(dec_clone.raw_score, 4),
+            "threshold": dec_clone.threshold,
+            "prob_bona_pct": round(prob_clone_bona * 100.0, 1),
+            "prob_spoof_pct": round(prob_clone_spoof * 100.0, 1),
+            "confidence": round(prob_clone_spoof * 100.0, 1) if not dec_clone.is_bonafide else round(prob_clone_bona * 100.0, 1),
+            "latency_sec": round(lat_clone, 4),
+            "audio_sha256": sha_clone,
+            "duration_s": round(float(len(cloned_float) / TARGET_SAMPLE_RATE), 2),
+            "n_windows": int(windows_clone.shape[0]),
+            "audio_base64": audio_b64,
+            "transcript_used": ref_used,
+        }
+
+        # Log anonymously
+        log_entry_bona = {
+            "request_id": f"req_{uuid.uuid4().hex[:12]}",
+            "audio_sha256": sha_bona,
+            "predicted_label": bona_dict["prediction"],
+            "raw_score": bona_dict["raw_score"],
+            "threshold": bona_dict["threshold"],
+            "confidence_score": bona_dict["confidence"],
+            "latency_sec": bona_dict["latency_sec"],
+            "n_windows": bona_dict["n_windows"],
+            "type": "live_reference",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        _append_latency_log(log_path, log_entry_bona)
+
+        log_entry_clone = {
+            "request_id": f"req_{uuid.uuid4().hex[:12]}",
+            "audio_sha256": sha_clone,
+            "predicted_label": clone_dict["prediction"],
+            "raw_score": clone_dict["raw_score"],
+            "threshold": clone_dict["threshold"],
+            "confidence_score": clone_dict["confidence"],
+            "latency_sec": clone_dict["latency_sec"],
+            "n_windows": clone_dict["n_windows"],
+            "type": "live_cfm_clone",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+        _append_latency_log(log_path, log_entry_clone)
+
+        return {
+            "status": "success",
+            "target_text": target_text or DEFAULT_TARGET_TEXT,
+            "transcript_used": ref_used,
+            "bonafide": bona_dict,
+            "clone": clone_dict,
+        }
 
     if model is not None:
         from src.app.zalo_webhook import create_zalo_router
