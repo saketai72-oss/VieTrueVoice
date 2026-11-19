@@ -52,6 +52,7 @@ def evaluate_dataset(
     model,
     device: str,
     apply_dither: bool = True,
+    pooling_mode: str = "asymmetric_veto",
 ) -> pd.DataFrame:
     records = []
 
@@ -73,7 +74,7 @@ def evaluate_dataset(
 
     all_items = bona_files + spoof_files
     print(f"Tổng số tệp kiểm định: {len(all_items)} (Bona Fide: {len(bona_files)}, Unseen Spoof: {len(spoof_files)})")
-    print(f"Cấu hình suy luận: Multi-window Max-Pooling | apply_dither={apply_dither}")
+    print(f"Cấu hình suy luận: Multi-window Pooling ({pooling_mode}) | apply_dither={apply_dither}")
 
     t0 = time.perf_counter()
     with torch.no_grad():
@@ -89,7 +90,7 @@ def evaluate_dataset(
                     apply_dither=apply_dither,
                 ).to(device)
                 win_scores = model.score(wb)
-                score = pool_scores(win_scores, mode="max")
+                score = pool_scores(win_scores, mode=pooling_mode)
                 pred_label = 1 if score > 0.0 else 0
                 is_correct = (pred_label == true_label)
 
@@ -153,6 +154,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ckpt", type=str, default="out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--pooling", type=str, default="asymmetric_veto", help="Pooling mode (asymmetric_veto, max, mean, min)")
     parser.add_argument("--dither", action="store_true", help="Apply comfort dithering (default: False)")
     parser.add_argument("--out", type=str, default="benchmarks/eval_5spk_unseen_and_bonafide.json")
     args = parser.parse_args()
@@ -160,18 +162,18 @@ def main():
     print("=" * 95)
     print("🔬 KIỂM ĐỊNH TOÀN BỘ TẬP UNSEEN TTS & BONA FIDE CỦA 5 TÌNH NGUYỆN VIÊN ĐỐI CHỨNG HELD-OUT")
     print(f"Mô hình: {args.ckpt}")
-    print(f"Thiết bị: {args.device} | Ngưỡng quyết định: theta = 0.0 | Comfort Dither: {args.dither}")
+    print(f"Thiết bị: {args.device} | Ngưỡng quyết định: theta = 0.0 | Pooling: {args.pooling} | Comfort Dither: {args.dither}")
     print("=" * 95)
 
     model, _ = load_model(args.ckpt, args.device)
     model.eval()
 
     # 1. Chạy đánh giá tập dữ liệu
-    mode_name = "MULTI-WINDOW MAX-POOLING (RAW ACOUSTIC)" if not args.dither else "MULTI-WINDOW MAX-POOLING + COMFORT DITHERING"
+    mode_name = f"MULTI-WINDOW POOLING ({args.pooling.upper()})" + (" + COMFORT DITHERING" if args.dither else " (RAW ACOUSTIC)")
     print("\n" + "=" * 95)
     print(f"🚀 CHẠY ĐÁNH GIÁ CHẾ ĐỘ: {mode_name}")
     print("=" * 95)
-    df_res = evaluate_dataset(model, args.device, apply_dither=args.dither)
+    df_res = evaluate_dataset(model, args.device, apply_dither=args.dither, pooling_mode=args.pooling)
 
     summary_overall = compute_metrics_table(df_res)
 
@@ -236,7 +238,7 @@ def main():
         "checkpoint": args.ckpt,
         "device": args.device,
         "threshold": 0.0,
-        "pooling": "multi_window_max_pooling_5win",
+        "pooling": args.pooling,
         "apply_dither": args.dither,
         "overall": summary_overall,
         "by_speaker": spk_breakdowns,

@@ -256,8 +256,8 @@ graph TD
 - Checkpoint V7 lưu tại: `out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`.
 - Công cụ kiểm định Unseen TTS thực thụ cho Giả thuyết H2 là **VoiceStudio (OmniVoice CFM Zero-shot Voice Cloning)** — hoàn toàn tách biệt khỏi quá trình huấn luyện.
 
-### 8.3. Kết Quả Kiểm Định Nghiệm Thu Toàn Diện Trên 795 Clips Đối Chứng
-Chạy kiểm định qua toàn bộ 795 clips nghiệm thu bằng script `scripts/eval_5spk_unseen_and_bonafide.py`:
+### 8.3. Kết Quả Kiểm Định Nghiệm Thu Ban Đầu Dưới Max-Pooling (V7)
+Chạy kiểm định qua toàn bộ 795 clips nghiệm thu bằng script `scripts/eval_5spk_unseen_and_bonafide.py` với cơ chế Max-Pooling:
 - **Bona Fide Pass Rate (Giọng thật)**: **89.52% (376/420)** với điểm trung bình dương rất cao (`+20.62`).
   - Trên 4 người nói đối chứng nòng cốt (`SPK_0004`..`SPK_0007`, 320 clips): Đạt **97.19% (311/320)** PASS.
   - Trên cả 5 người nói đối chứng (bao gồm cả `SPK_0003` giọng trầm vừa): Đạt **89.52%**.
@@ -269,4 +269,49 @@ Chạy kiểm định qua toàn bộ 795 clips nghiệm thu bằng script `scrip
 
 ---
 
-*v0.4.7 — 2026-11-11*
+## 9. Cơ Chế Gộp Điểm Đa Cửa Sổ Bất Đối Xứng (Asymmetric Veto Multi-Window Pooling — V8)
+
+### 9.1. Động Lực Kỹ Thuật & Hạn Chế Của Max-Pooling Cổ Điển
+Trong các tình huống thực tế, đoạn thoại 5–10 giây thường chứa các khoảng lặng ngắt nghỉ (silence pause) hoặc các đoạn âm xát/vô thanh (unvoiced fricatives).
+- **Hạn chế của Max-Pooling**: Khi đoạn âm thanh được chia thành nhiều cửa sổ trượt (sliding windows), các cửa sổ rơi vào vùng vô thanh có thể khiến mô hình đưa ra điểm số dao động nhẹ quanh ngưỡng $0$ hoặc dương nhẹ (ví dụ: $+1.0$ đến $+3.0$). Cơ chế `max-pooling` thuần túy ($s_{\text{pooled}} = \max_k s_k$) bắt buộc chọn điểm số cao nhất này, vô tình phủ quyết (veto) hoàn toàn các bằng chứng giả mạo rất mạnh tại các cửa sổ có thanh âm trước đó (nơi điểm số âm sâu từ $-25.0$ đến $-40.0$). Điều này dẫn đến hiện tượng lọt lưới spoof (tăng APCER).
+- **Yêu cầu thiết kế**: Cần một cơ chế gộp điểm bất đối xứng: khi đã có bằng chứng spoof mạnh ở ít nhất một cửa sổ thanh âm, mô hình không cho phép một cửa sổ vô thanh làm đảo ngược kết luận; ngược lại, khi không có bằng chứng spoof rõ ràng, cơ chế max-pooling được duy trì để bảo vệ giọng thật (ngăn ngừa BPCER).
+
+### 9.2. Định Nghĩa Toán Học & Thuật Toán Asymmetric Veto
+Cho đoạn âm thanh được trích xuất thành $K$ cửa sổ trượt cố định $W = 64.000$ mẫu ($4.0\text{s}$ ở $16\text{ kHz}$), bước nhảy $H = 16.000$ mẫu ($1.0\text{s}$), tối đa $K \le 5$ cửa sổ.
+Toàn bộ $K$ cửa sổ được gộp thành một mini-batch $\mathbf{X} \in \mathbb{R}^{K \times 64000}$ và đưa qua mô hình trong **một lượt forward pass duy nhất** (`batch_window_forward`), thu được vector điểm số các cửa sổ:
+$$\mathbf{s} = [s_1, s_2, \dots, s_K] \in \mathbb{R}^K$$
+
+Sắp xếp dãy điểm số theo thứ tự tăng dần:
+$$s_{(1)} \le s_{(2)} \le \dots \le s_{(K)}$$
+
+Đặt ngưỡng bằng chứng giả mạo mạnh $\tau_{\text{veto}} = -12.0$. Hàm gộp điểm `pool_scores(scores, mode="asymmetric_veto")` được định nghĩa toán học:
+
+$$s_{\text{pooled}} = \begin{cases}
+\frac{1}{K-1} \sum_{i=1}^{K-1} s_{(i)} & \text{nếu } \min(\mathbf{s}) < \tau_{\text{veto}} \text{ và } K \ge 3 \quad (\text{Trimmed Mean: loại bỏ ngoại lai cao nhất } s_{(K)}) \\
+\frac{1}{K} \sum_{i=1}^K s_i & \text{nếu } \min(\mathbf{s}) < \tau_{\text{veto}} \text{ và } K < 3 \quad (\text{Arithmetic Mean}) \\
+\max_{k=1,\dots,K} s_k & \text{nếu } \min(\mathbf{s}) \ge \tau_{\text{veto}} \quad (\text{Conservative Max-Pooling bảo vệ giọng thật})
+\end{cases}$$
+
+### 9.3. Bằng Chứng Thực Nghiệm & Bước Nhảy Vọt Hiệu Năng (V8 Benchmark)
+Đánh giá thực nghiệm hoàn tất trên checkpoint `out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt` với `asymmetric_veto` pooling trên toàn bộ 795 clips nghiệm thu và 750 clips đối chứng Seen/Unseen (`benchmarks/seen_vs_unseen_degradation_v8.json`):
+
+| Hệ Thống / Tập Đánh Giá | Loại | Pass Rate V7 (Max-pool) | Pass Rate V8 (Asymmetric Veto) | EER V7 | EER V8 | Mean Score V8 | Median Score V8 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **VoiceStudio (OmniVoice CFM)** | **Unseen** | 79.47% | **97.07% (364/375)** | 14.67% | **10.71%** | **-34.64** | **-38.43** |
+| **VieNeu-TTS v3 Turbo** | **Seen** | 87.73% | **99.73% (374/375)** | 12.27% | **10.67%** | **-38.20** | **-40.80** |
+| **F5-TTS** | **Seen** | 99.20% | **100.00% (375/375)** | 2.38% | **3.47%** | **-40.15** | **-40.05** |
+| **Seen Pooled (F5 + VieNeu)** | Seen | 93.47% | **99.87% (749/750)** | 6.80% | **6.00%** | **-39.17** | — |
+| **Unseen Pooled (OmniVoice)** | Unseen | 79.47% | **97.07% (364/375)** | 14.67% | **10.71%** | **-34.64** | — |
+
+- **Ý nghĩa thực nghiệm**:
+  1. **OmniVoice CFM (Unseen)**: Tỷ lệ phát hiện tăng vọt từ $79.47\%$ lên **$97.07\%$** (+17.60 pp), EER giảm sâu xuống **$10.71\%$** (vượt xa ngưỡng an toàn $\le 15.0\%$ của Giả thuyết H2).
+  2. **VieNeu-TTS (Seen)**: Tỷ lệ phát hiện bứt phá từ $87.73\%$ lên **$99.73\%$** (+12.00 pp), triệt tiêu hoàn toàn 45/46 trường hợp lọt lưới do cửa sổ vô thanh trước đó.
+  3. **Mức độ suy giảm Seen vs Unseen**: $\Delta\text{Pass Rate} = -2.80\%$, $\Delta\text{EER} = +4.71\%$, tái khẳng định tính khái quát hóa cực cao của mô hình trước các công cụ Zero-Shot CFM thế hệ mới.
+
+### 9.4. Kiểm Thử TDD & Độ Bền Vững Mã Nguồn
+- Triển khai hoàn tất tại `src/preprocessing/pooling.py` (`pool_scores` hỗ trợ `"max"`, `"mean"`, `"min"`, `"asymmetric_veto"` / alias `"adaptive"`).
+- Toàn bộ **35/35 unit tests** trong `tests/test_pooling.py` và `tests/test_sliding_window_pooling.py` vượt qua $100\%$ green, bao phủ các trường hợp biên: outlier $+3.0$ cạnh voiced $-25.0$, âm thanh ngắn $<3$ cửa sổ, bảo vệ giọng thật dương, ngưỡng chuyển tiếp $\tau = -12.0$, và bảo toàn kiểu dữ liệu đầu vào.
+
+---
+
+*v0.5.6 — 2026-11-19*

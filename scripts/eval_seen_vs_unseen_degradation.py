@@ -46,6 +46,7 @@ def evaluate_system_files(
     device: str,
     system_name: str,
     system_type: str,
+    pooling_mode: str = "asymmetric_veto",
 ) -> pd.DataFrame:
     records = []
     for idx, f in enumerate(files):
@@ -54,7 +55,7 @@ def evaluate_system_files(
             batch = extract_window_batch(y, win=64000, hop=16000, max_windows=5).to(device)
             with torch.no_grad():
                 win_scores = model.score(batch)
-            score = pool_scores(win_scores, mode="max")
+            score = pool_scores(win_scores, mode=pooling_mode)
 
             # High-frequency ratio (>4kHz)
             fft = np.abs(np.fft.rfft(y))
@@ -92,13 +93,14 @@ def evaluate_system_files(
 
 
 def run_benchmark(
-    ckpt_path: str = "out/zalo_b_zalo_v6_local/best_model.pt",
+    ckpt_path: str = "out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt",
     device: str = "cuda" if torch.cuda.is_available() else "cpu",
     output_json: str = "benchmarks/seen_vs_unseen_degradation.json",
+    pooling_mode: str = "asymmetric_veto",
 ):
     print("=" * 90)
     print("🔬 ĐO ĐẠC SO SÁNH SEEN TTS VS UNSEEN TTS & ĐÁNH GIÁ MỨC ĐỘ SUY GIẢM")
-    print(f"Checkpoint: {ckpt_path} | Device: {device} | Pooling: Multi-window Max-Pooling")
+    print(f"Checkpoint: {ckpt_path} | Device: {device} | Pooling: Multi-window Pooling ({pooling_mode})")
     print("=" * 90)
 
     model, _ = load_model(ckpt_path, device)
@@ -120,7 +122,7 @@ def run_benchmark(
             batch = extract_window_batch(y, win=64000, hop=16000, max_windows=5).to(device)
             with torch.no_grad():
                 win_scores = model.score(batch)
-            score = pool_scores(win_scores, mode="max")
+            score = pool_scores(win_scores, mode=pooling_mode)
             bona_records.append({
                 "system": "BonaFide",
                 "type": "bonafide",
@@ -178,7 +180,7 @@ def run_benchmark(
 
     for name, meta in tts_systems.items():
         print(f"\n⏳ Đang chấm điểm hệ thống [{meta['type']}]: {name} ({len(meta['files'])} files)...")
-        df_sys = evaluate_system_files(model, meta["files"], device, name, meta["type"])
+        df_sys = evaluate_system_files(model, meta["files"], device, name, meta["type"], pooling_mode=pooling_mode)
         all_spoof_dfs.append(df_sys)
 
         spoof_sc = df_sys["score"].to_numpy()
@@ -264,6 +266,7 @@ def run_benchmark(
 
     report = {
         "checkpoint": ckpt_path,
+        "pooling": pooling_mode,
         "bona_fide_evaluation": {
             "total": len(df_bona),
             "pass_rate_pct": round(bona_pass_rate, 2),
@@ -317,9 +320,10 @@ def run_benchmark(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ckpt", type=str, default="out/zalo_b_zalo_v6_local/best_model.pt")
+    parser.add_argument("--ckpt", type=str, default="out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--pooling", type=str, default="asymmetric_veto", help="Pooling mode (asymmetric_veto, max, mean, min)")
     parser.add_argument("--out", type=str, default="benchmarks/seen_vs_unseen_degradation.json")
     args = parser.parse_args()
 
-    run_benchmark(args.ckpt, args.device, args.out)
+    run_benchmark(args.ckpt, args.device, args.out, pooling_mode=args.pooling)

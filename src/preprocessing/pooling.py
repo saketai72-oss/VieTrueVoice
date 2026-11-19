@@ -137,8 +137,13 @@ def pool_scores(
     Args:
         scores: Window scores (list, numpy array, or torch tensor).
         mode: Pooling method:
-            - 'max': Conservative anti-spoofing (highest spoof risk window governs).
+            - 'max': Conservative anti-spoofing (highest score window governs).
             - 'mean': Average score across all temporal windows.
+            - 'min': Minimum score across all temporal windows.
+            - 'asymmetric_veto' (or 'adaptive'): Asymmetric veto pooling. If any window
+              shows strong spoof evidence (min < -12.0), drops highest outlier window
+              (trimmed mean) or computes mean to prevent unvoiced near-zero windows from
+              vetoing spoof detection; otherwise protects bona fide voice using max-pooling.
 
     Returns:
         Aggregated utterance score as float.
@@ -162,8 +167,24 @@ def pool_scores(
         return float(np.max(scores_np))
     if mode == "mean":
         return float(np.mean(scores_np))
+    if mode == "min":
+        return float(np.min(scores_np))
+    if mode in ("asymmetric_veto", "adaptive"):
+        if np.min(scores_np) < -12.0:
+            # Strong spoof evidence in at least one voiced segment; do not let an unvoiced near-zero window veto it.
+            if len(scores_np) >= 3:
+                # Trimmed mean: drop highest single outlier window
+                s_pooled = float(np.mean(np.sort(scores_np)[:-1]))
+            else:
+                s_pooled = float(np.mean(scores_np))
+        else:
+            # No strong spoof evidence; protect bona fide voice using max-pooling
+            s_pooled = float(np.max(scores_np))
+        return s_pooled
 
-    raise ValueError(f"Unsupported pooling mode: '{mode}'. Must be 'max' or 'mean'")
+    raise ValueError(
+        f"Unsupported pooling mode: '{mode}'. Must be 'max', 'mean', 'min', or 'asymmetric_veto'"
+    )
 
 
 def batch_window_forward(
