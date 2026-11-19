@@ -395,7 +395,7 @@ Truy cập trình duyệt tại `http://localhost:7860`:
 3. **Lựa chọn 2 (Ghi âm Micro cá nhân)**: Bấm biểu tượng Microphone và đọc theo câu chuẩn: *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."* (khuyến nghị 3 – 5 giây).
 4. Bấm nút **"2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM"**:
    - Thẩm định ngay lập tức bản gốc của bạn (~66ms, hiển thị thẻ Người Thật màu xanh).
-   - VoiceStudio CFM thực thi đúng 100% pipeline gốc từ tập `Voice_Final` (`num_step=16`, `guidance_scale=2.0`), sinh câu thoại đích 10 từ thuần Việt (`"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."`), xuất 16kHz PCM to rõ, vang, tự nhiên 100%.
+   - VoiceStudio CFM thực thi đúng 100% pipeline gốc từ tập `Voice_Final` (`num_step=16`, `guidance_scale=2.0`), sinh nguyên văn câu thoại đối soát (*"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."*), xuất 16kHz PCM to rõ, vang, tự nhiên 100%.
    - Thẩm định bản clone qua ViTrueVoice và hiển thị kết quả phân định Thật / Giả mạo cùng Bảng đối soát 2 chiều.
 
 ### 8.7 Xuất bản Bộ Tài liệu Thử nghiệm Pilot & Dự toán Chi phí AWS Runbook (W07 & W08)
@@ -407,6 +407,20 @@ Tài liệu được xuất bản và đồng bộ tự động tại:
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.docx` & `.pdf`
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\Bang_Chi_Phi_AWS_Va_So_Tay_Su_Co_Runbook.docx` & `.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
+
+### 8.8 Trải nghiệm Google Labs Playground Web Client (v0.5.8)
+Hệ thống cung cấp giao diện Web độc lập hiện đại theo phong cách Google Labs Playground tại endpoint `/playground`:
+```bash
+# Khởi động máy chủ phát triển cục bộ
+python -m uvicorn src.app.server:app --port 8001
+
+# Hoặc khởi động cụm Docker Compose (port 8000)
+docker compose up -d --build
+```
+Truy cập trình duyệt:
+- URL Playground: `http://localhost:8001/playground` (hoặc `http://localhost:8000/playground` với Docker).
+- Chế độ 1: **SINGLE-FILE ANALYSIS** — Tải file hoặc thu âm nhanh, trực quan hóa sóng âm Oscilloscope, Platt radial gauge và Forensics Spectral Studio canvas.
+- Chế độ 2: **LIVE CFM CLONING AUDIT** — Ghi âm Micro hoặc nạp 1-Click SPK_0004, hệ thống nhân bản theo thời gian thực qua VoiceStudio CFM (OmniVoice Zero-Shot Flow Matching) nói nguyên văn câu đối soát *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."*, xuất Ma trận đối soát đối chứng (Comparative Benchmark Matrix) đạt phân tách $\Delta s > 40.0$, BPCER $0.0\%$, APCER $0.0\%$.
 
 
 
