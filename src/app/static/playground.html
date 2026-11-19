@@ -1547,23 +1547,23 @@
           </div>
 
           <!-- Dynamic Result Box -->
-          <div class="verdict-banner bonafide" id="cfm-ref-verdict" style="padding: 12px 16px;">
+          <div class="verdict-banner idle" id="cfm-ref-verdict" style="padding: 12px 16px;">
             <div class="verdict-info">
               <span class="verdict-pretitle">KẾT LUẬN THẨM ĐỊNH AI</span>
-              <span class="verdict-title" id="cfm-ref-verdict-text" style="font-size: 11px;">VERDICT: BONA FIDE (AUTHENTIC VOICE)</span>
+              <span class="verdict-title" id="cfm-ref-verdict-text" style="font-size: 11px;">CHỜ KÍCH HOẠT NHÂN BẢN & ĐỐI SOÁT</span>
             </div>
-            <div class="verdict-badge" id="cfm-ref-badge" style="background: var(--neon-lime); color: #000;">GENUINE</div>
+            <div class="verdict-badge" id="cfm-ref-badge" style="background: rgba(255,255,255,0.1); color: var(--text-muted);">STANDBY</div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="metric-card accent-lime">
               <span class="metric-title">RAW LOGIT SCORE</span>
-              <span class="metric-val" id="cfm-ref-score" style="font-size: 16px; color: var(--neon-lime);">+24.80</span>
+              <span class="metric-val" id="cfm-ref-score" style="font-size: 16px; color: var(--text-muted);">--</span>
               <span class="metric-sub">Vùng an toàn Bona Fide</span>
             </div>
             <div class="metric-card">
               <span class="metric-title">XÁC SUẤT PLATT</span>
-              <span class="metric-val" id="cfm-ref-conf" style="font-size: 16px; color: var(--neon-lime);">99.9%</span>
+              <span class="metric-val" id="cfm-ref-conf" style="font-size: 16px; color: var(--text-muted);">--</span>
               <span class="metric-sub">P(bonafide | s)</span>
             </div>
           </div>
@@ -1581,30 +1581,30 @@
 
           <div style="background: var(--surface-input); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px;">
             <div style="display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); margin-bottom: 6px;">
-              <span id="cfm-sus-filename-label">sample_spoof_f5tts.wav</span>
-              <span id="cfm-sus-duration-label">Đang sẵn sàng phát</span>
+              <span id="cfm-sus-filename-label">(Chưa có - Bấm nút để nhân bản)</span>
+              <span id="cfm-sus-duration-label">Thời lượng: --</span>
             </div>
             <audio id="cfm-sus-audio" controls style="width: 100%; height: 36px; border-radius: 8px; filter: invert(0.9) hue-rotate(180deg);"></audio>
           </div>
 
           <!-- Dynamic Result Box -->
-          <div class="verdict-banner spoof" id="cfm-sus-verdict" style="padding: 12px 16px;">
+          <div class="verdict-banner idle" id="cfm-sus-verdict" style="padding: 12px 16px;">
             <div class="verdict-info">
               <span class="verdict-pretitle">KẾT LUẬN THẨM ĐỊNH AI</span>
-              <span class="verdict-title" id="cfm-sus-verdict-text" style="font-size: 11px;">VERDICT: DEEPFAKE DETECTED (SPOOF)</span>
+              <span class="verdict-title" id="cfm-sus-verdict-text" style="font-size: 11px;">CHỜ KÍCH HOẠT NHÂN BẢN & ĐỐI SOÁT</span>
             </div>
-            <div class="verdict-badge" id="cfm-sus-badge" style="background: var(--neon-crimson); color: #fff;">SYNTHETIC</div>
+            <div class="verdict-badge" id="cfm-sus-badge" style="background: rgba(255,255,255,0.1); color: var(--text-muted);">STANDBY</div>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div class="metric-card accent-crimson">
               <span class="metric-title">RAW LOGIT SCORE</span>
-              <span class="metric-val" id="cfm-sus-score" style="font-size: 16px; color: var(--neon-crimson);">-44.01</span>
+              <span class="metric-val" id="cfm-sus-score" style="font-size: 16px; color: var(--text-muted);">--</span>
               <span class="metric-sub">Vùng phủ quyết Deepfake</span>
             </div>
             <div class="metric-card">
               <span class="metric-title">XÁC SUẤT GIẢ MẠO</span>
-              <span class="metric-val" id="cfm-sus-conf" style="font-size: 16px; color: var(--neon-crimson);">99.9%</span>
+              <span class="metric-val" id="cfm-sus-conf" style="font-size: 16px; color: var(--text-muted);">--</span>
               <span class="metric-sub">P(spoof | s)</span>
             </div>
           </div>
@@ -1636,20 +1636,20 @@
               </tr>
               <tr style="border-bottom: 1px solid var(--border-faint);">
                 <td style="padding: 10px 12px; color: var(--text-main);">Phán Quyết AI ViTrueVoice</td>
-                <td style="padding: 10px 12px; font-weight: 700; color: var(--neon-lime);" id="mat-verdict-bona">✅ XÁC THỰC: NGƯỜI THẬT</td>
-                <td style="padding: 10px 12px; font-weight: 700; color: var(--neon-crimson);" id="mat-verdict-clone">🛡️ CHẶN THÀNH CÔNG: DEEPFAKE</td>
-                <td style="padding: 10px 12px; color: var(--neon-lime);" id="mat-accuracy-status">Độ chính xác: 100% (0% Sai số)</td>
+                <td style="padding: 10px 12px; font-weight: 700; color: var(--text-muted);" id="mat-verdict-bona">Chờ đối soát</td>
+                <td style="padding: 10px 12px; font-weight: 700; color: var(--text-muted);" id="mat-verdict-clone">Chờ đối soát</td>
+                <td style="padding: 10px 12px; color: var(--text-muted);" id="mat-accuracy-status">Sẵn sàng phân tích</td>
               </tr>
               <tr style="border-bottom: 1px solid var(--border-faint);">
                 <td style="padding: 10px 12px; color: var(--text-main);">Điểm Raw Logit Score (s)</td>
-                <td style="padding: 10px 12px; font-weight: 700; color: var(--neon-lime);" id="mat-score-bona">+24.80</td>
-                <td style="padding: 10px 12px; font-weight: 700; color: var(--neon-crimson);" id="mat-score-clone">-44.01</td>
-                <td style="padding: 10px 12px; color: var(--neon-cyan);" id="mat-score-delta">Chênh lệch: Δs = +68.81 (Phân tách cực đại)</td>
+                <td style="padding: 10px 12px; font-weight: 700; color: var(--text-muted);" id="mat-score-bona">--</td>
+                <td style="padding: 10px 12px; font-weight: 700; color: var(--text-muted);" id="mat-score-clone">--</td>
+                <td style="padding: 10px 12px; color: var(--text-muted);" id="mat-score-delta">Chênh lệch: --</td>
               </tr>
               <tr style="border-bottom: 1px solid var(--border-faint);">
                 <td style="padding: 10px 12px; color: var(--text-main);">Độ Tin Cậy Hiệu Chuẩn (Platt)</td>
-                <td style="padding: 10px 12px; color: var(--neon-lime);" id="mat-conf-bona">99.9% Authentic</td>
-                <td style="padding: 10px 12px; color: var(--neon-crimson);" id="mat-conf-clone">99.9% Synthetic Deepfake</td>
+                <td style="padding: 10px 12px; color: var(--text-muted);" id="mat-conf-bona">--</td>
+                <td style="padding: 10px 12px; color: var(--text-muted);" id="mat-conf-clone">--</td>
                 <td style="padding: 10px 12px; color: var(--text-muted);">Hiệu chuẩn độc lập k = 0.3569</td>
               </tr>
               <tr>
@@ -1905,6 +1905,7 @@
       const btn = document.getElementById('btn-run-cfm-clone');
       btn.disabled = true;
       btn.classList.add('loading');
+      btn.innerHTML = '<span>🌀 ĐANG NHÂN BẢN & ĐỐI SOÁT VOICESTUDIO CFM...</span>';
 
       const progressBanner = document.getElementById('cfm-progress-banner');
       const progressText = document.getElementById('cfm-progress-text');
@@ -1913,6 +1914,23 @@
       progressBanner.style.background = 'rgba(0, 229, 255, 0.08)';
       progressBanner.style.color = 'var(--neon-cyan)';
       progressText.textContent = '⚡ [BƯỚC 1/2] Đang xác thực giọng người thật (~66ms)... Đang chạy VoiceStudio Flow Matching (~3.5s)...';
+
+      // Reset cards to active evaluation states
+      const refVerdict = document.getElementById('cfm-ref-verdict');
+      if (refVerdict) {
+        refVerdict.className = 'verdict-banner idle';
+        document.getElementById('cfm-ref-verdict-text').textContent = '⚡ ĐANG THẨM ĐỊNH GIỌNG GỐC...';
+        document.getElementById('cfm-ref-badge').textContent = 'EVALUATING';
+      }
+
+      const susVerdict = document.getElementById('cfm-sus-verdict');
+      if (susVerdict) {
+        susVerdict.className = 'verdict-banner idle';
+        document.getElementById('cfm-sus-verdict-text').textContent = '🌀 ĐANG TỔNG HỢP ÂM THANH CLONE (VOICESTUDIO CFM)...';
+        document.getElementById('cfm-sus-badge').textContent = 'SYNTHESIZING';
+        document.getElementById('cfm-sus-filename-label').textContent = 'Đang sinh file clone theo thời gian thực...';
+        document.getElementById('cfm-sus-duration-label').textContent = 'Flow Matching 16 steps...';
+      }
 
       logConsole('SYSTEM', 'Sending reference voice to /api/v1/clone-and-audit for live CFM cloning...');
       const startTime = performance.now();
@@ -1957,6 +1975,7 @@
         cfmState.isCloningRunning = false;
         btn.disabled = false;
         btn.classList.remove('loading');
+        btn.innerHTML = '<span>🚀 BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM (LIVE CFM CLONE)</span>';
       }
     }
 
@@ -2007,8 +2026,9 @@
         const susAudio = document.getElementById('cfm-sus-audio');
         if (susAudio) {
           susAudio.src = clone.audio_base64;
-          document.getElementById('cfm-sus-filename-label').textContent = 'voicestudio_cfm_synthesized_clone.wav';
-          document.getElementById('cfm-sus-duration-label').textContent = `${clone.duration_s || '3.2'}s (Flow Matching 16kHz)`;
+          const displayFilename = clone.filename || 'voicestudio_cfm_clone.wav';
+          document.getElementById('cfm-sus-filename-label').textContent = displayFilename;
+          document.getElementById('cfm-sus-duration-label').textContent = `${clone.duration_s || '3.2'}s @ 16kHz PCM (VoiceStudio CFM)`;
           susAudio.load();
         }
       }

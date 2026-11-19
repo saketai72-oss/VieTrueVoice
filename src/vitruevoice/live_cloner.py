@@ -41,9 +41,10 @@ if _VS_DIR.exists() and str(_VS_DIR) not in sys.path:
     sys.path.insert(0, str(_VS_DIR))
 
 from src.app.decision import PLATT_SCALE_K, classify_score, platt_calibrator
-from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 
+TARGET_SAMPLE_RATE = 16000
+TARGET_SAMPLE_COUNT = 64000  # 4.0s at 16kHz
 DEFAULT_TARGET_TEXT = "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."
 DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
 
