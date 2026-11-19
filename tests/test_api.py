@@ -128,3 +128,29 @@ def test_predict_rejects_unsupported_audio_format(client):
     )
 
     assert response.status_code == 415
+
+
+def test_playground_endpoint_returns_html(client):
+    response = client.get("/playground")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "<!DOCTYPE html>" in response.text
+    assert "ViTrueVoice Labs" in response.text
+
+    # Verify trailing slash routing
+    response_slash = client.get("/playground/")
+    assert response_slash.status_code == 200
+    assert "text/html" in response_slash.headers.get("content-type", "")
+
+
+def test_predict_alias_route(client):
+    audio_bytes = make_wav_bytes()
+    response = client.post(
+        "/predict",
+        files={"file": ("voice_alias.wav", audio_bytes, "audio/wav")},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["prediction"] == "BONA_FIDE"
+    assert payload["raw_score"] == 1.0
+

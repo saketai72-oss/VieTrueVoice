@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import numpy as np
 import soundfile as sf
 import torch
@@ -27,6 +30,8 @@ SUPPORTED_TYPES = {
 }
 TARGET_SAMPLE_RATE = 16000
 TARGET_SAMPLE_COUNT = 64000  # 4.0s at 16kHz
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+PLAYGROUND_HTML_PATH = STATIC_DIR / "playground.html"
 
 
 def _is_supported(filename: str | None, content_type: str | None) -> bool:
@@ -130,6 +135,24 @@ def create_app(
         description="Phát hiện giọng nói giả mạo tiếng Việt qua kênh thoại nén.",
     )
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    STATIC_DIR.mkdir(parents=True, exist_ok=True)
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+    @app.get("/playground")
+    @app.get("/playground/")
+    def playground() -> FileResponse:
+        if not PLAYGROUND_HTML_PATH.exists():
+            raise HTTPException(status_code=404, detail="Playground HTML not found")
+        return FileResponse(PLAYGROUND_HTML_PATH, media_type="text/html")
+
     @app.get("/health")
     def health() -> dict[str, Any]:
         return {
@@ -140,6 +163,7 @@ def create_app(
         }
 
     @app.post("/api/v1/predict")
+    @app.post("/predict")
     async def predict(file: UploadFile = File(...)) -> dict[str, Any]:
         if not _is_supported(file.filename, file.content_type):
             raise HTTPException(status_code=415, detail="Unsupported audio format")
