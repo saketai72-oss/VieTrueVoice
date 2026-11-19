@@ -160,7 +160,7 @@ def test_clone_and_audit_endpoint(client, tmp_path):
     response = client.post(
         "/api/v1/clone-and-audit",
         files={"file": ("mic_record.wav", audio_bytes, "audio/wav")},
-        data={"target_text": "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."},
+        data={"target_text": "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."},
     )
     assert response.status_code == 200
     payload = response.json()

@@ -33,7 +33,7 @@ try:
     )
 except Exception:
     LiveVoiceStudioCloner = None
-    DEFAULT_TARGET_TEXT = "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."
+    DEFAULT_TARGET_TEXT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
     DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
 
 SUPPORTED_EXTS = {".wav", ".mp3", ".m4a", ".ogg", ".opus", ".flac"}
