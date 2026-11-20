@@ -765,6 +765,19 @@ def make_predict_fn(
         raw_bytes = data.tobytes()
         audio_sha256 = hashlib.sha256(raw_bytes).hexdigest()
 
+        # DSP conditioning: trim silence and normalize peak for live mic / streaming inputs
+        if len(data) >= int(0.5 * TARGET_SAMPLE_RATE):
+            try:
+                import librosa
+                trimmed, _ = librosa.effects.trim(data, top_db=25)
+                if len(trimmed) >= int(0.5 * TARGET_SAMPLE_RATE):
+                    data = trimmed
+            except Exception:
+                pass
+            max_abs = float(np.max(np.abs(data)))
+            if max_abs > 1e-5:
+                data = (data / max_abs) * 0.95
+
         # Multi-window inference with max-pooling (STUBBORN_FACT: repeat padding <64k, single batched forward pass)
         windows_batch = extract_window_batch(
             data,

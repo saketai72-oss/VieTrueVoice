@@ -1517,7 +1517,7 @@
           </button>
           <input type="file" id="cfm-file-input" accept="audio/*" style="display: none;" onchange="handleCfmFileSelect(this.files[0])">
 
-          <button class="btn-secondary" style="border-color: rgba(129, 255, 0, 0.4); color: var(--neon-lime);" onclick="loadCfmPresetSpk0004()">
+          <button class="btn-secondary" id="btn-cfm-load-sample" style="border-color: rgba(129, 255, 0, 0.4); color: var(--neon-lime);" onclick="loadCfmPresetSpk0004()">
             ⚡ 1-Click: Nạp Mẫu Chuẩn SPK_0004
           </button>
 
@@ -1698,6 +1698,32 @@
 
   <!-- APPLICATION LOGIC & AUDIO ENGINE -->
   <script>
+    // Dual-Platform Raw Audio Capture Hook: disable aggressive browser noise gating
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      if (!window.__vitruevoice_gum_patched) {
+        window.__vitruevoice_gum_patched = true;
+        const origGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+        navigator.mediaDevices.getUserMedia = function(constraints) {
+          if (constraints && constraints.audio) {
+            if (typeof constraints.audio === 'object') {
+              constraints.audio.noiseSuppression = false;
+              constraints.audio.echoCancellation = false;
+              constraints.audio.autoGainControl = false;
+            } else if (constraints.audio === true) {
+              constraints.audio = {
+                noiseSuppression: false,
+                echoCancellation: false,
+                autoGainControl: false,
+                channelCount: 1,
+                sampleRate: 16000
+              };
+            }
+          }
+          return origGUM(constraints);
+        };
+      }
+    }
+
     // --- Application State ---
     const state = {
       activeTab: 'single',
@@ -1853,8 +1879,25 @@
       } else {
         // Start recording
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          cfmState.mediaRecorder = new MediaRecorder(stream);
+          const audioConstraints = {
+            audio: {
+              noiseSuppression: false,
+              echoCancellation: false,
+              autoGainControl: false,
+              channelCount: 1,
+              sampleRate: 16000
+            }
+          };
+          const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+          let mrOptions = {};
+          if (typeof MediaRecorder.isTypeSupported === 'function') {
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+              mrOptions = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 128000 };
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+              mrOptions = { mimeType: 'audio/mp4', audioBitsPerSecond: 128000 };
+            }
+          }
+          cfmState.mediaRecorder = new MediaRecorder(stream, mrOptions);
           cfmState.recordedChunks = [];
           cfmState.recordStartTime = performance.now();
 
@@ -1863,7 +1906,8 @@
           };
 
           cfmState.mediaRecorder.onstop = () => {
-            const blob = new Blob(cfmState.recordedChunks, { type: 'audio/wav' });
+            const mimeType = (cfmState.mediaRecorder && cfmState.mediaRecorder.mimeType) || 'audio/webm';
+            const blob = new Blob(cfmState.recordedChunks, { type: mimeType });
             const durationSec = ((performance.now() - cfmState.recordStartTime) / 1000).toFixed(1);
             cfmState.referenceBlob = blob;
             cfmState.referenceFileName = `mic_live_capture_${Date.now()}.wav`;
@@ -2396,8 +2440,25 @@
       } else {
         // Start recording
         try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          state.mediaRecorder = new MediaRecorder(stream);
+          const audioConstraints = {
+            audio: {
+              noiseSuppression: false,
+              echoCancellation: false,
+              autoGainControl: false,
+              channelCount: 1,
+              sampleRate: 16000
+            }
+          };
+          const stream = await navigator.mediaDevices.getUserMedia(audioConstraints);
+          let mrOptions = {};
+          if (typeof MediaRecorder.isTypeSupported === 'function') {
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+              mrOptions = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 128000 };
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+              mrOptions = { mimeType: 'audio/mp4', audioBitsPerSecond: 128000 };
+            }
+          }
+          state.mediaRecorder = new MediaRecorder(stream, mrOptions);
           state.recordedChunks = [];
 
           state.mediaRecorder.ondataavailable = (e) => {
@@ -2405,8 +2466,9 @@
           };
 
           state.mediaRecorder.onstop = () => {
-            const blob = new Blob(state.recordedChunks, { type: 'audio/wav' });
-            const recordedFile = new File([blob], `mic_capture_${Date.now()}.wav`, { type: 'audio/wav' });
+            const mimeType = (state.mediaRecorder && state.mediaRecorder.mimeType) || 'audio/webm';
+            const blob = new Blob(state.recordedChunks, { type: mimeType });
+            const recordedFile = new File([blob], `mic_capture_${Date.now()}.wav`, { type: mimeType });
             loadAudioFile(recordedFile);
             stream.getTracks().forEach(track => track.stop());
           };

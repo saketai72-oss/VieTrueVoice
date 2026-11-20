@@ -36,12 +36,12 @@ except Exception:
     DEFAULT_TARGET_TEXT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
     DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
 
-SUPPORTED_EXTS = {".wav", ".mp3", ".m4a", ".ogg", ".opus", ".flac"}
+SUPPORTED_EXTS = {".wav", ".mp3", ".m4a", ".ogg", ".opus", ".flac", ".webm"}
 SUPPORTED_TYPES = {
     "audio/wav", "audio/x-wav", "audio/wave",
     "audio/mpeg", "audio/mp3", "audio/ogg",
     "audio/opus", "audio/x-m4a", "audio/m4a",
-    "audio/flac",
+    "audio/flac", "audio/webm",
 }
 TARGET_SAMPLE_RATE = 16000
 TARGET_SAMPLE_COUNT = 64000  # 4.0s at 16kHz
@@ -64,6 +64,28 @@ from src.preprocessing.audio_loader import load_audio
 def _load_audio_in_memory(raw_bytes: bytes) -> np.ndarray:
     """Read audio stream into a 1D float32 numpy array normalized to 16kHz."""
     return load_audio(raw_bytes, target_sr=TARGET_SAMPLE_RATE)
+
+
+def _condition_audio_for_inference(waveform: np.ndarray) -> np.ndarray:
+    """Preprocess audio stream to mitigate dead silence gating and low microphone gain.
+
+    Applies silence trimming (top_db=25) so leading/trailing silence doesn't bias
+    the neural SSL front-end into false deepfake verdicts, and peak-normalizes to 0.95
+    to match the acoustic energy distribution of the training data.
+    """
+    if len(waveform) < int(0.5 * TARGET_SAMPLE_RATE):
+        return waveform
+    try:
+        import librosa
+        trimmed, _ = librosa.effects.trim(waveform, top_db=25)
+        if len(trimmed) >= int(0.5 * TARGET_SAMPLE_RATE):
+            waveform = trimmed
+    except Exception:
+        pass
+    max_abs = float(np.max(np.abs(waveform)))
+    if max_abs > 1e-5:
+        waveform = (waveform / max_abs) * 0.95
+    return waveform
 
 
 def _pad_or_crop(waveform: np.ndarray, target_len: int = TARGET_SAMPLE_COUNT) -> np.ndarray:
@@ -213,6 +235,8 @@ def create_app(
         except Exception as exc:
             raise HTTPException(status_code=400, detail=f"Failed to decode audio: {exc}")
 
+        audio_data = _condition_audio_for_inference(audio_data)
+
         if model is None:
             raise HTTPException(status_code=503, detail="Model is not loaded")
 
@@ -289,6 +313,8 @@ def create_app(
             audio_data = _load_audio_in_memory(raw_bytes)
         except Exception as exc:
             raise HTTPException(status_code=400, detail=f"Failed to decode audio: {exc}")
+
+        audio_data = _condition_audio_for_inference(audio_data)
 
         if len(audio_data) < int(0.5 * TARGET_SAMPLE_RATE):
             raise HTTPException(status_code=400, detail="Đoạn âm thanh quá ngắn (< 0.5s)")
