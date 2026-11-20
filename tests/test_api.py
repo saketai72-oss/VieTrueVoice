@@ -16,8 +16,9 @@ from src.app.server import create_app
 class StubModel:
     def score(self, waveform):
         assert isinstance(waveform, torch.Tensor)
-        assert tuple(waveform.shape) == (1, 64000)
-        return torch.tensor([1.0], device=waveform.device)
+        assert waveform.shape[-1] == 64000
+        n_windows = waveform.shape[0] if waveform.ndim == 2 else 1
+        return torch.tensor([1.0] * n_windows, device=waveform.device)
 
 
 def make_wav_bytes(sample_rate=16000, duration_sec=0.5):
