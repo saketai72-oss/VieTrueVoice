@@ -128,3 +128,55 @@ def test_predict_rejects_unsupported_audio_format(client):
     )
 
     assert response.status_code == 415
+
+
+def test_playground_endpoint_returns_html(client):
+    response = client.get("/playground")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "<!DOCTYPE html>" in response.text
+    assert "ViTrueVoice Labs" in response.text
+
+    # Verify trailing slash routing
+    response_slash = client.get("/playground/")
+    assert response_slash.status_code == 200
+    assert "text/html" in response_slash.headers.get("content-type", "")
+
+
+def test_predict_alias_route(client):
+    audio_bytes = make_wav_bytes()
+    response = client.post(
+        "/predict",
+        files={"file": ("voice_alias.wav", audio_bytes, "audio/wav")},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["prediction"] == "BONA_FIDE"
+    assert payload["raw_score"] == 1.0
+
+
+def test_clone_and_audit_endpoint(client, tmp_path):
+    audio_bytes = make_wav_bytes(duration_sec=1.0)
+    response = client.post(
+        "/api/v1/clone-and-audit",
+        files={"file": ("mic_record.wav", audio_bytes, "audio/wav")},
+        data={"target_text": "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "success"
+    assert "bonafide" in payload
+    assert "clone" in payload
+    assert payload["bonafide"]["prediction"] == "BONA_FIDE"
+    assert payload["clone"]["audio_base64"].startswith("data:audio/wav;base64,")
+    assert payload["clone"]["prediction"] in ("BONA_FIDE", "SPOOF")
+
+    # Verify alias route
+    response_alias = client.post(
+        "/clone-and-audit",
+        files={"file": ("mic_alias.wav", audio_bytes, "audio/wav")},
+    )
+    assert response_alias.status_code == 200
+    assert response_alias.json()["status"] == "success"
+
+

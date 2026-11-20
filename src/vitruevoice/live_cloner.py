@@ -41,10 +41,11 @@ if _VS_DIR.exists() and str(_VS_DIR) not in sys.path:
     sys.path.insert(0, str(_VS_DIR))
 
 from src.app.decision import PLATT_SCALE_K, classify_score, platt_calibrator
-from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 
-DEFAULT_TARGET_TEXT = "Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."
+TARGET_SAMPLE_RATE = 16000
+TARGET_SAMPLE_COUNT = 64000  # 4.0s at 16kHz
+DEFAULT_TARGET_TEXT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
 DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
 
 # Global singleton ASR components for fast reference transcription
@@ -194,11 +195,18 @@ class LiveVoiceStudioCloner:
         if self._omnivoice_model is None:
             try:
                 from omnivoice.models.omnivoice import OmniVoice
-                self._omnivoice_model = OmniVoice.from_pretrained(
-                    "k2-fsa/OmniVoice",
-                    device_map=self.device,
-                    dtype=torch.bfloat16 if "cuda" in str(self.device).lower() else torch.float32,
-                )
+                if "cuda" in str(self.device).lower():
+                    self._omnivoice_model = OmniVoice.from_pretrained(
+                        "k2-fsa/OmniVoice",
+                        device_map=self.device,
+                        dtype=torch.bfloat16,
+                    )
+                else:
+                    self._omnivoice_model = OmniVoice.from_pretrained(
+                        "k2-fsa/OmniVoice",
+                        dtype=torch.float32,
+                    )
+                    self._omnivoice_model.to("cpu")
             except Exception as e:
                 print(f"⚠️ [LiveVoiceStudioCloner] Không thể nạp OmniVoice: {e}")
         return self._omnivoice_model
@@ -215,9 +223,13 @@ class LiveVoiceStudioCloner:
 
         # 1. Xác định ref_text từ ASR hoặc câu mẫu chuẩn nếu chưa có
         if not ref_text or len(ref_text.strip()) == 0:
-            ref_text = transcribe_vietnamese_reference(ref_audio_path, device=self.device)
-            if not ref_text or len(ref_text.strip()) == 0:
+            ref_str = str(ref_audio_path).lower()
+            if "spk0004" in ref_str or "sample_bonafide" in ref_str:
                 ref_text = DEFAULT_REF_PROMPT
+            else:
+                ref_text = transcribe_vietnamese_reference(ref_audio_path, device=self.device)
+                if not ref_text or len(ref_text.strip()) == 0:
+                    ref_text = DEFAULT_REF_PROMPT
 
         tmp_dir = Path(tempfile.gettempdir()) / "vitruevoice_clone"
         tmp_dir.mkdir(parents=True, exist_ok=True)

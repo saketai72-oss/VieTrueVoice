@@ -26,6 +26,8 @@ scratch/
 *.wav
 *.ogg
 *.aac
+!src/app/static/samples/*.wav
+!src/app/samples/*.wav
 
 # Local Environment Variables & Secrets
 .env
