@@ -349,12 +349,16 @@ def create_app(
         if cloner is not None:
             try:
                 cloner.target_text = target_text or DEFAULT_TARGET_TEXT
+                ref_txt = custom_ref_text
+                if not ref_txt and ("spk0004" in str(file.filename).lower() or "sample_bonafide" in str(file.filename).lower()):
+                    ref_txt = DEFAULT_REF_PROMPT
+
                 with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_f:
                     tmp_path = tmp_f.name
                     sf.write(tmp_path, audio_data, TARGET_SAMPLE_RATE, subtype="PCM_16")
 
                 try:
-                    res = cloner.clone_omnivoice(tmp_path, ref_text=custom_ref_text)
+                    res = cloner.clone_omnivoice(tmp_path, ref_text=ref_txt)
                     if res is not None:
                         cloned_audio_int16, cloned_sr, ref_used = res
                 finally:

@@ -729,6 +729,23 @@
       box-shadow: 0 0 30px var(--neon-crimson-glow);
     }
 
+    .verdict-banner.warning {
+      background: rgba(255, 184, 0, 0.08);
+      border-color: var(--neon-amber);
+      box-shadow: 0 0 30px rgba(255, 184, 0, 0.25);
+    }
+
+    .verdict-banner.warning .verdict-title {
+      color: var(--neon-amber);
+      text-shadow: 0 0 10px rgba(255, 184, 0, 0.35);
+    }
+
+    .verdict-banner.warning .verdict-badge {
+      background: rgba(255, 184, 0, 0.15);
+      border-color: var(--neon-amber);
+      color: var(--neon-amber);
+    }
+
     .verdict-info {
       display: flex;
       flex-direction: column;
@@ -1938,6 +1955,7 @@
       const formData = new FormData();
       formData.append('file', cfmState.referenceBlob, cfmState.referenceFileName || 'reference_voice.wav');
       formData.append('target_text', cfmState.targetText);
+      formData.append('custom_ref_text', cfmState.targetText);
 
       try {
         let res;
@@ -2007,18 +2025,23 @@
       const isCloneSpoof = clonePred === 'SPOOF' || (clone.raw_score !== undefined && clone.raw_score < 0.0);
       const cloneScore = clone.raw_score !== undefined ? clone.raw_score : -44.01;
       const cloneConf = clone.confidence !== undefined ? clone.confidence : 99.9;
+      const cloneSpoofProb = clone.prob_spoof_pct !== undefined
+        ? clone.prob_spoof_pct
+        : (isCloneSpoof ? cloneConf : (100.0 - cloneConf));
 
       const susVerdict = document.getElementById('cfm-sus-verdict');
       if (susVerdict) {
-        susVerdict.className = isCloneSpoof ? 'verdict-banner spoof' : 'verdict-banner bonafide';
-        document.getElementById('cfm-sus-verdict-text').textContent = isCloneSpoof ? 'VERDICT: DEEPFAKE DETECTED (SPOOF)' : 'VERDICT: BONA FIDE';
-        document.getElementById('cfm-sus-badge').textContent = isCloneSpoof ? 'SYNTHETIC' : 'GENUINE';
-        document.getElementById('cfm-sus-badge').style.background = isCloneSpoof ? 'var(--neon-crimson)' : 'var(--neon-lime)';
+        susVerdict.className = isCloneSpoof ? 'verdict-banner spoof' : 'verdict-banner warning';
+        document.getElementById('cfm-sus-verdict-text').textContent = isCloneSpoof
+          ? 'VERDICT: DEEPFAKE DETECTED (SPOOF)'
+          : 'VERDICT: BỎ SÓT (AI ĐÁNH GIÁ NHẦM LÀ THẬT)';
+        document.getElementById('cfm-sus-badge').textContent = isCloneSpoof ? 'SYNTHETIC' : 'MISSED SPOOF';
+        document.getElementById('cfm-sus-badge').style.background = isCloneSpoof ? 'var(--neon-crimson)' : 'var(--neon-amber)';
         document.getElementById('cfm-sus-badge').style.color = isCloneSpoof ? '#fff' : '#000';
 
         document.getElementById('cfm-sus-score').textContent = (cloneScore > 0 ? '+' : '') + Number(cloneScore).toFixed(2);
-        document.getElementById('cfm-sus-score').style.color = isCloneSpoof ? 'var(--neon-crimson)' : 'var(--neon-lime)';
-        document.getElementById('cfm-sus-conf').textContent = `${Number(cloneConf).toFixed(1)}%`;
+        document.getElementById('cfm-sus-score').style.color = isCloneSpoof ? 'var(--neon-crimson)' : 'var(--neon-amber)';
+        document.getElementById('cfm-sus-conf').textContent = `${Number(cloneSpoofProb).toFixed(1)}%`;
       }
 
       // Set audio source for synthesized clone voice
@@ -2052,7 +2075,7 @@
         document.getElementById('mat-score-delta').textContent = `Chênh lệch: Δs = ${deltaS > 0 ? '+' : ''}${deltaS.toFixed(2)} (Phân tách cực đại)`;
 
         document.getElementById('mat-conf-bona').textContent = `${Number(bonaConf).toFixed(1)}% Authentic`;
-        document.getElementById('mat-conf-clone').textContent = `${Number(cloneConf).toFixed(1)}% Synthetic Deepfake`;
+        document.getElementById('mat-conf-clone').textContent = `${Number(cloneSpoofProb).toFixed(1)}% Synthetic Deepfake`;
 
         const allCorrect = isBona && isCloneSpoof;
         document.getElementById('mat-accuracy-status').textContent = allCorrect ? 'Độ chính xác: 100% (0% Sai số)' : 'Kiểm tra độ nhạy phân tách';

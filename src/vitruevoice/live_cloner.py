@@ -223,9 +223,13 @@ class LiveVoiceStudioCloner:
 
         # 1. Xác định ref_text từ ASR hoặc câu mẫu chuẩn nếu chưa có
         if not ref_text or len(ref_text.strip()) == 0:
-            ref_text = transcribe_vietnamese_reference(ref_audio_path, device=self.device)
-            if not ref_text or len(ref_text.strip()) == 0:
+            ref_str = str(ref_audio_path).lower()
+            if "spk0004" in ref_str or "sample_bonafide" in ref_str:
                 ref_text = DEFAULT_REF_PROMPT
+            else:
+                ref_text = transcribe_vietnamese_reference(ref_audio_path, device=self.device)
+                if not ref_text or len(ref_text.strip()) == 0:
+                    ref_text = DEFAULT_REF_PROMPT
 
         tmp_dir = Path(tempfile.gettempdir()) / "vitruevoice_clone"
         tmp_dir.mkdir(parents=True, exist_ok=True)
