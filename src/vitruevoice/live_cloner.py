@@ -195,11 +195,18 @@ class LiveVoiceStudioCloner:
         if self._omnivoice_model is None:
             try:
                 from omnivoice.models.omnivoice import OmniVoice
-                self._omnivoice_model = OmniVoice.from_pretrained(
-                    "k2-fsa/OmniVoice",
-                    device_map=self.device,
-                    dtype=torch.bfloat16 if "cuda" in str(self.device).lower() else torch.float32,
-                )
+                if "cuda" in str(self.device).lower():
+                    self._omnivoice_model = OmniVoice.from_pretrained(
+                        "k2-fsa/OmniVoice",
+                        device_map=self.device,
+                        dtype=torch.bfloat16,
+                    )
+                else:
+                    self._omnivoice_model = OmniVoice.from_pretrained(
+                        "k2-fsa/OmniVoice",
+                        dtype=torch.float32,
+                    )
+                    self._omnivoice_model.to("cpu")
             except Exception as e:
                 print(f"⚠️ [LiveVoiceStudioCloner] Không thể nạp OmniVoice: {e}")
         return self._omnivoice_model

@@ -201,7 +201,8 @@ Giao diện Dark Forensics Lab đạt chuẩn thiết kế Stitch v2.4, tối gi
 python scripts/demo_predict.py --web
 # hoặc: python -m src.app.ui
 ```
-- Mở trình duyệt tại: `http://localhost:7860` (hoặc `http://localhost:8000` khi chạy bằng Docker).
+- Mở trình duyệt tại: `http://localhost:7860` (hoặc `http://localhost:8000/` khi chạy bằng Docker).
+- **Google Labs Playground Standalone (Web Client hiện đại)**: `http://localhost:8000/playground` (Giao diện Cyber-Retro-Futuristic với Audio Visualizer Oscilloscope, Platt Radial Gauge, và Chế độ Live VoiceStudio CFM Cloning Audit nói nguyên văn câu chuẩn đối soát).
 - **Chuyển đổi giao diện Sáng / Tối (Light/Dark Theme Switcher)**: 1-click nút `☀️`/`🌙` trên góc phải thanh tiêu đề.
 
 #### 🛡️ Chế Độ 1: Thẩm Định Nhanh Đơn Mẫu (Single-File Analysis)

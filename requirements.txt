@@ -9,6 +9,7 @@ numpy>=1.23.0
 # Pretrained Models & HuggingFace
 transformers>=4.30.0
 huggingface_hub>=0.16.0
+accelerate>=0.26.0
 
 # Metrics & Data Processing
 pandas>=2.0.0

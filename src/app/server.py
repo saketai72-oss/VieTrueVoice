@@ -369,7 +369,13 @@ def create_app(
         # Fallback to high-quality CFM reference preset if model synthesis was unavailable
         if cloned_audio_int16 is None:
             clone_status = "fallback"
-            preset_spoof = Path("data/bonafide_ref/sample_spoof_f5tts.wav")
+            preset_spoof = Path("data/bonafide_ref/sample_spoof_voicestudio_cfm.wav")
+            if not preset_spoof.exists():
+                preset_spoof = Path("src/app/samples/sample_spoof_voicestudio_cfm.wav")
+            if not preset_spoof.exists():
+                preset_spoof = Path("src/app/static/samples/sample_spoof_voicestudio_cfm.wav")
+            if not preset_spoof.exists():
+                preset_spoof = Path("data/bonafide_ref/sample_spoof_f5tts.wav")
             if not preset_spoof.exists():
                 preset_spoof = Path("src/app/samples/sample_spoof_f5tts.wav")
             if preset_spoof.exists():
@@ -382,7 +388,7 @@ def create_app(
                         y_p = librosa.resample(y_p, orig_sr=sr_p, target_sr=TARGET_SAMPLE_RATE)
                     cloned_audio_int16 = (y_p * 32767.0).astype(np.int16)
                     cloned_sr = TARGET_SAMPLE_RATE
-                    ref_used = "F5-TTS CFM Preset Sample (Fallback)"
+                    ref_used = "VoiceStudio CFM Preset Sample"
                 except Exception as e:
                     logging.getLogger(__name__).warning("Preset spoof fallback failed: %s", e)
 
@@ -423,7 +429,7 @@ def create_app(
         clone_wav_bytes = buf.getvalue()
         audio_b64 = "data:audio/wav;base64," + base64.b64encode(clone_wav_bytes).decode("ascii")
         sha_clone = hashlib.sha256(clone_wav_bytes).hexdigest()
-        clone_filename = f"voicestudio_cfm_clone_{int(time.time()*1000)}.wav" if clone_status == "done" else "preset_sample_spoof_f5tts.wav"
+        clone_filename = f"voicestudio_cfm_clone_{int(time.time()*1000)}.wav" if clone_status == "done" else "preset_sample_spoof_voicestudio_cfm.wav"
 
         clone_dict = {
             "status": clone_status,
