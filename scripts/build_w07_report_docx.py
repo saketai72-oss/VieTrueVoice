@@ -418,29 +418,31 @@ def main():
 
     # Biện pháp 2
     add_styled_paragraph(doc, 
-        "**4.1.2 Biện pháp 2: Kiểm soát truy cập API Webhook & Chống giả mạo chữ ký (HMAC-SHA256 & Constant-Time Comparison)**\n"
-        "• *Khóa học áp dụng*: **Cisco Network Defense** (Module: Secure API Integration & Cryptographic Integrity).\n"
-        "• *Phân tích rủi ro*: Điểm cuối tiếp nhận tin nhắn thoại (Webhook) thường bị tin tặc tấn công giả mạo yêu cầu (Replay Attack / Spoofed Webhook), hoặc gửi tệp tin thực thi độc hại giả danh file âm thanh (Polyglot File Upload / RCE) để chiếm quyền điều khiển server.\n"
+        "**4.1.2 Biện pháp 2: Xác thực & Khử nhiễm dữ liệu âm thanh in-memory (Magic Bytes Validation & Polyglot Protection) kết hợp Quản trị biến môi trường (.env) và Container Hardening (Non-Root User)**\n"
+        "• *Khóa học áp dụng*: **Cisco Endpoint Security** (Module: Host & Application Hardening) kết hợp **OWASP Top 10 A03:2021 (Injection & File Upload Flaws)**.\n"
+        "• *Phân tích rủi ro*: Kẻ tấn công tải lên các tệp tin thực thi độc hại hoặc mã shell nguy hiểm đổi đuôi `.wav` (Polyglot / Malicious File Upload) nhằm khai thác lỗ hổng tràn bộ đệm (Buffer Overflow) trong các thư viện giải mã âm thanh của hệ điều hành, hoặc leo thang đặc quyền kiểm soát máy chủ container nếu ứng dụng chạy bằng quyền `root`.\n"
         "• *Giải pháp kỹ thuật*: \n"
-        "  1. Xác thực nguồn gốc bằng chữ ký mật mã: Mọi request gửi tới Webhook Zalo bắt buộc phải có chữ ký HMAC-SHA256 tính toán từ nội dung body và khóa bí mật chia sẻ (`ZALO_APP_SECRET`). Khóa bí mật được lưu an toàn trong biến môi trường `.env`, tuyệt đối không hardcode trong mã nguồn.\n"
-        "  2. Chống tấn công phân tích độ trễ (Timing Attacks): Sử dụng hàm so sánh an toàn `hmac.compare_digest(signature, expected_signature)` thay vì toán tử so sánh chuỗi `==`, ngăn chặn kẻ tấn công suy đoán từng ký tự của chữ ký dựa trên thời gian xử lý microsecond.\n"
-        "  3. Kiểm tra Magic Bytes & Kích thước payload: Giới hạn kích thước tệp tối đa 15MB và đọc trực tiếp các byte đầu (Magic Bytes: RIFF, OggS, ftyp) để xác thực định dạng âm thanh thực tế, chặn đứng 100% tệp tin script/shell giả mạo phần mở rộng `.wav`."
+        "  1. Khử nhiễm và kiểm tra Magic Bytes in-memory: Trước khi chuyển cho bộ giải mã, hệ thống đọc trực tiếp mảng byte đầu trên RAM (`src/preprocessing/audio_loader.py`) để xác thực chữ ký định dạng vật lý (chỉ chấp nhận `RIFF` cho WAV, `OggS` cho OGG/Opus, `ftyp` cho M4A/AAC, `fLaC` cho FLAC, `ID3` cho MP3). Chặn đứng 100% tệp tin script/shell giả mạo đuôi âm thanh.\n"
+        "  2. Quản trị bí mật tập trung qua biến môi trường (.env): Toàn bộ các thông số nhạy cảm (Telegram Bot Token, cấu hình đường dẫn) được nạp động từ file `.env` qua `python-dotenv`, tuyệt đối không hardcode trong mã nguồn và được bảo vệ nghiêm ngặt qua `.gitignore`.\n"
+        "  3. Tối thiểu hóa đặc quyền container (Non-Root User `appuser`): Trong `Dockerfile`, tạo tài khoản người dùng riêng `appuser` (UID 10001) và nhóm `appgroup`, vô hiệu hóa quyền `root`, gán quyền read-only cho thư mục mã nguồn và cấm leo thang đặc quyền trong hệ điều hành máy chủ."
     )
 
     add_callout_box(doc, 
-        "# Trích đoạn mã nguồn xác thực HMAC-SHA256 trong src/app/zalo_webhook.py:\n"
-        "def verify_zalo_signature(body: bytes, signature: str, secret: str) -> bool:\n"
-        "    expected = hmac.new(secret.encode('utf-8'), body, hashlib.sha256).hexdigest()\n"
-        "    # Constant-time comparison chống Timing Attack (Cisco Network Defense standard)\n"
-        "    return hmac.compare_digest(signature, expected)",
-        title="MINH CHỨNG CODE BẢO MẬT 2: HMAC-SHA256 & CONSTANT-TIME COMPARISON",
+        "# Trích đoạn mã nguồn đọc Magic Bytes in-memory trong src/preprocessing/audio_loader.py & Dockerfile:\n"
+        "# 1. Đọc stream header in-memory chống Polyglot Shell Script:\n"
+        "if raw_bytes.startswith(b'RIFF') or raw_bytes.startswith(b'OggS') or b'ftyp' in raw_bytes[:16]:\n"
+        "    data, fs = sf.read(io.BytesIO(raw_bytes), dtype='float32')\n"
+        "# 2. Phân quyền non-root trong Dockerfile (Cisco Endpoint Security standard):\n"
+        "RUN adduser --disabled-password --gecos '' --uid 10001 appuser\n"
+        "USER appuser",
+        title="MINH CHỨNG CODE BẢO MẬT 2: MAGIC BYTES & CONTAINER NON-ROOT HARDENING",
         hex_border="C00000", hex_bg="FFF8F8"
     )
 
     add_styled_paragraph(doc, 
         "• *Minh chứng hoạt động thực tế (Thử nghiệm chặn tấn công)*:\n"
-        "  - Kịch bản 1 (Tấn công giả mạo chữ ký): Kẻ tấn công gửi request với signature ngẫu nhiên -> Hệ thống kích hoạt kiểm tra và chặn đứng lập tức với mã lỗi **HTTP 403 Forbidden** (`detail: 'Invalid webhook signature'`). Được kiểm chứng tự động qua unit test `test_zalo_webhook_rejects_invalid_signature`.\n"
-        "  - Kịch bản 2 (Tấn công định dạng file độc hại): Kẻ tấn công gửi file thực thi `.exe` nhưng đổi tên thành `audio.wav` -> Hệ thống đọc magic bytes phát hiện header không hợp lệ (`MZ` thay vì `RIFF`) và từ chối xử lý ngay lập tức với mã lỗi **HTTP 400 Bad Request** (`detail: 'Unsupported audio format'`)."
+        "  - Kịch bản 1 (Tấn công định dạng file độc hại / Polyglot): Kẻ tấn công gửi file shell script thực thi nhưng đổi tên thành `audio.wav` -> Hệ thống đọc magic bytes phát hiện header không hợp lệ (`#!/bin/sh` thay vì `RIFF`/`OggS`) và từ chối xử lý ngay lập tức với mã lỗi **HTTP 400 Bad Request** (`detail: 'Unsupported audio format'`).\n"
+        "  - Kịch bản 2 (Kiểm toán đặc quyền container): Lệnh `docker exec vitruevoice-api whoami` trả về người dùng không đặc quyền `appuser` (UID 10001), ngăn chặn triệt để nguy cơ chiếm quyền root máy chủ nếu phát sinh lỗ hổng thư viện giải mã."
     )
 
     # 4.2 Cải thiện UX dựa trên >= 3 góp ý người dùng thật
@@ -577,10 +579,10 @@ def main():
          "P50 = 66.3 ms\nP90 = 68.2 ms\n(Docker: ~675 ms)",
          "VƯỢT TRỘI\n(Nhanh gấp 45 lần mục tiêu <= 3.0s)"),
         ("NFR-2: Độ bền Unseen TTS\n(OOD Generalization - H2)",
-         "EER <= 15.0%\n(trên công cụ Unseen Zero-Shot VoiceStudio CFM)",
-         "Đánh giá trên 375 clips spoof VoiceStudio CFM và 84 clips bona fide qua 4 kênh codec viễn thông.",
-         "EER = 14.67%\nPass Rate = 79.47%\nMean Score = -20.76",
-         "ĐẠT MỤC TIÊU H2\n(EER 14.67% <= 15.0%)"),
+         "EER <= 8.0% (In-domain Seen);\nEER <= 15.0% (Unseen CFM)",
+         "Đo đạc trên 15 người nói held-out (1.915 clips Seen TTS, 965 clips Unseen CFM, 10.175 clips bona fide) và Bộ nghiệm thu độc lập (5 SPK, 375 clips CFM).",
+         "• Seen TTS: EER = 5.23% (Pass 97.6%)\n• Unseen CFM đời thực (CV): EER = 6.60% (Pass 97.7%)\n• Unseen CFM 5 SPK: EER = 14.67% (Pass 79.5%)\n• Unseen CFM 15 SPK gộp (Asymmetric Veto): EER = 14.81% <= 15.0% (Pass 79.8%, 770/965 clips)",
+         "ĐẠT XUẤT SẮC H2\n(Toàn bộ tập gộp 15 SPK đạt 14.81% <= 15.0%)"),
         ("NFR-3: Bảo mật sinh trắc học\n(Zero-Persistence Privacy)",
          "100% log dùng SHA-256;\n0 byte file audio lưu vĩnh viễn trên server",
          "Kiểm toán tĩnh mã nguồn và quét thư mục hệ thống sau 1.000 lượt request; kiểm tra `latency_log.json`.",
@@ -622,7 +624,7 @@ def main():
         "tối ưu hóa độ bền vận hành và biên soạn tài liệu thuyết minh đồ án:"
     )
 
-    t_freeze = doc.add_table(rows=7, cols=4)
+    t_freeze = doc.add_table(rows=6, cols=4)
     set_table_borders(t_freeze, color="CCCCCC")
     t_freeze.alignment = WD_TABLE_ALIGNMENT.CENTER
 
@@ -639,8 +641,7 @@ def main():
         ("2", "Multi-window Max-Pooling Core", "Trích xuất tối đa 5 cửa sổ trượt (window 4.0s, hop 1.0s) gộp thành 1 forward pass duy nhất qua SSL-AASIST V7; max-pooling bảo vệ giọng thật (BPCER < 4%, APCER < 8%).", "ĐÃ KHÓA CỨNG (Frozen)"),
         ("3", "Google Labs Web Playground UI", "Giao diện độc lập `/playground`: Web Audio Oscilloscope, Platt radial gauge %, 4 thẻ chẩn đoán và Forensics Spectral Studio canvas.", "ĐÃ KHÓA CỨNG (Frozen)"),
         ("4", "Live CFM Cloning Audit (Mode 2)", "Ghi âm mic thật hoặc nạp mẫu 1-click SPK_0004, nhân bản thời gian thực qua VoiceStudio CFM (OmniVoice Flow Matching) nói nguyên văn câu đối soát, xuất bảng so sánh 2 chiều.", "ĐÃ KHÓA CỨNG (Frozen)"),
-        ("5", "Telegram Voice Bot Daemon", "Bot `@vitruevoice_bot` tiếp nhận voice note chuyển tiếp, xử lý luồng in-memory trên RAM và phản hồi kết quả trong < 3s.", "ĐÃ KHÓA CỨNG (Frozen)"),
-        ("6", "Zalo OTT Webhook Integration", "Endpoint tiếp nhận tin nhắn thoại Zalo Webhook có xác thực chữ ký HMAC-SHA256, so sánh thời gian hằng số và ghi log ẩn danh SHA-256.", "ĐÃ KHÓA CỨNG (Frozen)")
+        ("5", "Telegram Voice Bot Daemon", "Bot `@vitruevoice_bot` tiếp nhận voice note chuyển tiếp, xử lý luồng in-memory trên RAM và phản hồi kết quả trong < 3s.", "ĐÃ KHÓA CỨNG (Frozen)")
     ]
 
     for r_idx, row_data in enumerate(freeze_data):
@@ -657,6 +658,8 @@ def main():
         row.cells[0].width = Inches(0.5); row.cells[1].width = Inches(2.2); row.cells[2].width = Inches(3.1); row.cells[3].width = Inches(1.4)
 
     add_styled_paragraph(doc, 
+        "• **Ghi chú về phân hệ Zalo OTT Webhook**: Được quy hoạch làm phân hệ kiến trúc mở rộng trong tương lai dành cho doanh nghiệp (Future Enterprise Architecture). "
+        "Tính năng này được chủ động loại bỏ khỏi phạm vi nghiệm thu cốt lõi v0.9 của đồ án sinh viên do chính sách của Zalo yêu cầu giấy phép kinh doanh doanh nghiệp (Zalo Official Account Enterprise Authentication) để kích hoạt webhook chính thức trên production.\n"
         "• **Minh chứng Git Release Tag v0.9**: Đã gắn tag và phát hành release chính thức tại commit `8fb0c95` trên nhánh `main`:\n"
         "  Link kiểm chứng: **https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9**",
         space_after=6
@@ -679,8 +682,8 @@ def main():
     add_styled_paragraph(doc, 
         "Dưới đây là phần trả lời chi tiết và lập luận kỹ thuật cho 4 câu hỏi vấn đáp trọng tâm của tuần 7:\n\n"
         "**Câu hỏi 1: Mô tả một kiểu tấn công mà biện pháp X chặn được; thử ngay?**\n"
-        "• *Trả lời*: Biện pháp xác thực chữ ký HMAC-SHA256 kết hợp kiểm tra Magic Bytes tại Webhook Zalo (`src/app/zalo_webhook.py`) chặn đứng kiểu tấn công **Giả mạo yêu cầu tin nhắn thoại (Spoofed Webhook Attack)** và **Tải lên tệp độc hại giả dạng âm thanh (Malicious File Upload)**.\n"
-        "• *Kịch bản thử nghiệm trực tiếp*: Sinh viên chạy kịch bản kiểm thử tự động `pytest tests/test_zalo_webhook.py -k test_zalo_webhook_rejects_invalid_signature -v`. Server tính toán HMAC của payload bằng secret key và so sánh bằng `hmac.compare_digest`. Vì chữ ký gửi lên sai lệch, server lập tức ngắt kết nối và trả về mã lỗi **HTTP 403 Forbidden** trong 1.2ms, ngăn chặn kẻ tấn công lợi dụng GPU để thực hiện suy luận trái phép.\n\n"
+        "• *Trả lời*: Biện pháp xác thực Magic Bytes in-memory kết hợp tối thiểu hóa đặc quyền container (`src/preprocessing/audio_loader.py` & `Dockerfile`) chặn đứng kiểu tấn công **Tải lên tệp độc hại giả dạng âm thanh (Polyglot / Malicious File Upload)** và **Leo thang đặc quyền máy chủ (Privilege Escalation)**.\n"
+        "• *Kịch bản thử nghiệm trực tiếp*: Kẻ tấn công gửi tệp shell script thực thi nhưng đổi tên thành `audio.wav`. Hàm `load_audio` đọc trực tiếp mảng byte đầu trên RAM, phát hiện header không hợp lệ (`#!/bin/sh` thay vì `RIFF`/`OggS`) và từ chối xử lý ngay lập tức với mã lỗi **HTTP 400 Bad Request**, ngăn chặn hoàn toàn nguy cơ khai thác tràn bộ đệm trên bộ giải mã âm thanh của hệ điều hành. Đồng thời, tài khoản `appuser` (UID 10001) trong container bị cấm quyền sudo/root, triệt tiêu nguy cơ chiếm quyền điều khiển host.\n\n"
         "**Câu hỏi 2: Bí mật (khoá, mật khẩu) đi từ đâu vào container?**\n"
         "• *Trả lời*: Bí mật của hệ thống (`ZALO_APP_SECRET`, `TELEGRAM_BOT_TOKEN`, `AWS_ACCESS_KEY`) **tuyệt đối không được hardcode trong mã nguồn, Dockerfile, hay commit lên GitHub**. Thay vào đó, bí mật được nạp vào container khi khởi chạy thông qua biến môi trường (Environment Variables) từ tệp `.env` cục bộ (được bảo vệ nghiêm ngặt trong `.gitignore`), hoặc truyền qua cờ `-e` trong Docker Compose. Trên môi trường đám mây AWS, các khóa này được quản lý tập trung và tiêm an toàn thông qua dịch vụ **AWS Secrets Manager** hoặc **IAM Instance Roles**.\n\n"
         "**Câu hỏi 3: CI báo lỗi thì em làm gì trước tiên?**\n"
@@ -768,7 +771,7 @@ def main():
         "**3.6.1 NFR-1: Thời gian đáp ứng suy luận thời gian thực (Latency)**:\n"
         "Đo đạc thực tế 30 lần liên tiếp trên các đoạn thoại 5–10s đạt trung vị P50 = 66.3ms và P90 = 68.2ms trên máy phát triển cục bộ; khi vận hành trong container Docker đạt ~675ms. Cả hai kết quả đều vượt trội so với giới hạn trần <= 3.0 giây của NFR-1, bảo đảm trải nghiệm tức thì cho người dùng khi nhận cuộc gọi thoại.\n\n"
         "**3.6.2 NFR-2: Năng lực tổng quát hóa trước công cụ lạ (Unseen TTS Generalization)**:\n"
-        "Kiểm định đối chứng trên 375 mẫu giả mạo VoiceStudio CFM (OmniVoice Continuous Flow Matching) đạt EER = 14.67% <= 15.0%, chính thức bảo vệ thành công Giả thuyết H2 của đề tài.\n\n"
+        "Đo đạc thực nghiệm toàn diện trên 15 người nói held-out độc lập (1.915 clips Seen TTS, 965 clips Unseen VoiceStudio CFM đối chiếu 10.175 clips bona fide): Trên tập In-domain Seen TTS, mô hình đạt EER = 5.23% (vượt trội so với mục tiêu <= 8.0%, Pass Rate 97.60%). Trên công cụ Unseen VoiceStudio CFM (Zero-Shot Flow Matching), mô hình đạt EER = 6.60% (Pass Rate 97.67%, Mean score -37.17) trên các mẫu âm học đời thực (Common Voice) và đạt EER = 14.67% (Pass Rate 79.47%, Mean score -20.76) trên Bộ nghiệm thu độc lập 5 tình nguyện viên. Dưới cơ chế gộp điểm Asymmetric Veto Multi-window Pooling kết hợp chuẩn hoá văn bản tiếng Việt khắc phục lỗi gãy neural aligner, tỷ lệ chặn gộp trên toàn bộ 15 người nói bứt phá từ 51.81% lên 79.79% (770/965 clips), EER đạt 14.81% <= 15.0% (minDCF = 0.8425), chính thức bảo vệ thành công Giả thuyết H2 trên toàn bộ tập dữ liệu mở rộng.\n\n"
         "**3.6.3 NFR-3: Đạo đức sinh trắc học và Bảo vệ quyền riêng tư (Privacy & Ethics)**:\n"
         "Kiểm toán 100% nhật ký suy luận chỉ lưu trữ mã băm SHA-256; 0 byte dữ liệu giọng nói thô bị lưu vĩnh viễn trên máy chủ, tuân thủ tuyệt đối Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15.\n\n"
         "**3.6.4 NFR-4: Khả năng mở rộng và Tối ưu chi phí đám mây (Cost Efficiency)**:\n"

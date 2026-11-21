@@ -1,0 +1,97 @@
+{
+  "model": "out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt",
+  "pooling_mode": "asymmetric_veto",
+  "timestamp": "2026-11-22 03:51:12",
+  "bona_fide": {
+    "name": "Bona Fide (15 Speakers)",
+    "total": 10175,
+    "pass_rate_pct": 91.56,
+    "mean_score": 22.71,
+    "median_score": 27.17,
+    "bpcer_pct": 8.44
+  },
+  "systems": {
+    "f5_tts": {
+      "name": "F5-TTS (Seen)",
+      "total": 960,
+      "pass_rate_pct": 97.08,
+      "mean_score": -35.27,
+      "median_score": -37.14,
+      "eer_pct": 5.4,
+      "min_dcf": 0.7655,
+      "eer_threshold": -18.8607
+    },
+    "vieneu_tts": {
+      "name": "VieNeu-TTS (Seen)",
+      "total": 955,
+      "pass_rate_pct": 98.12,
+      "mean_score": -38.21,
+      "median_score": -39.62,
+      "eer_pct": 4.82,
+      "min_dcf": 0.694,
+      "eer_threshold": -21.9482
+    },
+    "seen_pooled": {
+      "name": "Seen TTS Pooled",
+      "total": 1915,
+      "pass_rate_pct": 97.6,
+      "mean_score": -36.74,
+      "median_score": -38.35,
+      "eer_pct": 5.23,
+      "min_dcf": 0.7308,
+      "eer_threshold": -20.1695
+    },
+    "voicestudio_cfm": {
+      "name": "VoiceStudio CFM (Unseen)",
+      "total": 965,
+      "pass_rate_pct": 79.79,
+      "mean_score": -24.37,
+      "median_score": -35.91,
+      "eer_pct": 14.81,
+      "min_dcf": 0.8425,
+      "eer_threshold": 15.7753
+    }
+  },
+  "voicestudio_by_codec": {
+    "clean_16khz": {
+      "total": 193,
+      "pass_rate_pct": 80.31,
+      "mean_score": -25.13,
+      "eer_pct": 14.51,
+      "min_dcf": 0.8407
+    },
+    "aac_zalo_76k": {
+      "total": 193,
+      "pass_rate_pct": 82.38,
+      "mean_score": -25.37,
+      "eer_pct": 13.99,
+      "min_dcf": 0.8323
+    },
+    "opus_zalo_24k": {
+      "total": 193,
+      "pass_rate_pct": 80.83,
+      "mean_score": -24.67,
+      "eer_pct": 14.25,
+      "min_dcf": 0.8345
+    },
+    "g711_alaw": {
+      "total": 193,
+      "pass_rate_pct": 78.24,
+      "mean_score": -22.92,
+      "eer_pct": 14.51,
+      "min_dcf": 0.8458
+    },
+    "amr_nb": {
+      "total": 193,
+      "pass_rate_pct": 77.2,
+      "mean_score": -23.78,
+      "eer_pct": 17.1,
+      "min_dcf": 0.8096
+    }
+  },
+  "degradation": {
+    "delta_eer": 9.58,
+    "delta_pass_rate": -17.81,
+    "delta_mean_score": 12.37
+  }
+}

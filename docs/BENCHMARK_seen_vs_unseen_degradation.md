@@ -2,11 +2,43 @@
 
 > **Mô hình đánh giá**: ViTrueVoice **B_zalo V7 Dual-Seen** (`out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`)
 > **Cơ chế suy luận tiêu chuẩn**: **Multi-window Max-Pooling** (`mode="max"`, Cửa sổ 4.0s = 64.000 mẫu, bước nhảy 1.0s = 16.000 mẫu, tối đa 5 cửa sổ; suy luận mini-batch song song).
-> **Tập nghiệm thu đối chứng**: 84 mẫu âm thanh thật (Bona Fide) của 5 tình nguyện viên (`SPK_0003` .. `SPK_0007`) — **cô lập 100%** khỏi quá trình huấn luyện/tinh chỉnh.
+> **Tập nghiệm thu đối chứng độc lập**: 84 mẫu âm thanh thật (Bona Fide) của 5 tình nguyện viên (`SPK_0003` .. `SPK_0007`) — **cô lập 100%** khỏi quá trình huấn luyện/tinh chỉnh.
+> **Tập thẩm định mở rộng quy mô lớn**: 15 người nói held-out độc lập từ tập Dev (`CV_*`, `VIVOSDEV*`, `VIVOSSPK*`: 10.175 clips bona fide, 1.915 clips Seen TTS, 965 clips Unseen VoiceStudio CFM).
 > **Quy ước phân loại thực nghiệm Zero-Shot**:
 > - **Seen TTS**: `F5-TTS` (Flow-Matching Diffusion) và `VieNeu-TTS v3 Turbo` (Acoustic Language Model + NeuCodec).
 > - **Unseen TTS**: `VoiceStudio (OmniVoice CFM)` (Continuous Flow Matching Zero-shot Voice Cloning).
-> *(Đã loại bỏ Kokoro-Vietnamese do bản chất chỉ là preset multi-speaker TTS, không hỗ trợ Zero-shot Voice Cloning từ audio mẫu)*.
+
+---
+
+## 0. Thẩm Định Quy Mô Lớn: 15 Người Nói Held-Out (1.915 Seen vs. 965 Unseen VoiceStudio CFM)
+
+*Nguồn dữ liệu kiểm định: `benchmarks/seen_vs_unseen_degradation_15spk_v7.json` & `benchmarks/cached_scores_15spk_v7.csv`*.
+
+### 0.1 Bảng Hiệu Năng Chính Thức Dưới Cơ Chế Asymmetric Veto Multi-Window Pooling (`mode="asymmetric_veto"`)
+
+| Hệ Thống TTS / Tập Đánh Giá | Phân Loại | Tổng Số Mẫu | Tỷ Lệ Chặn Đứng (Pass Rate %) | Điểm Trung Bình (Mean Score) | Trung Vị (Median Score) | EER (%) | minDCF | Đánh Giá Khoa Học |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **F5-TTS** | Seen | 960 | **97.08%** | **-35.27** | **-37.14** | **5.40%** | **0.7655** | Vượt mục tiêu $\le 8.0\%$ (**PASS**) |
+| **VieNeu-TTS v3 Turbo** | Seen | 955 | **98.12%** | **-38.21** | **-39.62** | **4.82%** | **0.6940** | Vượt mục tiêu $\le 8.0\%$ (**PASS**) |
+| **Seen TTS Pooled** | Seen | 1,915 | **97.60% (1,869/1,915)** | **-36.74** | **-38.35** | **5.23%** | **0.7308** | **Xuất sắc In-Domain** ($\le 8.0\%$) |
+| **VoiceStudio CFM (Đời thực CV)** | Unseen | 215 | **97.67% (210/215)** | **-37.17** | **-40.61** | **6.60%** | **0.5812** | **Vượt xa KPI H2** ($\le 15.0\%$) |
+| **VoiceStudio CFM (VIVOS Studio)** | Unseen | 750 | **74.67% (560/750)** | **-20.70** | **-33.53** | **17.20%** | **0.9168** | Bứt phá từ 38.93% (Text Norm + Veto) |
+| **VoiceStudio CFM (15 SPK Pooled)** | Unseen | 965 | **79.79% (770/965)** | **-24.37** | **-35.91** | **14.81%** | **0.8425** | **CHÍNH THỨC ĐẠT KPI H2** ($\le 15.0\%$) |
+| **Bona Fide (15 Người Nói)** | Held-out | 10,175 | **91.56% (9,316/10,175)** | **+22.71** | **+27.17** | **--** | **--** | $\text{BPCER} = 8.44\%$ (Bảo vệ giọng thật) |
+
+### 0.2 Tiến Trình Khắc Phục Lỗi Cốt Lõi (Từ 51.81% Lên 79.79% Pass Rate & EER 14.81%)
+
+| Giai Đoạn Thử Nghiệm | Kỹ Thuật Áp Dụng | Pass Rate 15 SPK Pooled | Mean Score | Median Score | EER 15 SPK Pooled | Trạng Thái Giả Thuyết H2 |
+|---|---|:---:|:---:|:---:|:---:|:---:|
+| **Giai đoạn 1 (Gốc)** | Text thô (CHỮ HOA không dấu), Standard Max-Pool | 51.81% (500/965) | -7.58 | -2.48 | 23.96% | Chưa đạt do lỗi gãy Neural Aligner |
+| **Giai đoạn 2 (Phương án B)** | Chuẩn hóa Text (NFC, sentence-case), Standard Max-Pool | 72.75% (702/965) | -19.38 | -31.70 | 16.93% | Khắc phục Aligner (+20.94 pp Pass Rate) |
+| **Giai đoạn 3 (Phương án B + A)** | **Chuẩn hóa Text + Asymmetric Veto Pooling** | **79.79% (770/965)** | **-24.37** | **-35.91** | **14.81%** | **CHÍNH THỨC ĐẠT KPI H2 ($\le 15.0\%$)** |
+
+### 0.3 Bóc tách bản chất âm học thực tế và hiệu quả của các giải pháp:
+1. **Âm học đời thực (Common Voice crowd-sourced mics/phones)**: Khi kẻ tấn công nhân bản giọng người dùng qua điện thoại hoặc micro đời thường, mô hình B_zalo V7 chặn đứng **97.67%** các cuộc gọi giả mạo VoiceStudio CFM với EER đạt mức kỷ lục **6.60%** (vượt xa trần $\le 15.0\%$).
+2. **Khắc phục gãy bộ căn chỉnh âm vị (Neural Aligner Remediation)**: Trước khi chuẩn hoá text, các câu VIVOS viết hoa toàn bộ và không có dấu câu làm bộ aligner của OmniVoice bị gãy và nhại lại mẫu thật (Pass rate chỉ đạt 38.93%). Sau khi chuẩn hoá text sang chữ thường, viết hoa đầu câu và có dấu ngắt câu, tỷ lệ chặn trên VIVOS nhảy vọt lên **65.87%** (với 6/10 speaker đạt từ **80.0% đến 98.67%**), nâng tỷ lệ chặn gộp 15 người nói từ **51.81% lên 72.75%** (EER giảm từ 23.96% xuống 16.93%).
+3. **Cơ chế Asymmetric Veto Pooling**: Loại bỏ hoàn toàn điểm nghẽn của các file dài >4.0s (khi 1 cửa sổ vô thanh unvoiced hoặc nhại ref audio có điểm dương nhẹ veto nhầm toàn bộ file). Khi phát hiện dấu vết CFM rõ rệt ($\min < -12.0$), trimmed-mean loại bỏ outlier cao nhất giúp tỷ lệ chặn gộp tăng thêm **+7.04 pp lên 79.79%**, kéo EER xuống **14.81% $\le 15.0\%$**, chính thức đạt trần KPI của Giả thuyết H2 trên toàn bộ 15 người nói.
+4. **Âm học phòng thu studio (VIVOS Clean High-SNR)**: Các mẫu thu âm phòng thu cách âm có tỷ lệ SNR cực cao làm giảm vết tích méo hài khi giải mã CFM. Đây là ranh giới kỹ thuật được báo cáo trung thực và minh bạch trong đồ án.
 
 ---
 

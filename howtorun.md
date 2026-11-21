@@ -423,5 +423,20 @@ Truy cập trình duyệt:
 - Chế độ 1: **SINGLE-FILE ANALYSIS** — Tải file hoặc thu âm nhanh, trực quan hóa sóng âm Oscilloscope, Platt radial gauge và Forensics Spectral Studio canvas.
 - Chế độ 2: **LIVE CFM CLONING AUDIT** — Ghi âm Micro hoặc nạp 1-Click SPK_0004, hệ thống nhân bản theo thời gian thực qua VoiceStudio CFM (OmniVoice Zero-Shot Flow Matching) nói nguyên văn câu đối soát *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."*, xuất Ma trận đối soát đối chứng (Comparative Benchmark Matrix) đạt phân tách $\Delta s > 40.0$, BPCER $0.0\%$, APCER $0.0\%$. Đã chuẩn hóa thu âm mộc WebRTC (tắt noise suppression/AEC/AGC) và pipeline DSP tự động cắt tỉa khoảng lặng thừa (`top_db=25`) + peak-normalize 95% ngăn ngừa hiện tượng nhận nhầm giọng người thật thành Spoof.
 
+### 8.9 Đánh Giá Mở Rộng Unseen TTS VoiceStudio CFM Trên 15 Người Nói Held-out (W07)
+Quy trình sinh và đánh giá suy giảm (Degradation Analysis) trên 15 người nói held-out độc lập (10.175 bona fide, 1.915 seen TTS, 965 unseen VoiceStudio CFM clips):
+```bash
+# 1. Tái sinh 965 clips Unseen VoiceStudio CFM với văn bản chuẩn hóa NFC & sentence-case
+python scripts/generate_omnivoice_15spk_unseen.py --force-vivos
+
+# 2. Đánh giá suy luận độc lập mô hình B_zalo V7 và tính toán EER, minDCF, Pass Rate (mặc định Asymmetric Veto)
+python scripts/eval_15spk_unseen_benchmark.py --force-unseen --pooling-mode asymmetric_veto
+
+# 3. Xuất bản báo cáo tổng hợp W07 (.docx & .pdf)
+python scripts/build_w07_report_docx.py
+```
+Toàn bộ tập audio mẫu nghiệm thu được đồng bộ sang thư mục lưu trữ chính thức:
+`C:\Users\saket\Documents\Đồ án chuyên ngành\Voice_Final\01_Corpus_Evaluation\Unseen_VoiceStudio_15Spk\`
+
 
 
