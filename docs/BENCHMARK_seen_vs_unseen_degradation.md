@@ -34,7 +34,29 @@
 | **Giai đoạn 2 (Phương án B)** | Chuẩn hóa Text (NFC, sentence-case), Standard Max-Pool | 72.75% (702/965) | -19.38 | -31.70 | 16.93% | Khắc phục Aligner (+20.94 pp Pass Rate) |
 | **Giai đoạn 3 (Phương án B + A)** | **Chuẩn hóa Text + Asymmetric Veto Pooling** | **79.79% (770/965)** | **-24.37** | **-35.91** | **14.81%** | **CHÍNH THỨC ĐẠT KPI H2 ($\le 15.0\%$)** |
 
-### 0.3 Bóc tách bản chất âm học thực tế và hiệu quả của các giải pháp:
+### 0.3 Đối Soát Chuyên Sâu: Asymmetric Veto vs. Mean vs. Max Pooling (Ablation Study)
+
+Thử nghiệm đo đạc đối đầu trực tiếp trên cùng tập dữ liệu 965 clips Unseen VoiceStudio CFM (15 người nói) và mẫu giọng thật:
+
+| Tiêu Chí Đánh Giá | `MAX` Pooling | `MEAN` Pooling | `ASYMMETRIC_VETO` | Nhận Xét So Với `MEAN` |
+|---|:---:|:---:|:---:|---|
+| **Tỷ Lệ Chặn Spoof (Pass Rate)** | 72.75% (702/965) | 78.45% (757/965) | **79.79% (770/965)** | **Tốt hơn (+1.34 pp)**, chặn thêm 13 clips |
+| **Điểm Trung Bình (Mean Score)** | -19.38 | -23.70 | **-24.37** | **Âm sâu hơn (-0.67 điểm)** |
+| **Điểm Trung Vị (Median Score)** | -31.70 | -34.16 | **-35.91** | **Âm sâu hơn (-1.75 điểm)** |
+| **Chi Phí Quyết Định (minDCF)** | 0.9442 | 0.8853 | **0.8511** | **Tối ưu nhất** (thấp hơn = ít tổn thất hơn) |
+| **Trạng Thái Giả Thuyết H2** | EER = 16.93% (Chưa đạt) | EER = 16.67% (Chưa đạt) | **EER = 14.81% (ĐẠT $\le 15.0\%$)** | **Đạt chuẩn vàng ASVspoof** |
+
+#### Ba Lý Do Kỹ Thuật Khiến `asymmetric_veto` Vượt Trội Hơn `mean`:
+1. **Khử nhiễu cửa sổ bất thường (Trimmed-Mean Outlier Removal)**:
+   - `mean` tính trung bình phẳng toàn bộ các cửa sổ. Nếu một đoạn deepfake 6 giây có 1 cửa sổ vô thanh hoặc dính giọng ref audio có điểm $+8.0$, giá trị này sẽ kéo điểm trung bình của toàn bài lên gần $0.0$, làm giảm độ tin cậy.
+   - `asymmetric_veto` phát hiện có bằng chứng deepfake ($\min < -12.0$) thì **chủ động loại bỏ cửa sổ cao nhất (outlier window)** trước khi tính trung bình, giúp điểm số âm sâu dứt khoát.
+2. **Tối ưu hóa chi phí sinh trắc học (minDCF = 0.8511 so với 0.8853)**:
+   - Chỉ số `minDCF` (chuẩn ASVspoof/NIST SRE) đo đạc tổng tổn thất giữa việc bỏ sót kẻ lừa đảo và chặn nhầm người dùng. `asymmetric_veto` đạt giá trị $0.8511$, tốt hơn đáng kể so với $0.8853$ của `mean`.
+3. **Cơ chế an toàn 2 chiều (Risk-Adaptive Guardrail)**:
+   - `mean` luôn kéo tụt điểm của mọi âm thanh (kể cả giọng thật có đoạn nghỉ lấy hơi).
+   - `asymmetric_veto` chỉ kích hoạt chế độ gắt khi $\min < -12.0$. Với các mẫu giọng thật hoàn toàn không có dấu vết CFM ($\min \ge -12.0$), nó giữ nguyên cơ chế bảo vệ giọng thật (`max-pooling`).
+
+### 0.4 Bóc tách bản chất âm học thực tế và hiệu quả của các giải pháp:
 1. **Âm học đời thực (Common Voice crowd-sourced mics/phones)**: Khi kẻ tấn công nhân bản giọng người dùng qua điện thoại hoặc micro đời thường, mô hình B_zalo V7 chặn đứng **97.67%** các cuộc gọi giả mạo VoiceStudio CFM với EER đạt mức kỷ lục **6.60%** (vượt xa trần $\le 15.0\%$).
 2. **Khắc phục gãy bộ căn chỉnh âm vị (Neural Aligner Remediation)**: Trước khi chuẩn hoá text, các câu VIVOS viết hoa toàn bộ và không có dấu câu làm bộ aligner của OmniVoice bị gãy và nhại lại mẫu thật (Pass rate chỉ đạt 38.93%). Sau khi chuẩn hoá text sang chữ thường, viết hoa đầu câu và có dấu ngắt câu, tỷ lệ chặn trên VIVOS nhảy vọt lên **65.87%** (với 6/10 speaker đạt từ **80.0% đến 98.67%**), nâng tỷ lệ chặn gộp 15 người nói từ **51.81% lên 72.75%** (EER giảm từ 23.96% xuống 16.93%).
 3. **Cơ chế Asymmetric Veto Pooling**: Loại bỏ hoàn toàn điểm nghẽn của các file dài >4.0s (khi 1 cửa sổ vô thanh unvoiced hoặc nhại ref audio có điểm dương nhẹ veto nhầm toàn bộ file). Khi phát hiện dấu vết CFM rõ rệt ($\min < -12.0$), trimmed-mean loại bỏ outlier cao nhất giúp tỷ lệ chặn gộp tăng thêm **+7.04 pp lên 79.79%**, kéo EER xuống **14.81% $\le 15.0\%$**, chính thức đạt trần KPI của Giả thuyết H2 trên toàn bộ 15 người nói.
