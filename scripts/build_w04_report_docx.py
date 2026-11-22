@@ -154,7 +154,7 @@ def main():
         ("Link Commit / PR Tính năng #1", "https://github.com/saketai72-oss/VieTrueVoice/commit/f0f155e (commits chuỗi [AI] tính năng Must #1)"),
         ("Hạn nộp & Báo cáo", "Trước 12:00 thứ Sáu 06/11/2026 · Báo cáo & vấn đáp xác minh: 13:30–16:30 cùng ngày"),
         ("Tên file nộp", "DACN_2380601959_NguyenThanhTai_W04.pdf (xuất trực tiếp từ file Word này)"),
-        ("Thứ tự cấu trúc trong file", "(0) Bổ sung tuần trước → (I) Phiếu nhật ký tuần W04 & Trả lời câu hỏi tư duy → (II) Nhật ký AI (5 câu hỏi Hitachi) → (III) Minh chứng Tính năng cốt lõi #1 (Must #1) chạy đầu–cuối (TDD, AC, baseline 5 SPK đối chứng, link demo) → (IV) Chương 2 bản nháp hoàn chỉnh (8–12 trang, ≥5 tài liệu trích dẫn chuẩn IEEE) → (V) Minh chứng khoá học AWS/Cisco → (VI) Tự kiểm & Bộ câu hỏi vấn đáp mẫu.")
+        ("Thứ tự cấu trúc trong file", "(0) Bổ sung tuần trước → (I) Phiếu nhật ký tuần W04 & Trả lời câu hỏi tư duy → (II) Nhật ký AI (5 câu hỏi Hitachi) → (III) Minh chứng Tính năng cốt lõi #1 (Must #1) chạy đầu–cuối (TDD, AC, baseline 5 SPK đối chứng, link demo) → (IV) Chương 2 bản nháp hoàn chỉnh (8–12 trang, ≥5 tài liệu trích dẫn chuẩn IEEE) → (V) Minh chứng khoá học AWS (Gói A) → (VI) Tự kiểm & Bộ câu hỏi vấn đáp mẫu.")
     ]
     
     for row_idx, (col0, col1) in enumerate(t0_data):
@@ -869,8 +869,8 @@ def main():
 
     add_styled_paragraph(doc, "", space_after=8)
 
-    # 9. PHẦN V. MINH CHỨNG KHOÁ HỌC AWS/CISCO
-    add_heading_1(doc, "PHẦN V. MINH CHỨNG KHOÁ HỌC AWS ACADEMY / CISCO")
+    # 9. PHẦN V. MINH CHỨNG KHOÁ HỌC AWS (GÓI A)
+    add_heading_1(doc, "PHẦN V. MINH CHỨNG KHOÁ HỌC AWS ACADEMY (GÓI A)")
     add_styled_paragraph(doc, "Căn cứ theo yêu cầu bắt buộc của Khoa CNTT HUTECH về việc hoàn thành các chứng chỉ chuyên môn trên nền tảng AWS Academy (Gói A), sinh viên báo cáo chi tiết tiến độ học tập và đính kèm minh chứng tính đến ngày 05/11/2026:")
     
     t_aws = doc.add_table(rows=4, cols=4)

@@ -177,7 +177,7 @@ def main():
         ("Link Git Release Tag v0.9 (Đóng băng)", "https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9 (Commit 8fb0c95 trên branch main)"),
         ("Link CI Run xanh gần nhất (GitHub Actions)", "https://github.com/saketai72-oss/VieTrueVoice/actions/runs/44719429979 (Run ID: 44719429979 · 328/328 tests passed 100% green · Thời gian: 2m40s)"),
         ("Hạn nộp & Lịch vấn đáp LMS", "Hạn nộp: Trước 12:00 thứ Sáu 27/11/2026 · Vấn đáp: ==13:30–16:30 chiều thứ Sáu 27/11/2026 (có vấn đáp xác minh)=="),
-        ("Cấu trúc nộp bài (chuẩn LMS HUTECH)", "(1) Bổ sung tuần trước → (2) Phiếu nhật ký tuần W07 → (3) Nhật ký AI → (4) Minh chứng Checkpoint W07 (Bảo mật, UX 3 người dùng, Docker/CI, 5 NFR, Đóng băng v0.9, Tự học OWASP/Docker/CI, Vấn đáp mẫu, Chứng chỉ AWS/Cisco) → (5) Chương 3 nháp bổ sung.")
+        ("Cấu trúc nộp bài (chuẩn LMS HUTECH)", "(1) Bổ sung tuần trước → (2) Phiếu nhật ký tuần W07 → (3) Nhật ký AI → (4) Minh chứng Checkpoint W07 (Bảo mật, UX 3 người dùng, Docker/CI, 5 NFR, Đóng băng v0.9, Tự học OWASP/Docker/CI, Vấn đáp mẫu, 3 Chứng chỉ AWS Gói A) → (5) Chương 3 nháp bổ sung.")
     ]
     
     for r_idx, (col1, col2) in enumerate(t0_data):
@@ -286,10 +286,9 @@ def main():
          "3. Thiết kế Poster khổ A0 báo cáo nghiệm thu và biên tập video demo 3 phút giới thiệu hệ thống ViTrueVoice.\n"
          "4. Rà soát chuẩn bị bảo vệ trước Hội đồng chấm Đồ án chuyên ngành HUTECH."),
         ("% Tiến độ khóa học đang học\n(Tên khóa · % tiến độ)",
-         "• AWS Academy Cloud Foundations: **100% Hoàn thành** (Đã cấp chứng chỉ ngày 13/11/2026)\n"
-         "• AWS Academy Cloud Security Foundations: **100% Hoàn thành** (Đã cấp chứng chỉ ngày 13/11/2026)\n"
-         "• AWS Academy Cloud Architecting: **100% Hoàn thành** (Đã cấp chứng chỉ ngày 14/11/2026)\n"
-         "• Cisco Endpoint Security (Gói B/C): **100% Hoàn thành** các module theo tiến độ W07-W08.")
+         "• AWS Academy Cloud Foundations (Gói A): **100% Hoàn thành** (Đã cấp chứng chỉ ngày 13/11/2026)\n"
+         "• AWS Academy Cloud Security Foundations (Gói A): **100% Hoàn thành** (Đã cấp chứng chỉ ngày 13/11/2026)\n"
+         "• AWS Academy Cloud Architecting (Gói A): **100% Hoàn thành** (Đã cấp chứng chỉ ngày 14/11/2026)")
     ]
 
     for r_idx, (col1, col2) in enumerate(diary_rows):
@@ -380,7 +379,7 @@ def main():
     add_heading_2(doc, "4.1 Tối thiểu 2 biện pháp bảo mật từ khóa học (kèm minh chứng hoạt động)")
     add_styled_paragraph(doc, 
         "Hệ thống ViTrueVoice được thiết kế theo tư duy DevSecOps (Bảo mật ngay từ khâu thiết kế). "
-        "Sinh viên đã chắt lọc và hiện thực hóa thành công **2 biện pháp bảo mật chuyên sâu** từ các khóa học chính thức của Cisco và AWS, "
+        "Sinh viên đã chắt lọc và hiện thực hóa thành công **2 biện pháp bảo mật chuyên sâu** từ các khóa học chính thức của AWS (Gói A) và chuẩn an toàn thông tin OWASP, "
         "có minh chứng cấu hình, mã nguồn và kịch bản thử nghiệm chặn đứng các mối đe dọa thực tế:"
     )
 
@@ -419,7 +418,7 @@ def main():
     # Biện pháp 2
     add_styled_paragraph(doc, 
         "**4.1.2 Biện pháp 2: Xác thực & Khử nhiễm dữ liệu âm thanh in-memory (Magic Bytes Validation & Polyglot Protection) kết hợp Quản trị biến môi trường (.env) và Container Hardening (Non-Root User)**\n"
-        "• *Khóa học áp dụng*: **Cisco Endpoint Security** (Module: Host & Application Hardening) kết hợp **OWASP Top 10 A03:2021 (Injection & File Upload Flaws)**.\n"
+        "• *Khóa học áp dụng*: **AWS Academy Cloud Security** (Module: Container Security & Host Hardening) kết hợp **OWASP Top 10 A03:2021 (Injection & File Upload Flaws)**.\n"
         "• *Phân tích rủi ro*: Kẻ tấn công tải lên các tệp tin thực thi độc hại hoặc mã shell nguy hiểm đổi đuôi `.wav` (Polyglot / Malicious File Upload) nhằm khai thác lỗ hổng tràn bộ đệm (Buffer Overflow) trong các thư viện giải mã âm thanh của hệ điều hành, hoặc leo thang đặc quyền kiểm soát máy chủ container nếu ứng dụng chạy bằng quyền `root`.\n"
         "• *Giải pháp kỹ thuật*: \n"
         "  1. Khử nhiễm và kiểm tra Magic Bytes in-memory: Trước khi chuyển cho bộ giải mã, hệ thống đọc trực tiếp mảng byte đầu trên RAM (`src/preprocessing/audio_loader.py`) để xác thực chữ ký định dạng vật lý (chỉ chấp nhận `RIFF` cho WAV, `OggS` cho OGG/Opus, `ftyp` cho M4A/AAC, `fLaC` cho FLAC, `ID3` cho MP3). Chặn đứng 100% tệp tin script/shell giả mạo đuôi âm thanh.\n"
@@ -432,7 +431,7 @@ def main():
         "# 1. Đọc stream header in-memory chống Polyglot Shell Script:\n"
         "if raw_bytes.startswith(b'RIFF') or raw_bytes.startswith(b'OggS') or b'ftyp' in raw_bytes[:16]:\n"
         "    data, fs = sf.read(io.BytesIO(raw_bytes), dtype='float32')\n"
-        "# 2. Phân quyền non-root trong Dockerfile (Cisco Endpoint Security standard):\n"
+        "# 2. Phân quyền non-root trong Dockerfile (Container Hardening standard):\n"
         "RUN adduser --disabled-password --gecos '' --uid 10001 appuser\n"
         "USER appuser",
         title="MINH CHỨNG CODE BẢO MẬT 2: MAGIC BYTES & CONTAINER NON-ROOT HARDENING",
@@ -698,11 +697,11 @@ def main():
         "  - *Độ bền Unseen TTS NFR-2 <= 15.0% EER*: Theo tiêu chuẩn quốc tế ASVspoof 2021 Logical Access (LA) Benchmark, đối với các công cụ tổng hợp giọng hoàn toàn ngoại lai (Zero-Shot Out-of-Distribution), mức EER <= 15.0% là ngưỡng chuẩn vàng bảo đảm cân bằng tối ưu giữa việc chặn kẻ lừa đảo (APCER < 8%) và không làm phiền người dùng thật (BPCER < 4%)."
     )
 
-    # 4.8 Minh chứng chứng chỉ AWS / Cisco
-    add_heading_2(doc, "4.8 Minh chứng khóa học Cisco và AWS (100% Gói A)")
+    # 4.8 Minh chứng chứng chỉ AWS Gói A
+    add_heading_2(doc, "4.8 Minh chứng hoàn thành 100% cả 3 khóa học AWS Academy (Gói A)")
     add_styled_paragraph(doc, 
-        "Sinh viên đã hoàn thành xuất sắc **100% cả 3 chứng chỉ đào tạo đám mây chính thức của AWS** (Gói khóa học A) do Khoa CNTT HUTECH chỉ định, "
-        "đồng thời hoàn thành các module bắt buộc của khóa Cisco Endpoint Security:"
+        "Sinh viên đã hoàn thành xuất sắc **100% cả 3 chứng chỉ đào tạo đám mây chính thức của AWS** (Gói khóa học A) do Khoa CNTT HUTECH chỉ định gồm: "
+        "AWS Academy Cloud Foundations, AWS Academy Cloud Security Foundations, và AWS Academy Cloud Architecting (có ảnh chứng chỉ đính kèm bên dưới):"
     )
 
     img_fnd = DIR_OUT_1 / "Course" / "AWS Academy Cloud Foundations.jpg"
