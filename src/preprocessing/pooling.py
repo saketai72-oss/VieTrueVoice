@@ -18,6 +18,7 @@ def sliding_windows(
     x: torch.Tensor | np.ndarray,
     win: int = 64000,
     hop: int = 16000,
+    dense_slicing: bool = False,
 ) -> list[torch.Tensor]:
     """Extract fixed-length sliding windows from 1D audio waveform.
 
@@ -25,6 +26,8 @@ def sliding_windows(
         x: Input audio waveform (1D torch.Tensor or numpy.ndarray).
         win: Window length in samples (default 64,000 = 4.0s @ 16kHz).
         hop: Hop size between consecutive windows in samples (default 16,000 = 1.0s @ 16kHz).
+        dense_slicing: Whether to enforce dense overlap slicing for signals >= 50,000 samples
+            (~3.125s) to guarantee at least 2 windows for Asymmetric Veto anomaly detection.
 
     Returns:
         List of 1D torch.Tensor, each of length `win` and dtype float32.
@@ -45,6 +48,12 @@ def sliding_windows(
 
     # Short clip repeat padding (STUBBORN_FACT: repeat padding instead of zero padding)
     if sig_len < win:
+        if dense_slicing and sig_len >= 50000:
+            repeats = int(np.ceil((win * 2) / sig_len)) + 1
+            t_rep = torch.tile(t, (repeats,))
+            w1 = t_rep[:win]
+            w2 = t_rep[8000 : 8000 + win]
+            return [w1, w2]
         repeats = int(np.ceil(win / sig_len))
         padded = torch.tile(t, (repeats,))[:win]
         return [padded]
@@ -56,6 +65,14 @@ def sliding_windows(
     # Boundary guarantee: if last window does not end at signal tail, append tail window
     if starts[-1] + win < sig_len:
         windows.append(t[-win:])
+
+    # Dense Overlap Slicing guarantee:
+    # If sig_len >= 50,000 samples and only 1 window extracted (e.g. when sig_len == win == 64000
+    # or starts produced only 1 window and tail window didn't expand count),
+    # ensure at least 2 windows exist so Asymmetric Veto can detect local anomalies.
+    if len(windows) < 2 and sig_len >= 50000:
+        t_rep = torch.tile(t, (2,))
+        windows.append(t_rep[min(hop, 8000) : min(hop, 8000) + win])
 
     return windows
 
@@ -99,6 +116,7 @@ def extract_window_batch(
     max_windows: int = 5,
     apply_dither: bool = False,
     dither_std: float = 0.0035,
+    dense_slicing: bool = True,
 ) -> torch.Tensor:
     """Extract evenly-spaced sliding windows collated into a 2D batch tensor.
 
@@ -110,13 +128,17 @@ def extract_window_batch(
         win: Window length in samples (default 64,000).
         hop: Hop size in samples (default 16,000).
         max_windows: Maximum number of windows to retain (default 5).
-        apply_dither: Whether to apply micro comfort dither to prevent WebRTC gating false positives.
+        apply_dither: Whether to apply micro comfort dither.
+            NOTE: Only apply dither on live audio captured from WebRTC microphone to
+            compensate for noise gating. Hardcode `apply_dither=False` for compressed
+            telephony audio and uploaded files to prevent blurring CFM vocoder artifacts.
         dither_std: Standard deviation of comfort dither (default 0.0035).
+        dense_slicing: Whether to enforce dense overlap slicing for signals >= 50,000 samples.
 
     Returns:
         torch.Tensor of shape (N_windows, win) with dtype float32, where 1 <= N_windows <= max_windows.
     """
-    windows = sliding_windows(x, win=win, hop=hop)
+    windows = sliding_windows(x, win=win, hop=hop, dense_slicing=dense_slicing)
 
     if len(windows) > max_windows:
         indices = np.linspace(0, len(windows) - 1, max_windows, dtype=int)

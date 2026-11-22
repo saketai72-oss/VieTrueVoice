@@ -81,7 +81,7 @@ experiment_id,model_name,augmentation,test_condition,tts_generator,eer_percent,m
 
 ### Bộ AI Eval $\ge 30$ Tình Huống & Kiểm Thử TDD (W6 / CP6)
 - Xây dựng bộ đánh giá hệ thống AI gồm $\ge 30$ ca kiểm thử (trong đó bắt buộc có $\ge 10$ tình huống hệ thống từng nhận diện sai, báo cáo tỷ lệ đạt trước và sau khi sửa).
-- Duy trì bộ kiểm thử tự động TDD đạt **301/301 unit tests xanh** (`pytest tests/ -v`) trên máy cục bộ và GitHub Actions CI.
+- Duy trì bộ kiểm thử tự động TDD đạt **362/362 unit tests xanh** (`pytest tests/ -v`) trên máy cục bộ và GitHub Actions CI.
 
 ### Giao Thức Đánh Giá Nghiệm Thu 5 Tình Nguyện Viên Đối Chứng (795 Clips — v0.4.7)
 - Kịch bản thực thi: `scripts/eval_5spk_unseen_and_bonafide.py`.

@@ -17,7 +17,11 @@ import numpy as np
 import pytest
 import torch
 
-from src.preprocessing.pooling import pool_scores
+from src.preprocessing.pooling import (
+    extract_window_batch,
+    pool_scores,
+    sliding_windows,
+)
 
 
 def test_asymmetric_veto_spoof_with_unvoiced_window_trimmed_mean():
@@ -136,3 +140,85 @@ def test_pool_scores_unsupported_mode_raises():
     """Verify unsupported mode raises ValueError."""
     with pytest.raises(ValueError, match="Unsupported pooling mode"):
         pool_scores([1.0, 2.0], mode="unknown_mode")
+
+
+def test_dense_overlap_slicing_4p04s_clip_extracts_at_least_two_windows():
+    """Verify 4.04s clip (64,640 samples @ 16kHz) extracts >= 2 windows with Dense Overlap Slicing."""
+    sr = 16000
+    num_samples_4p04 = int(4.04 * sr)  # 64,640 samples
+    assert num_samples_4p04 == 64640
+
+    x_4p04 = torch.sin(2 * np.pi * 220 * torch.arange(num_samples_4p04) / sr).to(torch.float32)
+
+    # sliding_windows must extract at least 2 windows
+    windows = sliding_windows(x_4p04, win=64000, hop=16000)
+    assert len(windows) >= 2
+    for w in windows:
+        assert isinstance(w, torch.Tensor)
+        assert w.shape == (64000,)
+
+    # extract_window_batch must produce a 2D tensor of shape (N >= 2, 64000)
+    batch = extract_window_batch(x_4p04, win=64000, hop=16000, max_windows=5, apply_dither=False)
+    assert isinstance(batch, torch.Tensor)
+    assert batch.dim() == 2
+    assert batch.shape[0] >= 2
+    assert batch.shape[1] == 64000
+
+
+def test_dense_overlap_slicing_4p00s_and_near_boundary():
+    """Verify 4.00s clip (64,000 samples) and 3.50s clip (56,000 samples) extract >= 2 windows under dense slicing."""
+    sr = 16000
+    # Exactly 4.00s (64,000 samples)
+    x_4p00 = torch.randn(64000, dtype=torch.float32)
+    windows_4p00 = sliding_windows(x_4p00, win=64000, hop=16000)
+    assert len(windows_4p00) >= 2
+    for w in windows_4p00:
+        assert w.shape == (64000,)
+
+    batch_4p00 = extract_window_batch(x_4p00, win=64000, hop=16000, max_windows=5, dense_slicing=True)
+    assert batch_4p00.shape[0] >= 2
+    assert batch_4p00.shape[1] == 64000
+
+    # 3.50s clip (56,000 samples) with dense_slicing=True
+    x_3p50 = torch.randn(56000, dtype=torch.float32)
+    windows_3p50 = sliding_windows(x_3p50, win=64000, hop=16000, dense_slicing=True)
+    assert len(windows_3p50) >= 2
+    for w in windows_3p50:
+        assert w.shape == (64000,)
+
+    batch_3p50 = extract_window_batch(x_3p50, win=64000, hop=16000, max_windows=5, dense_slicing=True)
+    assert batch_3p50.shape[0] >= 2
+    assert batch_3p50.shape[1] == 64000
+
+
+def test_asymmetric_veto_reverses_decision_on_single_negative_window():
+    """Verify asymmetric veto reverses verdict from false Bona Fide (+3.2) to Spoof (< 0.0) when 1 window has spoof evidence."""
+    # Window 0 has strong localized spoof artifact (-18.0)
+    # Window 1 is unvoiced / silent and misleads max-pooling into positive (+3.2)
+    scores = [-18.0, 3.2]
+
+    # Max-pooling would select +3.2 (misclassification / APCER failure)
+    score_max = pool_scores(scores, mode="max")
+    assert score_max == pytest.approx(3.2)
+    assert score_max > 0.0  # False Bona Fide
+
+    # Asymmetric Veto must detect the spoof window (< -12.0) and pull the decision into negative territory
+    score_veto = pool_scores(scores, mode="asymmetric_veto")
+    assert score_veto < 0.0  # Successfully reversed to SPOOF
+    assert score_veto == pytest.approx((-18.0 + 3.2) / 2.0)  # -7.4
+
+
+def test_asymmetric_veto_three_windows_drops_highest_outlier():
+    """Verify 3-window spoof clip with an unvoiced positive outlier drops the outlier window via trimmed mean."""
+    # Window 0: -22.0 (spoof phoneme)
+    # Window 1: -16.0 (spoof phoneme)
+    # Window 2: +4.5 (unvoiced pause / ambient room floor)
+    scores = [-22.0, -16.0, 4.5]
+
+    score_max = pool_scores(scores, mode="max")
+    assert score_max == pytest.approx(4.5)  # Max-pooling would fail
+
+    score_veto = pool_scores(scores, mode="asymmetric_veto")
+    # Drops +4.5 outlier, computes mean([-22.0, -16.0]) = -19.0
+    assert score_veto == pytest.approx(-19.0)
+    assert score_veto < 0.0

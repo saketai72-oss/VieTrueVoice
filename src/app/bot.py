@@ -93,6 +93,8 @@ async def handle_voice_message(
             win=TARGET_SAMPLE_COUNT,
             hop=16000,
             max_windows=5,
+            apply_dither=False,
+            dense_slicing=True,
         ).to(device)
         n_windows = int(windows_batch.shape[0])
 
@@ -104,11 +106,16 @@ async def handle_voice_message(
                 scores_np = np.asarray(score_tensor)
             if scores_np.ndim == 0:
                 scores_np = np.array([float(scores_np)])
-            raw_score = float(pool_scores(scores_np, mode="max"))
+            raw_score = float(pool_scores(scores_np, mode="asymmetric_veto"))
 
         latency_infer = time.perf_counter() - t_infer
         latency_total = time.perf_counter() - t0
-        decision = classify_score(raw_score, threshold=threshold, calibrator=calibrator)
+        decision = classify_score(
+            raw_score,
+            threshold=threshold,
+            calibrator=calibrator,
+            window_scores=scores_np,
+        )
 
         if decision.confidence_calibrated and decision.confidence is not None:
             conf_str = f"`{decision.confidence * 100:.1f}%` (Đã hiệu chuẩn Platt Scaling)"
@@ -119,7 +126,7 @@ async def handle_voice_message(
             reply = (
                 f"🛡️ *KẾT QUẢ: GIỌNG NÓI THẬT (BONAFIDE)*\n\n"
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
-                f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
+                f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Asymmetric Veto)\n"
                 f"• *Độ tin cậy*: {conf_str}\n"
                 f"• *Thời gian xử lý*: `{latency_infer:.2f}s` (Mạng Telegram: `{latency_total:.2f}s`)\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"
@@ -129,7 +136,7 @@ async def handle_voice_message(
             reply = (
                 f"🚨 *CẢNH BÁO LỪA ĐẢO: ĐÂY LÀ GIỌNG NÓI GIẢ MẠO (SPOOF)*\n\n"
                 f"• *Điểm phân định (Raw score)*: `{raw_score:+.4f}` (Ngưỡng: `{threshold:+.4f}`)\n"
-                f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Max-Pooling)\n"
+                f"• *Phân tích đa cửa sổ*: `{n_windows}` cửa sổ trượt (Asymmetric Veto)\n"
                 f"• *Độ tin cậy phát hiện*: {conf_str}\n"
                 f"• *Thời gian xử lý*: `{latency_infer:.2f}s` (Mạng Telegram: `{latency_total:.2f}s`)\n"
                 f"• *Mã băm kiểm định*: `{audio_hash}...`\n\n"

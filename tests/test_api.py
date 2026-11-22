@@ -77,13 +77,19 @@ def test_predict_returns_contract_and_logs_only_audio_hash(client, tmp_path):
     assert payload["request_id"]
     assert payload["prediction"] == "BONA_FIDE"
     assert payload["label"] == 1
-    assert payload["confidence"] is None
-    assert payload["confidence_calibrated"] is False
+    assert payload["confidence"] is not None
+    assert payload["confidence"] == pytest.approx(0.5156, abs=1e-3)
+    assert payload["confidence_calibrated"] is True
     assert payload["threshold"] == 0.0
     assert payload["raw_score"] == 1.0
     assert payload["latency_sec"] >= 0.0
     assert payload["audio_sha256"] == hashlib.sha256(audio_bytes).hexdigest()
     assert payload["n_windows"] == 1
+    assert "window_scores" in payload
+    assert isinstance(payload["window_scores"], list)
+    assert len(payload["window_scores"]) == 1
+    assert "is_borderline" in payload
+    assert isinstance(payload["is_borderline"], bool)
 
     log_path = tmp_path / "latency_log.json"
     entries = json.loads(log_path.read_text(encoding="utf-8"))

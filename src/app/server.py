@@ -22,7 +22,7 @@ import numpy as np
 import soundfile as sf
 import torch
 
-from src.app.decision import PLATT_SCALE_K, classify_score
+from src.app.decision import PLATT_SCALE_K, classify_score, platt_calibrator
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 
 try:
@@ -246,7 +246,8 @@ def create_app(
             win=TARGET_SAMPLE_COUNT,
             hop=16000,
             max_windows=5,
-            apply_dither=True,
+            apply_dither=False,
+            dense_slicing=True,
         ).to(device)
         n_windows = int(windows_batch.shape[0])
 
@@ -260,11 +261,17 @@ def create_app(
                 scores_np = scores_np.squeeze(-1)
             elif scores_np.ndim == 0:
                 scores_np = np.array([scores_np.item()], dtype=np.float32)
-            raw_score = pool_scores(scores_np, mode="max")
+            raw_score = float(pool_scores(scores_np, mode="asymmetric_veto"))
 
         latency_sec = time.perf_counter() - t0
-        decision = classify_score(raw_score, threshold=threshold)
+        decision = classify_score(
+            raw_score,
+            threshold=threshold,
+            calibrator=platt_calibrator,
+            window_scores=scores_np,
+        )
         req_id = f"req_{uuid.uuid4().hex[:12]}"
+        window_scores_list = [round(float(s), 4) for s in scores_np.tolist()]
 
         result = {
             "request_id": req_id,
@@ -277,6 +284,8 @@ def create_app(
             "latency_sec": round(latency_sec, 4),
             "audio_sha256": audio_sha256,
             "n_windows": n_windows,
+            "window_scores": window_scores_list,
+            "is_borderline": decision.is_borderline,
         }
 
         # Anonymized audit log
@@ -329,7 +338,8 @@ def create_app(
             win=TARGET_SAMPLE_COUNT,
             hop=16000,
             max_windows=5,
-            apply_dither=True,
+            apply_dither=False,
+            dense_slicing=True,
         ).to(device)
         with torch.inference_mode():
             score_tensor = model.score(windows_bona)
@@ -341,10 +351,15 @@ def create_app(
                 scores_np = scores_np.squeeze(-1)
             elif scores_np.ndim == 0:
                 scores_np = np.array([scores_np.item()], dtype=np.float32)
-            raw_score_bona = float(pool_scores(scores_np, mode="max"))
+            raw_score_bona = float(pool_scores(scores_np, mode="asymmetric_veto"))
 
         lat_bona = time.perf_counter() - t0_bona
-        dec_bona = classify_score(raw_score_bona, threshold=threshold)
+        dec_bona = classify_score(
+            raw_score_bona,
+            threshold=threshold,
+            calibrator=platt_calibrator,
+            window_scores=scores_np,
+        )
         diff_bona = raw_score_bona - threshold
         prob_bona = float(1.0 / (1.0 + np.exp(-PLATT_SCALE_K * diff_bona)))
         prob_bona = max(0.001, min(0.999, prob_bona))
@@ -443,6 +458,7 @@ def create_app(
             hop=16000,
             max_windows=5,
             apply_dither=False,
+            dense_slicing=True,
         ).to(device)
 
         with torch.inference_mode():
@@ -455,10 +471,15 @@ def create_app(
                 sc_np = sc_np.squeeze(-1)
             elif sc_np.ndim == 0:
                 sc_np = np.array([sc_np.item()], dtype=np.float32)
-            raw_score_clone = float(pool_scores(sc_np, mode="max"))
+            raw_score_clone = float(pool_scores(sc_np, mode="asymmetric_veto"))
 
         lat_clone = time.perf_counter() - t0_clone
-        dec_clone = classify_score(raw_score_clone, threshold=threshold)
+        dec_clone = classify_score(
+            raw_score_clone,
+            threshold=threshold,
+            calibrator=platt_calibrator,
+            window_scores=sc_np,
+        )
         diff_clone = raw_score_clone - threshold
         prob_clone_bona = float(1.0 / (1.0 + np.exp(-PLATT_SCALE_K * diff_clone)))
         prob_clone_bona = max(0.001, min(0.999, prob_clone_bona))

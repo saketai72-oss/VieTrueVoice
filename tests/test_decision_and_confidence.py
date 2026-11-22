@@ -130,9 +130,12 @@ def test_api_does_not_return_fake_100_percent_confidence(tmp_path):
     assert res.status_code == 200
     data = res.json()
 
-    # Confidence must not be the uncalibrated sigmoid(abs(score)) pseudo-probability
-    assert data["confidence"] is None
-    assert data["confidence_calibrated"] is False
+    # Calibrated confidence via Temperature-scaled Platt Scaling (T=16.0, k_eff=0.0625)
+    # Must NOT return fake uncalibrated 1.0 (100%) confidence
+    assert data["confidence"] is not None
+    assert data["confidence"] != 1.0
+    assert data["confidence"] == pytest.approx(0.6779, abs=1e-3)
+    assert data["confidence_calibrated"] is True
     assert data["raw_score"] == pytest.approx(-11.9034, abs=1e-4)
 
 
@@ -159,7 +162,7 @@ def test_ui_predict_fn_displays_calibrated_platt_scaling():
     verdict, conf_text, detail_text = predict_fn(audio_tuple)
 
     assert "THẬT" in verdict
-    assert "78.0%" in conf_text
+    assert "55.5%" in conf_text
     assert "Platt Scaling" in conf_text
 
 
@@ -216,7 +219,7 @@ async def test_bot_handle_voice_displays_calibrated_platt_scaling():
     update.message.reply_text.assert_called_once()
     reply = update.message.reply_text.call_args[0][0]
     assert "GIỌNG NÓI THẬT" in reply
-    assert "78.0%" in reply
+    assert "55.5%" in reply
     assert "Platt Scaling" in reply
 
 

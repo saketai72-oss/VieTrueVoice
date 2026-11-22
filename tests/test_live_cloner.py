@@ -31,7 +31,7 @@ def test_evaluate_audio_sample_bonafide():
 
     assert res["is_bonafide"] is True
     assert res["raw_score"] == pytest.approx(5.0)
-    assert res["prob_bona_pct"] > 80.0
+    assert res["prob_bona_pct"] > 55.0  # Temperature Scaling T=16.0 (k=0.0625) bounds score 5.0 to ~57.7%
     assert "sha256" in res
     assert len(res["sha256"]) == 64
 

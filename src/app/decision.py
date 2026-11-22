@@ -16,6 +16,8 @@ class DecisionResult:
     label: int       # 1 or 0
     confidence: float | None
     confidence_calibrated: bool
+    is_borderline: bool = False
+    risk_level: str = "NORMAL"
 
 
 class CalibrationResult(NamedTuple):
@@ -127,45 +129,73 @@ def calibrate_by_enrollment(
     )
 
 
-# Empirically fitted Platt Scaling parameter on 11,450 Zalo development utterances (out/dev_zalo_scores_b_zalo.csv)
-PLATT_SCALE_K: float = 0.3569
+# Temperature Scaling parameter calibrated for AM-Softmax logit range [-50, +50]
+T_CALIB: float = 16.0
+PLATT_SCALE_K: float = 1.0 / T_CALIB  # k_eff = 0.0625, eliminates premature 99.9% saturation
+
+# Margin around threshold requiring forensic audit and uncertainty warning
+BORDERLINE_THRESHOLD: float = 8.0
 
 
-def platt_calibrator(raw_score: float, threshold: float = 0.0) -> float:
-    """Calculate calibrated posterior probability of the predicted class using Platt Scaling.
+def platt_calibrator(
+    raw_score: float,
+    threshold: float = 0.0,
+    window_scores: list[float] | np.ndarray | None = None,
+) -> float:
+    """Calculate calibrated posterior probability of the predicted class using Platt Scaling & Temperature Scaling.
 
-    Trained on 11,450 development set utterances (out/dev_zalo_scores_b_zalo.csv).
+    Fitted for AM-Softmax logit scale [-50, +50] with temperature T_calib = 16.0 (k_eff = 0.0625).
     Guarantees:
-      - At raw_score == threshold: confidence is 50.0%.
-      - raw_score > threshold: returns P(bona_fide) in [0.50, 1.00).
-      - raw_score < threshold: returns P(spoof) in [0.50, 1.00).
+      - At raw_score == threshold: confidence is exactly 50.0%.
+      - Near threshold (|raw_score - threshold| <= 8.0): confidence remains bounded in [50%, 75%].
+      - Moderate logits (+10 to +30) do not prematurely saturate to 99.9%.
+      - Only very strong logits (|raw_score - threshold| >= 40.0) reach high confidence (> 92-95%).
+      - Multi-window variance penalty: if window_scores has std > 6.0, discounts confidence towards 0.50.
     """
     diff = float(raw_score - threshold)
     prob_bona = 1.0 / (1.0 + float(np.exp(-PLATT_SCALE_K * diff)))
     conf = prob_bona if diff >= 0 else (1.0 - prob_bona)
+
+    # Multi-window uncertainty penalty: discount confidence when inter-window variance is high
+    if window_scores is not None and len(window_scores) > 1:
+        w_arr = np.asarray(window_scores, dtype=np.float64)
+        w_std = float(np.std(w_arr))
+        if w_std > 6.0:
+            penalty = (w_std - 6.0) * 0.02
+            conf = max(0.50, conf - penalty)
+
     return float(max(0.50, min(0.9990, conf)))
 
 
 def classify_score(
     raw_score: float,
     threshold: float = 0.0,
-    calibrator: Callable[..., float] | None = None,
+    calibrator: Callable[..., float] | None = platt_calibrator,
+    window_scores: list[float] | np.ndarray | None = None,
 ) -> DecisionResult:
-    """Classify a raw model score using a configured threshold and optional calibrator.
+    """Classify a raw model score using a configured threshold and calibrator.
 
     STUBBORN_FACT: Raw model score >= threshold is classified as BONA_FIDE (label 1),
     otherwise SPOOF (label 0).
-    When no calibrator is provided, confidence is None and confidence_calibrated is False.
+    Defaults to platt_calibrator (Temperature Scaling T=16.0, k_eff=0.0625).
+    Sets is_borderline=True and risk_level='BORDERLINE' when |raw_score - threshold| <= 8.0.
     """
     is_bonafide = bool(raw_score >= threshold)
     prediction = "BONA_FIDE" if is_bonafide else "SPOOF"
     label = 1 if is_bonafide else 0
 
+    diff = abs(float(raw_score - threshold))
+    is_borderline = bool(diff <= BORDERLINE_THRESHOLD)
+    risk_level = "BORDERLINE" if is_borderline else "NORMAL"
+
     if calibrator is not None:
         try:
-            conf_val = float(calibrator(raw_score, threshold))
+            conf_val = float(calibrator(raw_score, threshold, window_scores=window_scores))
         except TypeError:
-            conf_val = float(calibrator(raw_score))
+            try:
+                conf_val = float(calibrator(raw_score, threshold))
+            except TypeError:
+                conf_val = float(calibrator(raw_score))
         confidence = float(max(0.0001, min(0.9999, conf_val)))
         confidence_calibrated = True
     else:
@@ -180,6 +210,8 @@ def classify_score(
         label=label,
         confidence=confidence,
         confidence_calibrated=confidence_calibrated,
+        is_borderline=is_borderline,
+        risk_level=risk_level,
     )
 
 
