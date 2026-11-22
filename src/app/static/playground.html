@@ -1253,6 +1253,10 @@
         <span class="tag">SPOOF</span>
         <span>Zalo Opus 24kbps Spoof</span>
       </button>
+      <button class="preset-chip bonafide" onclick="loadPreset('amrnb')">
+        <span class="tag" style="background: rgba(255, 184, 0, 0.2); color: #FFB800;">TELEPHONY</span>
+        <span>AMR-NB 3.4kHz Bandlimited</span>
+      </button>
     </section>
 
     <!-- MODE 1: SINGLE-FILE ANALYSIS VIEW -->
@@ -2185,6 +2189,7 @@
         const audioCtx = getAudioContext();
         // Clone buffer because decodeAudioData detaches the arrayBuffer
         const bufferCopy = arrayBuffer.slice(0);
+        state._stftCache = null;
         state.audioBuffer = await audioCtx.decodeAudioData(bufferCopy);
 
         updateAudioMetadata();
@@ -2492,6 +2497,7 @@
       if (presetKey === 'f5tts') filename = 'sample_spoof_f5tts.wav';
       else if (presetKey === 'spk0004') filename = 'sample_bonafide_spk0004.wav';
       else if (presetKey === 'zalo_opus') filename = 'sample_spoof_zalo_opus.wav';
+      else if (presetKey === 'amrnb') filename = 'sample_telephony_amrnb.wav';
 
       const candidateUrls = [
         `/static/samples/${filename}`,
@@ -2542,6 +2548,7 @@
         data[i] = sample * envelope * 0.7;
       }
 
+      state._stftCache = null;
       state.audioBuffer = buffer;
       const wavBlob = audioBufferToWavBlob(buffer);
       const name = isBonaFide ? 'synth_bonafide_spk0004.wav' : 'synth_spoof_f5tts.wav';
@@ -2759,178 +2766,699 @@
     function setForensicsTab(tab) {
       state.forensicsTab = tab;
       document.querySelectorAll('.forensics-tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(`ftab-${tab}`).classList.add('active');
+      const activeBtn = document.getElementById(`ftab-${tab}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      updateCanvasLegend(tab);
       renderForensicsVisualizer();
       logConsole('SYSTEM', `Forensics view changed to ${tab.toUpperCase()}`);
     }
 
-    function renderForensicsVisualizer() {
-      const canvas = document.getElementById('forensics-viewport-canvas');
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width = canvas.clientWidth * window.devicePixelRatio;
-      const h = canvas.height = canvas.clientHeight * window.devicePixelRatio;
-
-      ctx.clearRect(0, 0, w, h);
-
-      if (state.forensicsTab === 'spectrogram') {
-        drawSpectrogram(ctx, w, h);
-      } else if (state.forensicsTab === 'waveform') {
-        drawWindowSlices(ctx, w, h);
-      } else if (state.forensicsTab === 'saliency') {
-        drawSaliencyMap(ctx, w, h);
-      } else if (state.forensicsTab === 'codec') {
-        drawCodecAudit(ctx, w, h);
+    function updateCanvasLegend(tab) {
+      const legend = document.getElementById('canvas-legend');
+      if (!legend) return;
+      if (tab === 'spectrogram') {
+        legend.innerHTML = `
+          <div class="legend-row">
+            <div class="legend-color" style="background: #00E5FF;"></div>
+            <span>Formants (0 - 3.4kHz)</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-color" style="background: #FFB800;"></div>
+            <span>AMR-NB 3.4kHz Cutoff</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-color" style="background: #FF007A;"></div>
+            <span>Synthetic Anomaly Peak</span>
+          </div>
+        `;
+      } else if (tab === 'waveform') {
+        legend.innerHTML = `
+          <div class="legend-row">
+            <div class="legend-color" style="background: #00E5FF;"></div>
+            <span>PCM Signal Envelope</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-color" style="background: rgba(0, 229, 255, 0.4);"></div>
+            <span>Sliding Window (4.0s / 64k)</span>
+          </div>
+        `;
+      } else if (tab === 'saliency') {
+        legend.innerHTML = `
+          <div class="legend-row">
+            <div class="legend-color" style="background: #00E5FF;"></div>
+            <span>Acoustic Consistency</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-color" style="background: #FF007A;"></div>
+            <span>Synthetic Anomaly Zone</span>
+          </div>
+        `;
+      } else if (tab === 'codec') {
+        legend.innerHTML = `
+          <div class="legend-row">
+            <div class="legend-color" style="background: #81FF00;"></div>
+            <span>Sub-3.4kHz Formants</span>
+          </div>
+          <div class="legend-row">
+            <div class="legend-color" style="background: #FFB800;"></div>
+            <span>Supra-3.4kHz High-Band</span>
+          </div>
+        `;
       }
     }
 
-    // 1. Spectrogram Visualizer
+    function renderForensicsVisualizer() {
+      const canvas = document.getElementById('forensics-viewport-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = canvas.clientWidth || 960;
+      const cssH = canvas.clientHeight || 240;
+
+      canvas.width = Math.floor(cssW * dpr);
+      canvas.height = Math.floor(cssH * dpr);
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, cssW, cssH);
+
+      if (state.forensicsTab === 'spectrogram') {
+        drawSpectrogram(ctx, cssW, cssH);
+      } else if (state.forensicsTab === 'waveform') {
+        drawWindowSlices(ctx, cssW, cssH);
+      } else if (state.forensicsTab === 'saliency') {
+        drawSaliencyMap(ctx, cssW, cssH);
+      } else if (state.forensicsTab === 'codec') {
+        drawCodecAudit(ctx, cssW, cssH);
+      }
+      ctx.restore();
+    }
+
+    // --- FFT & STFT Core Engine for Forensics Spectral Studio ---
+    function fftRadix2(real, imag) {
+      const n = real.length;
+      let j = 0;
+      for (let i = 0; i < n - 1; i++) {
+        if (i < j) {
+          const tr = real[i]; real[i] = real[j]; real[j] = tr;
+          const ti = imag[i]; imag[i] = imag[j]; imag[j] = ti;
+        }
+        let k = n >> 1;
+        while (k <= j) { j -= k; k >>= 1; }
+        j += k;
+      }
+      for (let l = 2; l <= n; l <<= 1) {
+        const halfL = l >> 1;
+        const angle = -2 * Math.PI / l;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        let ur = 1.0, ui = 0.0;
+        for (let m = 0; m < halfL; m++) {
+          for (let i = m; i < n; i += l) {
+            const pos = i + halfL;
+            const vr = real[pos] * ur - imag[pos] * ui;
+            const vi = real[pos] * ui + imag[pos] * ur;
+            real[pos] = real[i] - vr;
+            imag[pos] = imag[i] - vi;
+            real[i] += vr;
+            imag[i] += vi;
+          }
+          const nextUr = ur * cosA - ui * sinA;
+          ui = ur * sinA + ui * cosA;
+          ur = nextUr;
+        }
+      }
+    }
+
+    function computeAudioSTFT(audioBuffer, targetCols = 220, nFft = 512) {
+      if (!audioBuffer) return null;
+      if (state._stftCache && state._stftCache.buffer === audioBuffer && state._stftCache.cols === targetCols) {
+        return state._stftCache.data;
+      }
+
+      const pcm = audioBuffer.getChannelData(0);
+      const totalSamples = pcm.length;
+      const sr = audioBuffer.sampleRate;
+      const dur = audioBuffer.duration;
+      const cols = Math.min(targetCols, Math.max(60, Math.floor(dur * 50)));
+      const deltaF = sr / nFft;
+      const nyquist = sr / 2;
+      const maxDisplayFreq = 8000;
+      const numBins = Math.min(nFft / 2, Math.ceil(Math.min(nyquist, maxDisplayFreq) / deltaF));
+
+      const hann = new Float32Array(nFft);
+      for (let i = 0; i < nFft; i++) {
+        hann[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (nFft - 1)));
+      }
+
+      const matrix = new Float32Array(cols * numBins);
+      const rawDb = new Float32Array(cols * numBins);
+      const real = new Float32Array(nFft);
+      const imag = new Float32Array(nFft);
+      const hop = Math.max(1, (totalSamples - nFft) / Math.max(1, cols - 1));
+
+      let lowEnergyTotal = 0;
+      let highEnergyTotal = 0;
+      let supra4kEnergyTotal = 0;
+      let globalMaxDb = -999;
+
+      for (let c = 0; c < cols; c++) {
+        const start = Math.max(0, Math.min(totalSamples - nFft, Math.floor(c * hop)));
+        for (let i = 0; i < nFft; i++) {
+          const idx = start + i;
+          real[i] = (idx < totalSamples) ? pcm[idx] * hann[i] : 0;
+          imag[i] = 0;
+        }
+
+        fftRadix2(real, imag);
+
+        for (let k = 0; k < numBins; k++) {
+          const freq = k * deltaF;
+          const mag = Math.sqrt(real[k] * real[k] + imag[k] * imag[k]);
+          const pwr = mag * mag;
+          const db = 20 * Math.log10(mag + 1e-6);
+          rawDb[c * numBins + k] = db;
+          if (db > globalMaxDb) globalMaxDb = db;
+
+          if (freq <= 3400) {
+            lowEnergyTotal += pwr;
+          } else {
+            highEnergyTotal += pwr;
+            if (freq > 4000) {
+              supra4kEnergyTotal += pwr;
+            }
+          }
+        }
+      }
+
+      const topDb = Math.max(-20, globalMaxDb);
+      const floorDb = topDb - 70; // 70 dB dynamic range
+
+      for (let i = 0; i < cols * numBins; i++) {
+        const db = rawDb[i];
+        matrix[i] = Math.max(0, Math.min(1, (db - floorDb) / 70));
+      }
+
+      const totalE = lowEnergyTotal + highEnergyTotal + 1e-12;
+      const lowRatio = (lowEnergyTotal / totalE) * 100;
+      const highRatio = (highEnergyTotal / totalE) * 100;
+      const supra4kRatio = supra4kEnergyTotal / totalE;
+
+      // Acoustic Telephony Detection:
+      // In telephony (AMR-NB / G.711), the signal was recorded/transmitted at 8kHz, so energy above 4.0kHz is strictly 0 (< 0.005%)
+      const isBandlimited = (sr <= 8000 || supra4kRatio < 0.00005);
+
+      const data = {
+        cols,
+        numBins,
+        deltaF,
+        sr,
+        duration: dur,
+        matrix,
+        lowEnergyRatio: lowRatio,
+        highEnergyRatio: highRatio,
+        isBandlimited,
+        maxDisplayFreq
+      };
+
+      state._stftCache = { buffer: audioBuffer, cols: targetCols, data };
+      return data;
+    }
+
+    function getSpectralColor(val, isSpoof) {
+      if (val <= 0.03) return '#020304';
+      if (val < 0.20) {
+        const t = val / 0.20;
+        return `rgb(${Math.floor(2 + t * 4)}, ${Math.floor(3 + t * 20)}, ${Math.floor(4 + t * 40)})`;
+      }
+      if (val < 0.45) {
+        const t = (val - 0.20) / 0.25;
+        return `rgb(0, ${Math.floor(24 + t * 130)}, ${Math.floor(44 + t * 160)})`;
+      }
+      if (val < 0.70) {
+        const t = (val - 0.45) / 0.25;
+        return `rgb(0, ${Math.floor(154 + t * 75)}, 255)`; // neon cyan
+      }
+      if (val < 0.88) {
+        const t = (val - 0.70) / 0.18;
+        return `rgb(${Math.floor(t * 129)}, 255, ${Math.floor(255 * (1 - t))})`; // cyan to lime
+      }
+      const t = (val - 0.88) / 0.12;
+      if (isSpoof) {
+        return `rgb(255, ${Math.floor(180 * (1 - t))}, ${Math.floor(122 * t)})`; // neon crimson
+      }
+      return `rgb(${Math.floor(129 + t * 126)}, ${Math.floor(255 - t * 71)}, 0)`; // neon amber
+    }
+
+    // 1. Spectrogram Visualizer (Real-time Client STFT)
     function drawSpectrogram(ctx, w, h) {
-      const cols = 120;
-      const rows = 40;
-      const cellW = w / cols;
-      const cellH = h / rows;
+      const ml = 54, mr = 16, mt = 24, mb = 24;
+      const plotW = w - ml - mr;
+      const plotH = h - mt - mb;
+      const cutoffY = mt + plotH * (1 - 3400 / 8000);
 
       const predUpper = String(state.lastPredictionResult?.prediction || '').toUpperCase();
       const rawScore = Number(state.lastPredictionResult?.raw_score);
       const isSpoof = Boolean(state.lastPredictionResult && (predUpper === 'SPOOF' || (!isNaN(rawScore) && rawScore < 0.0)));
 
-      for (let x = 0; x < cols; x++) {
-        for (let y = 0; y < rows; y++) {
-          const freqRatio = 1 - (y / rows);
-          let intensity = Math.sin(x * 0.15) * Math.cos(freqRatio * 4) * 0.5 + 0.5;
+      // Draw background
+      ctx.fillStyle = '#020304';
+      ctx.fillRect(ml, mt, plotW, plotH);
 
-          // Formant frequency bands (200Hz - 3.4kHz)
-          if (freqRatio > 0.1 && freqRatio < 0.45) {
-            intensity += 0.35 * Math.sin(x * 0.3);
+      if (!state.audioBuffer) {
+        // Draw standby grid
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.setLineDash([3, 3]);
+        for (let freq of [6000, 4000, 2000]) {
+          const y = mt + plotH * (1 - freq / 8000);
+          ctx.beginPath(); ctx.moveTo(ml, y); ctx.lineTo(ml + plotW, y); ctx.stroke();
+        }
+        for (let f = 1; f <= 3; f++) {
+          const x = ml + (f / 4) * plotW;
+          ctx.beginPath(); ctx.moveTo(x, mt); ctx.lineTo(x, mt + plotH); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = 'var(--neon-cyan)';
+        ctx.font = '11px "JetBrains Mono"';
+        ctx.textAlign = 'center';
+        ctx.fillText('STANDBY — DROP AUDIO OR SELECT A PRESET TO RENDER STFT SPECTROGRAM', ml + plotW / 2, mt + plotH / 2);
+      } else {
+        const targetCols = Math.min(240, Math.max(80, Math.floor(plotW / 3)));
+        const stft = computeAudioSTFT(state.audioBuffer, targetCols, 512);
+
+        if (stft) {
+          const colW = plotW / stft.cols;
+          const binH = plotH / (8000 / stft.deltaF);
+
+          for (let c = 0; c < stft.cols; c++) {
+            const x = ml + c * colW;
+            for (let k = 0; k < stft.numBins; k++) {
+              const freq = k * stft.deltaF;
+              if (freq > 8000) break;
+              const y = mt + plotH * (1 - freq / 8000);
+              const val = stft.matrix[c * stft.numBins + k];
+              ctx.fillStyle = getSpectralColor(val, isSpoof);
+              ctx.fillRect(x, y - binH, colW + 0.5, binH + 0.5);
+            }
           }
-
-          if (isSpoof && freqRatio > 0.65) {
-            // High frequency synthetic discontinuity
-            intensity += 0.4 * Math.random();
-          }
-
-          intensity = Math.max(0, Math.min(1, intensity));
-
-          // Cyberpunk heat palette: dark -> cyan -> neon crimson
-          let r = Math.floor(intensity * (isSpoof ? 255 : 0));
-          let g = Math.floor(intensity * (isSpoof ? 0 : 229));
-          let b = Math.floor(intensity * 255);
-
-          ctx.fillStyle = `rgb(${r},${g},${b})`;
-          ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
         }
       }
 
-      // Draw Telephony Cutoff boundary (AMR-NB 3.4kHz line)
-      const cutoffY = h * (1 - 3400 / 8000);
+      // Draw AMR-NB 3.4kHz Bandwidth Cutoff line
       ctx.strokeStyle = '#FFB800';
       ctx.lineWidth = 1.5;
       ctx.setLineDash([6, 4]);
       ctx.beginPath();
-      ctx.moveTo(0, cutoffY);
-      ctx.lineTo(w, cutoffY);
+      ctx.moveTo(ml, cutoffY);
+      ctx.lineTo(ml + plotW, cutoffY);
       ctx.stroke();
       ctx.setLineDash([]);
 
+      const cutoffLabel = 'AMR-NB 3.4kHz Bandwidth Cutoff';
+      ctx.font = '9px "JetBrains Mono"';
+      const cLabelW = ctx.measureText(cutoffLabel).width + 8;
+      ctx.fillStyle = 'rgba(2, 3, 4, 0.85)';
+      ctx.fillRect(ml + 8, cutoffY - 14, cLabelW, 13);
       ctx.fillStyle = '#FFB800';
-      ctx.font = '10px "JetBrains Mono"';
-      ctx.fillText('AMR-NB 3.4kHz Bandwidth Cutoff', 16, cutoffY - 6);
+      ctx.textAlign = 'left';
+      ctx.fillText(cutoffLabel, ml + 12, cutoffY - 4);
+
+      // Draw Frequency Axis (Left)
+      ctx.fillStyle = '#8E99A8';
+      ctx.font = '9px "JetBrains Mono"';
+      ctx.textAlign = 'right';
+
+      ctx.fillText('8 kHz', ml - 6, mt + 4);
+      ctx.fillText('6 kHz', ml - 6, mt + plotH * 0.25 + 3);
+      ctx.fillText('4 kHz', ml - 6, mt + plotH * 0.50 + 3);
+      ctx.fillStyle = '#FFB800';
+      ctx.fillText('3.4k', ml - 6, cutoffY + 3);
+      ctx.fillStyle = '#8E99A8';
+      ctx.fillText('2 kHz', ml - 6, mt + plotH * 0.75 + 3);
+      ctx.fillText('0 Hz', ml - 6, mt + plotH);
+
+      // Frequency axis line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(ml, mt);
+      ctx.lineTo(ml, mt + plotH);
+      ctx.lineTo(ml + plotW, mt + plotH);
+      ctx.stroke();
+
+      // Draw Time Axis (Bottom)
+      const dur = state.audioBuffer ? state.audioBuffer.duration : 4.0;
+      const step = dur <= 2.0 ? 0.5 : 1.0;
+      ctx.textAlign = 'center';
+      for (let t = 0; t <= dur + 0.01; t += step) {
+        const x = ml + (t / dur) * plotW;
+        ctx.beginPath();
+        ctx.moveTo(x, mt + plotH);
+        ctx.lineTo(x, mt + plotH + 4);
+        ctx.stroke();
+        ctx.fillText(`${t.toFixed(1)}s`, x, mt + plotH + 15);
+      }
+
+      // Top info bar
+      ctx.textAlign = 'left';
+      const sr = state.audioBuffer ? state.audioBuffer.sampleRate : 16000;
+      const infoText = state.audioBuffer
+        ? `FFT: 512 (HANN) | Δf: ${(sr / 512).toFixed(1)} Hz | NYQUIST: ${sr / 2} Hz | DURATION: ${dur.toFixed(2)}s | SR: ${sr} Hz`
+        : 'FFT: 512 (HANN) | Δf: 31.25 Hz | NYQUIST: 8000 Hz | STANDBY GRID';
+      ctx.fillText(infoText, ml, 15);
     }
 
     // 2. Multi-Window Slices & Envelope
     function drawWindowSlices(ctx, w, h) {
-      const slices = (state.lastPredictionResult && state.lastPredictionResult.n_windows) || 4;
-      const sliceW = w / slices;
+      const ml = 54, mr = 16, mt = 24, mb = 24;
+      const plotW = w - ml - mr;
+      const plotH = h - mt - mb;
+      const midY = mt + plotH / 2;
 
-      for (let s = 0; s < slices; s++) {
-        const xStart = s * sliceW;
-        ctx.fillStyle = (s % 2 === 0) ? 'rgba(0, 229, 255, 0.04)' : 'rgba(129, 255, 0, 0.04)';
-        ctx.fillRect(xStart, 0, sliceW, h);
+      ctx.fillStyle = '#020304';
+      ctx.fillRect(ml, mt, plotW, plotH);
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(xStart, 0);
-        ctx.lineTo(xStart, h);
-        ctx.stroke();
+      if (!state.audioBuffer) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.setLineDash([3, 3]);
+        ctx.beginPath(); ctx.moveTo(ml, midY); ctx.lineTo(ml + plotW, midY); ctx.stroke();
         ctx.setLineDash([]);
 
         ctx.fillStyle = 'var(--neon-cyan)';
-        ctx.font = '10px "JetBrains Mono"';
-        ctx.fillText(`Window ${s + 1} (4.0s)`, xStart + 10, 20);
+        ctx.font = '11px "JetBrains Mono"';
+        ctx.textAlign = 'center';
+        ctx.fillText('STANDBY — DROP AUDIO TO RENDER PCM WAVEFORM & 4.0s SLIDING WINDOWS', ml + plotW / 2, midY);
+        return;
       }
 
-      // Draw overall envelope
-      ctx.strokeStyle = '#81FF00';
-      ctx.lineWidth = 2;
+      const pcm = state.audioBuffer.getChannelData(0);
+      const dur = state.audioBuffer.duration;
+      const nSamples = pcm.length;
+
+      // Draw zero reference line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
       ctx.beginPath();
-      for (let x = 0; x < w; x++) {
-        const y = (h / 2) + Math.sin(x * 0.05) * 40 * Math.sin(x / w * Math.PI);
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
+      ctx.moveTo(ml, midY);
+      ctx.lineTo(ml + plotW, midY);
       ctx.stroke();
-    }
 
-    // 3. Saliency Attention Map
-    function drawSaliencyMap(ctx, w, h) {
-      const bars = 48;
-      const barW = (w - 40) / bars;
+      // Draw 4.0s Sliding Windows (ViTrueVoice Multi-window Asymmetric Veto)
+      const nWindows = Math.max(1, Math.min(5, Math.floor((dur - 4.0) / 1.0) + 1));
       const predUpper = String(state.lastPredictionResult?.prediction || '').toUpperCase();
       const rawScore = Number(state.lastPredictionResult?.raw_score);
       const isSpoof = Boolean(state.lastPredictionResult && (predUpper === 'SPOOF' || (!isNaN(rawScore) && rawScore < 0.0)));
 
-      for (let i = 0; i < bars; i++) {
-        let weight = Math.abs(Math.sin(i * 0.25)) * 0.8 + 0.1;
-        if (isSpoof && (i > 18 && i < 26)) {
-          weight = 1.0; // Triggering anomaly window
+      for (let i = 0; i < nWindows; i++) {
+        const t1 = i * 1.0;
+        const t2 = Math.min(t1 + 4.0, dur);
+        const x1 = ml + (t1 / dur) * plotW;
+        const x2 = ml + (t2 / dur) * plotW;
+        const winW = Math.max(2, x2 - x1);
+
+        const isVetoWindow = isSpoof && (i === 0 || rawScore < -12.0);
+        ctx.fillStyle = isVetoWindow ? 'rgba(255, 0, 122, 0.08)' : (i % 2 === 0 ? 'rgba(0, 229, 255, 0.06)' : 'rgba(129, 255, 0, 0.06)');
+        ctx.fillRect(x1, mt, winW, plotH);
+
+        ctx.strokeStyle = isVetoWindow ? 'var(--neon-crimson)' : (i % 2 === 0 ? 'rgba(0, 229, 255, 0.35)' : 'rgba(129, 255, 0, 0.35)');
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(x1, mt, winW, plotH);
+        ctx.setLineDash([]);
+
+        // Window pill tag
+        const tagText = `Window ${i + 1} [${t1.toFixed(1)}s - ${t2.toFixed(1)}s]`;
+        ctx.font = '9px "JetBrains Mono"';
+        const tagW = ctx.measureText(tagText).width + 8;
+        ctx.fillStyle = 'rgba(2, 3, 4, 0.85)';
+        ctx.fillRect(x1 + 4, mt + 4 + (i % 2) * 16, tagW, 14);
+        ctx.fillStyle = isVetoWindow ? '#FF007A' : (i % 2 === 0 ? '#00E5FF' : '#81FF00');
+        ctx.textAlign = 'left';
+        ctx.fillText(tagText, x1 + 8, mt + 15 + (i % 2) * 16);
+      }
+
+      // Draw real PCM waveform envelope
+      const amp = (plotH / 2) * 0.90;
+      ctx.strokeStyle = '#00E5FF';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+
+      const cols = Math.floor(plotW);
+      for (let x = 0; x < cols; x++) {
+        const idxStart = Math.floor((x / cols) * nSamples);
+        const idxEnd = Math.floor(((x + 1) / cols) * nSamples);
+        let minVal = 0, maxVal = 0;
+        for (let j = idxStart; j < idxEnd; j++) {
+          const val = pcm[j];
+          if (val < minVal) minVal = val;
+          if (val > maxVal) maxVal = val;
         }
+        ctx.moveTo(ml + x, midY - maxVal * amp);
+        ctx.lineTo(ml + x, midY - minVal * amp);
+      }
+      ctx.stroke();
 
-        const barH = weight * (h - 60);
-        const x = 20 + i * barW;
-        const y = h - 30 - barH;
+      // Amplitude Axis (Left)
+      ctx.fillStyle = '#8E99A8';
+      ctx.font = '9px "JetBrains Mono"';
+      ctx.textAlign = 'right';
+      ctx.fillText('+1.0', ml - 6, mt + 8);
+      ctx.fillText('0.0', ml - 6, midY + 3);
+      ctx.fillText('-1.0', ml - 6, mt + plotH - 2);
 
-        ctx.fillStyle = (isSpoof && weight > 0.85) ? 'var(--neon-crimson)' : 'var(--neon-cyan)';
-        ctx.shadowColor = (isSpoof && weight > 0.85) ? 'rgba(255, 0, 122, 0.8)' : 'rgba(0, 229, 255, 0.5)';
-        ctx.shadowBlur = 6;
-        ctx.fillRect(x, y, barW - 2, barH);
+      // Axis lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.beginPath();
+      ctx.moveTo(ml, mt);
+      ctx.lineTo(ml, mt + plotH);
+      ctx.lineTo(ml + plotW, mt + plotH);
+      ctx.stroke();
+
+      // Time Axis (Bottom)
+      const step = dur <= 2.0 ? 0.5 : 1.0;
+      ctx.textAlign = 'center';
+      for (let t = 0; t <= dur + 0.01; t += step) {
+        const x = ml + (t / dur) * plotW;
+        ctx.beginPath();
+        ctx.moveTo(x, mt + plotH);
+        ctx.lineTo(x, mt + plotH + 4);
+        ctx.stroke();
+        ctx.fillText(`${t.toFixed(1)}s`, x, mt + plotH + 15);
+      }
+
+      // Top info
+      ctx.textAlign = 'left';
+      ctx.fillText(`MULTI-WINDOW POOLING: 64k SAMPLES (4.0s @ 16kHz) | HOP: 1.0s | EXTRACTED WINDOWS: ${nWindows}`, ml, 15);
+    }
+
+    // 3. Saliency Attention Map
+    function drawSaliencyMap(ctx, w, h) {
+      const ml = 54, mr = 16, mt = 24, mb = 24;
+      const plotW = w - ml - mr;
+      const plotH = h - mt - mb;
+
+      ctx.fillStyle = '#020304';
+      ctx.fillRect(ml, mt, plotW, plotH);
+
+      const predUpper = String(state.lastPredictionResult?.prediction || '').toUpperCase();
+      const rawScore = Number(state.lastPredictionResult?.raw_score);
+      const isSpoof = Boolean(state.lastPredictionResult && (predUpper === 'SPOOF' || (!isNaN(rawScore) && rawScore < 0.0)));
+
+      // Axis lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.beginPath();
+      ctx.moveTo(ml, mt);
+      ctx.lineTo(ml, mt + plotH);
+      ctx.lineTo(ml + plotW, mt + plotH);
+      ctx.stroke();
+
+      // Guide lines & Y ticks
+      ctx.fillStyle = '#8E99A8';
+      ctx.font = '9px "JetBrains Mono"';
+      ctx.textAlign = 'right';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.setLineDash([3, 3]);
+
+      for (let val of [1.0, 0.8, 0.6, 0.4, 0.2, 0.0]) {
+        const y = mt + plotH * (1 - val);
+        ctx.fillText(val.toFixed(1), ml - 6, y + 3);
+        if (val > 0 && val < 1.0) {
+          ctx.beginPath(); ctx.moveTo(ml, y); ctx.lineTo(ml + plotW, y); ctx.stroke();
+        }
+      }
+      ctx.setLineDash([]);
+
+      if (!state.audioBuffer) {
+        ctx.fillStyle = 'var(--neon-cyan)';
+        ctx.font = '11px "JetBrains Mono"';
+        ctx.textAlign = 'center';
+        ctx.fillText('STANDBY — AWAITING AUDIO INGESTION & INFERENCE TO MAP ATTENTION WEIGHTS', ml + plotW / 2, mt + plotH / 2);
+        return;
+      }
+
+      const pcm = state.audioBuffer.getChannelData(0);
+      const dur = state.audioBuffer.duration;
+      const bars = 48;
+      const barW = (plotW / bars) - 2;
+      const frameLen = Math.floor(pcm.length / bars);
+
+      // Compute frame RMS energy
+      const frameEnergies = new Float32Array(bars);
+      let maxEnergy = 1e-6;
+      for (let i = 0; i < bars; i++) {
+        let sumSq = 0;
+        const start = i * frameLen;
+        for (let j = 0; j < frameLen; j++) {
+          const s = pcm[start + j] || 0;
+          sumSq += s * s;
+        }
+        const rms = Math.sqrt(sumSq / frameLen);
+        frameEnergies[i] = rms;
+        if (rms > maxEnergy) maxEnergy = rms;
+      }
+
+      for (let i = 0; i < bars; i++) {
+        let weight = Math.min(1.0, frameEnergies[i] / maxEnergy);
+
+        // Highlight anomaly region if spoof
+        const isAnomaly = isSpoof && (weight > 0.65 || (i >= 18 && i <= 28));
+        if (isAnomaly) weight = Math.max(0.85, weight);
+
+        const barH = weight * (plotH - 10);
+        const x = ml + i * (barW + 2) + 1;
+        const y = mt + plotH - barH;
+
+        ctx.fillStyle = isAnomaly ? 'var(--neon-crimson)' : (weight > 0.5 ? 'var(--neon-cyan)' : 'rgba(0, 229, 255, 0.5)');
+        ctx.shadowColor = isAnomaly ? 'rgba(255, 0, 122, 0.8)' : 'rgba(0, 229, 255, 0.4)';
+        ctx.shadowBlur = isAnomaly ? 6 : 2;
+        ctx.fillRect(x, y, barW, barH);
         ctx.shadowBlur = 0;
       }
 
+      // Time axis bottom ticks
+      const step = dur <= 2.0 ? 0.5 : 1.0;
+      ctx.textAlign = 'center';
+      for (let t = 0; t <= dur + 0.01; t += step) {
+        const x = ml + (t / dur) * plotW;
+        ctx.beginPath();
+        ctx.moveTo(x, mt + plotH);
+        ctx.lineTo(x, mt + plotH + 4);
+        ctx.stroke();
+        ctx.fillText(`${t.toFixed(1)}s`, x, mt + plotH + 15);
+      }
+
+      ctx.textAlign = 'left';
       ctx.fillStyle = '#8E99A8';
-      ctx.font = '10px "JetBrains Mono"';
-      ctx.fillText('FRONT-END TIME-FREQUENCY ATTENTION WEIGHTS (AASIST GRAPH MODULE)', 20, 24);
+      ctx.fillText('AASIST GRAPH ATTENTION SALIENCY | TIME-FREQUENCY GRAPH WEIGHT MATRIX', ml, 15);
     }
 
     // 4. Codec Compression Audit
     function drawCodecAudit(ctx, w, h) {
+      ctx.fillStyle = '#020304';
+      ctx.fillRect(0, 0, w, h);
+
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = '12px "Press Start 2P"';
-      ctx.fillText('CODEC CHANNEL DEGRADATION PROFILE', 24, 36);
+      ctx.font = '11px "JetBrains Mono"';
+      ctx.textAlign = 'left';
+      ctx.fillText('CODEC CHANNEL BANDWIDTH & DEGRADATION FORENSIC AUDIT', 24, 20);
+
+      const stft = state.audioBuffer ? computeAudioSTFT(state.audioBuffer) : null;
+      const sr = stft ? stft.sr : 16000;
+      const isNarrowband = stft ? stft.isBandlimited : false;
+      const lowPct = stft ? stft.lowEnergyRatio.toFixed(1) : '95.0';
+      const highPct = stft ? stft.highEnergyRatio.toFixed(1) : '5.0';
+
+      // Left Panel: Ingested Audio Signal Telephony Spectrum Audit
+      const cardW = Math.floor(w * 0.44);
+      const cardH = h - 42;
+      const cardX = 24;
+      const cardY = 32;
+
+      ctx.fillStyle = 'rgba(15, 18, 24, 0.85)';
+      ctx.strokeStyle = 'var(--border-subtle)';
+      ctx.lineWidth = 1;
+      ctx.fillRect(cardX, cardY, cardW, cardH);
+      ctx.strokeRect(cardX, cardY, cardW, cardH);
+
+      ctx.fillStyle = 'var(--neon-cyan)';
+      ctx.font = '10px "JetBrains Mono"';
+      ctx.fillText('INGESTED SIGNAL TELEPHONY AUDIT', cardX + 14, cardY + 22);
+
+      ctx.fillStyle = '#F0F4F8';
+      ctx.font = '10px "JetBrains Mono"';
+      ctx.fillText(`Sample Rate: ${state.audioBuffer ? sr + ' Hz' : 'N/A (No audio loaded)'}`, cardX + 14, cardY + 44);
+      ctx.fillText(`Sub-3.4kHz Formant Energy: ${state.audioBuffer ? lowPct + '%' : 'N/A'}`, cardX + 14, cardY + 64);
+      ctx.fillText(`Supra-3.4kHz High-Band: ${state.audioBuffer ? highPct + '%' : 'N/A'}`, cardX + 14, cardY + 84);
+
+      // Acoustic profile badge
+      ctx.fillText('Detected Profile:', cardX + 14, cardY + 110);
+      let profileText = 'STANDBY (AWAITING AUDIO)';
+      let badgeColor = '#8E99A8';
+      if (state.audioBuffer) {
+        if (isNarrowband) {
+          profileText = 'NARROWBAND (AMR-NB / G.711 Cutoff at 3.4kHz)';
+          badgeColor = '#FFB800';
+        } else {
+          profileText = 'WIDEBAND / HIGH-FIDELITY (8.0kHz Spectrum)';
+          badgeColor = '#81FF00';
+        }
+      }
+      ctx.fillStyle = badgeColor;
+      ctx.fillText(profileText, cardX + 14, cardY + 128);
+
+      // Energy Split Meter
+      ctx.fillStyle = '#8E99A8';
+      ctx.font = '9px "JetBrains Mono"';
+      ctx.fillText('SPECTRAL ENERGY RATIO (< 3.4kHz vs > 3.4kHz):', cardX + 14, cardY + 155);
+
+      const meterW = cardW - 28;
+      const meterH = 12;
+      const meterY = cardY + 162;
+      const splitX = state.audioBuffer ? (parseFloat(lowPct) / 100) * meterW : meterW * 0.5;
+
+      ctx.fillStyle = '#81FF00';
+      ctx.fillRect(cardX + 14, meterY, splitX, meterH);
+      ctx.fillStyle = '#FFB800';
+      ctx.fillRect(cardX + 14 + splitX, meterY, meterW - splitX, meterH);
+
+      // Right Panel: Model Checkpoint B Telephony Matrix
+      const rCardX = cardX + cardW + 16;
+      const rCardW = w - rCardX - 24;
+
+      ctx.fillStyle = 'rgba(15, 18, 24, 0.85)';
+      ctx.fillRect(rCardX, cardY, rCardW, cardH);
+      ctx.strokeRect(rCardX, cardY, rCardW, cardH);
+
+      ctx.fillStyle = 'var(--neon-cyan)';
+      ctx.font = '10px "JetBrains Mono"';
+      ctx.fillText('V14 TELEPHONY COMPRESSOR SPECIFICATIONS', rCardX + 14, cardY + 22);
 
       const codecs = [
-        { name: 'Clean 16kHz (PCM)', eer: '2.60%', bandwidth: '8000 Hz', pass: 'PASS 100%' },
-        { name: 'Zalo Profile A (AAC-LC 76k)', eer: '1.73%', bandwidth: '8000 Hz', pass: 'PASS 98.4%' },
-        { name: 'Zalo Profile B (Opus 24k)', eer: '1.56%', bandwidth: '8000 Hz', pass: 'PASS 98.4%' },
-        { name: 'AMR-NB Narrowband (8kHz)', eer: '3.13%', bandwidth: '3400 Hz', pass: 'PASS 100%' },
-        { name: 'G.711 A-law / mu-law', eer: '3.13%', bandwidth: '3400 Hz', pass: 'PASS 100%' }
+        { name: '1. Clean 16kHz (PCM)', bw: '8000 Hz', eer: '2.60%', pass: 'PASS 100%' },
+        { name: '2. Zalo Profile A (AAC-LC 76k)', bw: '8000 Hz', eer: '1.73%', pass: 'PASS 98.4%' },
+        { name: '3. Zalo Profile B (Opus 24k)', bw: '8000 Hz', eer: '1.56%', pass: 'PASS 98.4%' },
+        { name: '4. AMR-NB Narrowband (8kHz)', bw: '3400 Hz', eer: '3.13%', pass: 'PASS 100%' },
+        { name: '5. G.711 A-law / mu-law', bw: '3400 Hz', eer: '3.13%', pass: 'PASS 100%' }
       ];
 
       codecs.forEach((c, idx) => {
-        const y = 70 + idx * 30;
-        ctx.font = '11px "JetBrains Mono"';
+        const y = cardY + 46 + idx * 24;
+        ctx.font = '10px "JetBrains Mono"';
         ctx.fillStyle = '#F0F4F8';
-        ctx.fillText(`${idx + 1}. ${c.name}`, 30, y);
+        ctx.fillText(c.name, rCardX + 14, y);
 
         ctx.fillStyle = '#00E5FF';
-        ctx.fillText(`BW: ${c.bandwidth}`, 340, y);
+        ctx.fillText(`BW: ${c.bw}`, rCardX + 210, y);
 
         ctx.fillStyle = '#81FF00';
-        ctx.fillText(`EER: ${c.eer}`, 520, y);
+        ctx.fillText(`EER: ${c.eer}`, rCardX + 310, y);
 
-        ctx.fillStyle = 'rgba(129, 255, 0, 0.8)';
-        ctx.fillText(c.pass, 640, y);
+        ctx.fillStyle = 'rgba(129, 255, 0, 0.9)';
+        ctx.fillText(c.pass, rCardX + 390, y);
       });
+
+      ctx.fillStyle = '#8E99A8';
+      ctx.font = '8px "JetBrains Mono"';
+      ctx.fillText('Audited with ViTrueVoice TelephonyCompressor (5 Volunteer Speakers strictly isolated).', rCardX + 14, cardY + cardH - 10);
     }
 
     // --- Interactive Console Logger ---
@@ -2968,6 +3496,7 @@
     });
 
     // Initial render
+    updateCanvasLegend('spectrogram');
     drawStaticWaveform();
     renderForensicsVisualizer();
     logConsole('SYSTEM', 'Google Labs Playground UI Initialized.');

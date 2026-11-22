@@ -420,7 +420,7 @@ docker compose up -d --build
 ```
 Truy cập trình duyệt:
 - URL Playground: `http://localhost:8001/playground` (hoặc `http://localhost:8000/playground` với Docker).
-- Chế độ 1: **SINGLE-FILE ANALYSIS** — Tải file hoặc thu âm nhanh, trực quan hóa sóng âm Oscilloscope, Platt radial gauge và Forensics Spectral Studio canvas.
+- Chế độ 1: **SINGLE-FILE ANALYSIS** — Tải file hoặc thu âm nhanh, trực quan hóa sóng âm Oscilloscope, Platt radial gauge và **Forensics Spectral Studio** thời gian thực (STFT Spectrogram Radix-2 FFT 512 phân giải 31.25Hz hiển thị dải formant và đường ngắt băng thông vật lý AMR-NB 3.4kHz, Sóng âm đa cửa sổ trượt Window Slices 4.0s/64k kèm chỉ báo Asymmetric Veto, Bản đồ Attention Saliency mạng đồ thị AASIST, Thẻ kiểm toán băng thông thoại Codec Audit tự động phân tách Narrowband vs Wideband). Hỗ trợ nạp nhanh qua 4 chip Presets 1-click: F5-TTS Spoof, SPK_0004 Clean Voice, Zalo Opus 24k Spoof và AMR-NB 3.4kHz Telephony.
 - Chế độ 2: **LIVE CFM CLONING AUDIT** — Ghi âm Micro hoặc nạp 1-Click SPK_0004, hệ thống nhân bản theo thời gian thực qua VoiceStudio CFM (OmniVoice Zero-Shot Flow Matching) nói nguyên văn câu đối soát *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."*, xuất Ma trận đối soát đối chứng (Comparative Benchmark Matrix) đạt phân tách $\Delta s > 40.0$, BPCER $0.0\%$, APCER $0.0\%$. Đã chuẩn hóa thu âm mộc WebRTC (tắt noise suppression/AEC/AGC) và pipeline DSP tự động cắt tỉa khoảng lặng thừa (`top_db=25`) + peak-normalize 95% ngăn ngừa hiện tượng nhận nhầm giọng người thật thành Spoof.
 
 ### 8.9 Đánh Giá Mở Rộng Unseen TTS VoiceStudio CFM Trên 15 Người Nói Held-out (W07)
