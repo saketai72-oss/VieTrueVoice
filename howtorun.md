@@ -120,6 +120,9 @@ python scripts/generate_omnivoice_train_manifests.py --max-spks 55 --prompts-per
 # Bước 2: Huấn luyện V8 Pha 1 & Pha 2 và tự động đánh giá 4 Cổng kiểm định
 python scripts/train_v8_inverted_dual.py --device cuda --batch-size 8 --accum-steps 2
 
+# (Tùy chọn) Tiếp tục chạy Pha 2 của Run 2 từ checkpoint bảo lưu
+python scripts/train_v8_inverted_dual.py --resume-run2 --phase2-epochs 3
+
 # (Tùy chọn) Chạy đánh giá độc lập 4 Cổng trên checkpoint bất kỳ
 python -c "from scripts.train_v8_inverted_dual import evaluate_all_gates; evaluate_all_gates('out/zalo_b_zalo_v8_inverted/best_model.pt', 'data/manifests_zalo/dev_v8_f5_omni.csv')"
 ```

@@ -7,7 +7,7 @@
   "unseen_tts": [
     "VieNeu-TTS v3 Turbo"
   ],
-  "winning_checkpoint": "out/zalo_b_zalo_v8_inverted/best_model.pt",
+  "winning_checkpoint": "out\\zalo_b_zalo_v8_inverted\\best_model.pt",
   "run1_no_spk1": {
     "checkpoint": "out/zalo_b_zalo_v8_inverted_no_spk1/best_model.pt",
     "training_time_min": 343.5,
@@ -65,90 +65,89 @@
     }
   },
   "run2_with_spk1": {
-    "checkpoint": "out/zalo_b_zalo_v8_inverted/best_model.pt",
-    "dev_eer_pct": 5.76,
+    "checkpoint": "out\\zalo_b_zalo_v8_inverted\\best_model.pt",
     "gate1_spk0001": {
       "gate": "Gate 1 - SPK_0001 Isolation",
       "total": 15,
-      "n_pass": 14,
-      "pass_rate_pct": 93.33333333333333,
-      "mean_score": 19.849226999282838,
-      "median_score": 24.82744789123535,
-      "passed": true,
+      "n_pass": 6,
+      "pass_rate_pct": 40.0,
+      "mean_score": -1.505862299601237,
+      "median_score": -3.6406736373901367,
+      "passed": false,
       "details": [
         {
           "file": "SPK_0001_01.wav",
-          "score": 10.994232177734375,
-          "is_bonafide": true
+          "score": -17.401466369628906,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_02.wav",
-          "score": 27.935386657714844,
+          "score": 12.802047729492188,
           "is_bonafide": true
         },
         {
           "file": "SPK_0001_03.wav",
-          "score": -32.445701599121094,
+          "score": -44.44343185424805,
           "is_bonafide": false
         },
         {
           "file": "SPK_0001_04.wav",
-          "score": 14.376825332641602,
-          "is_bonafide": true
+          "score": -12.035937309265137,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_05.wav",
-          "score": 24.811195373535156,
+          "score": 13.885599136352539,
           "is_bonafide": true
         },
         {
           "file": "SPK_0001_06.wav",
-          "score": 27.196033477783203,
-          "is_bonafide": true
+          "score": -16.64082145690918,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_07.wav",
-          "score": 19.751102447509766,
-          "is_bonafide": true
+          "score": -23.700897216796875,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_08.wav",
-          "score": 27.896711349487305,
-          "is_bonafide": true
+          "score": -3.137070655822754,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_09.wav",
-          "score": 21.716236114501953,
-          "is_bonafide": true
+          "score": -3.6406736373901367,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_10.wav",
-          "score": 26.525745391845703,
+          "score": 20.070484161376953,
           "is_bonafide": true
         },
         {
           "file": "SPK_0001_11.wav",
-          "score": 34.20615768432617,
+          "score": 31.189441680908203,
           "is_bonafide": true
         },
         {
           "file": "SPK_0001_12.wav",
-          "score": 31.464679718017578,
+          "score": 22.869354248046875,
           "is_bonafide": true
         },
         {
           "file": "SPK_0001_13.wav",
-          "score": 35.173152923583984,
-          "is_bonafide": true
+          "score": -8.16510009765625,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_14.wav",
-          "score": 3.3092000484466553,
-          "is_bonafide": true
+          "score": -15.964077949523926,
+          "is_bonafide": false
         },
         {
           "file": "SPK_0001_15.wav",
-          "score": 24.82744789123535,
+          "score": 21.7246150970459,
           "is_bonafide": true
         }
       ]
@@ -158,77 +157,77 @@
       "by_speaker": {
         "SPK_0003": {
           "total": 20,
-          "bona": 19,
-          "pass_rate_pct": 95.0,
-          "mean_score": 26.52972776889801
+          "bona": 12,
+          "pass_rate_pct": 60.0,
+          "mean_score": 5.628960359096527
         },
         "SPK_0004": {
           "total": 14,
-          "bona": 14,
-          "pass_rate_pct": 100.0,
-          "mean_score": 32.70054885319301
+          "bona": 13,
+          "pass_rate_pct": 92.85714285714286,
+          "mean_score": 19.379529663494655
         },
         "SPK_0005": {
           "total": 20,
-          "bona": 20,
-          "pass_rate_pct": 100.0,
-          "mean_score": 35.137508392333984
+          "bona": 14,
+          "pass_rate_pct": 70.0,
+          "mean_score": 13.993382316827773
         },
         "SPK_0006": {
           "total": 10,
           "bona": 10,
           "pass_rate_pct": 100.0,
-          "mean_score": 37.58552589416504
+          "mean_score": 34.03768692016602
         },
         "SPK_0007": {
           "total": 20,
-          "bona": 20,
-          "pass_rate_pct": 100.0,
-          "mean_score": 34.30989093780518
+          "bona": 19,
+          "pass_rate_pct": 95.0,
+          "mean_score": 22.148381614685057
         }
       },
       "total_files": 84,
-      "total_bona": 83,
-      "overall_pass_rate_pct": 98.80952380952381,
-      "passed": true
+      "total_bona": 68,
+      "overall_pass_rate_pct": 80.95238095238095,
+      "passed": false
     },
     "gate3_unseen_vieneu": {
       "gate": "Gate 3 - Unseen VieNeu-TTS Benchmark",
       "total_unseen_spoof": 955,
       "total_bona_eval": 2000,
-      "eer_pct": 13.200000000000001,
-      "eer_threshold": 29.010906944274904,
-      "min_dcf": 0.6525994764397905,
-      "spoof_blocked_count": 536,
-      "spoof_block_rate_pct": 56.12565445026178,
-      "mean_spoof_score": -4.81915421646615,
-      "mean_bona_score": 33.38773469472677
+      "eer_pct": 11.700000000000001,
+      "eer_threshold": 11.428284420967085,
+      "min_dcf": 0.65117277486911,
+      "spoof_blocked_count": 799,
+      "spoof_block_rate_pct": 83.66492146596859,
+      "mean_spoof_score": -29.45296645033422,
+      "mean_bona_score": 23.682966119527816
     },
     "gate4_omnivoice_reversal": {
       "gate": "Gate 4 - OmniVoice CFM Reversal",
       "total_missed_v7": 195,
-      "n_reversed_to_spoof": 61,
-      "reversal_rate_pct": 31.28205128205128,
+      "n_reversed_to_spoof": 166,
+      "reversal_rate_pct": 85.12820512820512,
       "vivosdev02_prompt0_details": {
         "VIVOSDEV02_omnivoice_prompt_000": {
           "old": 15.168729782104492,
-          "new": 3.4090993404388428
+          "new": -40.45814514160156
         },
         "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
           "old": 14.804235458374023,
-          "new": 4.933978080749512
+          "new": -42.07387161254883
         },
         "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
           "old": 15.499570846557615,
-          "new": 13.818842887878418
+          "new": -39.83162307739258
         },
         "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
           "old": 15.936992645263672,
-          "new": 5.405651092529297
+          "new": -42.490013122558594
         },
         "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
           "old": 14.810254096984863,
-          "new": 7.845554351806641
+          "new": -37.361915588378906
         }
       },
       "sample_details": [
@@ -236,71 +235,71 @@
           "utt_id": "CV_b145cdf41b_omnivoice_prompt_003",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_b145cdf41b/CV_b145cdf41b_omnivoice_prompt_003.wav",
           "old_score_v7": 4.326410293579102,
-          "new_score_v8": 29.143932342529297,
+          "new_score_v8": 22.188196182250977,
           "is_reversed_to_spoof": false
         },
         {
           "utt_id": "CV_b145cdf41b_omnivoice_prompt_009",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_b145cdf41b/CV_b145cdf41b_omnivoice_prompt_009.wav",
           "old_score_v7": 6.641255855560303,
-          "new_score_v8": 27.684192657470703,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -6.561349868774414,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "CV_df95a7cece_omnivoice_prompt_007",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_df95a7cece/CV_df95a7cece_omnivoice_prompt_007.wav",
           "old_score_v7": 15.087491989135742,
-          "new_score_v8": 14.03483772277832,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -16.980518341064453,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "CV_df95a7cece_omnivoice_prompt_007_aac_zalo_76k",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_df95a7cece/CV_df95a7cece_omnivoice_prompt_007_aac_zalo.wav",
           "old_score_v7": 16.833175659179688,
-          "new_score_v8": 10.158824920654297,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -21.99441909790039,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "CV_df95a7cece_omnivoice_prompt_007_opus_zalo_24k",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_df95a7cece/CV_df95a7cece_omnivoice_prompt_007_opus_zalo.wav",
           "old_score_v7": 22.86478805541992,
-          "new_score_v8": 29.80408477783203,
+          "new_score_v8": 22.002838134765625,
           "is_reversed_to_spoof": false
         },
         {
           "utt_id": "VIVOSDEV02_omnivoice_prompt_000",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000.wav",
           "old_score_v7": 15.168729782104492,
-          "new_score_v8": 3.4090993404388428,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -40.45814514160156,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "VIVOSDEV02_omnivoice_prompt_000_g711_alaw",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_g711.wav",
           "old_score_v7": 14.804235458374023,
-          "new_score_v8": 4.933978080749512,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -42.07387161254883,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "VIVOSDEV02_omnivoice_prompt_000_amr_nb",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_amrnb.wav",
           "old_score_v7": 15.499570846557615,
-          "new_score_v8": 13.818842887878418,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -39.83162307739258,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_aac_zalo.wav",
           "old_score_v7": 15.936992645263672,
-          "new_score_v8": 5.405651092529297,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -42.490013122558594,
+          "is_reversed_to_spoof": true
         },
         {
           "utt_id": "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k",
           "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_opus_zalo.wav",
           "old_score_v7": 14.810254096984863,
-          "new_score_v8": 7.845554351806641,
-          "is_reversed_to_spoof": false
+          "new_score_v8": -37.361915588378906,
+          "is_reversed_to_spoof": true
         }
       ]
     }

@@ -381,6 +381,7 @@ def main():
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--force-run2", action="store_true", help="Bắt buộc chạy Run 2 bỏ qua kết quả Run 1")
     parser.add_argument("--skip-run1", action="store_true", help="Bỏ qua Run 1, chạy thẳng Run 2")
+    parser.add_argument("--resume-run2", action="store_true", help="Tiếp tục chạy Pha 2 của Run 2 từ checkpoint đã bảo lưu")
     args = parser.parse_args()
 
     init_ckpt = "out/zalo_b_zalo_v5_local/best_model.pt"
@@ -393,6 +394,54 @@ def main():
     dev_manifest = "data/manifests_zalo/dev_v8_f5_omni.csv"
 
     full_report = {}
+
+    if args.resume_run2:
+        print("\n" + "=" * 80)
+        print("🚀 TIẾP TỤC HUẤN LUYỆN RUN 2 TỪ CHECKPOINT ĐÃ BẢO LƯU:")
+        print("   Tập train có SPK_0001 (51.255 mẫu)")
+        print("   Chạy Pha 2: Mở khóa Wav2Vec 2.0 (Unfrozen SSL) cho 3 epochs")
+        print("=" * 80)
+
+        saved_ckpt = Path("out/zalo_b_zalo_v8_inverted/checkpoint_saved_v8_with_spk1.pt")
+        if not saved_ckpt.exists():
+            saved_ckpt = Path("out/zalo_b_zalo_v8_inverted/best_model.pt")
+        print(f"📥 Nạp checkpoint bảo lưu: {saved_ckpt}")
+
+        report_path = _ROOT / "benchmarks/v8_inverted_evaluation_report.json"
+        if report_path.exists():
+            try:
+                full_report = json.loads(report_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        run2_dir = "out/zalo_b_zalo_v8_inverted"
+        t0 = time.time()
+        run2_ckpt = run_training_cmd(
+            train_manifest=train_with_spk1,
+            dev_manifest=dev_manifest,
+            out_dir=run2_dir,
+            init_ckpt=str(saved_ckpt),
+            phase1_epochs=0,
+            phase2_epochs=args.phase2_epochs if args.phase2_epochs is not None else 3,
+            patience=args.patience,
+            batch_size=args.batch_size,
+            accum_steps=args.accum_steps,
+            num_workers=args.num_workers,
+            device=args.device,
+        )
+        t_run2 = time.time() - t0
+        print(f"\n⏱️ Hoàn thành Run 2 Pha 2 sau {t_run2/60:.1f} phút! Checkpoint: {run2_ckpt}")
+
+        run2_results = evaluate_all_gates(run2_ckpt, dev_manifest, device=args.device)
+        full_report["run2_with_spk1"] = run2_results
+        winning_ckpt = run2_ckpt
+        full_report["winning_checkpoint"] = str(winning_ckpt)
+        report_path.write_text(json.dumps(full_report, indent=2, ensure_ascii=False), encoding="utf-8")
+        print(f"\n📄 Đã cập nhật báo cáo nghiệm thu V8 đầy đủ tại: {report_path}")
+
+        update_server_default_checkpoint(str(winning_ckpt))
+        print("\n🏁 TIẾP TỤC HUẤN LUYỆN VÀ ĐÁNH GIÁ RUN 2 HOÀN TẤT THÀNH CÔNG 100%!")
+        return
 
     # ═════════════════════════════════════════════════════════════════════════
     # GIAI ĐOẠN 2: HUẤN LUYỆN LẦN 1 (Run 1 — Không có SPK_0001)
