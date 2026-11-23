@@ -1,0 +1,308 @@
+{
+  "model_version": "ViTrueVoice B_zalo V8 Inverted Dual-Seen",
+  "seen_tts": [
+    "F5-TTS",
+    "OmniVoice CFM (VoiceStudio)"
+  ],
+  "unseen_tts": [
+    "VieNeu-TTS v3 Turbo"
+  ],
+  "winning_checkpoint": "out/zalo_b_zalo_v8_inverted/best_model.pt",
+  "run1_no_spk1": {
+    "checkpoint": "out/zalo_b_zalo_v8_inverted_no_spk1/best_model.pt",
+    "training_time_min": 343.5,
+    "dev_eer_pct": 5.71,
+    "gate1_spk0001": {
+      "n_pass": 5,
+      "total": 15,
+      "pass_rate_pct": 33.3,
+      "mean_score": -5.98,
+      "median_score": -9.61,
+      "passed": false
+    },
+    "gate2_acceptance_5spk": {
+      "total_files": 84,
+      "total_bona": 73,
+      "overall_pass_rate_pct": 86.9,
+      "passed": false,
+      "by_speaker": {
+        "SPK_0003": {
+          "pass_rate_pct": 60.0,
+          "mean_score": 4.3
+        },
+        "SPK_0004": {
+          "pass_rate_pct": 92.9,
+          "mean_score": 17.6
+        },
+        "SPK_0005": {
+          "pass_rate_pct": 95.0,
+          "mean_score": 17.91
+        },
+        "SPK_0006": {
+          "pass_rate_pct": 100.0,
+          "mean_score": 28.24
+        },
+        "SPK_0007": {
+          "pass_rate_pct": 95.0,
+          "mean_score": 21.32
+        }
+      }
+    },
+    "gate3_unseen_vieneu": {
+      "total_clips": 955,
+      "eer_pct": 12.25,
+      "eer_threshold": 14.0844,
+      "min_dcf": 0.6178,
+      "blocked_count": 763,
+      "block_rate_pct": 79.9,
+      "passed_h2": true
+    },
+    "gate4_omnivoice_reversal": {
+      "total_missed_v7": 195,
+      "n_reversed": 146,
+      "reversal_rate_pct": 74.9,
+      "vivosdev02_prompt000_all_codecs_reversed": true
+    }
+  },
+  "run2_with_spk1": {
+    "checkpoint": "out/zalo_b_zalo_v8_inverted/best_model.pt",
+    "dev_eer_pct": 5.76,
+    "gate1_spk0001": {
+      "gate": "Gate 1 - SPK_0001 Isolation",
+      "total": 15,
+      "n_pass": 14,
+      "pass_rate_pct": 93.33333333333333,
+      "mean_score": 19.849226999282838,
+      "median_score": 24.82744789123535,
+      "passed": true,
+      "details": [
+        {
+          "file": "SPK_0001_01.wav",
+          "score": 10.994232177734375,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_02.wav",
+          "score": 27.935386657714844,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_03.wav",
+          "score": -32.445701599121094,
+          "is_bonafide": false
+        },
+        {
+          "file": "SPK_0001_04.wav",
+          "score": 14.376825332641602,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_05.wav",
+          "score": 24.811195373535156,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_06.wav",
+          "score": 27.196033477783203,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_07.wav",
+          "score": 19.751102447509766,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_08.wav",
+          "score": 27.896711349487305,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_09.wav",
+          "score": 21.716236114501953,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_10.wav",
+          "score": 26.525745391845703,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_11.wav",
+          "score": 34.20615768432617,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_12.wav",
+          "score": 31.464679718017578,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_13.wav",
+          "score": 35.173152923583984,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_14.wav",
+          "score": 3.3092000484466553,
+          "is_bonafide": true
+        },
+        {
+          "file": "SPK_0001_15.wav",
+          "score": 24.82744789123535,
+          "is_bonafide": true
+        }
+      ]
+    },
+    "gate2_acceptance_5spk": {
+      "gate": "Gate 2 - 5 Acceptance Volunteers",
+      "by_speaker": {
+        "SPK_0003": {
+          "total": 20,
+          "bona": 19,
+          "pass_rate_pct": 95.0,
+          "mean_score": 26.52972776889801
+        },
+        "SPK_0004": {
+          "total": 14,
+          "bona": 14,
+          "pass_rate_pct": 100.0,
+          "mean_score": 32.70054885319301
+        },
+        "SPK_0005": {
+          "total": 20,
+          "bona": 20,
+          "pass_rate_pct": 100.0,
+          "mean_score": 35.137508392333984
+        },
+        "SPK_0006": {
+          "total": 10,
+          "bona": 10,
+          "pass_rate_pct": 100.0,
+          "mean_score": 37.58552589416504
+        },
+        "SPK_0007": {
+          "total": 20,
+          "bona": 20,
+          "pass_rate_pct": 100.0,
+          "mean_score": 34.30989093780518
+        }
+      },
+      "total_files": 84,
+      "total_bona": 83,
+      "overall_pass_rate_pct": 98.80952380952381,
+      "passed": true
+    },
+    "gate3_unseen_vieneu": {
+      "gate": "Gate 3 - Unseen VieNeu-TTS Benchmark",
+      "total_unseen_spoof": 955,
+      "total_bona_eval": 2000,
+      "eer_pct": 13.200000000000001,
+      "eer_threshold": 29.010906944274904,
+      "min_dcf": 0.6525994764397905,
+      "spoof_blocked_count": 536,
+      "spoof_block_rate_pct": 56.12565445026178,
+      "mean_spoof_score": -4.81915421646615,
+      "mean_bona_score": 33.38773469472677
+    },
+    "gate4_omnivoice_reversal": {
+      "gate": "Gate 4 - OmniVoice CFM Reversal",
+      "total_missed_v7": 195,
+      "n_reversed_to_spoof": 61,
+      "reversal_rate_pct": 31.28205128205128,
+      "vivosdev02_prompt0_details": {
+        "VIVOSDEV02_omnivoice_prompt_000": {
+          "old": 15.168729782104492,
+          "new": 3.4090993404388428
+        },
+        "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+          "old": 14.804235458374023,
+          "new": 4.933978080749512
+        },
+        "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+          "old": 15.499570846557615,
+          "new": 13.818842887878418
+        },
+        "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+          "old": 15.936992645263672,
+          "new": 5.405651092529297
+        },
+        "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+          "old": 14.810254096984863,
+          "new": 7.845554351806641
+        }
+      },
+      "sample_details": [
+        {
+          "utt_id": "CV_b145cdf41b_omnivoice_prompt_003",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_b145cdf41b/CV_b145cdf41b_omnivoice_prompt_003.wav",
+          "old_score_v7": 4.326410293579102,
+          "new_score_v8": 29.143932342529297,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "CV_b145cdf41b_omnivoice_prompt_009",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_b145cdf41b/CV_b145cdf41b_omnivoice_prompt_009.wav",
+          "old_score_v7": 6.641255855560303,
+          "new_score_v8": 27.684192657470703,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "CV_df95a7cece_omnivoice_prompt_007",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_df95a7cece/CV_df95a7cece_omnivoice_prompt_007.wav",
+          "old_score_v7": 15.087491989135742,
+          "new_score_v8": 14.03483772277832,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "CV_df95a7cece_omnivoice_prompt_007_aac_zalo_76k",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_df95a7cece/CV_df95a7cece_omnivoice_prompt_007_aac_zalo.wav",
+          "old_score_v7": 16.833175659179688,
+          "new_score_v8": 10.158824920654297,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "CV_df95a7cece_omnivoice_prompt_007_opus_zalo_24k",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/CV_df95a7cece/CV_df95a7cece_omnivoice_prompt_007_opus_zalo.wav",
+          "old_score_v7": 22.86478805541992,
+          "new_score_v8": 29.80408477783203,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "VIVOSDEV02_omnivoice_prompt_000",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000.wav",
+          "old_score_v7": 15.168729782104492,
+          "new_score_v8": 3.4090993404388428,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "VIVOSDEV02_omnivoice_prompt_000_g711_alaw",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_g711.wav",
+          "old_score_v7": 14.804235458374023,
+          "new_score_v8": 4.933978080749512,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "VIVOSDEV02_omnivoice_prompt_000_amr_nb",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_amrnb.wav",
+          "old_score_v7": 15.499570846557615,
+          "new_score_v8": 13.818842887878418,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_aac_zalo.wav",
+          "old_score_v7": 15.936992645263672,
+          "new_score_v8": 5.405651092529297,
+          "is_reversed_to_spoof": false
+        },
+        {
+          "utt_id": "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k",
+          "audio_path": "data/spoof_unseen/omnivoice_15spk/VIVOSDEV02/VIVOSDEV02_omnivoice_prompt_000_opus_zalo.wav",
+          "old_score_v7": 14.810254096984863,
+          "new_score_v8": 7.845554351806641,
+          "is_reversed_to_spoof": false
+        }
+      ]
+    }
+  }
+}

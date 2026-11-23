@@ -111,6 +111,19 @@ python scripts/audit_v6_manifest.py
 python scripts/train_local_zalo_v6.py
 ```
 
+### Huấn Luyện Mô Hình B_zalo V8 Đối Chứng 2 Chiều (Seen: F5 + OmniVoice | Unseen: VieNeu-TTS)
+Huấn luyện mô hình V8 hoán đổi cấu trúc Seen/Unseen để triệt tiêu hiện tượng lọt lưới 20% của Continuous Flow Matching (CFM) và kiểm định Giả thuyết H2 trên VieNeu-TTS:
+```bash
+# Bước 1: Tổng hợp mẫu OmniVoice train & xuất 4 tệp manifest V8 chuẩn 18/19 cột
+python scripts/generate_omnivoice_train_manifests.py --max-spks 55 --prompts-per-spk 2
+
+# Bước 2: Huấn luyện V8 Pha 1 & Pha 2 và tự động đánh giá 4 Cổng kiểm định
+python scripts/train_v8_inverted_dual.py --device cuda --batch-size 8 --accum-steps 2
+
+# (Tùy chọn) Chạy đánh giá độc lập 4 Cổng trên checkpoint bất kỳ
+python -c "from scripts.train_v8_inverted_dual import evaluate_all_gates; evaluate_all_gates('out/zalo_b_zalo_v8_inverted/best_model.pt', 'data/manifests_zalo/dev_v8_f5_omni.csv')"
+```
+
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
 # Nhánh A (Clean only baseline)
@@ -375,14 +388,26 @@ Hệ thống tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma =
 1. **Nền tảng 1 (File âm thanh viễn thông tải lên)**: Hỗ trợ kéo thả trực tiếp tệp `.wav`, `.m4a`, `.opus`, `.ogg`, `.mp3` qua Web UI hoặc Zalo/Telegram Bot.
 2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút Micro trên giao diện Gradio Web. Thuật toán bù đắp dither tự động khôi phục tính liên tục âm học tự nhiên cho các vùng khoảng lặng bị trình duyệt cắt cụt bởi bộ lọc tiếng ồn (noise suppression / AGC), ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
 
-### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu & Cẩm nang Phản biện Hội đồng
-Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện (22.637 từ, 445 đoạn văn, 27 bảng chuẩn mực, 22 câu hỏi phản biện) sang cả hai định dạng `.docx` và `.pdf`:
+### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu Toàn diện & Cẩm nang Phản biện Hội đồng
+
+#### Phiên bản 1.0 (V1.0)
+Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện v1 (22.637 từ, 445 đoạn văn, 27 bảng chuẩn mực, 22 câu hỏi phản biện) sang cả hai định dạng `.docx` và `.pdf`:
 ```bash
 python scripts/build_defense_handbook_docx.py
 ```
 Tài liệu được xuất bản và đồng bộ tự động tại:
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.docx`
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.pdf`
+- Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
+
+#### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8
+Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (26.630 từ, 489 đoạn văn, 32 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization & Ma trận suy giảm 5 codecs) sang cả hai định dạng `.docx` và `.pdf`:
+```bash
+python scripts/build_defense_handbook_v2_docx.py
+```
+Tài liệu được xuất bản và đồng bộ tự động tại:
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
 ### 8.6 Khởi chạy Phòng Thí Nghiệm Nhân Bản Trực Tiếp VoiceStudio CFM (Gradio Web Chế Độ 2)
