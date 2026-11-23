@@ -98,7 +98,7 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 362 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
+*(Yêu cầu: Toàn bộ 382 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
 
 ### Kiểm Toán An Ninh Manifest V6
 ```bash
@@ -126,6 +126,14 @@ python scripts/train_v8_inverted_dual.py --resume-run2 --phase2-epochs 3
 # (Tùy chọn) Chạy đánh giá độc lập 4 Cổng trên checkpoint bất kỳ
 python -c "from scripts.train_v8_inverted_dual import evaluate_all_gates; evaluate_all_gates('out/zalo_b_zalo_v8_inverted/best_model.pt', 'data/manifests_zalo/dev_v8_f5_omni.csv')"
 ```
+
+### Tối Ưu Lai Ghép Tầng (Layer-Wise Grafting) & Huấn Luyện Cân Bằng V8 (GĐ2 & GĐ3)
+Thực thi quy trình ghép tầng trọng số phân cấp (Layer-Wise Grafting `split=4, low_alpha=0.15, high_alpha=0.90`) và vi chỉnh cục bộ 1 epoch để chọn mô hình chiến thắng cân bằng 4 Cổng kiểm định:
+```bash
+# Chạy toàn trình tạo manifest cân bằng, ghép tầng và vi chỉnh 1-epoch
+python scripts/build_v8_hybrid_checkpoint.py
+```
+*(Mô hình chiến thắng Stage 2 Grafted được tự động xuất vào `out/zalo_b_zalo_v8_inverted/best_model.pt` và cập nhật vào `src/app/server.py`)*
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
@@ -404,7 +412,7 @@ Tài liệu được xuất bản và đồng bộ tự động tại:
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
 #### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8
-Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (26.630 từ, 489 đoạn văn, 32 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization & Ma trận suy giảm 5 codecs) sang cả hai định dạng `.docx` và `.pdf`:
+Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (27.393 từ, 497 đoạn văn, 34 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization & Ma trận suy giảm 5 codecs, Layer-Wise Grafting và Consensus Asymmetric Veto) sang cả hai định dạng `.docx` và `.pdf`:
 ```bash
 python scripts/build_defense_handbook_v2_docx.py
 ```
