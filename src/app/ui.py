@@ -1823,7 +1823,7 @@ def build_ui(
             """
             ---
             <div style="text-align: center; color: #64748B; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 1rem 0;">
-                ViTrueVoice Anti-Spoofing Inference Engine v0.9.1 | Backbone: Wav2Vec2 + AASIST (B_zalo V7 Dual-Seen) | Asymmetric Veto Multi-Window Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
+                ViTrueVoice Anti-Spoofing Inference Engine v0.9.3 | Backbone: Wav2Vec2 + AASIST (B_zalo V8 Inverted Dual-Seen) | Asymmetric Veto Multi-Window Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
             </div>
             """
         )
