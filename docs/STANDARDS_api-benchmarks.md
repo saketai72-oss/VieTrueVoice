@@ -126,4 +126,31 @@ Nhằm phục vụ đánh giá năng lực phát hiện Deepfake tương tác tr
 
 ---
 
-*v0.5.0 — 2026-11-13*
+## 6. Cấu Hình Thí Nghiệm Đối Chứng 2 Chiều V7 vs V8 (Inverted Generalization Benchmark — v0.9.2)
+
+### 6.1. Thiết Kế Hoán Đổi Đối Xứng Seen / Unseen
+Nhằm kiểm chứng tính tổng quát hóa không bị phụ thuộc vào một kiến trúc bộ sinh TTS cụ thể (loại bỏ hiện tượng Architectural Bias) và chứng minh cơ chế toán học kiểm soát sai số trên cả hai trường phái Continuous Flow Matching (CFM) và Discrete Neural Codec (RVQ):
+- **Cấu hình B_zalo V7 (Chiều Thuận)**:
+  - **Seen TTS (Train & Dev)**: `F5-TTS` (Flow-Matching Diffusion) + `VieNeu-TTS v3 Turbo` (Acoustic LM + NeuCodec).
+  - **Unseen TTS (Kiểm định Giả thuyết H2 OOD)**: `VoiceStudio (OmniVoice CFM)` (Continuous Flow Matching Zero-shot Voice Cloning).
+  - **Kết quả V7**: Seen EER = 5.23%, Pass Rate = 97.60%; Unseen CFM Pass Rate đạt 79.79% (EER 14.81% $\le 15.0\%$, đạt H2), tồn tại ~20.21% mẫu lọt lưới do tính trơn nhẵn của quỹ đạo ODE khi chưa từng được mô hình hóa trong không gian biểu diễn.
+- **Cấu hình B_zalo V8 (Chiều Nghịch — Hoán Đổi Đối Chứng)**:
+  - **Seen TTS (Train & Dev)**: `F5-TTS` + `VoiceStudio OmniVoice CFM`.
+    - Train manifest: `data/manifests_zalo/train_v8_f5_omni_no_spk1.csv` (và `train_v8_f5_omni_with_spk1.csv` cho Pha 2).
+    - Dev manifest: `data/manifests_zalo/dev_v8_f5_omni.csv` (OmniVoice CFM 15 SPK chuyển thành Seen Dev).
+  - **Unseen TTS (Kiểm định Giả thuyết H2 OOD)**: `VieNeu-TTS v3 Turbo`.
+    - Unseen manifest: `data/manifests_zalo/unseen_vieneu_benchmark.csv` (955 clips VieNeu-TTS chuyển thành Unseen OOD).
+  - **Kết quả V8**: Đưa CFM vào huấn luyện triệt tiêu hoàn toàn 20% lọt lưới, Pass Rate của OmniVoice CFM vọt lên **98.93% (371/375)**, EER giảm sâu xuống **2.13%**. Đồng thời, VieNeu-TTS (Unseen) vẫn đạt tỷ lệ chặn **89.33% (335/375)**, EER đạt **10.67% $\le 15.0\%$** (vượt xa chỉ tiêu H2), khẳng định mạng miễn dịch chéo trước các vết răng cưa lượng tử rời rạc của RVQ.
+
+### 6.2. Ma Trận Suy Giảm 5 Biến Thể Codec Thoại Nén
+Các tập đánh giá của cả V7 và V8 bắt buộc đo lường trên 5 biến thể kênh thoại nén:
+1. `clean`: Tuyến tính 16kHz PCM gốc.
+2. `aac_zalo_76k`: AAC-LC 76kbps @ 48kHz (Zalo Profile A).
+3. `opus_zalo_24k`: Opus 24kbps @ 16kHz OGG (Zalo Profile B).
+4. `amrnb`: AMR-NB 8kHz (GSM di động truyền thống).
+5. `g711`: G.711 A-law 8kHz (PSTN cố định).
+- **Tập nghiệm thu**: 84 clips Bona Fide độc bản của 5 tình nguyện viên đối chứng (`SPK_0003`..`0007`) x 5 codecs = 420 clips — cô lập 100% khỏi Train, Dev và Calibration.
+
+---
+
+*v0.9.2 — 2026-11-22*

@@ -28,8 +28,8 @@
       --neon-crimson-subtle: rgba(255, 0, 122, 0.15);
       --neon-amber: #FFB800;
       --text-main: #F0F4F8;
-      --text-muted: #8E99A8;
-      --text-faint: #525C6A;
+      --text-muted: #A0B0C4;
+      --text-faint: #78889E;
       --font-display: 'Press Start 2P', monospace;
       --font-mono: 'JetBrains Mono', monospace;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1123,6 +1123,17 @@
     }
 
     @media (max-width: 900px) {
+      header.top-nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+      }
+      .segmented-tabs {
+        justify-content: center;
+      }
+      .nav-actions {
+        justify-content: space-between;
+      }
       .cfm-grid {
         grid-template-columns: 1fr;
       }

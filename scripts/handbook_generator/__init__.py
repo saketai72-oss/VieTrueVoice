@@ -20,3 +20,4 @@ from .chapters_1_to_3 import add_chapters_1_to_3
 from .chapters_4_to_6 import add_chapters_4_to_6
 from .chapters_7_to_9 import add_chapters_7_to_9
 from .chapters_10_to_12 import add_chapters_10_to_12
+from .chapter_13_inverted import add_chapter_13_inverted
