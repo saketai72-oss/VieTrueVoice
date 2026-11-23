@@ -1,0 +1,523 @@
+{
+  "checkpoint_b_raw": {
+    "max": {
+      "gate1_spk0001": {
+        "n_pass": 11,
+        "total": 15,
+        "pass_rate_pct": 73.33333333333333,
+        "mean_score": 8.558916727701822
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 81,
+        "total_files": 84,
+        "overall_pass_rate_pct": 96.42857142857143,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 20.974112498760224
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 24.682375362941197
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 22.944973039627076
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 34.03768692016602
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 23.246659302711485
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 10.890052356020941,
+        "eer_threshold": 17.160128268895974,
+        "min_dcf": 0.651780104712042,
+        "blocked_count": 746,
+        "block_rate_pct": 78.1151832460733
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 119,
+        "total": 195,
+        "reversal_rate_pct": 61.02564102564103
+      }
+    },
+    "mean": {
+      "gate1_spk0001": {
+        "n_pass": 8,
+        "total": 15,
+        "pass_rate_pct": 53.333333333333336,
+        "mean_score": -1.5234859387079875
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 69,
+        "total_files": 84,
+        "overall_pass_rate_pct": 82.14285714285714,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 11,
+            "pass_rate_pct": 55.00000000000001,
+            "mean_score": 6.404656565189361
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 16.90312957763672
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 16,
+            "pass_rate_pct": 80.0,
+            "mean_score": 12.97326798196882
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 31.212051963806154
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 18.744154977798463
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 11.3,
+        "eer_threshold": 8.99303427696228,
+        "min_dcf": 0.6529031413612565,
+        "blocked_count": 798,
+        "block_rate_pct": 83.56020942408377
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 150,
+        "total": 195,
+        "reversal_rate_pct": 76.92307692307693
+      }
+    },
+    "asymmetric_veto": {
+      "gate1_spk0001": {
+        "n_pass": 11,
+        "total": 15,
+        "pass_rate_pct": 73.33333333333333,
+        "mean_score": 6.038508033752441
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 76,
+        "total_files": 84,
+        "overall_pass_rate_pct": 90.47619047619048,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 16,
+            "pass_rate_pct": 80.0,
+            "mean_score": 12.419618165493011
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 23.133352075304305
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 18,
+            "pass_rate_pct": 90.0,
+            "mean_score": 18.47056131362915
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 34.03768692016602
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 22.148381614685057
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 10.7,
+        "eer_threshold": 14.802437534332281,
+        "min_dcf": 0.65117277486911,
+        "blocked_count": 785,
+        "block_rate_pct": 82.19895287958116
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 140,
+        "total": 195,
+        "reversal_rate_pct": 71.7948717948718
+      }
+    }
+  },
+  "stage2_grafted": {
+    "max": {
+      "gate1_spk0001": {
+        "n_pass": 13,
+        "total": 15,
+        "pass_rate_pct": 86.66666666666667,
+        "mean_score": 13.999911812941233
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 84,
+        "total_files": 84,
+        "overall_pass_rate_pct": 100.0,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 25.13240752220154
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 14,
+            "pass_rate_pct": 100.0,
+            "mean_score": 27.77947732380458
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 26.309703159332276
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 35.16650810241699
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 26.736859703063963
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 11.85,
+        "eer_threshold": 21.250117378234865,
+        "min_dcf": 0.660764397905759,
+        "blocked_count": 682,
+        "block_rate_pct": 71.41361256544502
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 104,
+        "total": 195,
+        "reversal_rate_pct": 53.333333333333336
+      }
+    },
+    "mean": {
+      "gate1_spk0001": {
+        "n_pass": 9,
+        "total": 15,
+        "pass_rate_pct": 60.0,
+        "mean_score": 4.854815530776977
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 78,
+        "total_files": 84,
+        "overall_pass_rate_pct": 92.85714285714286,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 16,
+            "pass_rate_pct": 80.0,
+            "mean_score": 13.866498073935508
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 21.59891629219055
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 19.470002031326295
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 32.30214557647705
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 23.26514724493027
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 12.041884816753923,
+        "eer_threshold": 16.77206986112744,
+        "min_dcf": 0.6297905759162304,
+        "blocked_count": 744,
+        "block_rate_pct": 77.90575916230367
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 128,
+        "total": 195,
+        "reversal_rate_pct": 65.64102564102564
+      }
+    },
+    "asymmetric_veto": {
+      "gate1_spk0001": {
+        "n_pass": 12,
+        "total": 15,
+        "pass_rate_pct": 80.0,
+        "mean_score": 11.588016760349273
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 83,
+        "total_files": 84,
+        "overall_pass_rate_pct": 98.80952380952381,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 23.51309790611267
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 26.370494059153966
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 25.06217403411865
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 35.16650810241699
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 26.284760189056396
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 11.4,
+        "eer_threshold": 20.309937324523926,
+        "min_dcf": 0.6513246073298429,
+        "blocked_count": 731,
+        "block_rate_pct": 76.54450261780104
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 126,
+        "total": 195,
+        "reversal_rate_pct": 64.61538461538461
+      }
+    }
+  },
+  "stage3_partial_ft": {
+    "max": {
+      "gate1_spk0001": {
+        "n_pass": 11,
+        "total": 15,
+        "pass_rate_pct": 73.33333333333333,
+        "mean_score": 9.59988881746928
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 78,
+        "total_files": 84,
+        "overall_pass_rate_pct": 92.85714285714286,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 16,
+            "pass_rate_pct": 80.0,
+            "mean_score": 19.21830413788557
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 29.417537416730607
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 20,
+            "pass_rate_pct": 100.0,
+            "mean_score": 25.17174949645996
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 39.16641349792481
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 27.018963861465455
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 10.15,
+        "eer_threshold": 8.157826378345487,
+        "min_dcf": 0.7218010471204189,
+        "blocked_count": 825,
+        "block_rate_pct": 86.38743455497382
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 126,
+        "total": 195,
+        "reversal_rate_pct": 64.61538461538461
+      }
+    },
+    "mean": {
+      "gate1_spk0001": {
+        "n_pass": 7,
+        "total": 15,
+        "pass_rate_pct": 46.666666666666664,
+        "mean_score": 0.9978440761566162
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 69,
+        "total_files": 84,
+        "overall_pass_rate_pct": 82.14285714285714,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 11,
+            "pass_rate_pct": 55.00000000000001,
+            "mean_score": 5.524386298656464
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 20.390254378318787
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 16,
+            "pass_rate_pct": 80.0,
+            "mean_score": 13.070230770111085
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 35.3602635383606
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 22.45609107017517
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 10.680628272251314,
+        "eer_threshold": -2.6486602166560247,
+        "min_dcf": 0.7620314136125655,
+        "blocked_count": 867,
+        "block_rate_pct": 90.78534031413612
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 157,
+        "total": 195,
+        "reversal_rate_pct": 80.51282051282051
+      }
+    },
+    "asymmetric_veto": {
+      "gate1_spk0001": {
+        "n_pass": 9,
+        "total": 15,
+        "pass_rate_pct": 60.0,
+        "mean_score": 5.718807490666707
+      },
+      "gate2_acceptance_5spk": {
+        "total_bona": 72,
+        "total_files": 84,
+        "overall_pass_rate_pct": 85.71428571428571,
+        "by_speaker": {
+          "SPK_0003": {
+            "total": 20,
+            "bona": 13,
+            "pass_rate_pct": 65.0,
+            "mean_score": 10.392343258857727
+          },
+          "SPK_0004": {
+            "total": 14,
+            "bona": 13,
+            "pass_rate_pct": 92.85714285714286,
+            "mean_score": 27.892438002995082
+          },
+          "SPK_0005": {
+            "total": 20,
+            "bona": 17,
+            "pass_rate_pct": 85.0,
+            "mean_score": 18.808254194259643
+          },
+          "SPK_0006": {
+            "total": 10,
+            "bona": 10,
+            "pass_rate_pct": 100.0,
+            "mean_score": 39.16641349792481
+          },
+          "SPK_0007": {
+            "total": 20,
+            "bona": 19,
+            "pass_rate_pct": 95.0,
+            "mean_score": 26.453797912597658
+          }
+        }
+      },
+      "gate3_unseen_vieneu": {
+        "eer_pct": 10.680628272251314,
+        "eer_threshold": -0.0020553230927197047,
+        "min_dcf": 0.8120811518324608,
+        "blocked_count": 853,
+        "block_rate_pct": 89.31937172774869
+      },
+      "gate4_omnivoice_reversal": {
+        "n_reversed": 154,
+        "total": 195,
+        "reversal_rate_pct": 78.97435897435898
+      }
+    }
+  },
+  "winning_model": "stage2_grafted",
+  "winning_checkpoint": "out/zalo_b_zalo_v8_inverted/checkpoint_stage2_grafted.pt"
+}

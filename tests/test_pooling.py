@@ -222,3 +222,35 @@ def test_asymmetric_veto_three_windows_drops_highest_outlier():
     # Drops +4.5 outlier, computes mean([-22.0, -16.0]) = -19.0
     assert score_veto == pytest.approx(-19.0)
     assert score_veto < 0.0
+
+
+def test_asymmetric_veto_consensus_bonafide_multi_window_protection():
+    """Bona fide clips with >= 3 windows where >= 2 windows strongly score bona fide (>= 6.0) must be protected via sorted_s[-2]."""
+    scores_5win = [-38.7, -4.3, 10.6, 10.9, 21.6]
+    s_pooled_5win = pool_scores(scores_5win, mode="asymmetric_veto")
+    assert s_pooled_5win == pytest.approx(10.9)
+    assert s_pooled_5win > 0.0
+
+    scores_4win = [-31.99, -26.02, 8.09, 12.27]
+    s_pooled_4win = pool_scores(scores_4win, mode="asymmetric_veto")
+    assert s_pooled_4win == pytest.approx(8.09)
+    assert s_pooled_4win > 0.0
+
+
+def test_asymmetric_veto_single_positive_outlier_still_vetoed():
+    """Spoof clip with only 1 positive outlier window (sorted_s[-2] < 6.0) must still be vetoed via trimmed mean."""
+    scores = [-22.73, -13.87, 26.49]
+    s_pooled = pool_scores(scores, mode="asymmetric_veto")
+    assert s_pooled == pytest.approx(-18.30)
+    assert s_pooled < 0.0
+
+
+def test_asymmetric_veto_consensus_threshold_at_6p0():
+    """Verify consensus protection threshold at precisely 6.0 for sorted_s[-2]."""
+    # Exactly 6.0 -> consensus protection triggers, returns sorted_s[-2] == 6.0
+    scores_at_threshold = [-15.0, 6.0, 10.0]
+    assert pool_scores(scores_at_threshold, mode="asymmetric_veto") == pytest.approx(6.0)
+
+    # Just below 6.0 -> falls back to trimmed mean of remaining windows
+    scores_below_threshold = [-15.0, 5.99, 10.0]
+    assert pool_scores(scores_below_threshold, mode="asymmetric_veto") == pytest.approx((-15.0 + 5.99) / 2.0)

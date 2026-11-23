@@ -162,10 +162,13 @@ def pool_scores(
             - 'max': Conservative anti-spoofing (highest score window governs).
             - 'mean': Average score across all temporal windows.
             - 'min': Minimum score across all temporal windows.
-            - 'asymmetric_veto' (or 'adaptive'): Asymmetric veto pooling. If any window
-              shows strong spoof evidence (min < -12.0), drops highest outlier window
-              (trimmed mean) or computes mean to prevent unvoiced near-zero windows from
-              vetoing spoof detection; otherwise protects bona fide voice using max-pooling.
+            - 'asymmetric_veto' (or 'adaptive'): Consensus Asymmetric Veto pooling. If any
+              window shows strong spoof evidence (min < -12.0) and >= 3 windows exist,
+              checks whether >= 2 independent windows strongly vote bona fide
+              (sorted_s[-2] >= 6.0) to protect with sorted_s[-2]; otherwise drops the
+              highest outlier window (trimmed mean) or uses mean (< 3 windows) to
+              prevent unvoiced near-zero windows from vetoing spoof detection. If
+              min >= -12.0, protects bona fide voice using max-pooling.
 
     Returns:
         Aggregated utterance score as float.
@@ -193,10 +196,13 @@ def pool_scores(
         return float(np.min(scores_np))
     if mode in ("asymmetric_veto", "adaptive"):
         if np.min(scores_np) < -12.0:
-            # Strong spoof evidence in at least one voiced segment; do not let an unvoiced near-zero window veto it.
+            # Strong spoof evidence in at least one voiced segment; verify multi-window bona fide consensus before vetoing.
             if len(scores_np) >= 3:
-                # Trimmed mean: drop highest single outlier window
-                s_pooled = float(np.mean(np.sort(scores_np)[:-1]))
+                sorted_s = np.sort(scores_np)
+                if sorted_s[-2] >= 6.0:
+                    s_pooled = float(sorted_s[-2])
+                else:
+                    s_pooled = float(np.mean(sorted_s[:-1]))
             else:
                 s_pooled = float(np.mean(scores_np))
         else:
