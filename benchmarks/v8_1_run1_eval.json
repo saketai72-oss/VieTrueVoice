@@ -1,0 +1,969 @@
+{
+  "timestamp": "2026-11-24 18:00:26",
+  "checkpoints": {
+    "run1_phase1": {
+      "checkpoint": "out/zalo_b_zalo_v8_1_no_spk1/checkpoint_phase1.pt",
+      "ckpt_meta": {
+        "phase": 1,
+        "epoch": 1,
+        "dev_eer": 0.07959961868446139
+      },
+      "clip_counts": {
+        "set_4979": 4979,
+        "set_4969_v8_1_sym": 4969
+      },
+      "modes": {
+        "max": {
+          "gate1_spk0001": {
+            "n_pass": 6,
+            "total": 15,
+            "pass_rate_pct": 40.0,
+            "mean_score": -1.3028957923253377,
+            "median_score": -0.7094031572341919,
+            "passed": false
+          },
+          "gate2_acceptance_5spk": {
+            "total_bona": 70,
+            "total_files": 84,
+            "overall_pass_rate_pct": 83.33333333333334,
+            "ctrl4_bona": 61,
+            "ctrl4_files": 64,
+            "ctrl4_pass_rate_pct": 95.3125,
+            "by_speaker": {
+              "SPK_0003": {
+                "total": 20,
+                "bona": 9,
+                "pass_rate_pct": 45.0,
+                "mean_score": -0.6388019025325775
+              },
+              "SPK_0004": {
+                "total": 14,
+                "bona": 11,
+                "pass_rate_pct": 78.57142857142857,
+                "mean_score": 7.7556511504309515
+              },
+              "SPK_0005": {
+                "total": 20,
+                "bona": 20,
+                "pass_rate_pct": 100.0,
+                "mean_score": 11.098648238182069
+              },
+              "SPK_0006": {
+                "total": 10,
+                "bona": 10,
+                "pass_rate_pct": 100.0,
+                "mean_score": 17.5743727684021
+              },
+              "SPK_0007": {
+                "total": 20,
+                "bona": 20,
+                "pass_rate_pct": 100.0,
+                "mean_score": 12.045200562477111
+              }
+            }
+          },
+          "gate3_unseen_vieneu": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 22.198952879581146,
+            "eer_threshold": 8.162589207993753,
+            "min_dcf": 0.7793769633507854,
+            "blocked_count": 566,
+            "block_rate_pct": 59.26701570680628,
+            "mean_spoof_score": -2.565252657835396,
+            "median_spoof_score": -4.1715593338012695,
+            "mean_bona_score": 10.748540691778064
+          },
+          "gate4_omnivoice_reversal": {
+            "n_reversed": 84,
+            "total": 195,
+            "reversal_rate_pct": 43.07692307692308,
+            "vivosdev02_prompt0_details": {
+              "VIVOSDEV02_omnivoice_prompt_000": {
+                "old": 15.168729782104492,
+                "new": 1.0002868175506592
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+                "old": 14.804235458374023,
+                "new": 0.8249644041061401
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+                "old": 15.499570846557615,
+                "new": 4.0413126945495605
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+                "old": 15.936992645263672,
+                "new": 0.6681406497955322
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+                "old": 14.810254096984863,
+                "new": 0.9619308114051819
+              }
+            }
+          },
+          "dev_bona_bpcer_2000": {
+            "rejected_count": 92,
+            "total": 2000,
+            "bpcer_pct": 4.6,
+            "mean_score": 10.748540691778064,
+            "median_score": 11.76188850402832
+          },
+          "seen_f5_dev_960": {
+            "total_spoof": 960,
+            "total_bona": 2000,
+            "eer_pct": 2.604166666666663,
+            "eer_threshold": -2.8656620383262723,
+            "min_dcf": 0.1865416666666667,
+            "blocked_count": 944,
+            "block_rate_pct": 98.33333333333333,
+            "mean_spoof_score": -16.425262957469872,
+            "median_spoof_score": -17.166149139404297,
+            "mean_bona_score": 10.748540691778064
+          },
+          "seen_omni_v8_0_965": {
+            "total_spoof": 965,
+            "total_bona": 2000,
+            "eer_pct": 22.05,
+            "eer_threshold": 8.143228693008423,
+            "min_dcf": 0.72920207253886,
+            "blocked_count": 579,
+            "block_rate_pct": 60.0,
+            "mean_spoof_score": -3.831061037525612,
+            "median_spoof_score": -4.852199554443359,
+            "mean_bona_score": 10.748540691778064
+          },
+          "seen_omni_v8_1_955": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 22.198952879581146,
+            "eer_threshold": 8.182457454541588,
+            "min_dcf": 0.7352460732984293,
+            "blocked_count": 569,
+            "block_rate_pct": 59.58115183246073,
+            "mean_spoof_score": -3.689879043189643,
+            "median_spoof_score": -4.641798496246338,
+            "mean_bona_score": 10.748540691778064
+          },
+          "seen_v8_1_pooled_1915": {
+            "total_spoof": 1915,
+            "total_bona": 2000,
+            "eer_pct": 13.350000000000001,
+            "eer_threshold": 5.874972891807556,
+            "min_dcf": 0.46501436031331594,
+            "blocked_count": 1513,
+            "block_rate_pct": 79.00783289817232,
+            "mean_spoof_score": -10.074196827894092,
+            "median_spoof_score": -14.523426055908203,
+            "mean_bona_score": 10.748540691778064
+          },
+          "seen_v8_0_pooled_1925": {
+            "total_spoof": 1925,
+            "total_bona": 2000,
+            "eer_pct": 13.350000000000001,
+            "eer_threshold": 5.870102941989899,
+            "min_dcf": 0.4632402597402598,
+            "blocked_count": 1523,
+            "block_rate_pct": 79.11688311688312,
+            "mean_spoof_score": -10.111805891108203,
+            "median_spoof_score": -14.552228927612305,
+            "mean_bona_score": 10.748540691778064
+          }
+        },
+        "mean": {
+          "gate1_spk0001": {
+            "n_pass": 3,
+            "total": 15,
+            "pass_rate_pct": 20.0,
+            "mean_score": -7.441416471136941,
+            "median_score": -9.23781442642212,
+            "passed": false
+          },
+          "gate2_acceptance_5spk": {
+            "total_bona": 65,
+            "total_files": 84,
+            "overall_pass_rate_pct": 77.38095238095238,
+            "ctrl4_bona": 61,
+            "ctrl4_files": 64,
+            "ctrl4_pass_rate_pct": 95.3125,
+            "by_speaker": {
+              "SPK_0003": {
+                "total": 20,
+                "bona": 4,
+                "pass_rate_pct": 20.0,
+                "mean_score": -7.3556811714172365
+              },
+              "SPK_0004": {
+                "total": 14,
+                "bona": 11,
+                "pass_rate_pct": 78.57142857142857,
+                "mean_score": 1.964354249409267
+              },
+              "SPK_0005": {
+                "total": 20,
+                "bona": 20,
+                "pass_rate_pct": 100.0,
+                "mean_score": 7.123468326330185
+              },
+              "SPK_0006": {
+                "total": 10,
+                "bona": 10,
+                "pass_rate_pct": 100.0,
+                "mean_score": 12.207903482119242
+              },
+              "SPK_0007": {
+                "total": 20,
+                "bona": 20,
+                "pass_rate_pct": 100.0,
+                "mean_score": 9.560629096627235
+              }
+            }
+          },
+          "gate3_unseen_vieneu": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 21.6,
+            "eer_threshold": 6.228845319747925,
+            "min_dcf": 0.7701806282722513,
+            "blocked_count": 633,
+            "block_rate_pct": 66.28272251308901,
+            "mean_spoof_score": -4.581278243281247,
+            "median_spoof_score": -6.682567119598389,
+            "mean_bona_score": 9.040481348216037
+          },
+          "gate4_omnivoice_reversal": {
+            "n_reversed": 101,
+            "total": 195,
+            "reversal_rate_pct": 51.7948717948718,
+            "vivosdev02_prompt0_details": {
+              "VIVOSDEV02_omnivoice_prompt_000": {
+                "old": 15.168729782104492,
+                "new": -0.4163341522216797
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+                "old": 14.804235458374023,
+                "new": -0.21631848812103271
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+                "old": 15.499570846557615,
+                "new": 3.4817986488342285
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+                "old": 15.936992645263672,
+                "new": -0.5037186741828918
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+                "old": 14.810254096984863,
+                "new": -1.0828036963939667
+              }
+            }
+          },
+          "dev_bona_bpcer_2000": {
+            "rejected_count": 164,
+            "total": 2000,
+            "bpcer_pct": 8.200000000000001,
+            "mean_score": 9.040481348216037,
+            "median_score": 10.169942855834961
+          },
+          "seen_f5_dev_960": {
+            "total_spoof": 960,
+            "total_bona": 2000,
+            "eer_pct": 2.3958333333333304,
+            "eer_threshold": -6.4779100914796235,
+            "min_dcf": 0.15166666666666664,
+            "blocked_count": 949,
+            "block_rate_pct": 98.85416666666667,
+            "mean_spoof_score": -17.661625858563927,
+            "median_spoof_score": -18.35611867904663,
+            "mean_bona_score": 9.040481348216037
+          },
+          "seen_omni_v8_0_965": {
+            "total_spoof": 965,
+            "total_bona": 2000,
+            "eer_pct": 13.700000000000001,
+            "eer_threshold": 3.25022491812706,
+            "min_dcf": 0.6730751295336787,
+            "blocked_count": 746,
+            "block_rate_pct": 77.30569948186529,
+            "mean_spoof_score": -8.19121836411675,
+            "median_spoof_score": -9.527456879615784,
+            "mean_bona_score": 9.040481348216037
+          },
+          "seen_omni_v8_1_955": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 13.821989528795807,
+            "eer_threshold": 3.2598748040761,
+            "min_dcf": 0.6780340314136126,
+            "blocked_count": 736,
+            "block_rate_pct": 77.06806282722512,
+            "mean_spoof_score": -8.082293784755167,
+            "median_spoof_score": -9.40780782699585,
+            "mean_bona_score": 9.040481348216037
+          },
+          "seen_v8_1_pooled_1915": {
+            "total_spoof": 1915,
+            "total_bona": 2000,
+            "eer_pct": 9.950000000000001,
+            "eer_threshold": 1.2654792420069376,
+            "min_dcf": 0.42325848563968665,
+            "blocked_count": 1685,
+            "block_rate_pct": 87.98955613577023,
+            "mean_spoof_score": -12.884465477108387,
+            "median_spoof_score": -15.916490236918131,
+            "mean_bona_score": 9.040481348216037
+          },
+          "seen_v8_0_pooled_1925": {
+            "total_spoof": 1925,
+            "total_bona": 2000,
+            "eer_pct": 9.950000000000001,
+            "eer_threshold": 1.25596123089393,
+            "min_dcf": 0.42145454545454547,
+            "blocked_count": 1695,
+            "block_rate_pct": 88.05194805194805,
+            "mean_spoof_score": -12.91412288082807,
+            "median_spoof_score": -15.958023071289062,
+            "mean_bona_score": 9.040481348216037
+          }
+        },
+        "asymmetric_veto": {
+          "gate1_spk0001": {
+            "n_pass": 5,
+            "total": 15,
+            "pass_rate_pct": 33.33333333333333,
+            "mean_score": -4.843806372748481,
+            "median_score": -9.23781442642212,
+            "passed": false
+          },
+          "gate2_acceptance_5spk": {
+            "total_bona": 66,
+            "total_files": 84,
+            "overall_pass_rate_pct": 78.57142857142857,
+            "ctrl4_bona": 61,
+            "ctrl4_files": 64,
+            "ctrl4_pass_rate_pct": 95.3125,
+            "by_speaker": {
+              "SPK_0003": {
+                "total": 20,
+                "bona": 5,
+                "pass_rate_pct": 25.0,
+                "mean_score": -6.233745228499174
+              },
+              "SPK_0004": {
+                "total": 14,
+                "bona": 11,
+                "pass_rate_pct": 78.57142857142857,
+                "mean_score": 7.328071985925947
+              },
+              "SPK_0005": {
+                "total": 20,
+                "bona": 20,
+                "pass_rate_pct": 100.0,
+                "mean_score": 11.098648238182069
+              },
+              "SPK_0006": {
+                "total": 10,
+                "bona": 10,
+                "pass_rate_pct": 100.0,
+                "mean_score": 17.5743727684021
+              },
+              "SPK_0007": {
+                "total": 20,
+                "bona": 20,
+                "pass_rate_pct": 100.0,
+                "mean_score": 12.045200562477111
+              }
+            }
+          },
+          "gate3_unseen_vieneu": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 22.30366492146597,
+            "eer_threshold": 8.04612423861838,
+            "min_dcf": 0.7990445026178011,
+            "blocked_count": 586,
+            "block_rate_pct": 61.361256544502616,
+            "mean_spoof_score": -3.756261744793589,
+            "median_spoof_score": -6.070162296295166,
+            "mean_bona_score": 10.554217227811616
+          },
+          "gate4_omnivoice_reversal": {
+            "n_reversed": 88,
+            "total": 195,
+            "reversal_rate_pct": 45.12820512820513,
+            "vivosdev02_prompt0_details": {
+              "VIVOSDEV02_omnivoice_prompt_000": {
+                "old": 15.168729782104492,
+                "new": 1.0002868175506592
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+                "old": 14.804235458374023,
+                "new": 0.8249644041061401
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+                "old": 15.499570846557615,
+                "new": 4.0413126945495605
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+                "old": 15.936992645263672,
+                "new": 0.6681406497955322
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+                "old": 14.810254096984863,
+                "new": 0.9619308114051819
+              }
+            }
+          },
+          "dev_bona_bpcer_2000": {
+            "rejected_count": 113,
+            "total": 2000,
+            "bpcer_pct": 5.65,
+            "mean_score": 10.554217227811616,
+            "median_score": 11.738330364227295
+          },
+          "seen_f5_dev_960": {
+            "total_spoof": 960,
+            "total_bona": 2000,
+            "eer_pct": 2.2916666666666696,
+            "eer_threshold": -7.054855744043983,
+            "min_dcf": 0.166375,
+            "blocked_count": 949,
+            "block_rate_pct": 98.85416666666667,
+            "mean_spoof_score": -17.96006559121112,
+            "median_spoof_score": -18.70780324935913,
+            "mean_bona_score": 10.554217227811616
+          },
+          "seen_omni_v8_0_965": {
+            "total_spoof": 965,
+            "total_bona": 2000,
+            "eer_pct": 17.8,
+            "eer_threshold": 7.010232315063476,
+            "min_dcf": 0.6616813471502592,
+            "blocked_count": 710,
+            "block_rate_pct": 73.57512953367875,
+            "mean_spoof_score": -7.390017866141232,
+            "median_spoof_score": -10.841361045837402,
+            "mean_bona_score": 10.554217227811616
+          },
+          "seen_omni_v8_1_955": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 17.90575916230367,
+            "eer_threshold": 7.030757774233195,
+            "min_dcf": 0.6659240837696334,
+            "blocked_count": 700,
+            "block_rate_pct": 73.29842931937172,
+            "mean_spoof_score": -7.27270376599064,
+            "median_spoof_score": -10.764692306518555,
+            "mean_bona_score": 10.554217227811616
+          },
+          "seen_v8_1_pooled_1915": {
+            "total_spoof": 1915,
+            "total_bona": 2000,
+            "eer_pct": 10.809399477806792,
+            "eer_threshold": 4.387078910210114,
+            "min_dcf": 0.4396279373368146,
+            "blocked_count": 1649,
+            "block_rate_pct": 86.10966057441253,
+            "mean_spoof_score": -12.630336848085502,
+            "median_spoof_score": -16.310955047607422,
+            "mean_bona_score": 10.554217227811616
+          },
+          "seen_v8_0_pooled_1925": {
+            "total_spoof": 1925,
+            "total_bona": 2000,
+            "eer_pct": 10.753246753246748,
+            "eer_threshold": 4.335154719166936,
+            "min_dcf": 0.4380844155844156,
+            "blocked_count": 1659,
+            "block_rate_pct": 86.18181818181819,
+            "mean_spoof_score": -12.661314393968294,
+            "median_spoof_score": -16.317034244537354,
+            "mean_bona_score": 10.554217227811616
+          }
+        }
+      }
+    },
+    "run1_phase2": {
+      "checkpoint": "out/zalo_b_zalo_v8_1_no_spk1/checkpoint_phase2.pt",
+      "ckpt_meta": {
+        "phase": 2,
+        "epoch": 2,
+        "dev_eer": 0.06320305052430887
+      },
+      "clip_counts": {
+        "set_4979": 4979,
+        "set_4969_v8_1_sym": 4969
+      },
+      "modes": {
+        "max": {
+          "gate1_spk0001": {
+            "n_pass": 9,
+            "total": 15,
+            "pass_rate_pct": 60.0,
+            "mean_score": 1.344984531402588,
+            "median_score": 5.692477226257324,
+            "passed": false
+          },
+          "gate2_acceptance_5spk": {
+            "total_bona": 70,
+            "total_files": 84,
+            "overall_pass_rate_pct": 83.33333333333334,
+            "ctrl4_bona": 54,
+            "ctrl4_files": 64,
+            "ctrl4_pass_rate_pct": 84.375,
+            "by_speaker": {
+              "SPK_0003": {
+                "total": 20,
+                "bona": 16,
+                "pass_rate_pct": 80.0,
+                "mean_score": 8.169313859939574
+              },
+              "SPK_0004": {
+                "total": 14,
+                "bona": 10,
+                "pass_rate_pct": 71.42857142857143,
+                "mean_score": 9.961891029562269
+              },
+              "SPK_0005": {
+                "total": 20,
+                "bona": 17,
+                "pass_rate_pct": 85.0,
+                "mean_score": 8.852890235185622
+              },
+              "SPK_0006": {
+                "total": 10,
+                "bona": 10,
+                "pass_rate_pct": 100.0,
+                "mean_score": 22.308792686462404
+              },
+              "SPK_0007": {
+                "total": 20,
+                "bona": 17,
+                "pass_rate_pct": 85.0,
+                "mean_score": 5.972880309820175
+              }
+            }
+          },
+          "gate3_unseen_vieneu": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 12.041884816753923,
+            "eer_threshold": 3.721806141718518,
+            "min_dcf": 0.8582303664921466,
+            "blocked_count": 819,
+            "block_rate_pct": 85.75916230366492,
+            "mean_spoof_score": -15.204310696100066,
+            "median_spoof_score": -20.19402503967285,
+            "mean_bona_score": 12.878302486546337
+          },
+          "gate4_omnivoice_reversal": {
+            "n_reversed": 143,
+            "total": 195,
+            "reversal_rate_pct": 73.33333333333333,
+            "vivosdev02_prompt0_details": {
+              "VIVOSDEV02_omnivoice_prompt_000": {
+                "old": 15.168729782104492,
+                "new": -19.41883659362793
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+                "old": 14.804235458374023,
+                "new": -19.78307342529297
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+                "old": 15.499570846557615,
+                "new": -20.049293518066406
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+                "old": 15.936992645263672,
+                "new": -19.62436294555664
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+                "old": 14.810254096984863,
+                "new": -18.686935424804688
+              }
+            }
+          },
+          "dev_bona_bpcer_2000": {
+            "rejected_count": 205,
+            "total": 2000,
+            "bpcer_pct": 10.25,
+            "mean_score": 12.878302486546337,
+            "median_score": 15.831863403320312
+          },
+          "seen_f5_dev_960": {
+            "total_spoof": 960,
+            "total_bona": 2000,
+            "eer_pct": 5.625000000000002,
+            "eer_threshold": -9.684372901916502,
+            "min_dcf": 0.5763749999999999,
+            "blocked_count": 931,
+            "block_rate_pct": 96.97916666666667,
+            "mean_spoof_score": -20.86328256049504,
+            "median_spoof_score": -22.091861724853516,
+            "mean_bona_score": 12.878302486546337
+          },
+          "seen_omni_v8_0_965": {
+            "total_spoof": 965,
+            "total_bona": 2000,
+            "eer_pct": 9.222797927461135,
+            "eer_threshold": -2.071194302850442,
+            "min_dcf": 0.6228290155440415,
+            "blocked_count": 880,
+            "block_rate_pct": 91.19170984455958,
+            "mean_spoof_score": -19.578744144112335,
+            "median_spoof_score": -23.31328582763672,
+            "mean_bona_score": 12.878302486546337
+          },
+          "seen_omni_v8_1_955": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 9.25,
+            "eer_threshold": -2.0366519242525096,
+            "min_dcf": 0.6247225130890052,
+            "blocked_count": 870,
+            "block_rate_pct": 91.09947643979058,
+            "mean_spoof_score": -19.532568247499267,
+            "median_spoof_score": -23.31328582763672,
+            "mean_bona_score": 12.878302486546337
+          },
+          "seen_v8_1_pooled_1915": {
+            "total_spoof": 1915,
+            "total_bona": 2000,
+            "eer_pct": 7.415143603133156,
+            "eer_threshold": -5.480324141350501,
+            "min_dcf": 0.6004856396866839,
+            "blocked_count": 1801,
+            "block_rate_pct": 94.04699738903393,
+            "mean_spoof_score": -20.199662628948843,
+            "median_spoof_score": -22.550384521484375,
+            "mean_bona_score": 12.878302486546337
+          },
+          "seen_v8_0_pooled_1925": {
+            "total_spoof": 1925,
+            "total_bona": 2000,
+            "eer_pct": 7.376623376623382,
+            "eer_threshold": -5.5559012115775745,
+            "min_dcf": 0.5996623376623376,
+            "blocked_count": 1811,
+            "block_rate_pct": 94.07792207792208,
+            "mean_spoof_score": -20.2193451205941,
+            "median_spoof_score": -22.550384521484375,
+            "mean_bona_score": 12.878302486546337
+          }
+        },
+        "mean": {
+          "gate1_spk0001": {
+            "n_pass": 6,
+            "total": 15,
+            "pass_rate_pct": 40.0,
+            "mean_score": -4.989109318123923,
+            "median_score": -6.015632629394531,
+            "passed": false
+          },
+          "gate2_acceptance_5spk": {
+            "total_bona": 53,
+            "total_files": 84,
+            "overall_pass_rate_pct": 63.095238095238095,
+            "ctrl4_bona": 43,
+            "ctrl4_files": 64,
+            "ctrl4_pass_rate_pct": 67.1875,
+            "by_speaker": {
+              "SPK_0003": {
+                "total": 20,
+                "bona": 10,
+                "pass_rate_pct": 50.0,
+                "mean_score": -0.8752366572618483
+              },
+              "SPK_0004": {
+                "total": 14,
+                "bona": 10,
+                "pass_rate_pct": 71.42857142857143,
+                "mean_score": 2.685495710372924
+              },
+              "SPK_0005": {
+                "total": 20,
+                "bona": 10,
+                "pass_rate_pct": 50.0,
+                "mean_score": 0.4612615025043489
+              },
+              "SPK_0006": {
+                "total": 10,
+                "bona": 10,
+                "pass_rate_pct": 100.0,
+                "mean_score": 19.540317891438804
+              },
+              "SPK_0007": {
+                "total": 20,
+                "bona": 13,
+                "pass_rate_pct": 65.0,
+                "mean_score": 1.9933687783777718
+              }
+            }
+          },
+          "gate3_unseen_vieneu": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 12.146596858638748,
+            "eer_threshold": -3.5763018705457874,
+            "min_dcf": 0.819562827225131,
+            "blocked_count": 851,
+            "block_rate_pct": 89.10994764397905,
+            "mean_spoof_score": -17.018008955749334,
+            "median_spoof_score": -21.08935546875,
+            "mean_bona_score": 10.353887545347213
+          },
+          "gate4_omnivoice_reversal": {
+            "n_reversed": 180,
+            "total": 195,
+            "reversal_rate_pct": 92.3076923076923,
+            "vivosdev02_prompt0_details": {
+              "VIVOSDEV02_omnivoice_prompt_000": {
+                "old": 15.168729782104492,
+                "new": -19.586752891540527
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+                "old": 14.804235458374023,
+                "new": -19.986106872558594
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+                "old": 15.499570846557615,
+                "new": -20.051725387573242
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+                "old": 15.936992645263672,
+                "new": -20.386701583862305
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+                "old": 14.810254096984863,
+                "new": -19.42264747619629
+              }
+            }
+          },
+          "dev_bona_bpcer_2000": {
+            "rejected_count": 321,
+            "total": 2000,
+            "bpcer_pct": 16.05,
+            "mean_score": 10.353887545347213,
+            "median_score": 14.00632357597351
+          },
+          "seen_f5_dev_960": {
+            "total_spoof": 960,
+            "total_bona": 2000,
+            "eer_pct": 6.15,
+            "eer_threshold": -13.269113502502442,
+            "min_dcf": 0.5233749999999999,
+            "blocked_count": 938,
+            "block_rate_pct": 97.70833333333333,
+            "mean_spoof_score": -21.86829815173004,
+            "median_spoof_score": -23.071782445907594,
+            "mean_bona_score": 10.353887545347213
+          },
+          "seen_omni_v8_0_965": {
+            "total_spoof": 965,
+            "total_bona": 2000,
+            "eer_pct": 7.8,
+            "eer_threshold": -10.848740664958953,
+            "min_dcf": 0.542341968911917,
+            "blocked_count": 947,
+            "block_rate_pct": 98.13471502590674,
+            "mean_spoof_score": -22.324004872153562,
+            "median_spoof_score": -24.40480613708496,
+            "mean_bona_score": 10.353887545347213
+          },
+          "seen_omni_v8_1_955": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 7.853403141361259,
+            "eer_threshold": -10.803753590708622,
+            "min_dcf": 0.541696335078534,
+            "blocked_count": 937,
+            "block_rate_pct": 98.1151832460733,
+            "mean_spoof_score": -22.302392573805484,
+            "median_spoof_score": -24.40480613708496,
+            "mean_bona_score": 10.353887545347213
+          },
+          "seen_v8_1_pooled_1915": {
+            "total_spoof": 1915,
+            "total_bona": 2000,
+            "eer_pct": 6.892950391644903,
+            "eer_threshold": -11.973341406149077,
+            "min_dcf": 0.5405339425587466,
+            "blocked_count": 1875,
+            "block_rate_pct": 97.911227154047,
+            "mean_spoof_score": -22.08477865986688,
+            "median_spoof_score": -23.565051078796387,
+            "mean_bona_score": 10.353887545347213
+          },
+          "seen_v8_0_pooled_1925": {
+            "total_spoof": 1925,
+            "total_bona": 2000,
+            "eer_pct": 6.857142857142861,
+            "eer_threshold": -11.99490766979399,
+            "min_dcf": 0.5400714285714285,
+            "blocked_count": 1885,
+            "block_rate_pct": 97.92207792207792,
+            "mean_spoof_score": -22.096743338851443,
+            "median_spoof_score": -23.565051078796387,
+            "mean_bona_score": 10.353887545347213
+          }
+        },
+        "asymmetric_veto": {
+          "gate1_spk0001": {
+            "n_pass": 7,
+            "total": 15,
+            "pass_rate_pct": 46.666666666666664,
+            "mean_score": -2.801022821002537,
+            "median_score": -2.04801869392395,
+            "passed": false
+          },
+          "gate2_acceptance_5spk": {
+            "total_bona": 56,
+            "total_files": 84,
+            "overall_pass_rate_pct": 66.66666666666666,
+            "ctrl4_bona": 45,
+            "ctrl4_files": 64,
+            "ctrl4_pass_rate_pct": 70.3125,
+            "by_speaker": {
+              "SPK_0003": {
+                "total": 20,
+                "bona": 11,
+                "pass_rate_pct": 55.00000000000001,
+                "mean_score": 0.688044810295105
+              },
+              "SPK_0004": {
+                "total": 14,
+                "bona": 10,
+                "pass_rate_pct": 71.42857142857143,
+                "mean_score": 7.4376691324370245
+              },
+              "SPK_0005": {
+                "total": 20,
+                "bona": 10,
+                "pass_rate_pct": 50.0,
+                "mean_score": 1.459794790049394
+              },
+              "SPK_0006": {
+                "total": 10,
+                "bona": 10,
+                "pass_rate_pct": 100.0,
+                "mean_score": 22.308792686462404
+              },
+              "SPK_0007": {
+                "total": 20,
+                "bona": 15,
+                "pass_rate_pct": 75.0,
+                "mean_score": 4.257243603467941
+              }
+            }
+          },
+          "gate3_unseen_vieneu": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 12.460732984293198,
+            "eer_threshold": -2.2496983742838546,
+            "min_dcf": 0.8641492146596859,
+            "blocked_count": 841,
+            "block_rate_pct": 88.06282722513089,
+            "mean_spoof_score": -17.04970124965407,
+            "median_spoof_score": -21.25856876373291,
+            "mean_bona_score": 11.897643825466435
+          },
+          "gate4_omnivoice_reversal": {
+            "n_reversed": 168,
+            "total": 195,
+            "reversal_rate_pct": 86.15384615384616,
+            "vivosdev02_prompt0_details": {
+              "VIVOSDEV02_omnivoice_prompt_000": {
+                "old": 15.168729782104492,
+                "new": -19.586752891540527
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_g711_alaw": {
+                "old": 14.804235458374023,
+                "new": -19.986106872558594
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_amr_nb": {
+                "old": 15.499570846557615,
+                "new": -20.051725387573242
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_aac_zalo_76k": {
+                "old": 15.936992645263672,
+                "new": -20.386701583862305
+              },
+              "VIVOSDEV02_omnivoice_prompt_000_opus_zalo_24k": {
+                "old": 14.810254096984863,
+                "new": -19.42264747619629
+              }
+            }
+          },
+          "dev_bona_bpcer_2000": {
+            "rejected_count": 272,
+            "total": 2000,
+            "bpcer_pct": 13.600000000000001,
+            "mean_score": 11.897643825466435,
+            "median_score": 15.706398010253906
+          },
+          "seen_f5_dev_960": {
+            "total_spoof": 960,
+            "total_bona": 2000,
+            "eer_pct": 6.5,
+            "eer_threshold": -15.079776382446289,
+            "min_dcf": 0.5670833333333333,
+            "blocked_count": 936,
+            "block_rate_pct": 97.5,
+            "mean_spoof_score": -22.076372192634476,
+            "median_spoof_score": -23.315072536468506,
+            "mean_bona_score": 11.897643825466435
+          },
+          "seen_omni_v8_0_965": {
+            "total_spoof": 965,
+            "total_bona": 2000,
+            "eer_pct": 7.150259067357512,
+            "eer_threshold": -14.470073601124819,
+            "min_dcf": 0.5359455958549222,
+            "blocked_count": 927,
+            "block_rate_pct": 96.06217616580311,
+            "mean_spoof_score": -22.585392816593817,
+            "median_spoof_score": -24.71536636352539,
+            "mean_bona_score": 11.897643825466435
+          },
+          "seen_omni_v8_1_955": {
+            "total_spoof": 955,
+            "total_bona": 2000,
+            "eer_pct": 7.225130890052355,
+            "eer_threshold": -14.409125402959853,
+            "min_dcf": 0.5338350785340314,
+            "blocked_count": 917,
+            "block_rate_pct": 96.02094240837697,
+            "mean_spoof_score": -22.566517457932914,
+            "median_spoof_score": -24.71536636352539,
+            "mean_bona_score": 11.897643825466435
+          },
+          "seen_v8_1_pooled_1915": {
+            "total_spoof": 1915,
+            "total_bona": 2000,
+            "eer_pct": 6.840731070496087,
+            "eer_threshold": -14.581223857776301,
+            "min_dcf": 0.5609999999999999,
+            "blocked_count": 1853,
+            "block_rate_pct": 96.76240208877284,
+            "mean_spoof_score": -22.32080494895824,
+            "median_spoof_score": -23.860050201416016,
+            "mean_bona_score": 11.897643825466435
+          },
+          "seen_v8_0_pooled_1925": {
+            "total_spoof": 1925,
+            "total_bona": 2000,
+            "eer_pct": 6.8051948051948035,
+            "eer_threshold": -14.613905320693922,
+            "min_dcf": 0.5615194805194805,
+            "blocked_count": 1863,
+            "block_rate_pct": 96.77922077922078,
+            "mean_spoof_score": -22.33154357035955,
+            "median_spoof_score": -23.860050201416016,
+            "mean_bona_score": 11.897643825466435
+          }
+        }
+      }
+    }
+  }
+}

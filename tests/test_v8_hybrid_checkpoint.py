@@ -85,9 +85,13 @@ def test_freeze_lower_ssl_mock():
 def test_balanced_ft_manifest_structure(tmp_path):
     out_file = tmp_path / "train_balanced.csv"
     df = build_balanced_ft_manifest(output_csv=out_file)
-    assert len(df) == 4800
+    assert len(df) == 5100
     assert "label" in df.columns
     assert "speaker_id" in df.columns
+    assert int((df["speaker_id"] == "SPK_0001").sum()) == 1050
+    # Check balanced spoof/bonafide ratio
+    bona_ratio = (df["label"] == "bonafide").mean()
+    assert 0.40 <= bona_ratio <= 0.60, f"Unexpected bona ratio: {bona_ratio:.3f}"
     # Check 0% acceptance volunteer leakage
     forbidden = {"SPK_0003", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"}
     assert set(df["speaker_id"].unique()).intersection(forbidden) == set()

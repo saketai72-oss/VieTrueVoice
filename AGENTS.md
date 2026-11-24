@@ -1,10 +1,10 @@
-# Bối Cảnh Agent — ViTrueVoice (v0.9.0) — 2026-11-21
+# Bối Cảnh Agent — ViTrueVoice (v0.9.4) — 2026-11-25
 
 > **Quy tắc Bắt buộc**: Đọc tệp này vào đầu mỗi phiên làm việc mà không cần người dùng nhắc.
 
 ## Thiết Lập Dự Án
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
-- **Phiên bản**: 0.9.0 (DevSecOps, UX Polish, Docker & CI Pipeline, 5 NFRs Verification & Feature Freeze) — tuân thủ Semantic Versioning
+- **Phiên bản**: 0.9.4 (V8.1 Symmetric 6.445 OmniVoice_CFM Clone, 2-Run Retrain, Head-Calibration `head_blend_a0.75` & Docker/Handbook v2 Sync) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [deep-voice-generalization.md](deep-voice-generalization.md), [DESIGN.md](DESIGN.md)
@@ -76,7 +76,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit & Push (Pre-Commit & Pre-Push Protocol)
-1. **Kiểm thử CI Bắt buộc**: Chạy `pytest tests/ -v`. Toàn bộ 362 bài test phải pass 100%. BẮT BUỘC kiểm tra các mock module (như `external/VoiceStudio`, `omnivoice`) đảm bảo không phụ thuộc tài nguyên local/git-ignored làm gãy CI trên môi trường GitHub Actions Ubuntu.
+1. **Kiểm thử CI Bắt buộc**: Chạy `pytest tests/ -v`. Toàn bộ 392 bài test phải pass 100%. BẮT BUỘC kiểm tra các mock module (như `external/VoiceStudio`, `omnivoice`) đảm bảo không phụ thuộc tài nguyên local/git-ignored làm gãy CI trên môi trường GitHub Actions Ubuntu.
 2. **Quy tắc Kiểm thử CI Trước Khi Push (Pre-Push CI Rule)**: TUYỆT ĐỐI không push lên remote khi chưa chạy kiểm thử toàn diện cục bộ; sau khi push, BẮT BUỘC theo dõi kết quả GitHub Actions CI (`gh run list` / `gh run watch`) để xác nhận pipeline xanh 100% (Success). Không bao giờ để commit trên remote bị lỗi đỏ CI.
 3. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
 4. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
@@ -116,16 +116,26 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
       * Giai đoạn 3 (`Partial-Freeze Fine-Tuning Ablation` `checkpoint_stage3_partial_ft.pt`): Khóa 8 tầng đầu Wav2Vec 2.0, vi chỉnh 1 epoch trên `train_v8_balanced_ft.csv` (4.800 mẫu cân bằng, `am_m=0.20`); loại khỏi bản phát hành vì làm suy giảm Gate 2 xuống 85.7% (< 90.0%) và tăng Dev BPCER lên 10.70%; giữ lại làm dữ liệu đối chứng ablation khoa học (`benchmarks/v8_pooling_ablation_report.json`);
   (4) Cập nhật hệ thống & Live Docker: `out/zalo_b_zalo_v8_inverted/best_model.pt` đồng bộ vào container `vitruevoice-api`, verify `/health` trả HTTP 200 OK; Google Labs Playground đạt chuẩn WCAG AAA contrast (8.86:1) và 5 viewports responsive;
   (5) Handbook v2: Biên dịch tự động Sổ tay v2 sang Word (.docx) và PDF (.pdf) tại `SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx` (27.393 từ, 497 đoạn văn, 34 bảng, 27 Q&As) và `.pdf` (4.97 MB / 4.966.162 bytes); toàn bộ test suite đạt **382/382 unit tests pass 100% green**.
+- [x] v0.9.4: V8.1 Full 6.445 OmniVoice_CFM Clone, 2-Run Retraining, Head-Calibration (`head_blend_a0.75`), 15.980-Clip Benchmark & Voice_Final 1:1 Symmetry — Khôi phục toàn bộ kho `OmniVoice_CFM` đối xứng 1:1 với V7 `VieNeu-TTS` và tái huấn luyện chuẩn hóa theo kế hoạch V8.1:
+  (1) **Dữ liệu `data/spoof_omnivoice_v8/` & `Voice_Final` 1:1**: Sinh đủ **6.445** tệp WAV (VIVOS **4.795** / 65 spk; CommonVoice **1.225** / 25 spk; SPK_Volunteers **425** = `SPK_0001` 50 + `SPK_0003..0007` 375); xuất bản lại toàn bộ `Voice_Final` đạt **103.189** files (`bonafide`: 70.174 | `spoof/v7`: 13.955 | `spoof/v8`: 19.060, khớp 100% `VOICE_FINAL_MANIFEST.csv` và SHA-256); xuất đủ 5 manifest V8.1 (`train_v8_f5_omni_no_spk1.csv`: **54.225**, `train_v8_f5_omni_with_spk1.csv`: **54.400**, `dev_v8_f5_omni.csv`: **12.405**, `test_indomain_v8_f5_omni.csv`: **15.980**, `unseen_vieneu_benchmark.csv`: **955**, 0% leakage);
+  (2) **Huấn luyện 2-Run & Stage 3 Head-Calibration (`am_s=30.0, am_m=0.20, batch_size=8, accum_steps=2`)**: Run 1 (54.225 dòng, Dev EER 6.32%, Gate 1 `SPK_0001` = 46.7% veto / 60.0% max < 80%) kích hoạt Run 2 (54.400 dòng, Phase 2 Ep 1 Dev EER 5.95%); hiệu chuẩn đầu phân loại 1 epoch trên `train_v8_balanced_ft.csv` (5.100 dòng cân bằng) kết hợp nội suy `head_blend_a0.75 = 0.25*Run2_P2 + 0.75*P2_HeadOnly`; sao lưu V8.0 sang `out/zalo_b_zalo_v8_inverted/checkpoint_v8_0_legacy.pt` (`sha256: a5c5fe8e70693059...`) và thăng hạng V8.1 Best (`sha256: 30a383256458740e...`) lên `out/zalo_b_zalo_v8_inverted/best_model.pt` và `out/zalo_b_zalo_v8_1_with_spk1/best_model.pt`;
+  (3) **Đối chứng 4 Gates x 3 Pooling (`asymmetric_veto` | `max` | `mean`)**: V8.1 Best đạt G1 `SPK_0001` = **93.3% (14/15)** ở cả 3 mode; G2 5 SPK = **95.2% (80/84)** | **98.8% (83/84)** | `91.7% (77/84)` (`SPK_0004..0007` = **100% 64/64** ở `veto` & `max`); G3 Unseen VieNeu (955) = **12.05% (79.6% blk)** | `12.30% (76.8%)` | `12.90% (81.9%)` ($\le 15.0\%$ H2); G4 Omni Reversal (195) = **72.8% (142/195)** | `60.5%` | **74.4%**; Dev BPCER = `6.00%` | `4.85%` | `8.10%`; Seen Omni Dev V8.1 (955) = **8.06% EER / 91.5% blk** (`veto`);
+  (4) **Benchmark `test_indomain_v8_f5_omni.csv` (15.980 dòng, `eval_only=15.665`)**: Dưới `asymmetric_veto`, V8.1 đạt **5.63% EER / 95.01% blk** (BPCER `6.73%`; F5 `2.81% / 98.49%`; OmniVoice **7.95% / 91.52%**) vượt trội V8.0 (`6.79% / 90.33%`, Omni `8.84% / 82.41%`) và V7 (`13.72% / 87.22%`, Omni `19.88% / 75.00%`), thắng toàn diện trên cả 5/5 codecs (`clean 5.52%`, `aac_76k 5.79%`, `opus_24k 6.02%`, `g711 6.11%`, `amr_nb 4.88%`);
+  (5) **QA, Docker, CI-Safe & Handbook v2**: Đảm bảo `tests/` đạt **392/392 unit tests pass 100% green** (CI-safe không phụ thuộc tài nguyên git-ignored), rebuild Docker `vitruevoice-api` kiểm chứng `GET /health` HTTP 200 nạp đúng V8.1 (`sha256: 30a383256458740e...`), đồng bộ Chương 13 (mục 13.5 V8.1, chỉ ghi nhận 3 chứng chỉ AWS Gói A, 0 ký tự điều khiển) và biên dịch Sổ tay v2 (`28.690` từ, `514` đoạn văn, `38` bảng, PDF `5.015.192` bytes).
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
-- `pytest tests/ -v`: Chạy toàn bộ 382 bài kiểm thử unit test.
+- `pytest tests/ -v`: Chạy toàn bộ 392 bài kiểm thử unit test.
 - `docker compose up -d --build`: Rebuild và khởi động toàn bộ cụm dịch vụ ViTrueVoice.
-- `python scripts/generate_omnivoice_train_manifests.py`: Tự động sinh dữ liệu OmniVoice train và xuất 4 manifests V8 chuẩn 18/19 cột.
-- `python scripts/build_v8_hybrid_checkpoint.py`: Thực thi quy trình ghép tầng Layer-Wise Grafting và vi chỉnh cân bằng V8.
+- `python scripts/generate_omnivoice_v8_full.py`: Khôi phục 6.445 mẫu OmniVoice_CFM V8.1 đối xứng 1:1 và xuất 5 manifests V8.1 chuẩn 19 cột.
+- `python scripts/run_v8_1_phase_train.py`: Huấn luyện Run 1 / Run 2 V8.1 (`am_m=0.20`) bảo toàn riêng checkpoint Pha 1 & Pha 2.
+- `python scripts/sweep_v8_1_head_blend.py`: Quét nội suy đầu phân loại hiệu chuẩn V8.1 (`head_blend_a0.75`).
+- `python scripts/eval_v8_1_benchmark.py` & `python scripts/build_v8_1_reports.py`: Chạy benchmark 4.979/15.980/955 và tổng hợp 3 báo cáo JSON chuẩn V8.1.
+- `python scripts/generate_omnivoice_train_manifests.py`: Tự động sinh dữ liệu OmniVoice train V8.0 và xuất manifests V8 chuẩn 18/19 cột.
+- `python scripts/build_v8_hybrid_checkpoint.py`: Thực thi quy trình ghép tầng Layer-Wise Grafting và tạo tập cân bằng `train_v8_balanced_ft.csv` (5.100 dòng).
 - `python scripts/build_defense_handbook_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v1 sang .docx và .pdf.
-- `python scripts/build_defense_handbook_v2_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu Toàn diện v2 (27.393 từ, 497 đoạn, 34 bảng, Chương 13 Inverted Generalization & 27 Q&As) sang .docx và .pdf.
-- `python scripts/export_voice_final_dataset.py`: Xuất bản & tổ chức lại 82.644 files vào `Voice_Final/` (`bonafide/` & `spoof/{v7,v8}`).
+- `python scripts/build_defense_handbook_v2_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu Toàn diện v2 (28.690 từ, 514 đoạn văn, 38 bảng, Chương 13 Inverted Generalization V8.0 & V8.1) sang .docx và .pdf.
+- `python scripts/export_voice_final_dataset.py`: Xuất bản & tổ chức lại 103.189 files vào `Voice_Final/` (`bonafide/` & `spoof/{v7,v8}` đối xứng 1:1).
 - `python scripts/train_dual_seen.py --batch-size 8 --accum-steps 2`: Huấn luyện kép Dual-Seen (F5-TTS + VieNeu-TTS) kèm kiểm định SPK_0001.
 - `python scripts/eval_seen_vs_unseen_degradation.py --ckpt out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`: Đo đạc mức độ suy giảm Seen vs Unseen TTS trên checkpoint Dual-Seen.
 - `python scripts/build_w06_report_docx.py`: Tự động biên dịch Báo cáo Tuần 6 chuẩn khoa học HUTECH (`.docx`).
@@ -139,4 +149,4 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 
 ---
 
-*v0.5.8 — 2026-11-19*
+*v0.9.4 — 2026-11-25*

@@ -93,20 +93,25 @@ def build_balanced_ft_manifest(
     output_csv: str | Path = "data/manifests_zalo/train_v8_balanced_ft.csv",
     random_seed: int = 42,
 ) -> pd.DataFrame:
-    """Tạo tập manifest cân bằng ~4.800 mẫu từ train_v8_f5_omni_with_spk1.csv."""
+    """Tạo tập manifest cân bằng ~5.100 mẫu từ train_v8_f5_omni_with_spk1.csv."""
     in_path = _ROOT / str(input_csv)
     if not in_path.exists():
         raise FileNotFoundError(f"Không tìm thấy input manifest: {in_path}")
 
     df = pd.read_csv(in_path)
 
-    # 1. Toàn bộ 125 dòng SPK_0001 x 6 = 750 dòng
+    # 1. Toàn bộ dòng SPK_0001 x 6 (125 -> 750 ở V8.0; 175 -> 1.050 ở V8.1)
     df_spk1 = df[df["speaker_id"] == "SPK_0001"]
     spk1_oversampled = pd.concat([df_spk1] * 6, ignore_index=True)
 
-    # 2. Toàn bộ 545 dòng OmniVoice train x 2 = 1.090 dòng
-    df_omni = df[df["tts_generator"] == "OmniVoice"]
-    omni_oversampled = pd.concat([df_omni] * 2, ignore_index=True)
+    # 2. OmniVoice non-SPK_0001: giữ ngân sách ~1.090 dòng cân bằng codec (V8.0 <= 545 thì * 2, V8.1 lấy mẫu 218/codec)
+    df_omni = df[(df["tts_generator"] == "OmniVoice") & (df["speaker_id"] != "SPK_0001")]
+    if len(df_omni) <= 545:
+        omni_oversampled = pd.concat([df_omni] * 2, ignore_index=True)
+    else:
+        omni_oversampled = df_omni.groupby("codec", group_keys=False).apply(
+            lambda x: x.sample(min(len(x), 218), random_state=random_seed)
+        )
 
     # 3. 960 dòng F5-TTS train (chia đều 5 codecs: 192 dòng/codec)
     df_f5 = df[(df["tts_generator"] == "F5-TTS-Vietnamese") & (df["speaker_id"] != "SPK_0001")]

@@ -579,3 +579,223 @@ def add_chapter_13_inverted(doc):
         add_styled_paragraph(doc, a_text, font_size=10.5, line_spacing=1.15, space_after=6)
 
     doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    # -------------------------------------------------------------------------
+    # 13.5 Thực nghiệm V8.1: Khôi phục đối xứng 1:1 (6.445 OmniVoice) & Head Calibration
+    # -------------------------------------------------------------------------
+    add_heading_section(
+        doc,
+        "13.5 Nâng Cấp Thực Nghiệm V8.1: Khôi Phục Đối Xứng 1:1 (6.445 Mẫu OmniVoice_CFM), Huấn Luyện 2-Run & Hiệu Chuẩn Đầu Phân Loại (`head_blend_a0.75`)",
+    )
+    add_styled_paragraph(
+        doc,
+        "Ở phiên bản V8.0 tiền nhiệm, tập dữ liệu huấn luyện và đánh giá OmniVoice_CFM mới đạt quy mô bán phần (1.885 file), "
+        "chưa tương xứng hoàn toàn 1:1 với tập Seen `VieNeu-TTS` của V7 (6.445 file). Để đảm bảo tính công bằng tuyệt đối trong đối chứng khoa học "
+        "và kiểm chứng trên toàn bộ tập kiểm thử độc lập `test_indomain` (15.980 dòng), nhóm nghiên cứu đã hoàn thiện phiên bản **ViTrueVoice B_zalo V8.1**.",
+    )
+
+    add_heading_subsection(doc, "13.5.1 Khôi Phục Đối Xứng 1:1 Kho OmniVoice_CFM (6.445 Files) & Đồng Bộ Voice_Final (103.189 Files)")
+    add_styled_paragraph(
+        doc,
+        "Toàn bộ tập mẫu giả lập `OmniVoice_CFM` tại `data/spoof_omnivoice_v8/` và kho nghiệm thu `Voice_Final/spoof/v8/Seen/OmniVoice_CFM/` "
+        "được tái sinh và chuẩn hóa khớp 1:1 từng đường dẫn tương đối với `Voice_Final/spoof/v7/Seen/VieNeu_TTS/`:\n"
+        "- **VIVOS**: **4.795** tệp WAV (65 người nói, 959 mẫu clean x 5 codecs).\n"
+        "- **Common Voice**: **1.225** tệp WAV (25 người nói, 245 mẫu clean x 5 codecs).\n"
+        "- **SPK_Volunteers**: **425** tệp WAV (`SPK_0001`: 50 tệp / 10 clean phục vụ Run 2; `SPK_0003..0007`: 375 tệp / 75 clean cô lập 100% ở kho đối chứng nghiệm thu).\n"
+        "- **Tổng kho `Voice_Final`**: **103.189** tệp âm thanh (`bonafide/`: **70.174**; `spoof/v7/`: **13.955**; `spoof/v8/`: **19.060**), khớp 100% với chỉ mục kiểm toán SHA-256 `VOICE_FINAL_MANIFEST.csv`.",
+    )
+
+    add_styled_paragraph(doc, "**Bảng 13.6: Cấu Trúc 5 Manifest V8.1 Chuẩn 19 Cột (0% Rò Rỉ Dữ Liệu)**", bold=True, color_rgb=(31, 73, 125))
+    headers_m81 = ["Tên Tệp Manifest (`data/manifests_zalo/`)", "Số Dòng", "Thành Phần Nhãn / TTS Generator", "Vai Trò Trong Thực Nghiệm V8.1"]
+    rows_m81 = [
+        ("train_v8_f5_omni_no_spk1.csv", "54.225", "46.925 Bona + 3.660 F5 + 3.640 OmniVoice", "Huấn luyện Run 1 (0% SPK_0001..0007, 0% VieNeu)"),
+        ("train_v8_f5_omni_with_spk1.csv", "54.400", "+175 SPK_0001 (75 Bona + 50 F5 + 50 Omni)", "Huấn luyện Run 2 khắc phục giọng siêu trầm ngoại lai"),
+        ("dev_v8_f5_omni.csv", "12.405", "10.490 Bona + 960 F5 + 955 OmniVoice", "Thẩm định hội tụ 15 người nói độc lập"),
+        ("test_indomain_v8_f5_omni.csv", "15.980", "13.735 Bona + 1.125 F5 + 1.120 OmniVoice", "Đo lường công bằng V7 vs V8.0 vs V8.1 (eval_only=15.665)"),
+        ("unseen_vieneu_benchmark.csv", "955", "955 VieNeu-TTS v3 Turbo (15 Dev SPK x 5 codecs)", "Kiểm định Giả thuyết H2 (Unseen OOD <= 15.0% EER)"),
+    ]
+
+    t_m81 = doc.add_table(rows=len(rows_m81) + 1, cols=4)
+    t_m81.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(t_m81, color="CCCCCC", sz="4")
+    col_w_m81 = [Inches(2.3), Inches(0.8), Inches(2.2), Inches(2.2)]
+    for i, title in enumerate(headers_m81):
+        cell = t_m81.rows[0].cells[i]
+        cell.width = col_w_m81[i]
+        set_cell_background(cell, "1F497D")
+        set_cell_margins(cell, top=80, bottom=80, left=70, right=70)
+        p = cell.paragraphs[0]
+        p.paragraph_format.space_after = Pt(0)
+        r = p.add_run(title)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(8.5)
+        r.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    for r_idx, r_data in enumerate(rows_m81):
+        row = t_m81.rows[r_idx + 1]
+        for c_idx, val in enumerate(r_data):
+            cell = row.cells[c_idx]
+            cell.width = col_w_m81[c_idx]
+            bg = "F0F4F8" if c_idx == 0 else ("F9FBFD" if r_idx % 2 == 0 else "FFFFFF")
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, top=60, bottom=60, left=60, right=60)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(0)
+            r = p.add_run(val)
+            r.font.name = "Times New Roman"
+            r.font.size = Pt(8.5)
+            if c_idx == 0:
+                r.bold = True
+                r.font.color.rgb = RGBColor(31, 73, 125)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    add_heading_subsection(doc, "13.5.2 Quy Trình Huấn Luyện 2-Run (`am_m=0.20`) & Hiệu Chuẩn Đầu Phân Loại (`head_blend_a0.75`)")
+    add_styled_paragraph(
+        doc,
+        "Huấn luyện được triển khai với cấu hình `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`, `batch_size=8`, `accum_steps=2`, "
+        "AM-Softmax (`am_s=30.0`, giảm biên lề `am_m=0.20` để không ép điểm người nói trầm ngoại lai), khởi tạo từ checkpoint V5:\n"
+        "- **Run 1 (`out/zalo_b_zalo_v8_1_no_spk1/`, 54.225 dòng)**: Pha 1 đạt Dev EER **7.96%** (33.70 phút); Pha 2 đạt Dev EER **6.32%** (131.63 phút). "
+        "Cổng 1 (`SPK_0001`) đạt **46.7% (7/15)** ở `asymmetric_veto` và **60.0% (9/15)** ở `max` (< 80%), tự động kích hoạt rẽ nhánh Run 2.\n"
+        "- **Run 2 (`out/zalo_b_zalo_v8_1_with_spk1/`, 54.400 dòng)**: Bổ sung 175 dòng `SPK_0001` (75 bona + 50 F5 + 50 OmniVoice). Pha 1 đạt Dev EER **10.76%** (34.17 phút); "
+        "Pha 2 Epoch 1 đạt Dev EER **5.95%** (133.13 phút). Ở trạng thái thô (Raw Phase 2), khối SSL học phân tách rất mạnh giữa F5/OmniVoice và giọng thật "
+        "(Dev Omni EER 7.98%/8.06%, Gate 4 đạt 86.2% dưới `asymmetric_veto`), nhưng độ lệch phân loại âm (negative classifier bias) kéo Gate 1 xuống 40.0% và Gate 2 xuống 65.5%. "
+        "Do cả Run 2 Pha 1 và Pha 2 đều có Gate 1 < 54%, phép ghép tầng thô P1+P2 chỉ đạt tối đa 33.3% ở Gate 1.\n"
+        "- **Giải pháp Stage 3 (`head_blend_a0.75`)**: Đóng băng hoàn toàn khối SSL Wav2Vec 2.0 của Run 2 Pha 2, chỉ hiệu chuẩn đầu phân loại (Head-Only) "
+        "1 epoch trên tập cân bằng `train_v8_balanced_ft.csv` (5.100 dòng gồm 1.050 `SPK_0001`, 0% rò rỉ 5 tình nguyện viên/Dev/Test/VieNeu), "
+        "sau đó nội suy trọng số theo tỷ lệ $\\mathbf{W}_{\\text{V8.1}} = 0.25\\,\\mathbf{W}_{\\text{Run2\\_P2}} + 0.75\\,\\mathbf{W}_{\\text{P2\\_HeadOnly}}$. "
+        "Phiên bản V8.0 trước đó được sao lưu thành `out/zalo_b_zalo_v8_inverted/checkpoint_v8_0_legacy.pt` (`sha256: a5c5fe8e70693059...`), "
+        "và mô hình chiến thắng V8.1 (`sha256: 30a383256458740e...`) được thăng hạng làm checkpoint mặc định tại `out/zalo_b_zalo_v8_inverted/best_model.pt`.",
+    )
+
+    add_heading_subsection(doc, "13.5.3 Đối Chứng Công Bằng 4 Cổng x 3 Chế Độ Pooling (V7 Best vs V8.0 Legacy vs V8.1 Best)")
+    add_styled_paragraph(
+        doc,
+        "Bảng 13.7 đối chiếu trực diện 3 thế hệ mô hình trên bộ kiểm chứng 4.979 / 4.969 (đối xứng V8.1) qua cả 3 chế độ gộp điểm đa cửa sổ (`asymmetric_veto` | `max` | `mean`):",
+    )
+
+    add_styled_paragraph(doc, "**Bảng 13.7: Bảng Đối Chứng 4 Cổng Kiểm Định (V7 Best vs V8.0 Legacy vs V8.1 Best)**", bold=True, color_rgb=(31, 73, 125))
+    headers_g81 = ["Mô Hình", "Pooling Mode", "G1: SPK_0001 (15)", "G2: 5 SPK (84)", "G3: Unseen VieNeu (955)", "G4: Omni Reversal (195)", "Dev BPCER (2.000)", "Seen Omni Dev (955)"]
+    rows_g81 = [
+        ("V7 Best", "asymmetric_veto", "26.7% (4/15)", "84.5% (71/84)", "5.03% (98.5% blk)", "0.5% (1/195)", "9.00%", "16.34% / 76.9% blk"),
+        ("V8.0 Legacy", "asymmetric_veto", "80.0% (12/15)", "98.8% (83/84)", "11.40% (76.5% blk)", "64.6% (126/195)", "4.25%", "8.27% / 87.1% blk"),
+        ("V8.0 Legacy", "max", "86.7% (13/15)", "100.0% (84/84)", "11.85% (71.4% blk)", "53.3% (104/195)", "3.10%", "11.70% / 76.0% blk"),
+        ("V8.0 Legacy", "mean", "60.0% (9/15)", "92.9% (78/84)", "12.04% (77.9% blk)", "65.6% (128/195)", "5.15%", "7.02% / 89.0% blk"),
+        ("V8.1 Best (head_blend_a0.75)", "asymmetric_veto", "93.3% (14/15)", "95.2% (80/84)*", "12.05% (79.6% blk)", "72.8% (142/195)", "6.00%", "8.06% / 91.5% blk"),
+        ("V8.1 Best (head_blend_a0.75)", "max", "93.3% (14/15)", "98.8% (83/84)*", "12.30% (76.8% blk)", "60.5% (118/195)", "4.85%", "10.05% / 84.8% blk"),
+        ("V8.1 Best (head_blend_a0.75)", "mean", "93.3% (14/15)", "91.7% (77/84)", "12.90% (81.9% blk)", "74.4% (145/195)", "8.10%", "8.10% / 91.8% blk"),
+    ]
+
+    t_g81 = doc.add_table(rows=len(rows_g81) + 1, cols=8)
+    t_g81.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(t_g81, color="CCCCCC", sz="4")
+    col_w8 = [Inches(1.3), Inches(0.95), Inches(0.85), Inches(0.95), Inches(1.05), Inches(1.0), Inches(0.75), Inches(1.05)]
+    for i, title in enumerate(headers_g81):
+        c = t_g81.rows[0].cells[i]
+        c.width = col_w8[i]
+        set_cell_background(c, "1F497D")
+        set_cell_margins(c, top=70, bottom=70, left=45, right=45)
+        p = c.paragraphs[0]
+        p.paragraph_format.space_after = Pt(0)
+        r = p.add_run(title)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(8.0)
+        r.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    for r_idx, r_data in enumerate(rows_g81):
+        row = t_g81.rows[r_idx + 1]
+        is_v81 = "V8.1 Best" in r_data[0]
+        for c_idx, val in enumerate(r_data):
+            cell = row.cells[c_idx]
+            cell.width = col_w8[c_idx]
+            bg = "F0FFF0" if is_v81 and r_data[1] == "asymmetric_veto" else ("F9FBFD" if r_idx % 2 == 0 else "FFFFFF")
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, top=55, bottom=55, left=45, right=45)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(0)
+            r = p.add_run(val)
+            r.font.name = "Times New Roman"
+            r.font.size = Pt(7.8)
+            if c_idx == 0 or (is_v81 and c_idx in (2, 4, 5, 7)):
+                r.bold = True
+                if is_v81:
+                    r.font.color.rgb = RGBColor(0, 100, 0) if c_idx > 0 else RGBColor(31, 73, 125)
+
+    add_styled_paragraph(
+        doc,
+        "*Ghi chú Gate 2: Trên 4 tình nguyện viên đối chứng chính (`SPK_0004..0007`, 64 tệp), V8.1 Best đạt **100.0% (64/64)** ở cả `asymmetric_veto` và `max`.",
+        font_size=9.0,
+        italic=True,
+        space_after=6,
+    )
+
+    add_heading_subsection(doc, "13.5.4 Benchmark Trên Tập Độc Lập 15.980 Clips (`test_indomain_v8_f5_omni.csv`)")
+    add_styled_paragraph(
+        doc,
+        "Bảng 13.8 tổng hợp kết quả đánh giá quy mô lớn trên 15.980 mẫu (`eval_only=15.665` mẫu), đối chiếu toàn diện theo pooling, công cụ tạo sinh và 5 biến thể kênh nén:",
+    )
+
+    add_styled_paragraph(doc, "**Bảng 13.8: Benchmark `test_indomain_v8_f5_omni.csv` (15.980 Clips) — V7 Best vs V8.0 Legacy vs V8.1 Best**", bold=True, color_rgb=(192, 0, 0))
+    headers_t81 = ["Mô Hình", "Pooling Mode", "Overall EER / Block", "BPCER", "F5-TTS (EER / Blk)", "OmniVoice (EER / Blk)", "5 Codecs EER (Clean | AAC | Opus | G711 | AMR)"]
+    rows_t81 = [
+        ("V7 Best", "asymmetric_veto", "13.72% / 87.22%", "15.10%", "6.17% / 99.38%", "19.88% / 75.00%", "13.37 | 12.92 | 14.92 | 14.03 | 13.36%"),
+        ("V8.0 Legacy", "asymmetric_veto", "6.79% / 90.33%", "4.12%", "2.23% / 98.22%", "8.84% / 82.41%", "6.46 | 7.35 | 6.90 | 6.24 | 6.11%"),
+        ("V8.1 Best", "asymmetric_veto", "5.63% / 95.01%", "6.73%", "2.81% / 98.49%", "7.95% / 91.52%", "5.52 | 5.79 | 6.02 | 6.11 | 4.88%"),
+        ("V7 Best", "max", "14.72% / 83.16%", "12.07%", "5.14% / 98.93%", "21.79% / 67.32%", "14.92 | 14.25 | 15.59 | 14.48 | 14.03%"),
+        ("V8.0 Legacy", "max", "9.31% / 84.37%", "2.64%", "2.77% / 97.16%", "13.30% / 71.52%", "9.25 | 10.68 | 9.80 | 8.91 | 7.90%"),
+        ("V8.1 Best", "max", "8.33% / 88.24%", "5.34%", "3.21% / 97.69%", "11.61% / 78.75%", "8.24 | 9.35 | 8.69 | 7.35 | 7.13%"),
+        ("V7 Best", "mean", "13.81% / 87.88%", "16.28%", "5.32% / 99.47%", "19.21% / 76.25%", "13.59 | 12.92 | 14.92 | 13.90 | 13.11%"),
+        ("V8.0 Legacy", "mean", "5.54% / 92.92%", "4.81%", "2.31% / 98.22%", "6.54% / 87.59%", "5.57 | 6.17 | 5.88 | 5.12 | 5.25%"),
+        ("V8.1 Best", "mean", "6.24% / 96.17%", "8.80%", "2.84% / 98.67%", "7.77% / 93.66%", "6.17 | 6.68 | 6.74 | 5.63 | 5.81%"),
+    ]
+
+    t_t81 = doc.add_table(rows=len(rows_t81) + 1, cols=7)
+    t_t81.alignment = WD_TABLE_ALIGNMENT.CENTER
+    set_table_borders(t_t81, color="CCCCCC", sz="4")
+    col_w7 = [Inches(0.95), Inches(1.0), Inches(1.1), Inches(0.65), Inches(1.1), Inches(1.15), Inches(2.05)]
+    for i, title in enumerate(headers_t81):
+        c = t_t81.rows[0].cells[i]
+        c.width = col_w7[i]
+        set_cell_background(c, "800000")
+        set_cell_margins(c, top=70, bottom=70, left=45, right=45)
+        p = c.paragraphs[0]
+        p.paragraph_format.space_after = Pt(0)
+        r = p.add_run(title)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(8.0)
+        r.bold = True
+        r.font.color.rgb = RGBColor(255, 255, 255)
+
+    for r_idx, r_data in enumerate(rows_t81):
+        row = t_t81.rows[r_idx + 1]
+        is_winner = (r_data[0] == "V8.1 Best" and r_data[1] == "asymmetric_veto")
+        for c_idx, val in enumerate(r_data):
+            cell = row.cells[c_idx]
+            cell.width = col_w7[c_idx]
+            bg = "F0FFF0" if is_winner else ("FFF9F9" if r_idx % 2 == 0 else "FFFFFF")
+            set_cell_background(cell, bg)
+            set_cell_margins(cell, top=55, bottom=55, left=45, right=45)
+            p = cell.paragraphs[0]
+            p.paragraph_format.space_after = Pt(0)
+            r = p.add_run(val)
+            r.font.name = "Times New Roman"
+            r.font.size = Pt(7.8)
+            if is_winner or c_idx == 0:
+                r.bold = True
+                if is_winner and c_idx > 0:
+                    r.font.color.rgb = RGBColor(0, 100, 0)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    add_callout_box(
+        doc,
+        "Dưới cơ chế chuẩn sản xuất `asymmetric_veto` trên tập kiểm thử độc lập 15.980 mẫu (`test_indomain_v8_f5_omni.csv`), "
+        "**ViTrueVoice B_zalo V8.1 (`head_blend_a0.75`)** đạt kỷ lục **5.63% EER / 95.01% tỷ lệ chặn** (`eval_only`: 5.61%), "
+        "thắng tuyệt đối cả V8.0 Legacy (6.79% / 90.33%) lẫn V7 Best (13.72% / 87.22%) trên toàn bộ **5/5 biến thể codec** "
+        "(Clean 5.52%, Zalo AAC-LC 76k 5.79%, Zalo Opus 24k 6.02%, G.711 A-law 6.11%, AMR-NB 4.88%), "
+        "đẩy tỷ lệ chặn OmniVoice CFM từ 75.00% (V7) lên **91.52%**, đồng thời đạt **93.3%** Gate 1 `SPK_0001`, "
+        "**100%** 4 SPK đối chứng chính và **12.05% EER** trên Unseen VieNeu-TTS.",
+        title="TỔNG KẾT ĐỘT PHÁ CỦA MÔ HÌNH VITRUEVOICE B_ZALO V8.1",
+    )

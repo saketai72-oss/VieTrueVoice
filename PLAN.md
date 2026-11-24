@@ -13,7 +13,7 @@
 
 ### 0.2. Quy Tắc Phát Triển & Vận Hành Bắt Buộc Cho Agent
 
-1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **362/362 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
+1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **392/392 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
 2. **Quy ước Git Commit**: Mọi bản commit có sự hỗ trợ của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit.
 3. **Quy trình Huấn luyện Hybrid (Local Code <-> Kaggle GPU)**:
    - Phát triển mã nguồn, viết unit tests và quản lý toàn bộ dự án tại máy Local.
@@ -68,7 +68,7 @@ VieTrueVoice/
 │   ├── latency_log.json           # Log độ trễ ẩn danh băm SHA-256
 │   └── latency_benchmark.csv      # Bảng 30 lần bấm giờ lấy trung vị
 ├── out/                           # Trọng số best_model.pt và manifests tải từ Kaggle về
-└── tests/                         # Bộ kiểm thử TDD (274/274 tests xanh 100%)
+└── tests/                         # Bộ kiểm thử TDD (392/392 tests xanh 100%)
 ```
 
 ---
@@ -286,4 +286,10 @@ processor.run_batch(
       * Giai đoạn 3 (`Partial-Freeze Fine-Tuning Ablation` `checkpoint_stage3_partial_ft.pt`): Khóa 8 tầng đầu Wav2Vec 2.0, vi chỉnh 1 epoch trên `train_v8_balanced_ft.csv` (4.800 mẫu cân bằng, `am_m=0.20`); đẩy Cổng 4 lên 79.0% nhưng làm giảm Gate 2 xuống `85.7% < 90.0%` và tăng Dev BPCER lên `10.70%` nên loại khỏi bản phát hành theo quy tắc bảo vệ tình nguyện viên nghiệm thu, giữ lại làm đối chứng ablation trong `benchmarks/v8_pooling_ablation_report.json` & `benchmarks/v8_inverted_evaluation_report.json`;
   (4) Cập nhật hệ thống & Live Docker: `out/zalo_b_zalo_v8_inverted/best_model.pt` đồng bộ vào container `vitruevoice-api`, verify `/health` trả HTTP 200 OK; Google Labs Playground đạt chuẩn WCAG AAA contrast (8.86:1) và 5 viewports responsive;
   (5) Handbook v2: Xuất bản tự động sang Word (`.docx`) và PDF (`.pdf`) tại `SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx` (27.393 từ, 497 đoạn văn, 34 bảng, 27 Q&As) và `.pdf` (4.97 MB / 4.966.162 bytes); khóa cứng phạm vi chứng chỉ AWS Gói A; toàn bộ test suite đạt **382/382 unit tests pass 100% green**.
+- [x] **V8.1 Symmetric 6.445 OmniVoice_CFM Clone, 2-Run Retraining, Head-Calibration Winner (`head_blend_a0.75`) & Full 15.980-Clip Benchmark (v0.9.4)**: Hoàn tất khôi phục đối xứng 1:1 kho `OmniVoice_CFM` và tái huấn luyện V8.1:
+  (1) **Dữ liệu `data/spoof_omnivoice_v8/` & `Voice_Final` 1:1**: Khôi phục đủ **6.445** WAV (VIVOS **4.795** / 65 spk; CommonVoice **1.225** / 25 spk; SPK_Volunteers **425** = `SPK_0001` 50 + `SPK_0003..0007` 375), khớp 1:1 `data/spoof_vieneu/`; xuất mới toàn bộ `Voice_Final` đạt **103.189** files (`bonafide`: 70.174 | `spoof/v7`: 13.955 | `spoof/v8`: 19.060, khớp 100% `VOICE_FINAL_MANIFEST.csv`); xuất đủ 5 manifest V8.1 (`train_v8_f5_omni_no_spk1.csv`: **54.225**, `train_v8_f5_omni_with_spk1.csv`: **54.400**, `dev_v8_f5_omni.csv`: **12.405**, `test_indomain_v8_f5_omni.csv`: **15.980**, `unseen_vieneu_benchmark.csv`: **955**, 0% leakage);
+  (2) **Huấn luyện 2-Run & Stage 3 Head-Calibration (`am_s=30.0, am_m=0.20, batch_size=8, accum_steps=2`, init V5)**: Run 1 (54.225 dòng, Dev EER 6.32%, Gate 1 `SPK_0001` = 46.7% veto / 60.0% max < 80%) -> kích hoạt Run 2 (54.400 dòng có `SPK_0001` real+F5+Omni, Phase 2 Ep 1 Dev EER 5.95%); Stage 3 hiệu chuẩn đầu phân loại 1 epoch trên `train_v8_balanced_ft.csv` (5.100 dòng cân bằng) + nội suy `head_blend_a0.75 = 0.25*Run2_P2 + 0.75*P2_HeadOnly`; sao lưu V8.0 Legacy sang `out/zalo_b_zalo_v8_inverted/checkpoint_v8_0_legacy.pt` (`sha256: a5c5fe8e70693059...`) và thăng hạng V8.1 Best (`sha256: 30a383256458740e...`) lên `out/zalo_b_zalo_v8_inverted/best_model.pt` và `out/zalo_b_zalo_v8_1_with_spk1/best_model.pt`;
+  (3) **Đối chứng 4 Gates x 3 Pooling (`asymmetric_veto` | `max` | `mean`)**: V8.1 Best đạt G1 `SPK_0001` = **93.3% (14/15)** cả 3 mode; G2 5 SPK = **95.2% (80/84)** | **98.8% (83/84)** | `91.7% (77/84)` (`SPK_0004..0007` = **100% 64/64** ở `veto` & `max`); G3 Unseen VieNeu (955) = **12.05% (79.6% blk)** | `12.30% (76.8%)` | `12.90% (81.9%)` ($\le 15.0\%$ H2); G4 Omni Reversal (195) = **72.8% (142/195)** | `60.5%` | **74.4%**; Dev BPCER (2.000) = `6.00%` | `4.85%` | `8.10%`; Seen Omni Dev (955) = **8.06% EER / 91.5% blk** (`veto`);
+  (4) **Benchmark `test_indomain_v8_f5_omni.csv` (15.980 dòng, `eval_only=15.665`)**: `asymmetric_veto`: V8.1 **5.63% EER / 95.01% blk** (BPCER `6.73%`; F5 `2.81% / 98.49%`; OmniVoice **7.95% / 91.52%**) vs V8.0 `6.79% / 90.33%` (Omni `8.84% / 82.41%`) vs V7 `13.72% / 87.22%` (Omni `19.88% / 75.00%`), thắng toàn diện cả 5/5 codecs (`clean 5.52%`, `aac_76k 5.79%`, `opus_24k 6.02%`, `g711 6.11%`, `amr_nb 4.88%`); `max`: V8.1 `8.33% / 88.24% blk` vs V8.0 `9.31% / 84.37%` vs V7 `14.72% / 83.16%`; `mean`: V8.1 `6.24% / 96.17% blk` vs V8.0 `5.54% / 92.92%` vs V7 `13.81% / 87.88%`;
+  (5) **QA, Docker & Handbook v2**: Kiểm thử TDD **392/392 unit tests pass 100% green** (CI-safe), rebuild Docker `vitruevoice-api` (`GET /health` HTTP 200 nạp `out/zalo_b_zalo_v8_inverted/best_model.pt`), đồng bộ Chương 13 mục 13.5 V8.1 (chỉ 3 chứng chỉ AWS Gói A) và biên dịch lại Sổ tay v2 (`28.690` từ, `514` đoạn văn, `38` bảng, PDF `5.015.192` bytes).
 - [ ] **Pilot & Nghiệm thu (W7–W8 / v1.0.0)**: Đóng gói Docker trên AWS EC2, S3 Lifecycle tự xóa, IAM least privilege, CloudWatch; đạt đích **In-domain EER <= 8%**, **H1: Giảm >= 30% EER trên tập nén nội bộ**, báo cáo trung thực hạn chế H2 Unseen TTS, và **Latency trung vị (30 lần) <= 3,0 giây**; ký biên bản xác nhận nghiệm thu Pilot cùng CLB An toàn thông tin HUTECH.

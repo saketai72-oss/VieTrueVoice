@@ -98,7 +98,7 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 382 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
+*(Yêu cầu: Toàn bộ 392 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
 
 ### Kiểm Toán An Ninh Manifest V6
 ```bash
@@ -127,13 +127,26 @@ python scripts/train_v8_inverted_dual.py --resume-run2 --phase2-epochs 3
 python -c "from scripts.train_v8_inverted_dual import evaluate_all_gates; evaluate_all_gates('out/zalo_b_zalo_v8_inverted/best_model.pt', 'data/manifests_zalo/dev_v8_f5_omni.csv')"
 ```
 
-### Tối Ưu Lai Ghép Tầng (Layer-Wise Grafting) & Huấn Luyện Cân Bằng V8 (GĐ2 & GĐ3)
-Thực thi quy trình ghép tầng trọng số phân cấp (Layer-Wise Grafting `split=4, low_alpha=0.15, high_alpha=0.90`) và vi chỉnh cục bộ 1 epoch để chọn mô hình chiến thắng cân bằng 4 Cổng kiểm định:
+### Tối Ưu Lai Ghép Tầng (Layer-Wise Grafting), Huấn Luyện V8.1 Đối Xứng 6.445 Mẫu & Hiệu Chuẩn Đầu Phân Loại
+Thực thi quy trình khôi phục dữ liệu OmniVoice_CFM đối xứng 1:1 (6.445 files), huấn luyện 2-Run V8.1 (`am_m=0.20`), hiệu chuẩn đầu phân loại (`head_blend_a0.75`) và sinh báo cáo benchmark 4.979 / 15.980 / 955:
 ```bash
-# Chạy toàn trình tạo manifest cân bằng, ghép tầng và vi chỉnh 1-epoch
+# Bước 1: Khôi phục 6.445 mẫu OmniVoice_CFM V8.1 đối xứng 1:1 & xuất 5 manifests V8.1
+python scripts/generate_omnivoice_v8_full.py
+
+# Bước 2: Huấn luyện 2-Run V8.1 tách riêng checkpoint Pha 1 & Pha 2
+python scripts/run_v8_1_phase_train.py --init-ckpt out/zalo_b_zalo_v5_local/best_model.pt --train-manifest data/manifests_zalo/train_v8_f5_omni_no_spk1.csv --dev-manifest data/manifests_zalo/dev_v8_f5_omni.csv --out-dir out/zalo_b_zalo_v8_1_no_spk1 --phase1-epochs 1 --phase2-epochs 2 --am-m 0.20
+python scripts/run_v8_1_phase_train.py --init-ckpt out/zalo_b_zalo_v5_local/best_model.pt --train-manifest data/manifests_zalo/train_v8_f5_omni_with_spk1.csv --dev-manifest data/manifests_zalo/dev_v8_f5_omni.csv --out-dir out/zalo_b_zalo_v8_1_with_spk1 --phase1-epochs 1 --phase2-epochs 2 --am-m 0.20
+
+# Bước 3: Tạo tập cân bằng 5.100 dòng, chạy Stage 3 & quét nội suy hiệu chuẩn đầu phân loại (head_blend_a0.75)
 python scripts/build_v8_hybrid_checkpoint.py
+python scripts/run_v8_1_stage3_experiments.py
+python scripts/sweep_v8_1_head_blend.py
+
+# Bước 4: Chạy đánh giá đối chứng V7 vs V8.0 vs V8.1 (4.979/15.980/955) & tổng hợp báo cáo JSON
+python scripts/eval_v8_1_benchmark.py
+python scripts/build_v8_1_reports.py
 ```
-*(Mô hình chiến thắng Stage 2 Grafted được tự động xuất vào `out/zalo_b_zalo_v8_inverted/best_model.pt` và cập nhật vào `src/app/server.py`)*
+*(Checkpoint chiến thắng V8.1 `head_blend_a0.75` được thăng hạng vào `out/zalo_b_zalo_v8_inverted/best_model.pt` — bản V8.0 trước đó lưu tại `out/zalo_b_zalo_v8_inverted/checkpoint_v8_0_legacy.pt`)*
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
@@ -372,7 +385,7 @@ python scripts/simulate_zalo_webhook.py --audio data/spoof_f5tts/CV_08110ec9e6/C
 ## 8. Hướng Dẫn Xuất Bản Dữ Liệu Nghiệm Thu (Voice_Final) & Huấn Luyện Dual-Seen
 
 ### 8.1 Xuất bản toàn bộ dữ liệu ra thư mục nghiệm thu Voice_Final
-Thực thi trích xuất và tổ chức toàn bộ kho dữ liệu âm thanh (82.644 files) thành 2 thư mục chính (`bonafide/` gồm `SPK_Volunteers`, `VIVOS`, `CommonVoice`; và `spoof/` tách `v7/` và `v8/` đầy đủ `Seen` đến `Unseen`) kèm bảng chỉ mục SHA-256:
+Thực thi trích xuất và tổ chức toàn bộ kho dữ liệu âm thanh (**103.189 files**, đồng bộ đối xứng 1:1 giữa `spoof/v7/Seen/VieNeu_TTS` và `spoof/v8/Seen/OmniVoice_CFM` đạt đúng 6.445 files) thành 2 thư mục chính (`bonafide/`: 70.174 files gồm `SPK_Volunteers` 524, `VIVOS` 55.225, `CommonVoice` 14.425; và `spoof/` tách `v7/` 13.955 files và `v8/` 19.060 files) kèm bảng chỉ mục SHA-256 (`VOICE_FINAL_MANIFEST.csv`):
 ```bash
 python scripts/export_voice_final_dataset.py
 ```
@@ -411,8 +424,8 @@ Tài liệu được xuất bản và đồng bộ tự động tại:
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
-#### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8
-Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (27.393 từ, 497 đoạn văn, 34 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization & Ma trận suy giảm 5 codecs, Layer-Wise Grafting và Consensus Asymmetric Veto) sang cả hai định dạng `.docx` và `.pdf`:
+#### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8.0 & V8.1
+Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (28.690 từ, 514 đoạn văn, 38 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization V8.0 & V8.1, ma trận suy giảm 5 codecs, Layer-Wise Grafting, Head-Calibration `head_blend_a0.75` và Consensus Asymmetric Veto) sang cả hai định dạng `.docx` và `.pdf`:
 ```bash
 python scripts/build_defense_handbook_v2_docx.py
 ```

@@ -129,12 +129,12 @@ def build_document_v2():
         ),
         (
             "Phiên bản hệ thống:",
-            "v0.9.2 (Inverted Generalization V8, Dense Overlap Asymmetric Veto, Platt Scaling T=16.0 & 362 CI Tests 100% Green)",
+            "v0.9.4 (Inverted Generalization V8.1 Symmetric 6.445, Head-Calibration head_blend_a0.75, Dense Overlap Asymmetric Veto, Platt Scaling T=16.0 & 392 CI Tests 100% Green)",
         ),
         (
             "Công nghệ cốt lõi:",
-            "PyTorch 2.6 CUDA, Wav2Vec 2.0 (Vietnamese 250h), Compact AASIST (HS-GAL), Multi-Window Asymmetric Veto, "
-            "Continuous Flow Matching (OmniVoice CFM), VieNeu-TTS v3 Turbo, Platt Scaling, Docker Compose, 362 CI Tests",
+            "PyTorch 2.6 CUDA, Wav2Vec 2.0 (Vietnamese 250h), Compact AASIST (HS-GAL), Multi-Window Consensus Asymmetric Veto, "
+            "Continuous Flow Matching (OmniVoice CFM), VieNeu-TTS v3 Turbo, Platt Scaling, Docker Compose, 392 CI Tests",
         ),
     ]
     t_meta = doc.add_table(rows=len(meta_info), cols=2)
