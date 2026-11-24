@@ -123,31 +123,27 @@ def _default_model_loader(checkpoint_path: Path | str, device: str) -> Any:
     return model
 
 
-DEFAULT_CHECKPOINT = (
-    Path("out/zalo_b_zalo_v8_inverted/best_model.pt")
-    if Path("out/zalo_b_zalo_v8_inverted/best_model.pt").exists()
-    else (
-        Path("out/zalo_b_zalo_v8_inverted_no_spk1/best_model.pt")
-        if Path("out/zalo_b_zalo_v8_inverted_no_spk1/best_model.pt").exists()
-        else (
-            Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
-            if Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt").exists()
-            else (
-                Path("out/zalo_b_zalo_v6_local/best_model.pt")
-                if Path("out/zalo_b_zalo_v6_local/best_model.pt").exists()
-                else (
-                    Path("out/zalo_b_zalo_v5_local/best_model.pt")
-                    if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
-                    else (
-                        Path("out/best_model_B_zalo.pt")
-                        if Path("out/best_model_B_zalo.pt").exists()
-                        else Path("out/run_B/best_model.pt")
-                    )
-                )
-            )
-        )
-    )
+_CHECKPOINT_CANDIDATES = (
+    Path("out/v0.9.4/best_model.pt"),
+    Path("out/zalo_b_zalo_v8_inverted/best_model.pt"),
+    Path("out/zalo_b_zalo_v8_inverted_no_spk1/best_model.pt"),
+    Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt"),
+    Path("out/zalo_b_zalo_v6_local/best_model.pt"),
+    Path("out/zalo_b_zalo_v5_local/best_model.pt"),
+    Path("out/best_model_B_zalo.pt"),
+    Path("out/run_B/best_model.pt"),
 )
+
+
+def resolve_default_checkpoint(candidates: tuple[Path, ...] = _CHECKPOINT_CANDIDATES) -> Path:
+    """Return the highest-priority existing model checkpoint path."""
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[-1]
+
+
+DEFAULT_CHECKPOINT = resolve_default_checkpoint()
 
 
 DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

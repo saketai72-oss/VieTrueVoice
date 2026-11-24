@@ -187,3 +187,18 @@ def test_clone_and_audit_endpoint(client, tmp_path):
     assert response_alias.json()["status"] == "success"
 
 
+def test_resolve_default_checkpoint_prefers_v094(tmp_path):
+    from src.app.server import resolve_default_checkpoint
+
+    v094 = tmp_path / "out" / "v0.9.4" / "best_model.pt"
+    legacy = tmp_path / "out" / "zalo_b_zalo_v8_inverted" / "best_model.pt"
+    v094.parent.mkdir(parents=True)
+    legacy.parent.mkdir(parents=True)
+    v094.write_bytes(b"v094")
+    legacy.write_bytes(b"legacy")
+
+    assert resolve_default_checkpoint((v094, legacy)) == v094
+    v094.unlink()
+    assert resolve_default_checkpoint((v094, legacy)) == legacy
+
+

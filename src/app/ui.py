@@ -27,7 +27,13 @@ import numpy as np
 import torch
 
 from src.app.decision import classify_score, platt_calibrator, PLATT_SCALE_K
-from src.app.server import TARGET_SAMPLE_COUNT, TARGET_SAMPLE_RATE, _default_model_loader, _pad_or_crop
+from src.app.server import (
+    DEFAULT_CHECKPOINT,
+    TARGET_SAMPLE_COUNT,
+    TARGET_SAMPLE_RATE,
+    _default_model_loader,
+    _pad_or_crop,
+)
 from src.preprocessing.audio_loader import load_audio
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 try:
@@ -42,24 +48,6 @@ except Exception:
     DEFAULT_TARGET_TEXT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
     DEFAULT_REF_PROMPT = "Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
     evaluate_audio_sample = None
-
-DEFAULT_CHECKPOINT = (
-    Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt")
-    if Path("out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt").exists()
-    else (
-        Path("out/zalo_b_zalo_v6_local/best_model.pt")
-        if Path("out/zalo_b_zalo_v6_local/best_model.pt").exists()
-        else (
-            Path("out/zalo_b_zalo_v5_local/best_model.pt")
-            if Path("out/zalo_b_zalo_v5_local/best_model.pt").exists()
-            else (
-                Path("out/best_model_B_zalo.pt")
-                if Path("out/best_model_B_zalo.pt").exists()
-                else Path("out/run_B/best_model.pt")
-            )
-        )
-    )
-)
 
 CUSTOM_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;800&family=JetBrains+Mono:wght@600;700&display=swap');
@@ -1823,7 +1811,7 @@ def build_ui(
             """
             ---
             <div style="text-align: center; color: #64748B; font-size: 12px; font-family: 'JetBrains Mono', monospace; padding: 1rem 0;">
-                ViTrueVoice Anti-Spoofing Inference Engine v0.9.3 | Backbone: Wav2Vec2 + AASIST (B_zalo V8 Inverted Dual-Seen) | Asymmetric Veto Multi-Window Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
+                ViTrueVoice Anti-Spoofing Inference Engine v0.9.4 | Backbone: Wav2Vec2 + AASIST (v0.9.4 Dual-Seen) | Asymmetric Veto Multi-Window Pooling | Tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP
             </div>
             """
         )

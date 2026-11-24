@@ -127,26 +127,22 @@ python scripts/train_v8_inverted_dual.py --resume-run2 --phase2-epochs 3
 python -c "from scripts.train_v8_inverted_dual import evaluate_all_gates; evaluate_all_gates('out/zalo_b_zalo_v8_inverted/best_model.pt', 'data/manifests_zalo/dev_v8_f5_omni.csv')"
 ```
 
-### Tối Ưu Lai Ghép Tầng (Layer-Wise Grafting), Huấn Luyện V8.1 Đối Xứng 6.445 Mẫu & Hiệu Chuẩn Đầu Phân Loại
-Thực thi quy trình khôi phục dữ liệu OmniVoice_CFM đối xứng 1:1 (6.445 files), huấn luyện 2-Run V8.1 (`am_m=0.20`), hiệu chuẩn đầu phân loại (`head_blend_a0.75`) và sinh báo cáo benchmark 4.979 / 15.980 / 955:
+### Tối Ưu Lai Ghép Tầng (Layer-Wise Grafting), Huấn Luyện Đối Xứng 6.445 Mẫu & Hiệu Chuẩn `v0.9.4`
+Thực thi quy trình khôi phục dữ liệu OmniVoice_CFM đối xứng 1:1 (6.445 files), huấn luyện 2-Run (`am_m=0.20`), hiệu chuẩn đầu phân loại (`head_blend_a0.75`) và sinh báo cáo benchmark 4.979 / 15.980 / 955:
 ```bash
-# Bước 1: Khôi phục 6.445 mẫu OmniVoice_CFM V8.1 đối xứng 1:1 & xuất 5 manifests V8.1
+# Bước 1: Khôi phục 6.445 mẫu OmniVoice_CFM đối xứng 1:1 & xuất 5 manifests chuẩn
 python scripts/generate_omnivoice_v8_full.py
 
-# Bước 2: Huấn luyện 2-Run V8.1 tách riêng checkpoint Pha 1 & Pha 2
+# Bước 2: Huấn luyện 2-Run tách riêng checkpoint Pha 1 & Pha 2
 python scripts/run_v8_1_phase_train.py --init-ckpt out/zalo_b_zalo_v5_local/best_model.pt --train-manifest data/manifests_zalo/train_v8_f5_omni_no_spk1.csv --dev-manifest data/manifests_zalo/dev_v8_f5_omni.csv --out-dir out/zalo_b_zalo_v8_1_no_spk1 --phase1-epochs 1 --phase2-epochs 2 --am-m 0.20
 python scripts/run_v8_1_phase_train.py --init-ckpt out/zalo_b_zalo_v5_local/best_model.pt --train-manifest data/manifests_zalo/train_v8_f5_omni_with_spk1.csv --dev-manifest data/manifests_zalo/dev_v8_f5_omni.csv --out-dir out/zalo_b_zalo_v8_1_with_spk1 --phase1-epochs 1 --phase2-epochs 2 --am-m 0.20
 
-# Bước 3: Tạo tập cân bằng 5.100 dòng, chạy Stage 3 & quét nội suy hiệu chuẩn đầu phân loại (head_blend_a0.75)
+# Bước 3: Tạo tập cân bằng 5.100 dòng & chạy đánh giá đối chứng V7 vs V8.0 vs v0.9.4 (4.979/15.980/955)
 python scripts/build_v8_hybrid_checkpoint.py
-python scripts/run_v8_1_stage3_experiments.py
-python scripts/sweep_v8_1_head_blend.py
-
-# Bước 4: Chạy đánh giá đối chứng V7 vs V8.0 vs V8.1 (4.979/15.980/955) & tổng hợp báo cáo JSON
 python scripts/eval_v8_1_benchmark.py
 python scripts/build_v8_1_reports.py
 ```
-*(Checkpoint chiến thắng V8.1 `head_blend_a0.75` được thăng hạng vào `out/zalo_b_zalo_v8_inverted/best_model.pt` — bản V8.0 trước đó lưu tại `out/zalo_b_zalo_v8_inverted/checkpoint_v8_0_legacy.pt`)*
+*(Checkpoint chiến thắng `v0.9.4` (`head_blend_a0.75`) được lưu tại `out/v0.9.4/best_model.pt`)*
 
 ### Huấn Luyện CLI (3 Nhánh Thí Nghiệm)
 ```bash
@@ -424,8 +420,8 @@ Tài liệu được xuất bản và đồng bộ tự động tại:
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
-#### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8.0 & V8.1
-Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (28.690 từ, 514 đoạn văn, 38 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization V8.0 & V8.1, ma trận suy giảm 5 codecs, Layer-Wise Grafting, Head-Calibration `head_blend_a0.75` và Consensus Asymmetric Veto) sang cả hai định dạng `.docx` và `.pdf`:
+#### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8.0 & v0.9.4
+Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (28.690+ từ, 514 đoạn văn, 38 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization V8.0 & mô hình chính thức v0.9.4, ma trận suy giảm 5 codecs, Layer-Wise Grafting, Head-Calibration `head_blend_a0.75` và Consensus Asymmetric Veto) sang cả hai định dạng `.docx` và `.pdf`:
 ```bash
 python scripts/build_defense_handbook_v2_docx.py
 ```
