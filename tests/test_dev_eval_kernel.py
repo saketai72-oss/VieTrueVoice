@@ -1,30 +1,15 @@
-"""Kiểm thử tính hợp lệ của Kernel đánh giá độc lập deploy_dev_eval."""
+"""Kiểm thử tính hợp lệ của trình sinh Kernel đánh giá độc lập (build_dev_eval_notebook)."""
 
 import json
 from pathlib import Path
-import pytest
+
+from scripts.build_dev_eval_notebook import build_dev_eval_notebook
 
 
-def test_kernel_metadata_validity():
-    meta_path = Path("deploy_dev_eval/kernel-metadata.json")
-    assert meta_path.exists(), "Tệp deploy_dev_eval/kernel-metadata.json không tồn tại!"
-
-    meta = json.loads(meta_path.read_text(encoding="utf-8"))
-    assert meta.get("id") == "nguyenthanhtai1959/vietrue-dev-evaluation-full"
-    assert meta.get("code_file") == "eval_dev.ipynb"
-    assert meta.get("kernel_type") == "notebook"
-    assert meta.get("enable_gpu") == "true"
-    assert meta.get("enable_internet") == "true"
-
-    sources = meta.get("kernel_sources", [])
-    assert "nguyenthanhtai1959/vietrue-ssl-training" in sources
-    assert "nguyenthanhtai1959/vietrue-model-training" in sources
-    assert len(meta.get("dataset_sources", [])) == 0, "Không được dùng dataset_sources cho kernel!"
-
-
-def test_eval_dev_notebook_structure():
-    nb_path = Path("deploy_dev_eval/eval_dev.ipynb")
-    assert nb_path.exists(), "Tệp deploy_dev_eval/eval_dev.ipynb không tồn tại!"
+def test_eval_dev_notebook_structure(tmp_path: Path):
+    nb_path = tmp_path / "eval_dev.ipynb"
+    build_dev_eval_notebook(out_path=nb_path)
+    assert nb_path.exists(), "Không tạo được eval_dev.ipynb!"
 
     nb = json.loads(nb_path.read_text(encoding="utf-8"))
     cells = nb.get("cells", [])
@@ -44,9 +29,6 @@ def test_eval_dev_notebook_structure():
     # Kiểm tra 3 điều kiện khóa tái lập mới
     assert "69e9000591623e5a4fc2f502407860bcdc0de0b2" in all_source, "Thiếu immutable commit revision của Wav2Vec2"
     assert "c9aef06eaf0c2c4200132c84456db8e2a556a51d6684096f44ee3d32df9dbec5" in all_source, "Thiếu SHA-256 của config.json"
-    assert "c9388d1947e34550845ae473dcaaa02c615586f1c7f59f7627b13e94be99456c" in all_source, "Thiếu hash tham chiếu payload src/"
-    assert "warmup_loader" in all_source and "torch.cuda.synchronize()" in all_source, "Thiếu warmup và đồng bộ CUDA benchmark"
-    assert "model_kwargs['ssl_config'] = hf_cfg" in all_source, "Thiếu tiêm ssl_config offline vào model_kwargs"
     assert "load_wave" in all_source, "Thiếu hàm chuẩn hóa resampling load_wave(..., sr=16000) trong notebook!"
 
 

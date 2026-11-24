@@ -7,7 +7,7 @@
 - **Phiên bản**: 0.9.4 (Symmetric 6.445 OmniVoice_CFM Clone, 2-Run Retrain, Head-Calibration `head_blend_a0.75` & Clean Release Sync) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
 - **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
-- **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [deep-voice-generalization.md](deep-voice-generalization.md), [DESIGN.md](DESIGN.md)
+- **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [SPEC_deep-voice-generalization.md](docs/SPEC_deep-voice-generalization.md), [DESIGN.md](DESIGN.md)
 
 ## Thứ Tự Ưu Tiên Tài Liệu
 - Thư mục `docs/` là Nguồn Chân Lý Duy Nhất (Single Source of Truth - SSOT) về hành vi, kiến trúc và tiêu chuẩn thực thi.

@@ -1,75 +1,15 @@
-# Vietrue Model - Huấn Luyện Trên Kaggle GPU từ Local
+# ViTrueVoice — Hướng Dẫn Chạy, Huấn Luyện & Triển Khai
 
-Dự án này được thiết lập để bạn có thể viết code và quản lý model tại máy local, nhưng tận dụng GPU miễn phí của Kaggle để huấn luyện và tự động tải kết quả về.
-
----
-
-## 1. Cấu hình xác thực Kaggle (Làm 1 lần duy nhất)
-
-Chỉ cần chọn **1 trong 2 cách** sau:
-
-### Cách 1 (Khuyên dùng - Nhanh nhất): Đăng nhập trực tiếp bằng OAuth
-Chạy lệnh sau trên terminal để đăng nhập qua trình duyệt:
-```bash
-kaggle auth login
-```
-
-### Cách 2: Sử dụng file API token (`kaggle.json`)
-1. Truy cập [Kaggle Settings](https://www.kaggle.com/settings).
-2. Cuộn xuống phần **API** và chọn **Create New Token** (tải file `kaggle.json` về).
-3. Đặt file `kaggle.json` vào thư mục:
-   - Windows: `C:\Users\<Tên_User>\.kaggle\kaggle.json`
-   - Linux/macOS: `~/.kaggle/kaggle.json`
+Dự án hỗ trợ huấn luyện trực tiếp trên GPU cục bộ (`scripts/run_v8_1_phase_train.py`, `scripts/train.py`), kiểm thử CI (`pytest`) và triển khai qua FastAPI / Gradio / Docker. Các trình sinh notebook Colab/Kaggle nằm trong `scripts/build_*_notebook.py` (tạo tự động khi cần).
 
 ---
 
-## 2. Cài đặt Username cho dự án
-
-Cập nhật username Kaggle của bạn vào dự án:
+## 1. Sinh notebook Colab / Kaggle (tùy chọn)
 ```bash
-python manage_kaggle.py set-user <username_kaggle_cua_ban>
+python scripts/build_zalo_train_notebook.py
+python scripts/build_zalo_eval_notebook.py
+python scripts/build_dev_eval_notebook.py
 ```
-
----
-
-## 3. Quy trình sử dụng
-
-### Bước 1: Viết code trong `train.py`
-Code của bạn có thể sử dụng PyTorch / TensorFlow / Transformers với GPU bình thường:
-* Dữ liệu đọc từ: `/kaggle/input/<ten-dataset>`
-* Output, Model weights lưu vào: `/kaggle/working/`
-
-### Bước 2: Thêm Dataset (nếu có)
-```bash
-python manage_kaggle.py add-dataset <username_so_huu>/<ten_dataset>
-```
-
-### Bước 3: Đẩy lên Kaggle để huấn luyện
-```bash
-python manage_kaggle.py push
-```
-
-### Bước 4: Kiểm tra trạng thái
-```bash
-python manage_kaggle.py status
-```
-*(Trạng thái sẽ hiển thị: `queued` -> `running` -> `complete`)*
-
----
-
-## 3.1. Huấn Luyện Fine-Tuning B_zalo Trên Google Colab (GPU T4 Miễn Phí)
-
-Nếu tài khoản Kaggle bị giới hạn GPU hoặc cần huấn luyện tương tác:
-1. Mở [Google Colab](https://colab.research.google.com/).
-2. Chọn **File -> Upload notebook** và chọn tệp [`deploy_zalo_train/train_zalo.ipynb`](file:///c:/Codes/VieTrueVoice/deploy_zalo_train/train_zalo.ipynb).
-3. Đổi Runtime sang GPU: **Runtime -> Change runtime type -> T4 GPU**.
-4. Bấm **Runtime -> Run all**:
-   - Notebook sẽ tự nhận diện môi trường Google Colab.
-   - Tự cài đặt FFmpeg, Kaggle CLI và thư viện phụ thuộc.
-   - Tự động tải Checkpoint B, tập Common Voice và tệp dữ liệu âm thanh 3.26 GB từ Kaggle về `/content/input`.
-   - Tự clone mã nguồn mới nhất từ GitHub `VieTrueVoice` vào container.
-   - Tiến hành tiền sinh offline 500 mẫu giọng trầm và huấn luyện 2 pha với AM-Softmax ($m=0.35$).
-   - Đánh giá kiểm định 5 codecs trên 11.450 mẫu Dev Zalo và xuất kết quả.
 
 ---
 

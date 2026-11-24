@@ -15,12 +15,9 @@
 
 1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **392/392 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
 2. **Quy ước Git Commit**: Mọi bản commit có sự hỗ trợ của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit.
-3. **Quy trình Huấn luyện Hybrid (Local Code <-> Kaggle GPU)**:
-   - Phát triển mã nguồn, viết unit tests và quản lý toàn bộ dự án tại máy Local.
-   - Điều khiển đẩy dữ liệu và kịch bản `train.py` / `train.ipynb` lên GPU miễn phí của Kaggle (Tesla T4 16GB) qua CLI `manage_kaggle.py`:
-     - Dữ liệu đọc từ: `/kaggle/input/<ten-dataset>`
-     - Checkpoint và log lưu tại: `/kaggle/working/best_model.pt`
-     - Tải kết quả về máy Local: `./out/`
+3. **Quy trình Huấn luyện Cục bộ / Đám mây**:
+   - Phát triển mã nguồn, viết unit tests, huấn luyện trên GPU cục bộ (`scripts/run_v8_1_phase_train.py`, `scripts/train.py`) và quản lý toàn bộ dự án tại Local; có thể sinh notebook Kaggle/Colab theo yêu cầu qua `scripts/build_*_notebook.py`.
+     - Checkpoint và log lưu tại: `./out/v0.9.4/best_model.pt`
 4. **Đạo đức Dữ liệu & Bảo mật Sinh trắc học (Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP)**:
    - Triệt tiêu PII: Tuyệt đối không lưu tên thật hoặc thông tin định danh cá nhân; bắt buộc mã hóa ẩn danh `SPK_XXXX`.
    - Xử lý in-memory trên RAM: Đọc luồng byte trực tiếp (`io.BytesIO`) và xóa hủy ngay tệp âm thanh tạm sau khi suy luận.
@@ -33,13 +30,12 @@
 VieTrueVoice/
 ├── PLAN.md                        # Kế hoạch thực thi chi tiết cho Antigravity Agent
 ├── README.md                      # Bảng chỉ số Trước - Sau & thông tin đề tài
-├── howtorun.md                    # Hướng dẫn chạy Kaggle Hybrid, test & server
+├── howtorun.md                    # Hướng dẫn huấn luyện, kiểm thử & chạy server/Docker
 ├── AGENTS.md                      # Bối cảnh agent, quy tắc phiên, stubborn facts
-├── manage_kaggle.py               # CLI điều khiển Kaggle GPU (push/status/output)
-├── train.py / train.ipynb         # Entry-point huấn luyện mô hình 2 pha trên Kaggle GPU
+├── DESIGN.md                      # Đặc tả hệ thống thiết kế giao diện
 ├── requirements.txt               # Thư viện phụ thuộc
 ├── Dockerfile                     # Đóng gói container Docker (EC2 / ECR)
-├── .github/workflows/ci.yml       # Pipeline CI tự động chạy 31/31 unit tests
+├── .github/workflows/ci.yml       # Pipeline CI tự động chạy toàn bộ unit tests
 ├── data/
 │   ├── raw/                       # Giọng thật gốc 5 tình nguyện viên SPK_XXXX + VIVOS + Common Voice
 │   ├── bonafide_ref/              # Mẫu tham chiếu 3.5s-7.5s (allow_stitching=False)
