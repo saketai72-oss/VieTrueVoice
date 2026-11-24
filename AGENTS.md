@@ -125,7 +125,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - `python scripts/build_v8_hybrid_checkpoint.py`: Thực thi quy trình ghép tầng Layer-Wise Grafting và vi chỉnh cân bằng V8.
 - `python scripts/build_defense_handbook_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v1 sang .docx và .pdf.
 - `python scripts/build_defense_handbook_v2_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu Toàn diện v2 (27.393 từ, 497 đoạn, 34 bảng, Chương 13 Inverted Generalization & 27 Q&As) sang .docx và .pdf.
-- `python scripts/export_voice_final_dataset.py`: Xuất bản kho dữ liệu nghiệm thu 66.269 files vào `Voice_Final/`.
+- `python scripts/export_voice_final_dataset.py`: Xuất bản & tổ chức lại 82.644 files vào `Voice_Final/` (`bonafide/` & `spoof/{v7,v8}`).
 - `python scripts/train_dual_seen.py --batch-size 8 --accum-steps 2`: Huấn luyện kép Dual-Seen (F5-TTS + VieNeu-TTS) kèm kiểm định SPK_0001.
 - `python scripts/eval_seen_vs_unseen_degradation.py --ckpt out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`: Đo đạc mức độ suy giảm Seen vs Unseen TTS trên checkpoint Dual-Seen.
 - `python scripts/build_w06_report_docx.py`: Tự động biên dịch Báo cáo Tuần 6 chuẩn khoa học HUTECH (`.docx`).

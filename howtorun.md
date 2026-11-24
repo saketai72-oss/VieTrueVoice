@@ -372,7 +372,7 @@ python scripts/simulate_zalo_webhook.py --audio data/spoof_f5tts/CV_08110ec9e6/C
 ## 8. Hướng Dẫn Xuất Bản Dữ Liệu Nghiệm Thu (Voice_Final) & Huấn Luyện Dual-Seen
 
 ### 8.1 Xuất bản toàn bộ dữ liệu ra thư mục nghiệm thu Voice_Final
-Thực thi trích xuất và sao chép toàn bộ kho dữ liệu âm thanh phân tách nghiêm ngặt 2 mục lớn (`01_Training_Seen` và `02_Unseen_Acceptance`) kèm bảng chỉ mục SHA-256 và hướng dẫn hội đồng:
+Thực thi trích xuất và tổ chức toàn bộ kho dữ liệu âm thanh (82.644 files) thành 2 thư mục chính (`bonafide/` gồm `SPK_Volunteers`, `VIVOS`, `CommonVoice`; và `spoof/` tách `v7/` và `v8/` đầy đủ `Seen` đến `Unseen`) kèm bảng chỉ mục SHA-256:
 ```bash
 python scripts/export_voice_final_dataset.py
 ```

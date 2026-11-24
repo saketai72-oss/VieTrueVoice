@@ -1,38 +1,44 @@
 #!/usr/bin/env python3
-"""Kịch bản xuất bản toàn bộ dữ liệu âm thanh phục vụ Nghiệm thu Đồ án: Voice_Final.
+"""Kịch bản tổ chức & xuất bản toàn bộ dữ liệu âm thanh ViTrueVoice: Voice_Final.
 
 Địa chỉ đích: C:\\Users\\saket\\Documents\\Đồ án chuyên ngành\\Voice_Final
 
-Cấu trúc phân tách 2 không gian lưu trữ:
-1. 01_Training_Seen:
-   - SPK_0001_DeepVoice: Bona fide + F5-TTS + VieNeu-TTS (Clean + 4 Codecs + Ref)
-   - VIVOS_Corpus_Train: Bona fide + F5-TTS + VieNeu-TTS (Clean + 4 Codecs)
-   - CommonVoice_Corpus_Train: Bona fide + F5-TTS + VieNeu-TTS (Clean + 4 Codecs)
-2. 02_Unseen_Acceptance:
-   - BonaFide_5Spk_Volunteers: SPK_0003, SPK_0004, SPK_0005, SPK_0006, SPK_0007 (Clean + 4 Codecs + Ref)
-   - Seen_Baseline_Benchmarks: F5_TTS, VieNeu_TTS trên 5 SPK (375 + 375 = 750 clips)
-   - Unseen_TTS_Engines: Kokoro_Vietnamese, OmniVoice_CFM trên 5 SPK (375 + 375 = 750 clips)
-3. VOICE_FINAL_MANIFEST.csv: Bảng chỉ mục tổng thể 13 cột băm SHA-256 bảo vệ dữ liệu sinh trắc học.
-4. README_NGHIEM_THU.md: Bản hướng dẫn chi tiết dành riêng cho Hội đồng Nghiệm thu.
+Cấu trúc chuẩn 2 thư mục chính:
+1. bonafide/
+   - SPK_Volunteers/       : Đầy đủ SPK_0003..0007 (5 SPK nghiệm thu) + SPK_0001 (train Run 2), gồm raw + 4 codecs + Enrollment_Ref
+   - VIVOS/                : Toàn bộ tập VIVOS thật (VIVOSSPK* + VIVOSDEV*, clean + 4 codecs)
+   - CommonVoice/          : Toàn bộ tập Common Voice 8.0 thật (CV_*, clean + 4 codecs)
+2. spoof/
+   - v7/ (Seen: F5-TTS + VieNeu-TTS | Unseen: OmniVoice CFM)
+     * Seen/F5_TTS/        : SPK_Volunteers + VIVOS + CommonVoice (loại trừ .quarantine_mock)
+     * Seen/VieNeu_TTS/    : SPK_Volunteers + VIVOS + CommonVoice
+     * Unseen/OmniVoice_CFM/: SPK_Volunteers_5SPK (375) + Corpus_15Spk_Eval (965)
+   - v8/ (Seen: F5-TTS + OmniVoice CFM | Unseen: VieNeu-TTS)
+     * Seen/F5_TTS/        : SPK_Volunteers + VIVOS + CommonVoice (loại trừ .quarantine_mock)
+     * Seen/OmniVoice_CFM/ : Train_55Spk (545) + Dev_Eval_15Spk (965) + SPK_Volunteers_5SPK (375)
+     * Unseen/VieNeu_TTS/  : Benchmark_15Spk_955 + SPK_Volunteers (425) + Corpus_Remaining
+3. VOICE_FINAL_MANIFEST.csv & README_NGHIEM_THU.md
 """
 
 from __future__ import annotations
 
 import csv
 import hashlib
-import os
 import shutil
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
+import pandas as pd
 import soundfile as sf
 
 DEST_ROOT = Path(r"C:\Users\saket\Documents\Đồ án chuyên ngành\Voice_Final")
+AUDIO_EXTS = {".wav", ".m4a", ".mp3", ".flac", ".ogg", ".opus"}
 
 
 def sha256_of_file(filepath: Path) -> str:
@@ -56,6 +62,19 @@ def detect_codec(fname: str) -> str:
     return "clean_16k"
 
 
+def codec_subfolder(fname: str) -> str:
+    c = detect_codec(fname)
+    if c == "aac_zalo_76k":
+        return "Zalo_AAC_76k"
+    if c == "opus_zalo_24k":
+        return "Zalo_Opus_24k"
+    if c == "g711_alaw":
+        return "PSTN_G711_Alaw"
+    if c == "amrnb_12.2k":
+        return "Cellular_AMRNB"
+    return "Clean_16k"
+
+
 def get_audio_info(filepath: Path) -> tuple[int, float]:
     try:
         info = sf.info(str(filepath))
@@ -64,270 +83,379 @@ def get_audio_info(filepath: Path) -> tuple[int, float]:
         return 16000, 0.0
 
 
-def main():
-    print("=" * 80)
-    print("📦 XUẤT BẢN DỮ LIỆU NGHIỆM THU: VOICE_FINAL")
-    print(f"🎯 Thư mục đích: {DEST_ROOT}")
-    print("=" * 80)
+def _collect_speaker_dirs(base_dir: Path, prefix: str | None = None) -> list[Path]:
+    if not base_dir.exists():
+        return []
+    dirs = []
+    for d in sorted(base_dir.iterdir()):
+        if not d.is_dir():
+            continue
+        if d.name.startswith(".") or d.name == ".quarantine_mock":
+            continue
+        if prefix is None or d.name.startswith(prefix):
+            dirs.append(d)
+    return dirs
 
-    DEST_ROOT.mkdir(parents=True, exist_ok=True)
-    manifest_rows = []
-    t0 = time.time()
-    n_copied = 0
 
-    def copy_audio_file(
-        src: Path,
+def _process_task(task: tuple[Path, Path, str, str, str, str, str, str]) -> tuple[dict, bool]:
+    src, dst_dir, category, version, split_role, speaker_id, label, tts_generator = task
+    dst_dir.mkdir(parents=True, exist_ok=True)
+    dst_file = dst_dir / src.name
+    copied = False
+    if not dst_file.exists() or dst_file.stat().st_size != src.stat().st_size:
+        shutil.copy2(src, dst_file)
+        copied = True
+
+    rel_p = dst_file.relative_to(DEST_ROOT).as_posix()
+    sha = sha256_of_file(dst_file)
+    codec = detect_codec(src.name)
+    sr, dur = get_audio_info(dst_file)
+
+    row = {
+        "utt_id": src.stem,
+        "speaker_id": speaker_id,
+        "label": label,
+        "version": version,
+        "split_role": split_role,
+        "tts_generator": tts_generator,
+        "codec": codec,
+        "category": category,
+        "file_name": src.name,
+        "rel_path": rel_p,
+        "sha256_hash": sha,
+        "file_size_bytes": dst_file.stat().st_size,
+        "sample_rate": sr,
+        "duration_s": dur,
+    }
+    return row, copied
+
+
+def build_export_tasks() -> list[tuple[Path, Path, str, str, str, str, str, str]]:
+    tasks: list[tuple[Path, Path, str, str, str, str, str, str]] = []
+
+    def add_files_in_dir(
+        src_dir: Path,
         dst_dir: Path,
         category: str,
-        subfolder: str,
+        version: str,
+        split_role: str,
         speaker_id: str,
         label: str,
         tts_generator: str,
+        group_by_codec: bool = False,
     ) -> None:
-        nonlocal n_copied
-        if not src.is_file():
+        if not src_dir.exists():
             return
-        dst_dir.mkdir(parents=True, exist_ok=True)
-        dst_file = dst_dir / src.name
-        if not dst_file.exists() or dst_file.stat().st_size != src.stat().st_size:
-            shutil.copy2(src, dst_file)
-            n_copied += 1
-
-        rel_p = dst_file.relative_to(DEST_ROOT).as_posix()
-        sha = sha256_of_file(dst_file)
-        codec = detect_codec(src.name)
-        sr, dur = get_audio_info(dst_file)
-        utt_id = src.stem
-
-        manifest_rows.append({
-            "utt_id": utt_id,
-            "speaker_id": speaker_id,
-            "label": label,
-            "tts_generator": tts_generator,
-            "codec": codec,
-            "category": category,
-            "subfolder": subfolder,
-            "file_name": src.name,
-            "rel_path": rel_p,
-            "sha256_hash": sha,
-            "file_size_bytes": dst_file.stat().st_size,
-            "sample_rate": sr,
-            "duration_s": dur,
-        })
+        for f in sorted(src_dir.iterdir()):
+            if f.is_file() and f.suffix.lower() in AUDIO_EXTS:
+                target_d = dst_dir / codec_subfolder(f.name) if group_by_codec else dst_dir
+                tasks.append((f, target_d, category, version, split_role, speaker_id, label, tts_generator))
 
     # ═════════════════════════════════════════════════════════════════════════
-    # 1. 01_Training_Seen / SPK_0001_DeepVoice
+    # 1. BONAFIDE/
     # ═════════════════════════════════════════════════════════════════════════
-    print("\n📂 [1/4] Sao chép dữ liệu SPK_0001 (Training Seen)...")
-    dir_spk1_bona = DEST_ROOT / "01_Training_Seen" / "SPK_0001_DeepVoice" / "BonaFide"
-    dir_spk1_f5 = DEST_ROOT / "01_Training_Seen" / "SPK_0001_DeepVoice" / "Spoof_F5TTS"
-    dir_spk1_vn = DEST_ROOT / "01_Training_Seen" / "SPK_0001_DeepVoice" / "Spoof_VieNeuTTS"
+    bona_root = DEST_ROOT / "bonafide"
 
-    # Bona fide
-    for f in sorted((_ROOT / "data/raw/SPK_0001").glob("*.wav")):
-        c = detect_codec(f.name)
-        c_sub = "Clean_16k" if c == "clean_16k" else ("Zalo_AAC_76k" if "aac" in c else ("Zalo_Opus_24k" if "opus" in c else ("PSTN_G711_Alaw" if "g711" in c else "Cellular_AMRNB")))
-        copy_audio_file(f, dir_spk1_bona / c_sub, "01_Training_Seen", f"SPK_0001_DeepVoice/BonaFide/{c_sub}", "SPK_0001", "bonafide", "none")
-    # Enrollment ref
-    for f in sorted((_ROOT / "data/bonafide_ref/SPK_0001").glob("*.wav")):
-        copy_audio_file(f, dir_spk1_bona / "Enrollment_Ref", "01_Training_Seen", "SPK_0001_DeepVoice/BonaFide/Enrollment_Ref", "SPK_0001", "bonafide", "none")
-    # Spoof F5
-    for f in sorted((_ROOT / "data/spoof_f5tts/SPK_0001").glob("*.wav")):
-        c = detect_codec(f.name)
-        c_sub = "Clean_16k" if c == "clean_16k" else ("Zalo_AAC_76k" if "aac" in c else ("Zalo_Opus_24k" if "opus" in c else ("PSTN_G711_Alaw" if "g711" in c else "Cellular_AMRNB")))
-        copy_audio_file(f, dir_spk1_f5 / c_sub, "01_Training_Seen", f"SPK_0001_DeepVoice/Spoof_F5TTS/{c_sub}", "SPK_0001", "spoof", "F5-TTS-Vietnamese")
-    # Spoof VieNeu
-    for f in sorted((_ROOT / "data/spoof_vieneu/SPK_0001").glob("*.wav")):
-        c = detect_codec(f.name)
-        c_sub = "Clean_16k" if c == "clean_16k" else ("Zalo_AAC_76k" if "aac" in c else ("Zalo_Opus_24k" if "opus" in c else ("PSTN_G711_Alaw" if "g711" in c else "Cellular_AMRNB")))
-        copy_audio_file(f, dir_spk1_vn / c_sub, "01_Training_Seen", f"SPK_0001_DeepVoice/Spoof_VieNeuTTS/{c_sub}", "SPK_0001", "spoof", "VieNeu-TTS")
+    # 1.1. Tình nguyện viên SPK (đủ 5 SPK nghiệm thu SPK_0003..0007 + SPK_0001)
+    for spk_dir in _collect_speaker_dirs(_ROOT / "data/raw", prefix="SPK_"):
+        spk = spk_dir.name
+        role = "train_spk1" if spk == "SPK_0001" else "acceptance_5spk"
+        add_files_in_dir(
+            spk_dir,
+            bona_root / "SPK_Volunteers" / spk,
+            "bonafide/SPK_Volunteers",
+            "shared",
+            role,
+            spk,
+            "bonafide",
+            "none",
+            group_by_codec=True,
+        )
+        ref_dir = _ROOT / "data/bonafide_ref" / spk
+        add_files_in_dir(
+            ref_dir,
+            bona_root / "SPK_Volunteers" / spk / "Enrollment_Ref",
+            "bonafide/SPK_Volunteers",
+            "shared",
+            f"{role}_ref",
+            spk,
+            "bonafide",
+            "none",
+            group_by_codec=False,
+        )
 
-    # ═════════════════════════════════════════════════════════════════════════
-    # 2. 02_Unseen_Acceptance (Bộ Nghiệm Thu Độc Lập Held-Out 5 SPK)
-    # ═════════════════════════════════════════════════════════════════════════
-    print("\n📂 [2/4] Sao chép Bộ Nghiệm thu Độc lập (SPK_0003..0007 & TTS Benchmarks)...")
-    speakers = ["SPK_0003", "SPK_0004", "SPK_0005", "SPK_0006", "SPK_0007"]
+    # 1.2. VIVOS
+    for spk_dir in _collect_speaker_dirs(_ROOT / "data/raw", prefix="VIVOS"):
+        spk = spk_dir.name
+        add_files_in_dir(
+            spk_dir,
+            bona_root / "VIVOS" / spk,
+            "bonafide/VIVOS",
+            "shared",
+            "corpus_bonafide",
+            spk,
+            "bonafide",
+            "none",
+        )
 
-    # 2.1. Bona Fide 5 SPK
-    for spk in speakers:
-        raw_spk_dir = _ROOT / f"data/raw/{spk}"
-        dst_spk_dir = DEST_ROOT / "02_Unseen_Acceptance" / "BonaFide_5Spk_Volunteers" / spk
-        if raw_spk_dir.exists():
-            for f in sorted(list(raw_spk_dir.glob("*.wav")) + list(raw_spk_dir.glob("*.m4a"))):
-                c = detect_codec(f.name)
-                c_sub = "Clean_16k" if c == "clean_16k" else ("Zalo_AAC_76k" if "aac" in c else ("Zalo_Opus_24k" if "opus" in c else ("PSTN_G711_Alaw" if "g711" in c else "Cellular_AMRNB")))
-                copy_audio_file(f, dst_spk_dir / c_sub, "02_Unseen_Acceptance", f"BonaFide_5Spk_Volunteers/{spk}/{c_sub}", spk, "bonafide", "none")
-
-        ref_dir = _ROOT / f"data/bonafide_ref/{spk}"
-        if ref_dir.exists():
-            for f in sorted(ref_dir.glob("*.wav")):
-                copy_audio_file(f, dst_spk_dir / "Enrollment_Ref", "02_Unseen_Acceptance", f"BonaFide_5Spk_Volunteers/{spk}/Enrollment_Ref", spk, "bonafide", "none")
-
-    # 2.2. Seen Baseline Benchmarks (F5-TTS & VieNeu-TTS trên 5 SPK nghiệm thu)
-    for spk in speakers:
-        f5_spk_dir = _ROOT / f"data/spoof_f5tts/{spk}"
-        if f5_spk_dir.exists():
-            dst_f5 = DEST_ROOT / "02_Unseen_Acceptance" / "Seen_Baseline_Benchmarks" / "F5_TTS" / spk
-            for f in sorted(f5_spk_dir.glob("*.wav")):
-                c = detect_codec(f.name)
-                copy_audio_file(f, dst_f5, "02_Unseen_Acceptance", f"Seen_Baseline_Benchmarks/F5_TTS/{spk}", spk, "spoof", "F5-TTS-Vietnamese")
-
-        vn_spk_dir = _ROOT / f"data/spoof_vieneu/{spk}"
-        if vn_spk_dir.exists():
-            dst_vn = DEST_ROOT / "02_Unseen_Acceptance" / "Seen_Baseline_Benchmarks" / "VieNeu_TTS" / spk
-            for f in sorted(vn_spk_dir.glob("*.wav")):
-                copy_audio_file(f, dst_vn, "02_Unseen_Acceptance", f"Seen_Baseline_Benchmarks/VieNeu_TTS/{spk}", spk, "spoof", "VieNeu-TTS")
-
-    # 2.3. Unseen TTS Engines (VoiceStudio OmniVoice CFM trên 5 SPK nghiệm thu)
-    for spk in speakers:
-        omni_spk_dir = _ROOT / f"data/spoof_unseen/omnivoice/{spk}"
-        if omni_spk_dir.exists():
-            dst_omni = DEST_ROOT / "02_Unseen_Acceptance" / "Unseen_TTS_Engines" / "OmniVoice_CFM" / spk
-            for f in sorted(omni_spk_dir.glob("*.wav")):
-                copy_audio_file(f, dst_omni, "02_Unseen_Acceptance", f"Unseen_TTS_Engines/OmniVoice_CFM/{spk}", spk, "spoof", "OmniVoice")
+    # 1.3. Common Voice 8.0
+    for cv_dir in _collect_speaker_dirs(_ROOT / "data/raw", prefix="CV_"):
+        spk = cv_dir.name
+        add_files_in_dir(
+            cv_dir,
+            bona_root / "CommonVoice" / spk,
+            "bonafide/CommonVoice",
+            "shared",
+            "corpus_bonafide",
+            spk,
+            "bonafide",
+            "none",
+        )
 
     # ═════════════════════════════════════════════════════════════════════════
-    # 3. 01_Training_Seen / VIVOS & CommonVoice (Trích xuất mẫu đại diện hoặc đầy đủ)
+    # 2. SPOOF/
     # ═════════════════════════════════════════════════════════════════════════
-    print("\n📂 [3/4] Sao chép dữ liệu VIVOS & Common Voice (Training Seen)...")
-    # VIVOS train bona fide
-    dst_vivos_bona = DEST_ROOT / "01_Training_Seen" / "VIVOS_Corpus_Train" / "BonaFide"
-    for spk_dir in sorted((_ROOT / "data/raw").glob("VIVOSSPK*")):
-        spk_id = spk_dir.name
-        for f in sorted(spk_dir.glob("*.wav")):
-            copy_audio_file(f, dst_vivos_bona / spk_id, "01_Training_Seen", f"VIVOS_Corpus_Train/BonaFide/{spk_id}", spk_id, "bonafide", "none")
-    for spk_dir in sorted((_ROOT / "data/raw").glob("VIVOSDEV*")):
-        spk_id = spk_dir.name
-        for f in sorted(spk_dir.glob("*.wav")):
-            copy_audio_file(f, dst_vivos_bona / spk_id, "01_Training_Seen", f"VIVOS_Corpus_Train/BonaFide/{spk_id}", spk_id, "bonafide", "none")
+    spoof_root = DEST_ROOT / "spoof"
 
-    # VIVOS F5 spoofs
-    dst_vivos_f5 = DEST_ROOT / "01_Training_Seen" / "VIVOS_Corpus_Train" / "Spoof_F5TTS"
-    for spk_dir in sorted((_ROOT / "data/spoof_f5tts").glob("VIVOSSPK*")):
-        spk_id = spk_dir.name
-        for f in sorted(spk_dir.glob("*.wav")):
-            copy_audio_file(f, dst_vivos_f5 / spk_id, "01_Training_Seen", f"VIVOS_Corpus_Train/Spoof_F5TTS/{spk_id}", spk_id, "spoof", "F5-TTS-Vietnamese")
+    def add_f5_and_vieneu_for_version(
+        ver: str,
+        f5_role: str,
+        vieneu_role: str,
+        unseen_vieneu_paths: set[Path] | None = None,
+    ) -> None:
+        # F5-TTS (Seen ở cả v7 và v8)
+        f5_base = _ROOT / "data/spoof_f5tts"
+        for d in _collect_speaker_dirs(f5_base):
+            spk = d.name
+            if spk.startswith("SPK_"):
+                sub = "SPK_Volunteers"
+            elif spk.startswith("VIVOS"):
+                sub = "VIVOS"
+            elif spk.startswith("CV_"):
+                sub = "CommonVoice"
+            else:
+                sub = "Other"
+            add_files_in_dir(
+                d,
+                spoof_root / ver / f5_role / "F5_TTS" / sub / spk,
+                f"spoof/{ver}/{f5_role}/F5_TTS",
+                ver,
+                f5_role.lower(),
+                spk,
+                "spoof",
+                "F5-TTS-Vietnamese",
+            )
 
-    # VIVOS VieNeu spoofs
-    dst_vivos_vn = DEST_ROOT / "01_Training_Seen" / "VIVOS_Corpus_Train" / "Spoof_VieNeuTTS"
-    for spk_dir in sorted((_ROOT / "data/spoof_vieneu").glob("VIVOSSPK*")):
-        spk_id = spk_dir.name
-        for f in sorted(spk_dir.glob("*.wav")):
-            copy_audio_file(f, dst_vivos_vn / spk_id, "01_Training_Seen", f"VIVOS_Corpus_Train/Spoof_VieNeuTTS/{spk_id}", spk_id, "spoof", "VieNeu-TTS")
+        # VieNeu-TTS (Seen ở v7, Unseen ở v8)
+        vn_base = _ROOT / "data/spoof_vieneu"
+        for d in _collect_speaker_dirs(vn_base):
+            spk = d.name
+            if ver == "v8" and unseen_vieneu_paths is not None:
+                for f in sorted(d.iterdir()):
+                    if not (f.is_file() and f.suffix.lower() in AUDIO_EXTS):
+                        continue
+                    if f.resolve() in unseen_vieneu_paths:
+                        sub_dir = spoof_root / ver / vieneu_role / "VieNeu_TTS" / "Benchmark_15Spk_955" / spk
+                    elif spk.startswith("SPK_"):
+                        sub_dir = spoof_root / ver / vieneu_role / "VieNeu_TTS" / "SPK_Volunteers" / spk
+                    else:
+                        sub_dir = spoof_root / ver / vieneu_role / "VieNeu_TTS" / "Corpus_Remaining" / spk
+                    tasks.append((
+                        f,
+                        sub_dir,
+                        f"spoof/{ver}/{vieneu_role}/VieNeu_TTS",
+                        ver,
+                        vieneu_role.lower(),
+                        spk,
+                        "spoof",
+                        "VieNeu-TTS",
+                    ))
+            else:
+                if spk.startswith("SPK_"):
+                    sub = "SPK_Volunteers"
+                elif spk.startswith("VIVOS"):
+                    sub = "VIVOS"
+                elif spk.startswith("CV_"):
+                    sub = "CommonVoice"
+                else:
+                    sub = "Other"
+                add_files_in_dir(
+                    d,
+                    spoof_root / ver / vieneu_role / "VieNeu_TTS" / sub / spk,
+                    f"spoof/{ver}/{vieneu_role}/VieNeu_TTS",
+                    ver,
+                    vieneu_role.lower(),
+                    spk,
+                    "spoof",
+                    "VieNeu-TTS",
+                )
 
-    # Common Voice train bona fide
-    dst_cv_bona = DEST_ROOT / "01_Training_Seen" / "CommonVoice_Corpus_Train" / "BonaFide"
-    for cv_dir in sorted((_ROOT / "data/raw").glob("CV_*")):
-        spk_id = cv_dir.name
-        for f in sorted(cv_dir.glob("*.wav")):
-            copy_audio_file(f, dst_cv_bona / spk_id, "01_Training_Seen", f"CommonVoice_Corpus_Train/BonaFide/{spk_id}", spk_id, "bonafide", "none")
+    # 2.1. V7: Seen = {F5-TTS, VieNeu-TTS} | Unseen = {OmniVoice CFM}
+    add_f5_and_vieneu_for_version("v7", f5_role="Seen", vieneu_role="Seen")
 
-    # Common Voice F5 spoofs
-    dst_cv_f5 = DEST_ROOT / "01_Training_Seen" / "CommonVoice_Corpus_Train" / "Spoof_F5TTS"
-    for cv_dir in sorted((_ROOT / "data/spoof_f5tts").glob("CV_*")):
-        spk_id = cv_dir.name
-        for f in sorted(cv_dir.glob("*.wav")):
-            copy_audio_file(f, dst_cv_f5 / spk_id, "01_Training_Seen", f"CommonVoice_Corpus_Train/Spoof_F5TTS/{spk_id}", spk_id, "spoof", "F5-TTS-Vietnamese")
+    for d in _collect_speaker_dirs(_ROOT / "data/spoof_unseen/omnivoice"):
+        spk = d.name
+        add_files_in_dir(
+            d,
+            spoof_root / "v7" / "Unseen" / "OmniVoice_CFM" / "SPK_Volunteers_5SPK" / spk,
+            "spoof/v7/Unseen/OmniVoice_CFM",
+            "v7",
+            "unseen",
+            spk,
+            "spoof",
+            "OmniVoice",
+        )
+    for d in _collect_speaker_dirs(_ROOT / "data/spoof_unseen/omnivoice_15spk"):
+        spk = d.name
+        add_files_in_dir(
+            d,
+            spoof_root / "v7" / "Unseen" / "OmniVoice_CFM" / "Corpus_15Spk_Eval" / spk,
+            "spoof/v7/Unseen/OmniVoice_CFM",
+            "v7",
+            "unseen",
+            spk,
+            "spoof",
+            "OmniVoice",
+        )
 
-    # Common Voice VieNeu spoofs
-    dst_cv_vn = DEST_ROOT / "01_Training_Seen" / "CommonVoice_Corpus_Train" / "Spoof_VieNeuTTS"
-    for cv_dir in sorted((_ROOT / "data/spoof_vieneu").glob("CV_*")):
-        spk_id = cv_dir.name
-        for f in sorted(cv_dir.glob("*.wav")):
-            copy_audio_file(f, dst_cv_vn / spk_id, "01_Training_Seen", f"CommonVoice_Corpus_Train/Spoof_VieNeuTTS/{spk_id}", spk_id, "spoof", "VieNeu-TTS")
+    # 2.2. V8: Seen = {F5-TTS, OmniVoice CFM} | Unseen = {VieNeu-TTS}
+    unseen_vn_csv = _ROOT / "data/manifests_zalo/unseen_vieneu_benchmark.csv"
+    unseen_vn_set: set[Path] = set()
+    if unseen_vn_csv.exists():
+        uv_df = pd.read_csv(unseen_vn_csv)
+        unseen_vn_set = {(_ROOT / str(p)).resolve() for p in uv_df["audio_path"]}
 
-    # ═════════════════════════════════════════════════════════════════════════
-    # 4. Ghi VOICE_FINAL_MANIFEST.csv
-    # ═════════════════════════════════════════════════════════════════════════
-    print("\n📝 [4/4] Ghi bảng chỉ mục tổng thể VOICE_FINAL_MANIFEST.csv...")
+    add_f5_and_vieneu_for_version("v8", f5_role="Seen", vieneu_role="Unseen", unseen_vieneu_paths=unseen_vn_set)
+
+    for d in _collect_speaker_dirs(_ROOT / "data/spoof_train/omnivoice"):
+        spk = d.name
+        add_files_in_dir(
+            d,
+            spoof_root / "v8" / "Seen" / "OmniVoice_CFM" / "Train_55Spk" / spk,
+            "spoof/v8/Seen/OmniVoice_CFM",
+            "v8",
+            "seen",
+            spk,
+            "spoof",
+            "OmniVoice",
+        )
+    for d in _collect_speaker_dirs(_ROOT / "data/spoof_unseen/omnivoice_15spk"):
+        spk = d.name
+        add_files_in_dir(
+            d,
+            spoof_root / "v8" / "Seen" / "OmniVoice_CFM" / "Dev_Eval_15Spk" / spk,
+            "spoof/v8/Seen/OmniVoice_CFM",
+            "v8",
+            "seen",
+            spk,
+            "spoof",
+            "OmniVoice",
+        )
+    for d in _collect_speaker_dirs(_ROOT / "data/spoof_unseen/omnivoice"):
+        spk = d.name
+        add_files_in_dir(
+            d,
+            spoof_root / "v8" / "Seen" / "OmniVoice_CFM" / "SPK_Volunteers_5SPK" / spk,
+            "spoof/v8/Seen/OmniVoice_CFM",
+            "v8",
+            "seen",
+            spk,
+            "spoof",
+            "OmniVoice",
+        )
+
+    return tasks
+
+
+def main():
+    print("=" * 80)
+    print("📦 TỔ CHỨC LẠI TOÀN BỘ DỮ LIỆU VOICE_FINAL (bonafide/ & spoof/{v7,v8})")
+    print(f"🎯 Thư mục đích: {DEST_ROOT}")
+    print("=" * 80)
+
+    t0 = time.time()
+    DEST_ROOT.mkdir(parents=True, exist_ok=True)
+    tasks = build_export_tasks()
+    print(f"📋 Tổng số tệp âm thanh cần đồng bộ: {len(tasks):,} files", flush=True)
+
+    manifest_rows = []
+    n_copied = 0
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        for idx, (row, copied) in enumerate(ex.map(_process_task, tasks), 1):
+            manifest_rows.append(row)
+            if copied:
+                n_copied += 1
+            if idx % 10000 == 0 or idx == len(tasks):
+                print(f"   Tiến độ: {idx:,}/{len(tasks):,} ({idx/len(tasks)*100:.1f}%) | Chép mới: {n_copied:,} [{time.time()-t0:.1f}s]", flush=True)
+
+    # Dọn các thư mục cấu trúc cũ sau khi đã ghi xong cấu trúc mới
+    for legacy_dir in ["01_Training_Seen", "02_Unseen_Acceptance", "01_Corpus_Evaluation"]:
+        lp = DEST_ROOT / legacy_dir
+        if lp.exists():
+            print(f"🧹 Đang dọn cấu trúc cũ: {lp.name}...", flush=True)
+            shutil.rmtree(lp)
+
+    # Ghi manifest SHA-256 tổng thể
     manifest_csv = DEST_ROOT / "VOICE_FINAL_MANIFEST.csv"
     fieldnames = [
-        "utt_id", "speaker_id", "label", "tts_generator", "codec",
-        "category", "subfolder", "file_name", "rel_path",
-        "sha256_hash", "file_size_bytes", "sample_rate", "duration_s"
+        "utt_id", "speaker_id", "label", "version", "split_role",
+        "tts_generator", "codec", "category", "file_name", "rel_path",
+        "sha256_hash", "file_size_bytes", "sample_rate", "duration_s",
     ]
     with open(manifest_csv, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(manifest_rows)
 
-    # ═════════════════════════════════════════════════════════════════════════
-    # 5. Ghi README_NGHIEM_THU.md
-    # ═════════════════════════════════════════════════════════════════════════
-    readme_md = DEST_ROOT / "README_NGHIEM_THU.md"
+    # Thống kê chi tiết cho README
     n_total = len(manifest_rows)
-    n_train = sum(1 for r in manifest_rows if r["category"] == "01_Training_Seen")
-    n_accept = sum(1 for r in manifest_rows if r["category"] == "02_Unseen_Acceptance")
     n_bona = sum(1 for r in manifest_rows if r["label"] == "bonafide")
     n_spoof = sum(1 for r in manifest_rows if r["label"] == "spoof")
+    n_spk = sum(1 for r in manifest_rows if r["category"] == "bonafide/SPK_Volunteers")
+    n_vivos = sum(1 for r in manifest_rows if r["category"] == "bonafide/VIVOS")
+    n_cv = sum(1 for r in manifest_rows if r["category"] == "bonafide/CommonVoice")
 
-    content = f"""# BỘ DỮ LIỆU NGHIỆM THU ĐỒ ÁN CHUYÊN NGÀNH: VOICE_FINAL
-## Hệ Thống Phát Hiện Giọng Nói Giả Tiếng Việt Qua Kênh Thoại Nén (ViTrueVoice v0.4.6)
+    n_v7_seen_f5 = sum(1 for r in manifest_rows if r["category"] == "spoof/v7/Seen/F5_TTS")
+    n_v7_seen_vn = sum(1 for r in manifest_rows if r["category"] == "spoof/v7/Seen/VieNeu_TTS")
+    n_v7_unseen_om = sum(1 for r in manifest_rows if r["category"] == "spoof/v7/Unseen/OmniVoice_CFM")
 
-> **Cơ quan chủ quản**: Trường Đại học Công nghệ TP.HCM (HUTECH)  
-> **Sinh viên thực hiện**: Nguyễn Thành Tài (MSSV: 2380601959)  
-> **Thời gian xuất bản**: {time.strftime('%Y-%m-%d %H:%M:%S')}  
-> **Tổng số file âm thanh**: {n_total:,} clips ({n_copied:,} files mới sao chép)  
-> **Tính toàn vẹn**: 100% tệp đã băm mã hóa SHA-256 đối chiếu tại `VOICE_FINAL_MANIFEST.csv`
+    n_v8_seen_f5 = sum(1 for r in manifest_rows if r["category"] == "spoof/v8/Seen/F5_TTS")
+    n_v8_seen_om = sum(1 for r in manifest_rows if r["category"] == "spoof/v8/Seen/OmniVoice_CFM")
+    n_v8_unseen_vn = sum(1 for r in manifest_rows if r["category"] == "spoof/v8/Unseen/VieNeu_TTS")
 
----
+    readme_md = DEST_ROOT / "README_NGHIEM_THU.md"
+    readme_md.write_text(
+        f"""# BỘ DỮ LIỆU ĐẦY ĐỦ VITRUEVOICE (`VOICE_FINAL`)
 
-## 1. Phân Tách Hai Không Gian Lưu Trữ Cốt Lõi
-
-Bộ dữ liệu được phân chia nghiêm ngặt thành hai mục lớn theo đúng nguyên tắc thực nghiệm độc lập:
-
-### Mục 1: `01_Training_Seen/` ({n_train:,} files)
-Toàn bộ dữ liệu âm thanh tham gia vào quá trình huấn luyện và điều chỉnh mô hình (Training & Fine-Tuning):
-- **SPK_0001_DeepVoice**: Tình nguyện viên giọng trầm ngoại lai chuyển giao vào tập huấn luyện ({sum(1 for r in manifest_rows if r['speaker_id'] == 'SPK_0001')} files gồm 75 bona fide + 50 F5-TTS + 50 VieNeu-TTS).
-- **VIVOS_Corpus_Train**: Kho ngữ liệu VIVOS (46 người nói huấn luyện VIVOSSPK01..46) kèm biến thể nén 5 codec và spoof sinh bởi 2 công cụ Seen TTS (F5-TTS và VieNeu-TTS).
-- **CommonVoice_Corpus_Train**: Ngữ liệu Mozilla Common Voice 8.0 tiếng Việt (20 người nói) kèm đầy đủ paired codecs và spoof sinh bởi 2 công cụ Seen TTS.
-
-### Mục 2: `02_Unseen_Acceptance/` ({n_accept:,} files)
-**BỘ NGHIỆM THU ĐỘC LẬP CHÍNH THỨC CỦA ĐỒ ÁN** — Hoàn toàn cô lập 100% khỏi quá trình huấn luyện, chọn ngưỡng threshold hay calibration:
-- **BonaFide_5Spk_Volunteers** (444 files): 84 phát ngôn giọng thật gốc độc bản từ 5 tình nguyện viên đối chứng (`SPK_0003`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`) nhân với 5 biến thể codec (Clean, Zalo AAC-LC 76k, Zalo Opus 24k, G.711 A-law, AMR-NB) cùng các file chuẩn tham chiếu (Enrollment_Ref).
-- **Seen_Baseline_Benchmarks** (750 files): Tập spoof đối chứng sinh bởi 2 công cụ Seen TTS (`F5_TTS`: 375 files; `VieNeu_TTS`: 375 files) nhằm kiểm định Giả thuyết H1.
-- **Unseen_TTS_Engines** (375 files): Toàn bộ giọng giả sinh bởi công cụ Unseen TTS Zero-Shot VoiceStudio CFM (`OmniVoice_CFM`: 375 files) nhằm kiểm định Giả thuyết H2.
+> **Sinh viên thực hiện**: Nguyễn Thành Tài (MSSV: 2380601959) — HUTECH  
+> **Cập nhật lúc**: {time.strftime('%Y-%m-%d %H:%M:%S')}  
+> **Tổng số tệp âm thanh**: {n_total:,} files (`bonafide`: {n_bona:,} | `spoof`: {n_spoof:,})  
+> **Toàn vẹn dữ liệu**: 100% băm SHA-256 tại `VOICE_FINAL_MANIFEST.csv` (loại bỏ hoàn toàn `.quarantine_mock`)
 
 ---
 
-## 2. Thống Kê Phân Bổ Codec & Nhãn Âm Thanh
+## 1. Cấu Trúc 2 Thư Mục Chính
 
-| Hạng mục | Bona Fide (Thật) | Spoof (Giả) | Tổng cộng |
-|---|---|---|---|
-| **01_Training_Seen** | {sum(1 for r in manifest_rows if r['category'] == '01_Training_Seen' and r['label'] == 'bonafide'):,} | {sum(1 for r in manifest_rows if r['category'] == '01_Training_Seen' and r['label'] == 'spoof'):,} | {n_train:,} |
-| **02_Unseen_Acceptance** | {sum(1 for r in manifest_rows if r['category'] == '02_Unseen_Acceptance' and r['label'] == 'bonafide'):,} | {sum(1 for r in manifest_rows if r['category'] == '02_Unseen_Acceptance' and r['label'] == 'spoof'):,} | {n_accept:,} |
-| **Toàn bộ kho dữ liệu** | **{n_bona:,}** | **{n_spoof:,}** | **{n_total:,}** |
+### `bonafide/` ({n_bona:,} files)
+- `SPK_Volunteers/` (**{n_spk:,} files**): Đầy đủ 5 tình nguyện viên nghiệm thu (`SPK_0003`..`SPK_0007`, 444 files) và tình nguyện viên `SPK_0001` (80 files), gồm bản clean + 4 codecs viễn thông/Zalo và `Enrollment_Ref/`.
+- `VIVOS/` (**{n_vivos:,} files**): Toàn bộ ngữ liệu VIVOS (`VIVOSSPK*` + `VIVOSDEV*`) kèm 5 biến thể kênh thoại.
+- `CommonVoice/` (**{n_cv:,} files**): Toàn bộ ngữ liệu Mozilla Common Voice 8.0 (`CV_*`) kèm 5 biến thể kênh thoại.
 
----
+### `spoof/` ({n_spoof:,} files)
+#### `spoof/v7/` — Kiến trúc V7 (Seen: F5-TTS + VieNeu-TTS | Unseen: OmniVoice CFM)
+- `Seen/F5_TTS/` (**{n_v7_seen_f5:,} files**): Đầy đủ mẫu giả F5-TTS trên `SPK_Volunteers`, `VIVOS`, `CommonVoice`.
+- `Seen/VieNeu_TTS/` (**{n_v7_seen_vn:,} files**): Đầy đủ mẫu giả VieNeu-TTS trên `SPK_Volunteers`, `VIVOS`, `CommonVoice`.
+- `Unseen/OmniVoice_CFM/` (**{n_v7_unseen_om:,} files**): Đầy đủ mẫu giả Zero-Shot VoiceStudio CFM trên 5 SPK nghiệm thu (`SPK_Volunteers_5SPK`, 375 files) và 15 người nói held-out (`Corpus_15Spk_Eval`, 965 files).
 
-## 3. Hướng Dẫn Thẩm Định & Kiểm Chứng 1-Click Dành Cho Hội Đồng
+#### `spoof/v8/` — Kiến trúc Hoán đổi V8 (Seen: F5-TTS + OmniVoice CFM | Unseen: VieNeu-TTS)
+- `Seen/F5_TTS/` (**{n_v8_seen_f5:,} files**): Đầy đủ mẫu giả F5-TTS trên `SPK_Volunteers`, `VIVOS`, `CommonVoice`.
+- `Seen/OmniVoice_CFM/` (**{n_v8_seen_om:,} files**): Đầy đủ mẫu OmniVoice CFM gồm tập huấn luyện (`Train_55Spk`, 545 files), tập xác thực (`Dev_Eval_15Spk`, 965 files) và 5 SPK (`SPK_Volunteers_5SPK`, 375 files).
+- `Unseen/VieNeu_TTS/` (**{n_v8_unseen_vn:,} files**): Đầy đủ mẫu giả VieNeu-TTS Unseen gồm bộ kiểm định chính thức Cổng 3 H2 (`Benchmark_15Spk_955`, 955 files), `SPK_Volunteers` (425 files) và phần ngữ liệu VIVOS/CommonVoice còn lại.
+""",
+        encoding="utf-8",
+    )
 
-Hội đồng có thể kiểm tra trực tiếp bất kỳ file âm thanh nào trong thư mục này qua giao diện hoặc CLI:
-
-### Cách 1: Chạy kịch bản suy luận CLI
-```bash
-python scripts/demo_predict.py --audio "02_Unseen_Acceptance/BonaFide_5Spk_Volunteers/SPK_0004/Clean_16k/SPK_0004_01.wav"
-python scripts/demo_predict.py --audio "02_Unseen_Acceptance/Unseen_TTS_Engines/OmniVoice_CFM/SPK_0004/SPK_0004_omnivoice_prompt_006.wav"
-```
-
-### Cách 2: Chạy kiểm định ma trận suy giảm (Degradation Analysis)
-```bash
-python scripts/eval_seen_vs_unseen_degradation.py
-```
-
-### Cách 3: Đối chiếu tính toàn vẹn SHA-256
-Mọi bản ghi âm thanh đều khớp chính xác mã SHA-256 trong tệp `VOICE_FINAL_MANIFEST.csv`, tuân thủ nghiêm ngặt Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP.
-"""
-    readme_md.write_text(content, encoding="utf-8")
-
-    dt = time.time() - t0
-    print("\n" + "=" * 80)
-    print(f"🎉 XUẤT BẢN THÀNH CÔNG BỘ DỮ LIỆU VOICE_FINAL!")
-    print(f"📁 Tổng số file đã quét & đăng ký: {n_total:,} files ({n_copied:,} files chép mới)")
-    print(f"📄 Bảng chỉ mục: {manifest_csv}")
-    print(f"📖 Hướng dẫn nghiệm thu: {readme_md}")
-    print(f"⏱️ Tổng thời gian thực hiện: {dt:.1f} giây")
-    print("=" * 80)
+    print(f"\n✅ HOÀN TẤT XUẤT BẢN VOICE_FINAL: {n_total:,} files trong {time.time()-t0:.1f}s!")
 
 
 if __name__ == "__main__":
