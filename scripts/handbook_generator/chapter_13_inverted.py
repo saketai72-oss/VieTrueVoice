@@ -605,13 +605,13 @@ def add_chapter_13_inverted(doc):
         "- **Tổng kho `Voice_Final`**: **103.189** tệp âm thanh (`bonafide/`: **70.174**; `spoof/v7/`: **13.955**; `spoof/v8/`: **19.060**), khớp 100% với chỉ mục kiểm toán SHA-256 `VOICE_FINAL_MANIFEST.csv`.",
     )
 
-    add_styled_paragraph(doc, "**Bảng 13.6: Cấu Trúc 5 Manifest V8.1 Chuẩn 19 Cột (0% Rò Rỉ Dữ Liệu)**", bold=True, color_rgb=(31, 73, 125))
-    headers_m81 = ["Tên Tệp Manifest (`data/manifests_zalo/`)", "Số Dòng", "Thành Phần Nhãn / TTS Generator", "Vai Trò Trong Thực Nghiệm V8.1"]
+    add_styled_paragraph(doc, "**Bảng 13.6: Cấu Trúc 5 Manifest Chuẩn 19 Cột (0% Rò Rỉ Dữ Liệu)**", bold=True, color_rgb=(31, 73, 125))
+    headers_m81 = ["Tên Tệp Manifest (`data/manifests_zalo/`)", "Số Dòng", "Thành Phần Nhãn / TTS Generator", "Vai Trò Trong Thực Nghiệm v0.9.4"]
     rows_m81 = [
         ("train_v8_f5_omni_no_spk1.csv", "54.225", "46.925 Bona + 3.660 F5 + 3.640 OmniVoice", "Huấn luyện Run 1 (0% SPK_0001..0007, 0% VieNeu)"),
         ("train_v8_f5_omni_with_spk1.csv", "54.400", "+175 SPK_0001 (75 Bona + 50 F5 + 50 Omni)", "Huấn luyện Run 2 khắc phục giọng siêu trầm ngoại lai"),
         ("dev_v8_f5_omni.csv", "12.405", "10.490 Bona + 960 F5 + 955 OmniVoice", "Thẩm định hội tụ 15 người nói độc lập"),
-        ("test_indomain_v8_f5_omni.csv", "15.980", "13.735 Bona + 1.125 F5 + 1.120 OmniVoice", "Đo lường công bằng V7 vs V8.0 vs V8.1 (eval_only=15.665)"),
+        ("test_indomain_v8_f5_omni.csv", "15.980", "13.735 Bona + 1.125 F5 + 1.120 OmniVoice", "Đo lường công bằng V7 vs V8.0 vs v0.9.4 (eval_only=15.665)"),
         ("unseen_vieneu_benchmark.csv", "955", "955 VieNeu-TTS v3 Turbo (15 Dev SPK x 5 codecs)", "Kiểm định Giả thuyết H2 (Unseen OOD <= 15.0% EER)"),
     ]
 
@@ -797,4 +797,15 @@ def add_chapter_13_inverted(doc):
         "đẩy tỷ lệ chặn OmniVoice CFM từ 75.00% (V7) lên **91.52%**, đồng thời đạt **93.3%** Gate 1 `SPK_0001`, "
         "**100%** 4 SPK đối chứng chính và **12.05% EER** trên Unseen VieNeu-TTS.",
         title="TỔNG KẾT ĐỘT PHÁ CỦA MÔ HÌNH VITRUEVOICE v0.9.4",
+    )
+
+    add_styled_paragraph(
+        doc,
+        "- **Chuẩn hóa mã nguồn & phát hành `v0.9.4`**: Gỡ bỏ 11 script thử nghiệm một lần, 3 JSON grid trung gian, 11 mục dư thừa tại thư mục gốc "
+        "và dọn 25,69 GB cache/checkpoint cục bộ; di chuyển đặc tả giọng trầm vào `docs/SPEC_deep-voice-generalization.md`, "
+        "hoàn thiện bảng bằng chứng & ngày đo thực tế trong `README.md`, duy trì **392/392 unit tests** xanh 100% trên GitHub Actions CI "
+        "và đóng gói Release `v0.9.4` kèm trọng số `vitruevoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`).",
+        font_size=9.5,
+        space_before=6,
+        space_after=6,
     )

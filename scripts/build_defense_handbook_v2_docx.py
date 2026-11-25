@@ -129,7 +129,7 @@ def build_document_v2():
         ),
         (
             "Phiên bản hệ thống:",
-            "v0.9.4 (Inverted Generalization V8.1 Symmetric 6.445, Head-Calibration head_blend_a0.75, Dense Overlap Asymmetric Veto, Platt Scaling T=16.0 & 392 CI Tests 100% Green)",
+            "v0.9.4 (Inverted Generalization Symmetric 6.445, Head-Calibration head_blend_a0.75, Dense Overlap Asymmetric Veto, Platt Scaling T=16.0 & 392 CI Tests 100% Green)",
         ),
         (
             "Công nghệ cốt lõi:",
