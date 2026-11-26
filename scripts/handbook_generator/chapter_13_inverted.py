@@ -608,8 +608,8 @@ def add_chapter_13_inverted(doc):
     add_styled_paragraph(doc, "**Bảng 13.6: Cấu Trúc 5 Manifest Chuẩn 19 Cột (0% Rò Rỉ Dữ Liệu)**", bold=True, color_rgb=(31, 73, 125))
     headers_m81 = ["Tên Tệp Manifest (`data/manifests_zalo/`)", "Số Dòng", "Thành Phần Nhãn / TTS Generator", "Vai Trò Trong Thực Nghiệm v0.9.4"]
     rows_m81 = [
-        ("train_v8_f5_omni_no_spk1.csv", "54.225", "46.925 Bona + 3.660 F5 + 3.640 OmniVoice", "Huấn luyện Run 1 (0% SPK_0001..0007, 0% VieNeu)"),
-        ("train_v8_f5_omni_with_spk1.csv", "54.400", "+175 SPK_0001 (75 Bona + 50 F5 + 50 Omni)", "Huấn luyện Run 2 khắc phục giọng siêu trầm ngoại lai"),
+        ("train_v8_f5_omni_no_spk1.csv", "54.225", "46.925 Bona + 3.660 F5 + 3.640 OmniVoice", "Tập Train đối chứng (0% SPK_0001..0007, 0% VieNeu)"),
+        ("train_v8_f5_omni_with_spk1.csv", "54.400", "+175 SPK_0001 (75 Bona + 50 F5 + 50 Omni)", "Tập Train chính thức v0.9.4 (thêm 1 SPK dư ngoài bộ 5 SPK nghiệm thu)"),
         ("dev_v8_f5_omni.csv", "12.405", "10.490 Bona + 960 F5 + 955 OmniVoice", "Thẩm định hội tụ 15 người nói độc lập"),
         ("test_indomain_v8_f5_omni.csv", "15.980", "13.735 Bona + 1.125 F5 + 1.120 OmniVoice", "Đo lường công bằng V7 vs V8.0 vs v0.9.4 (eval_only=15.665)"),
         ("unseen_vieneu_benchmark.csv", "955", "955 VieNeu-TTS v3 Turbo (15 Dev SPK x 5 codecs)", "Kiểm định Giả thuyết H2 (Unseen OOD <= 15.0% EER)"),
@@ -656,9 +656,9 @@ def add_chapter_13_inverted(doc):
         doc,
         "Huấn luyện được triển khai với cấu hình `HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`, `batch_size=8`, `accum_steps=2`, "
         "AM-Softmax (`am_s=30.0`, giảm biên lề `am_m=0.20` để không ép điểm người nói trầm ngoại lai), khởi tạo từ checkpoint V5:\n"
-        "- **Run 1 (`out/zalo_b_zalo_v8_1_no_spk1/`, 54.225 dòng)**: Pha 1 đạt Dev EER **7.96%** (33.70 phút); Pha 2 đạt Dev EER **6.32%** (131.63 phút). "
-        "Cổng 1 (`SPK_0001`) đạt **46.7% (7/15)** ở `asymmetric_veto` và **60.0% (9/15)** ở `max` (< 80%), tự động kích hoạt rẽ nhánh Run 2.\n"
-        "- **Run 2 (`out/zalo_b_zalo_v8_1_with_spk1/`, 54.400 dòng)**: Bổ sung 175 dòng `SPK_0001` (75 bona + 50 F5 + 50 OmniVoice). Pha 1 đạt Dev EER **10.76%** (34.17 phút); "
+        "- **Run 1 (`out/zalo_b_zalo_v8_1_no_spk1/`, 54.225 dòng)**: Pha 1 đạt Dev EER **7.96%** (33.70 phút); Pha 2 đạt Dev EER **6.32%** (131.63 phút); "
+        "Cổng 1 (`SPK_0001`) đạt **46.7% (7/15)** ở `asymmetric_veto` và **60.0% (9/15)** ở `max`.\n"
+        "- **Run 2 (`out/zalo_b_zalo_v8_1_with_spk1/`, 54.400 dòng)**: Sử dụng tập Train đầy đủ gồm VIVOS, CommonVoice và 175 mẫu của `SPK_0001` (tình nguyện viên thứ 6 dư ngoài bộ 5 SPK nghiệm thu `SPK_0003..0007`). Pha 1 đạt Dev EER **10.76%** (34.17 phút); "
         "Pha 2 Epoch 1 đạt Dev EER **5.95%** (133.13 phút). Ở trạng thái thô (Raw Phase 2), khối SSL học phân tách rất mạnh giữa F5/OmniVoice và giọng thật "
         "(Dev Omni EER 7.98%/8.06%, Gate 4 đạt 86.2% dưới `asymmetric_veto`), nhưng độ lệch phân loại âm (negative classifier bias) kéo Gate 1 xuống 40.0% và Gate 2 xuống 65.5%. "
         "Do cả Run 2 Pha 1 và Pha 2 đều có Gate 1 < 54%, phép ghép tầng thô P1+P2 chỉ đạt tối đa 33.3% ở Gate 1.\n"

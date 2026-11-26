@@ -144,7 +144,7 @@ def main():
     footer = section.footer
     f_p = footer.paragraphs[0]
     f_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    f_run = f_p.add_run("DACN W07 · Nguyễn Thành Tài – 2380601959 · ViTrueVoice (v0.9)")
+    f_run = f_p.add_run("DACN W07 · Nguyễn Thành Tài – 2380601959 · ViTrueVoice (v0.9.4)")
     f_run.font.name = "Times New Roman"
     f_run.font.size = Pt(8.5)
     f_run.font.italic = True
@@ -158,7 +158,7 @@ def main():
     
     add_styled_paragraph(doc, "BÁO CÁO TIẾN ĐỘ CHECKPOINT TUẦN 7 (W07)\nBẢO MẬT, UX, DOCKER, CI, 5 NFR — ĐÓNG BĂNG TÍNH NĂNG (DEVSECOPS)", 
                          font_size=14.0, bold=True, color_rgb=(192, 0, 0), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=3)
-    add_styled_paragraph(doc, "Mục tiêu tuần: Đưa bảo mật và chất lượng vận hành vào sản phẩm (DevSecOps) · Từ tuần này không thêm tính năng mới · Đóng băng tính năng (Release tag v0.9) · >=2 biện pháp bảo mật có minh chứng hoạt động · Cải thiện UX từ >=3 góp ý người dùng thật (ảnh trước/sau) · Dockerfile & Compose chạy theo README · CI GitHub Actions chạy test thật xanh 100% · 5 NFR có số mục tiêu và cách đo (đã đo thực tế >=2) · Bổ sung Chương 3 nháp.", 
+    add_styled_paragraph(doc, "Mục tiêu tuần: Đưa bảo mật và chất lượng vận hành vào sản phẩm (DevSecOps) · Từ tuần này không thêm tính năng mới · Đóng băng tính năng (Release tag v0.9.4) · >=2 biện pháp bảo mật có minh chứng hoạt động · Cải thiện UX từ >=3 góp ý người dùng thật (ảnh trước/sau) · Dockerfile & Compose chạy theo README (0 VNĐ cục bộ) · CI GitHub Actions chạy test thật xanh 100% · 5 NFR có số mục tiêu và cách đo (đã đo thực tế >=2) · Bổ sung Chương 3 nháp.", 
                          font_size=9.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=8)
     
     # 3. Table 0: Metadata Table
@@ -174,10 +174,10 @@ def main():
         ("Cụm đề tài áp dụng", "AI/ML kết hợp Web/App (Trọng tâm: DevSecOps, Lọc PII sinh trắc học, Chống tấn công giả mạo Webhook)"),
         ("Link Repository GitHub (dán LMS)", "https://github.com/saketai72-oss/VieTrueVoice"),
         ("Link Web Demo & API (dán LMS)", "Web Client Google Labs Playground: http://localhost:8000/playground\nGradio Web UI Forensics: http://localhost:8000 · Telegram Bot: https://t.me/vitruevoice_bot (@vitruevoice_bot)"),
-        ("Link Git Release Tag v0.9 (Đóng băng)", "https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9 (Commit 8fb0c95 trên branch main)"),
-        ("Link CI Run xanh gần nhất (GitHub Actions)", "https://github.com/saketai72-oss/VieTrueVoice/actions/runs/44719429979 (Run ID: 44719429979 · 328/328 tests passed 100% green · Thời gian: 2m40s)"),
+        ("Link Git Release Tag v0.9.4 (Đóng băng)", "https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9.4 (Nhánh main · Đính kèm trọng số vitruevoice_v0.9.4.zip)"),
+        ("Link CI Run xanh gần nhất (GitHub Actions)", "https://github.com/saketai72-oss/VieTrueVoice/actions/runs/45468850621 (Run ID: 45468850621 · 392/392 tests passed 100% green · Thời gian: 2m59s)"),
         ("Hạn nộp & Lịch vấn đáp LMS", "Hạn nộp: Trước 12:00 thứ Sáu 27/11/2026 · Vấn đáp: ==13:30–16:30 chiều thứ Sáu 27/11/2026 (có vấn đáp xác minh)=="),
-        ("Cấu trúc nộp bài (chuẩn LMS HUTECH)", "(1) Bổ sung tuần trước → (2) Phiếu nhật ký tuần W07 → (3) Nhật ký AI → (4) Minh chứng Checkpoint W07 (Bảo mật, UX 3 người dùng, Docker/CI, 5 NFR, Đóng băng v0.9, Tự học OWASP/Docker/CI, Vấn đáp mẫu, 3 Chứng chỉ AWS Gói A) → (5) Chương 3 nháp bổ sung.")
+        ("Cấu trúc nộp bài (chuẩn LMS HUTECH)", "(1) Bổ sung tuần trước → (2) Phiếu nhật ký tuần W07 → (3) Nhật ký AI → (4) Minh chứng Checkpoint W07 (Bảo mật, UX 3 người dùng, Docker/CI, 5 NFR, Đóng băng v0.9.4, Tự học OWASP/Docker/CI, Vấn đáp mẫu, 3 Chứng chỉ AWS Gói A) → (5) Chương 3 nháp bổ sung.")
     ]
     
     for r_idx, (col1, col2) in enumerate(t0_data):
@@ -229,7 +229,7 @@ def main():
          "Đã khóa cứng pipeline nhân bản VoiceStudio CFM (OmniVoice Zero-Shot Flow Matching) với câu thoại nguyên văn đối soát (*'Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ.'*), tích hợp bảng đối soát Comparative Benchmark Matrix phân tách rõ ràng.",
          "Mục 4.2 (Hình 4.2)"),
         ("3. Đưa bảo mật DevSecOps và quy trình CI tự động vào sản phẩm",
-         "Đã hoàn thành đóng gói Docker Compose 2 container (`vitruevoice-api` và `vitruevoice-bot`), thiết lập pipeline GitHub Actions tự động kiểm thử 328/328 tests mỗi lần push/PR, thiết lập cờ đóng băng tính năng và tạo git release tag `v0.9`.",
+         "Đã hoàn thành đóng gói Docker Compose 2 container (`vitruevoice-api` và `vitruevoice-bot`) vận hành 0 VNĐ cục bộ, thiết lập pipeline GitHub Actions tự động kiểm thử 392/392 tests mỗi lần push/PR, đóng băng tính năng và phát hành Release `v0.9.4` kèm trọng số `vitruevoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`).",
          "Mục 4.1, 4.3, 4.5")
     ]
 
@@ -268,20 +268,20 @@ def main():
          "• Chủ Nhật 22/11: Tích hợp Chế độ 2 Live CFM Voice Cloning qua VoiceStudio CFM (OmniVoice), chuẩn hóa câu thoại nguyên văn đối soát (*'Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ.'*); giải quyết circular import và cập nhật dynamic audio stream. Commits: `6630a1c`, `d3dc6fd`, `974a0b1`.\n"
          "• Thứ Hai 23/11: Phát hiện hiện tượng Chrome/Edge WebRTC squelch gating (-25.39 điểm); bóc tách nguyên nhân và khắc phục triệt để bằng hook WebRTC mộc (`noiseSuppression: false`, `echoCancellation: false`, `autoGainControl: false`) kết hợp pipeline tiền xử lý DSP `_condition_audio_for_inference` (trim silence top_db=25, peak norm 95%). Đưa giọng mic thật về `BONA FIDE` (+22.74 điểm, 99.9% tin cậy). Commit: `0c9c59f`.\n"
          "• Thứ Ba 24/11: Thu thập phản hồi UX từ 3 người dùng thật (CLB ATTT HUTECH, phụ huynh cao tuổi, kỹ sư QA); tinh chỉnh giao diện, sửa nhãn xác suất `prob_spoof_pct`, thêm cảnh báo hổ phách `MISSED SPOOF` minh bạch. Đo lường 5 NFRs. Commits: `24c0ade`, `752aa33`.\n"
-         "• Thứ Tư 25/11: Đóng gói và chạy thử nghiệm Docker Compose; bổ sung mock synthetic fallback cho CI headless runner; chạy 328 unit tests; merge `feature/playground-ui` vào `main`. Commits: `0604558`, `8fb0c95`.\n"
-         "• Thứ Năm 26/11: Giám sát pipeline CI GitHub Actions đạt 100% Green (Run ID: `44719429979`, 328/328 passed); đóng băng tính năng, tạo và đẩy git tag `v0.9`; soạn thảo bản nháp Chương 3 bổ sung (Bảo mật, Docker/CI, 5 NFRs).\n"
+         "• Thứ Tư 25/11: Hoàn thiện tập `OmniVoice_CFM` đối xứng 1:1 (6.445 tệp: VIVOS 4.795 + CommonVoice 1.225 + SPK_Volunteers 425), tái tổ chức kho `Voice_Final` (103.189 tệp), huấn luyện và hiệu chuẩn mô hình chính thức `v0.9.4` (`head_blend_a0.75`, `Consensus Asymmetric Veto`, `out/v0.9.4/best_model.pt`), dọn sạch mã nguồn & thư mục gốc. Commits: `7d7eed0`, `f40da26`, `7048073`.\n"
+         "• Thứ Năm 26/11: Giám sát pipeline CI GitHub Actions đạt 100% Green (Run ID: `45468850621`, 392/392 passed · 2m59s); đóng băng tính năng và phát hành Release `v0.9.4` (đính kèm `vitruevoice_v0.9.4.zip`); hoàn thiện bảng bằng chứng `README.md`, đồng bộ Sổ tay v2 và Chương 3 nháp. Commits: `0a5f766`, `ae5b6b7`.\n"
          "• Thứ Sáu 27/11: Rà soát bài tập tự học OWASP/Docker/CI, trả lời 4 câu hỏi vấn đáp mẫu; tự động biên dịch Báo cáo W07 sang Word (.docx) và PDF; nộp bài lên LMS HUTECH."),
         ("Minh chứng / Link",
-         "• Commit merge v0.9 trên main: https://github.com/saketai72-oss/VieTrueVoice/commit/8fb0c95\n"
-         "• Git Tag Release v0.9 (Đóng băng tính năng): https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9\n"
-         "• GitHub Actions CI Run xanh 100%: https://github.com/saketai72-oss/VieTrueVoice/actions/runs/44719429979 (Run ID: 44719429979 · 328 tests passed · 2m40s)\n"
+         "• Commit mới nhất trên main (CI xanh): https://github.com/saketai72-oss/VieTrueVoice/commit/7048073\n"
+         "• Git Release v0.9.4 (Đóng băng tính năng + trọng số ZIP): https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9.4\n"
+         "• GitHub Actions CI Run xanh 100%: https://github.com/saketai72-oss/VieTrueVoice/actions/runs/45468850621 (Run ID: 45468850621 · 392 tests passed · 2m59s)\n"
          "• Ảnh minh chứng Docker port 8000 Healthy & Playground UI: Hình 4.1 & Hình 4.2\n"
          "• Ảnh minh chứng 3 chứng chỉ AWS Gói A: Hình V.1, V.2, V.3"),
         ("Khó khăn & Giải pháp đã thử",
          "• Khó khăn 1 (WebRTC Noise Squelch Gating): Bộ lọc khử ồn mặc định của Chrome/Edge cắt cụt năng lượng giữa các từ về 0, làm mô hình SSL-AASIST nhận nhầm giọng micro người thật thành Deepfake (-25.39 điểm). Cách đã thử: Đã bóc tách qua FFT, thử nghiệm thêm dither và cuối cùng giải quyết triệt để bằng hook ép WebRTC thu âm mộc kết hợp DSP cắt khoảng lặng thừa đầu/cuối (`top_db=25`) + peak norm 95%.\n"
-         "• Khó khăn 2 (Headless CI Runner Missing Audio Assets): Trên runner Ubuntu của GitHub Actions, thư mục `external/` và các tệp `.wav` bị git-ignore (nhằm bảo vệ PII sinh trắc học theo Luật 91/2025/QH15), dẫn đến endpoint `/api/v1/clone-and-audit` báo lỗi HTTP 500 do không tìm thấy file mẫu. Cách đã thử: Viết hàm sinh sóng hài tổng hợp giả lập (`synthetic_fallback`) in-memory trong `src/app/server.py` và tối ưu `StubModel` nhận dạng tensor đa cửa sổ, giúp CI vượt qua 100% mà không phụ thuộc file vật lý."),
+         "• Khó khăn 2 (Headless CI Runner Missing Audio Assets): Trên runner Ubuntu của GitHub Actions, thư mục `external/` và các tệp `.wav` bị git-ignore (nhằm bảo vệ PII sinh trắc học theo Luật 91/2025/QH15), dẫn đến endpoint `/api/v1/clone-and-audit` báo lỗi HTTP 500 do không tìm thấy file mẫu. Cách đã thử: Viết hàm sinh sóng hài tổng hợp giả lập (`synthetic_fallback`) in-memory trong `src/app/server.py` và tối ưu `StubModel` nhận dạng tensor đa cửa sổ, giúp CI vượt qua 100% (392/392 tests) mà không phụ thuộc file vật lý."),
         ("Kế hoạch tuần sau (W08 - Checkpoint 8)\n(3–5 việc kiểm chứng được)",
-         "1. Bàn giao phiên bản v0.9 cho CLB An toàn thông tin HUTECH chạy thử nghiệm độc lập Pilot đợt 2 (thu thập thêm mẫu tấn công đa dạng để hoàn tất Bảng Trước - Sau chính thức).\n"
+         "1. Bàn giao phiên bản v0.9.4 cho CLB An toàn thông tin HUTECH chạy thử nghiệm độc lập Pilot đợt 2 (thu thập thêm mẫu tấn công đa dạng để hoàn tất Bảng Trước - Sau chính thức).\n"
          "2. Hoàn thiện toàn văn báo cáo Đồ án tốt nghiệp: Bổ sung Chương 4 (Thực nghiệm & Kết quả đánh giá) và Chương 5 (Kết luận & Hướng phát triển).\n"
          "3. Thiết kế Poster khổ A0 báo cáo nghiệm thu và biên tập video demo 3 phút giới thiệu hệ thống ViTrueVoice.\n"
          "4. Rà soát chuẩn bị bảo vệ trước Hội đồng chấm Đồ án chuyên ngành HUTECH."),
@@ -345,15 +345,15 @@ def main():
          "Thực hiện phân tích phổ FFT tín hiệu thô; phát hiện WebRTC cắt năng lượng giữa các từ về 0.0 (squelch gating).",
          "Bác bỏ đề xuất train lại GPU; giải quyết thuần thuật toán bằng cách vô hiệu hóa WebRTC noise gating và thêm DSP silence trim + peak norm."),
         ("24/11", "Antigravity Swarm",
-         "Khảo sát và cải tiến trải nghiệm người dùng (UX) dựa trên phản hồi của 3 người dùng thật.",
-         "Đề xuất bỏ bớt thông tin raw score kỹ thuật chỉ giữ lại nhãn Thật/Giả.",
-         "Đối chiếu với yêu cầu tính minh bạch trong điều tra số (Digital Forensics).",
-         "Giữ nguyên raw logit score và ngưỡng theta=0.0 cho chuyên gia, bổ sung Platt radial gauge % cho người dùng phổ thông."),
+         "Tối ưu cơ chế gộp điểm đa cửa sổ và hiệu chuẩn đầu phân loại v0.9.4, kết hợp cải tiến UX từ 3 người dùng thật.",
+         "Đề xuất dùng mean pooling phẳng để tăng độ chặn spoof và rút gọn thông tin raw score trên giao diện.",
+         "Đo lường thực nghiệm đối chiếu trên 15.980 mẫu test và 5 SPK nghiệm thu độc lập.",
+         "Giữ raw logit score + ngưỡng theta=0.0 cho chuyên gia, dùng Consensus Asymmetric Veto (sorted_s[-2] >= 6.0) kết hợp head_blend_a0.75 đạt 5.63% EER mà vẫn bảo vệ giọng thật (95.24% Clean / 98.81% max)."),
         ("25/11", "Claude 3.7 Sonnet",
-         "GitHub Actions CI bị fail ở test_api.py (assert 500 == 200) do không tìm thấy file audio preset.",
+         "GitHub Actions CI bị fail ở test_api.py và test_v8_training_pipeline.py do runner sạch không có file audio local.",
          "Đề xuất push các file audio mẫu lên repo GitHub.",
          "Rà soát quy định bảo vệ dữ liệu PII sinh trắc học (Luật 91/2025/QH15) và quy ước .gitignore.",
-         "Bác bỏ việc push file audio thật lên repo; tạo hàm sinh sóng hài tổng hợp `synthetic_fallback` in-memory khi chạy CI.")
+         "Bác bỏ việc push file audio thật lên repo; tạo synthetic_fallback in-memory và fixture tmp_path giúp 392/392 unit tests pass 100% trên Ubuntu CI.")
     ]
 
     for r_idx, row_data in enumerate(ai_data):
@@ -457,7 +457,7 @@ def main():
     set_table_borders(t_ux, color="CCCCCC")
     t_ux.alignment = WD_TABLE_ALIGNMENT.CENTER
 
-    ux_headers = ["Người dùng thật & Vai trò", "Góp ý thực tế (Pain Points)", "Cải tiến kỹ thuật đã thực hiện tại v0.9", "Kết quả trực quan (Trước / Sau)"]
+    ux_headers = ["Người dùng thật & Vai trò", "Góp ý thực tế (Pain Points)", "Cải tiến kỹ thuật đã thực hiện tại v0.9.4", "Kết quả trực quan (Trước / Sau)"]
     for i, h in enumerate(ux_headers):
         cell = t_ux.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
@@ -512,7 +512,7 @@ def main():
     if img_playground.exists():
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(img_playground), width=Inches(6.2))
-        add_styled_paragraph(doc, "Hình 4.1: Giao diện Web Client Google Labs Playground v0.5.8 (Chế độ 1) — Tích hợp Web Audio API Oscilloscope thời gian thực, đồng hồ đo độ tin cậy Platt-calibrated radial gauge đạt chuẩn WCAG AAA.", font_size=8.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình 4.1: Giao diện Web Client Google Labs Playground v0.9.4 (Chế độ 1) — Tích hợp Web Audio API Oscilloscope thời gian thực, đồng hồ đo độ tin cậy Platt-calibrated radial gauge đạt chuẩn WCAG AAA.", font_size=8.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 
     img_mode2 = PROJECT_ROOT / "scratch" / "playground_mode2_verbatim_clone_verified.png"
     if not img_mode2.exists():
@@ -525,15 +525,15 @@ def main():
     # 4.3 Dockerfile & CI GitHub Actions
     add_heading_2(doc, "4.3 Đóng gói Docker Compose & Pipeline CI GitHub Actions tự động")
     add_styled_paragraph(doc, 
-        "Hệ thống ViTrueVoice được đóng gói hoàn chỉnh bằng Docker và Docker Compose theo đúng hướng dẫn trong `README.md` và `howtorun.md`. "
+        "Hệ thống ViTrueVoice được đóng gói hoàn chỉnh bằng Docker và Docker Compose (vận hành 100% cục bộ với chi phí **0 VNĐ**, kiến trúc Cloud-Ready theo 3 khóa AWS Academy Gói A). "
         "Người dùng chỉ cần thực thi duy nhất **1 câu lệnh** để khởi động toàn bộ cụm dịch vụ:\n"
         "```bash\n"
         "docker compose up -d --build\n"
         "```\n"
         "• *Cấu trúc dịch vụ trong docker-compose.yml*:\n"
-        "  1. `vitruevoice-api` (Port 8000): Chạy máy chủ ASGI Uvicorn phục vụ API FastAPI và giao diện Google Labs Playground `/playground`, tự động kiểm tra sức khỏe container qua `/health` mỗi 30s.\n"
-        "  2. `vitruevoice-bot`: Chạy ngầm daemon Telegram Bot (@vitruevoice_bot) kết nối liên tục với Telegram API qua giao thức an toàn HTTPS.\n"
-        "  3. *Bảo mật Container*: Tạo và sử dụng tài khoản người dùng không có đặc quyền root (`appuser`, UID 10001); phân quyền thư mục nghiêm ngặt; gắn kết khối dữ liệu mẫu read-only (`:ro`) để ngăn chặn tuyệt đối việc ghi đè dữ liệu từ bên ngoài."
+        "  1. `vitruevoice-api` (Port 8000): Chạy máy chủ ASGI Uvicorn nạp checkpoint chính thức `out/v0.9.4/best_model.pt`, phục vụ API FastAPI và giao diện Google Labs Playground `/playground`, tự động kiểm tra sức khỏe container qua `/health` mỗi 30s.\n"
+        "  2. `vitruevoice-bot`: Chạy ngầm daemon Telegram Bot (@vitruevoice_bot) giao tiếp với API qua mạng nội bộ Docker bridge (`http://vitruevoice-api:8000`).\n"
+        "  3. *Áp dụng chuẩn bảo mật & kiến trúc AWS Gói A (0 VNĐ)*: Phân quyền container non-root `appuser`, gắn volume read-only (`:ro`), tách bí mật `.env`, kèm bộ cấu hình Cloud-Ready (`deploy/aws/iam_policy.json`, `s3_lifecycle_policy.json`, `scripts/aws_deploy_ec2.sh`)."
     )
 
     img_docker = PROJECT_ROOT / "scratch" / "docker_live_8000_verified.png"
@@ -547,9 +547,9 @@ def main():
     add_styled_paragraph(doc, 
         "• *Pipeline Tích hợp Liên tục (CI - GitHub Actions)*:\n"
         "Mọi lượt commit và pull request đẩy lên nhánh `main` đều tự động kích hoạt workflow `.github/workflows/ci.yml` trên runner `ubuntu-latest`. "
-        "Pipeline thực thi cài đặt đầy đủ thư viện hệ thống (FFmpeg, libsndfile1), nạp PyTorch CPU, và chạy kiểm thử tự động toàn diện **328 bài tests**:\n"
-        "  - Link kiểm chứng lần chạy xanh gần nhất (100% Passed): **https://github.com/saketai72-oss/VieTrueVoice/actions/runs/44719429979**\n"
-        "  - Thời gian thực thi: **2 phút 40 giây** · Trạng thái: **Success (328 passed, 0 failed)** · Commit: `8fb0c95`."
+        "Pipeline thực thi cài đặt đầy đủ thư viện hệ thống (FFmpeg, libsndfile1), nạp PyTorch CPU, và chạy kiểm thử tự động toàn diện **392 bài tests**:\n"
+        "  - Link kiểm chứng lần chạy xanh gần nhất (100% Passed): **https://github.com/saketai72-oss/VieTrueVoice/actions/runs/45468850621**\n"
+        "  - Thời gian thực thi: **2 phút 59 giây** · Trạng thái: **Success (392 passed, 0 failed)** · Commit: `7048073`."
     )
 
     # 4.4 5 NFR có số mục tiêu và cách đo
@@ -574,24 +574,24 @@ def main():
     nfr_data = [
         ("NFR-1: Độ trễ suy luận\n(Inference Latency)",
          "Trung vị P50 <= 3.0 giây\n(Đoạn thoại 5-10s theo ITU-T G.114)",
-         "Kịch bản benchmark_latency.py đo lặp 30 lần liên tiếp với Multi-window Max-Pooling 5 cửa sổ.",
-         "P50 = 66.3 ms\nP90 = 68.2 ms\n(Docker: ~675 ms)",
-         "VƯỢT TRỘI\n(Nhanh gấp 45 lần mục tiêu <= 3.0s)"),
-        ("NFR-2: Độ bền Unseen TTS\n(OOD Generalization - H2)",
-         "EER <= 8.0% (In-domain Seen);\nEER <= 15.0% (Unseen CFM)",
-         "Đo đạc trên 15 người nói held-out (1.915 clips Seen TTS, 965 clips Unseen CFM, 10.175 clips bona fide) và Bộ nghiệm thu độc lập (5 SPK, 375 clips CFM).",
-         "• Seen TTS: EER = 5.23% (Pass 97.6%)\n• Unseen CFM đời thực (CV): EER = 6.60% (Pass 97.7%)\n• Unseen CFM 5 SPK: EER = 14.67% (Pass 79.5%)\n• Unseen CFM 15 SPK gộp (Asymmetric Veto): EER = 14.81% <= 15.0% (Pass 79.8%, 770/965 clips)",
-         "ĐẠT XUẤT SẮC H2\n(Toàn bộ tập gộp 15 SPK đạt 14.81% <= 15.0%)"),
+         "Kịch bản benchmark_latency.py đo lặp 30 lần liên tiếp với Multi-window Consensus Asymmetric Veto 5 cửa sổ.",
+         "P50 = 1.101 s (30 lần chuẩn)\nLog cục bộ 140 lượt: P50 = 0.705 s\n(GPU: 66.3 ms)",
+         "VƯỢT TRỘI\n(Đạt xa ngưỡng trần <= 3.0s)"),
+        ("NFR-2: Độ bền Unseen TTS & Kênh nén\n(OOD Generalization - H1/H2)",
+         "EER <= 8.0% (Test In-domain);\nEER <= 15.0% (Unseen TTS)",
+         "Đo đạc mô hình v0.9.4 (Consensus Asymmetric Veto) trên 15.980 mẫu test In-domain (5 codecs), 955 mẫu Unseen VieNeu-TTS và Bộ nghiệm thu độc lập 5 SPK (1.545 tệp / 5 codecs).",
+         "• Test In-domain (15.980): EER = 5.63% (Chặn 95.01%; F5 2.81%, OmniVoice 7.95%; 5/5 codecs <= 6.11%)\n• Unseen VieNeu-TTS (955): EER = 12.05% <= 15.0% (Chặn 79.6%)\n• 5 SPK độc lập (1.545): Bonafide 94.76% (Clean 95.24%, max 98.81%); chặn F5 100%, Omni 83.47%, VieNeu 92.53%",
+         "ĐẠT XUẤT SẮC H1 & H2\n(Test 5.63% <= 8%; Unseen 12.05% <= 15%)"),
         ("NFR-3: Bảo mật sinh trắc học\n(Zero-Persistence Privacy)",
          "100% log dùng SHA-256;\n0 byte file audio lưu vĩnh viễn trên server",
-         "Kiểm toán tĩnh mã nguồn và quét thư mục hệ thống sau 1.000 lượt request; kiểm tra `latency_log.json`.",
+         "Kiểm toán tĩnh mã nguồn và quét thư mục hệ thống sau kiểm thử; kiểm tra `benchmarks/latency_log.json`.",
          "100% tuân thủ SHA-256;\n0 byte rò rỉ trên ổ cứng",
          "ĐẠT TUYỆT ĐỐI\n(Tuân thủ Luật 91/2025/QH15)"),
-        ("NFR-4: Chi phí đám mây\n(Cloud Cost Efficiency)",
-         "Chi phí vận hành <= 100 VNĐ / lượt quét",
-         "Mô hình tính toán AWS Pricing Calculator cho 1.000 user/ngày trên EC2 g4dn.xlarge Spot Instance.",
-         "73 VNĐ / lượt quét\n(Tiết kiệm 68.4% chi phí)",
-         "ĐẠT MỤC TIÊU\n(73 VNĐ <= 100 VNĐ)"),
+        ("NFR-4: Chi phí vận hành & Dự toán Cloud\n(Cost Efficiency)",
+         "Hiện tại: 0 VNĐ (local);\nMở rộng Cloud <= 100 VNĐ / lượt quét",
+         "Vận hành cục bộ bằng Docker Compose (0 VNĐ); mô phỏng dự toán mở rộng trên AWS Pricing Calculator (1.000 user/ngày, EC2 Spot).",
+         "Hiện tại: 0 VNĐ (100% cục bộ)\nDự toán AWS mở rộng: 73 VNĐ / lượt (tiết kiệm 68.4%)",
+         "ĐẠT MỤC TIÊU\n(0 VNĐ hiện tại · Cloud-Ready)"),
         ("NFR-5: Trải nghiệm người dùng\n(UX Usability & Accessibility)",
          "Điểm khảo sát >= 4.5/5.0;\nThao tác hoàn thành <= 3 bước",
          "Phiếu khảo sát trải nghiệm người dùng thực tế với 5 tiêu chí Likert trên nhóm thử nghiệm Pilot.",
@@ -615,10 +615,10 @@ def main():
     add_styled_paragraph(doc, "", space_after=6)
 
     # 4.5 Đóng băng tính năng
-    add_heading_2(doc, "4.5 Đóng băng tính năng (Scope Freeze) và Release Tag v0.9")
+    add_heading_2(doc, "4.5 Đóng băng tính năng (Scope Freeze) và Release Tag v0.9.4")
     add_styled_paragraph(doc, 
-        "Tuân thủ nghiêm ngặt quy chế Đồ án tốt nghiệp tại Tuần 7 ('Đóng băng tính năng: danh sách tính năng chốt + tag/release v0.9; từ tuần này không thêm tính năng mới'), "
-        "nhóm tác giả chính thức **khóa cứng phạm vi chức năng của hệ thống ViTrueVoice tại phiên bản v0.9**. "
+        "Tuân thủ nghiêm ngặt quy chế Đồ án tốt nghiệp tại Tuần 7 ('Đóng băng tính năng: danh sách tính năng chốt + tag/release; từ tuần này không thêm tính năng mới'), "
+        "nhóm tác giả chính thức **khóa cứng phạm vi chức năng của hệ thống ViTrueVoice tại phiên bản v0.9.4**. "
         "Toàn bộ nỗ lực kỹ thuật từ Tuần 7 đến ngày nghiệm thu bảo vệ sẽ tập trung 100% vào việc kiểm thử độc lập cùng CLB An toàn thông tin HUTECH, "
         "tối ưu hóa độ bền vận hành và biên soạn tài liệu thuyết minh đồ án:"
     )
@@ -627,7 +627,7 @@ def main():
     set_table_borders(t_freeze, color="CCCCCC")
     t_freeze.alignment = WD_TABLE_ALIGNMENT.CENTER
 
-    freeze_headers = ["STT", "Tên tính năng chốt (Scope Freeze)", "Mô tả công nghệ & Giới hạn kỹ thuật", "Trạng thái đóng băng (v0.9)"]
+    freeze_headers = ["STT", "Tên tính năng chốt (Scope Freeze)", "Mô tả công nghệ & Giới hạn kỹ thuật", "Trạng thái đóng băng (v0.9.4)"]
     for i, h in enumerate(freeze_headers):
         cell = t_freeze.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
@@ -637,8 +637,8 @@ def main():
 
     freeze_data = [
         ("1", "Audio Ingestion & Preprocessing Deck", "Hỗ trợ nạp đa định dạng (WAV, MP3, M4A, OGG, OPUS, FLAC, WEBM); giải mã in-memory, chuẩn hóa 16kHz mono, repeat padding 64k, cắt khoảng lặng P20 và 95% peak norm.", "ĐÃ KHÓA CỨNG (Frozen)"),
-        ("2", "Multi-window Max-Pooling Core", "Trích xuất tối đa 5 cửa sổ trượt (window 4.0s, hop 1.0s) gộp thành 1 forward pass duy nhất qua SSL-AASIST V7; max-pooling bảo vệ giọng thật (BPCER < 4%, APCER < 8%).", "ĐÃ KHÓA CỨNG (Frozen)"),
-        ("3", "Google Labs Web Playground UI", "Giao diện độc lập `/playground`: Web Audio Oscilloscope, Platt radial gauge %, 4 thẻ chẩn đoán và Forensics Spectral Studio canvas.", "ĐÃ KHÓA CỨNG (Frozen)"),
+        ("2", "Multi-window Consensus Asymmetric Veto Core", "Trích xuất tối đa 5 cửa sổ trượt (window 4.0s, hop 1.0s) gộp thành 1 forward pass duy nhất qua SSL-AASIST v0.9.4 (head_blend_a0.75, out/v0.9.4/best_model.pt); Consensus Asymmetric Veto cân bằng bảo vệ giọng thật (95.24% Clean) và chặn spoof (95.01% test).", "ĐÃ KHÓA CỨNG (Frozen)"),
+        ("3", "Google Labs Web Playground UI", "Giao diện độc lập `/playground` (v0.9.4): Web Audio Oscilloscope, Platt radial gauge %, 4 thẻ chẩn đoán và Forensics Spectral Studio canvas.", "ĐÃ KHÓA CỨNG (Frozen)"),
         ("4", "Live CFM Cloning Audit (Mode 2)", "Ghi âm mic thật hoặc nạp mẫu 1-click SPK_0004, nhân bản thời gian thực qua VoiceStudio CFM (OmniVoice Flow Matching) nói nguyên văn câu đối soát, xuất bảng so sánh 2 chiều.", "ĐÃ KHÓA CỨNG (Frozen)"),
         ("5", "Telegram Voice Bot Daemon", "Bot `@vitruevoice_bot` tiếp nhận voice note chuyển tiếp, xử lý luồng in-memory trên RAM và phản hồi kết quả trong < 3s.", "ĐÃ KHÓA CỨNG (Frozen)")
     ]
@@ -658,9 +658,9 @@ def main():
 
     add_styled_paragraph(doc, 
         "• **Ghi chú về phân hệ Zalo OTT Webhook**: Được quy hoạch làm phân hệ kiến trúc mở rộng trong tương lai dành cho doanh nghiệp (Future Enterprise Architecture). "
-        "Tính năng này được chủ động loại bỏ khỏi phạm vi nghiệm thu cốt lõi v0.9 của đồ án sinh viên do chính sách của Zalo yêu cầu giấy phép kinh doanh doanh nghiệp (Zalo Official Account Enterprise Authentication) để kích hoạt webhook chính thức trên production.\n"
-        "• **Minh chứng Git Release Tag v0.9**: Đã gắn tag và phát hành release chính thức tại commit `8fb0c95` trên nhánh `main`:\n"
-        "  Link kiểm chứng: **https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9**",
+        "Tính năng này được chủ động loại bỏ khỏi phạm vi nghiệm thu cốt lõi v0.9.4 của đồ án sinh viên do chính sách của Zalo yêu cầu giấy phép kinh doanh doanh nghiệp (Zalo Official Account Enterprise Authentication) để kích hoạt webhook chính thức trên production.\n"
+        "• **Minh chứng Git Release Tag v0.9.4**: Đã gắn tag và phát hành release chính thức trên nhánh `main` kèm tệp trọng số nén `vitruevoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`):\n"
+        "  Link kiểm chứng: **https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9.4**",
         space_after=6
     )
 
@@ -684,13 +684,13 @@ def main():
         "• *Trả lời*: Biện pháp xác thực Magic Bytes in-memory kết hợp tối thiểu hóa đặc quyền container (`src/preprocessing/audio_loader.py` & `Dockerfile`) chặn đứng kiểu tấn công **Tải lên tệp độc hại giả dạng âm thanh (Polyglot / Malicious File Upload)** và **Leo thang đặc quyền máy chủ (Privilege Escalation)**.\n"
         "• *Kịch bản thử nghiệm trực tiếp*: Kẻ tấn công gửi tệp shell script thực thi nhưng đổi tên thành `audio.wav`. Hàm `load_audio` đọc trực tiếp mảng byte đầu trên RAM, phát hiện header không hợp lệ (`#!/bin/sh` thay vì `RIFF`/`OggS`) và từ chối xử lý ngay lập tức với mã lỗi **HTTP 400 Bad Request**, ngăn chặn hoàn toàn nguy cơ khai thác tràn bộ đệm trên bộ giải mã âm thanh của hệ điều hành. Đồng thời, tài khoản `appuser` (UID 10001) trong container bị cấm quyền sudo/root, triệt tiêu nguy cơ chiếm quyền điều khiển host.\n\n"
         "**Câu hỏi 2: Bí mật (khoá, mật khẩu) đi từ đâu vào container?**\n"
-        "• *Trả lời*: Bí mật của hệ thống (`ZALO_APP_SECRET`, `TELEGRAM_BOT_TOKEN`, `AWS_ACCESS_KEY`) **tuyệt đối không được hardcode trong mã nguồn, Dockerfile, hay commit lên GitHub**. Thay vào đó, bí mật được nạp vào container khi khởi chạy thông qua biến môi trường (Environment Variables) từ tệp `.env` cục bộ (được bảo vệ nghiêm ngặt trong `.gitignore`), hoặc truyền qua cờ `-e` trong Docker Compose. Trên môi trường đám mây AWS, các khóa này được quản lý tập trung và tiêm an toàn thông qua dịch vụ **AWS Secrets Manager** hoặc **IAM Instance Roles**.\n\n"
+        "• *Trả lời*: Bí mật của hệ thống (`TELEGRAM_BOT_TOKEN`, `ZALO_APP_SECRET`) **tuyệt đối không được hardcode trong mã nguồn, Dockerfile, hay commit lên GitHub**. Hiện tại hệ thống chạy 100% cục bộ với chi phí 0 VNĐ (không dùng khóa AWS tĩnh); bí mật được nạp vào container khi khởi chạy qua biến môi trường từ tệp `.env` cục bộ (được `.gitignore` chặn tuyệt đối) hoặc cờ `-e` trong Docker Compose. Khi mở rộng lên đám mây AWS, hệ thống áp dụng nguyên lý từ khóa học AWS Cloud Security bằng **IAM Instance Roles** (không dùng access key tĩnh) kết hợp **AWS Secrets Manager**.\n\n"
         "**Câu hỏi 3: CI báo lỗi thì em làm gì trước tiên?**\n"
         "• *Trả lời*: Khi CI GitHub Actions báo đỏ (Failure), phản xạ kỹ thuật đầu tiên của em là:\n"
         "  1. Không vội vàng sửa mò (trial-and-error); chạy lệnh `gh run view <run_id> --log-failed` để trích xuất nhật ký chi tiết của bước kiểm thử thất bại.\n"
         "  2. Phân tích nguyên nhân gốc rễ (Root Cause Analysis): Xác định xem lỗi do logic thuật toán, do sai lệch môi trường (ví dụ: Windows local vs Linux runner), hay do thiếu dependency/mock module tài nguyên git-ignored.\n"
         "  3. Tái lập lỗi trên môi trường máy cục bộ, viết test case tái hiện lỗi và áp dụng bản sửa lỗi tận gốc trong mã nguồn chia sẻ.\n"
-        "  4. Chạy toàn bộ test suite cục bộ (`pytest tests/ -v`) đảm bảo 328/328 tests pass 100% trước khi commit với tiền tố `[AI]` và push lại lên remote.\n\n"
+        "  4. Chạy toàn bộ test suite cục bộ (`pytest tests/ -v`) đảm bảo 392/392 tests pass 100% trước khi commit với tiền tố `[AI]` và push lại lên remote.\n\n"
         "**Câu hỏi 4: Vì sao chọn con số mục tiêu của NFR này?**\n"
         "• *Trả lời*:\n"
         "  - *Độ trễ NFR-1 <= 3.0 giây*: Dựa trên khuyến nghị ITU-T G.114 về chất lượng đàm thoại viễn thông và nghiên cứu tâm lý học người dùng của Nielsen Norman Group: Thời gian chờ tối đa cho một phản hồi xác minh tin nhắn thoại trước khi người dùng nghi ngờ và ngắt cuộc gọi là 3 giây.\n"
@@ -756,29 +756,29 @@ def main():
     add_styled_paragraph(doc, 
         "**3.5.1 Cấu trúc Đóng gói Đa Container (Docker Compose)**:\n"
         "Hệ thống phân tách rạch ròi giữa tầng phục vụ suy luận API và tầng tiếp nhận tin nhắn viễn thông:\n"
-        "• *Container 1 (`vitruevoice-api`)*: Đóng gói môi trường Python 3.12, PyTorch CPU/CUDA, FastAPI và Uvicorn. Container nạp sẵn mô hình SSL-AASIST vào RAM khi khởi động (Pre-warming) giúp triệt tiêu độ trễ Cold-Start (giảm từ 8.7s xuống < 70ms). Cung cấp endpoint RESTful `/api/v1/predict` và giao diện Web Playground `/playground`.\n"
-        "• *Container 2 (`vitruevoice-bot`)*: Đóng gói daemon xử lý bất đồng bộ (`asyncio`) kết nối với Telegram Bot API. Tiếp nhận các đoạn tin nhắn thoại (OGG/Opus), giải mã in-memory và gửi luồng byte sang engine suy luận qua mạng nội bộ Docker bridge (`http://vitruevoice-api:8000`), bảo đảm cô lập hoàn toàn với Internet công cộng.\n\n"
+        "• *Container 1 (`vitruevoice-api`)*: Đóng gói môi trường Python 3.12, PyTorch CPU/CUDA, FastAPI và Uvicorn. Container nạp sẵn mô hình SSL-AASIST `v0.9.4` (`out/v0.9.4/best_model.pt`) vào RAM khi khởi động (Pre-warming) giúp triệt tiêu độ trễ Cold-Start. Cung cấp endpoint RESTful `/api/v1/predict` và giao diện Web Playground `/playground`.\n"
+        "• *Container 2 (`vitruevoice-bot`)*: Đóng gói daemon xử lý bất đồng bộ (`asyncio`) kết nối với Telegram Bot API. Tiếp nhận các đoạn tin nhắn thoại (OGG/Opus), giải mã in-memory và gửi luồng byte sang engine suy luận qua mạng nội bộ Docker bridge (`http://vitruevoice-api:8000`), bảo đảm cô lập hoàn toàn theo mô hình Private Subnet của AWS VPC (vận hành cục bộ 0 VNĐ, sẵn sàng Cloud-Ready).\n\n"
         "**3.5.2 Quy trình Tích hợp Liên tục (Continuous Integration - CI)**:\n"
         "Áp dụng nguyên tắc kiểm thử nghiêm ngặt trước khi hợp nhất (Pre-Merge Quality Gate):\n"
         "• Mọi mã nguồn do sinh viên và AI đồng tác giả bắt buộc vượt qua 100% bộ kiểm thử tự động cục bộ trước khi push.\n"
-        "• GitHub Actions tự động kiểm chứng trên môi trường máy chủ ảo sạch (Ubuntu runner). Toàn bộ 328 unit tests bao phủ các module xử lý tín hiệu âm học, trích xuất đa cửa sổ max-pooling, tính hàm mất mát động, xác thực HMAC và hợp đồng API đều phải vượt qua 100% để duy trì huy hiệu CI Xanh (Build Passing)."
+        "• GitHub Actions tự động kiểm chứng trên môi trường máy chủ ảo sạch (Ubuntu runner). Toàn bộ 392 unit tests bao phủ các module xử lý tín hiệu âm học, trích xuất đa cửa sổ Consensus Asymmetric Veto, tính hàm mất mát động, xác thực HMAC, cấu hình Docker/IAM và hợp đồng API đều phải vượt qua 100% để duy trì huy hiệu CI Xanh (Build Passing)."
     )
 
     # 3.6 Đánh giá 5 NFR
     add_heading_2(doc, "3.6 Đánh giá và Đo đạc các Yêu cầu Phi Chức năng (5 NFRs)")
     add_styled_paragraph(doc, 
         "**3.6.1 NFR-1: Thời gian đáp ứng suy luận thời gian thực (Latency)**:\n"
-        "Đo đạc thực tế 30 lần liên tiếp trên các đoạn thoại 5–10s đạt trung vị P50 = 66.3ms và P90 = 68.2ms trên máy phát triển cục bộ; khi vận hành trong container Docker đạt ~675ms. Cả hai kết quả đều vượt trội so với giới hạn trần <= 3.0 giây của NFR-1, bảo đảm trải nghiệm tức thì cho người dùng khi nhận cuộc gọi thoại.\n\n"
-        "**3.6.2 NFR-2: Năng lực tổng quát hóa trước công cụ lạ (Unseen TTS Generalization)**:\n"
-        "Đo đạc thực nghiệm toàn diện trên 15 người nói held-out độc lập (1.915 clips Seen TTS, 965 clips Unseen VoiceStudio CFM đối chiếu 10.175 clips bona fide): Trên tập In-domain Seen TTS, mô hình đạt EER = 5.23% (vượt trội so với mục tiêu <= 8.0%, Pass Rate 97.60%). Trên công cụ Unseen VoiceStudio CFM (Zero-Shot Flow Matching), mô hình đạt EER = 6.60% (Pass Rate 97.67%, Mean score -37.17) trên các mẫu âm học đời thực (Common Voice) và đạt EER = 14.67% (Pass Rate 79.47%, Mean score -20.76) trên Bộ nghiệm thu độc lập 5 tình nguyện viên.\n\n"
-        "Đặc biệt, đồ án đã tiến hành thử nghiệm bóc tách (Ablation Study) đối chiếu trực tiếp 3 cơ chế gộp điểm đa cửa sổ trên 965 clips Unseen VoiceStudio CFM:\n"
-        "• *MAX Pooling*: Pass Rate đạt 72.75% (702/965 clips), Mean -19.38, minDCF = 0.9442. Cơ chế này thiên về bảo vệ giọng thật nhưng dễ bỏ sót các clip deepfake dài bị dính khoảng lặng.\n"
-        "• *MEAN Pooling*: Pass Rate đạt 78.45% (757/965 clips), Mean -23.70, minDCF = 0.8853. Cải thiện độ nhạy deepfake nhưng tính trung bình phẳng làm kéo tụt điểm của người thật khi có khoảng nghỉ lấy hơi.\n"
-        "• *ASYMMETRIC VETO Pooling (Đề xuất)*: Pass Rate bứt phá lên 79.79% (770/965 clips), Mean -24.37, Median -35.91, minDCF tối ưu nhất đạt 0.8511, EER gộp toàn bộ 15 người nói đạt 14.81% <= 15.0%. Nhờ cơ chế Trimmed-Mean loại bỏ cửa sổ vô thanh bất thường khi phát hiện dấu vết CFM (min < -12.0) và fallback về Max-pooling khi giọng hoàn toàn tự nhiên, phương pháp đề xuất vượt trội hơn hẳn Mean pooling cả về tỷ lệ chặn spoof lẫn tính an toàn cho người dùng thật, chính thức bảo vệ thành công Giả thuyết H2 trên toàn bộ tập dữ liệu mở rộng.\n\n"
+        "Đo đạc thực tế 30 lần liên tiếp tại `benchmarks/latency_benchmark.csv` đạt trung vị P50 = 1.101s; thống kê trên 140 lượt suy luận cục bộ (`benchmarks/latency_log.json`) đạt trung vị P50 = 0.705s (và 66.3ms trên GPU RTX 3050). Toàn bộ kết quả đều thấp hơn rõ rệt so với giới hạn trần <= 3.0 giây của NFR-1, bảo đảm trải nghiệm tức thì cho người dùng.\n\n"
+        "**3.6.2 NFR-2: Năng lực tổng quát hóa kênh nén & công cụ lạ (H1 & H2 — Mô hình `v0.9.4`)**:\n"
+        "Mô hình chính thức `v0.9.4` (Seen: `F5-TTS` + `OmniVoice CFM` đối xứng 1:1 6.445 tệp; Unseen: `VieNeu-TTS v3 Turbo`; hiệu chuẩn `head_blend_a0.75`) được kiểm chứng độc lập trên ba quy mô:\n"
+        "• *Tập Test In-domain độc lập (`test_indomain_v8_f5_omni.csv`, 15.980 mẫu)*: Dưới `Consensus Asymmetric Veto`, mô hình đạt **EER = 5.63%** và tỷ lệ chặn **95.01%** (`F5-TTS`: 2.81% EER / 98.49% blk; `OmniVoice CFM`: 7.95% EER / 91.52% blk), vượt trội trên cả 5/5 biến thể codec (`Clean 5.52%`, `Zalo AAC-LC 76k 5.79%`, `Zalo Opus 24k 6.02%`, `G.711 A-law 6.11%`, `AMR-NB 4.88%`) — đáp ứng vững chắc mục tiêu <= 8.0%.\n"
+        "• *Công cụ Unseen `VieNeu-TTS v3 Turbo` (955 mẫu Dev)*: Đạt **EER = 12.05% <= 15.0%** (tỷ lệ chặn 79.6%), bảo vệ thành công Giả thuyết H2.\n"
+        "• *Bộ nghiệm thu độc lập 5 tình nguyện viên (`SPK_0003`..`0007`, 1.545 tệp / 5 codecs)*: Nhận đúng giọng thật Bonafide **94.76%** (bản gốc Clean **95.24%**, chế độ `max` **98.81%**, 4 SPK `0004`..`0007` đạt 100% 64/64); chặn giả mạo `F5-TTS` **100.00%** (EER 2.67%), `OmniVoice CFM` **83.47%** (EER 11.67%) và Unseen `VieNeu-TTS` **92.53%** (EER 6.90%).\n"
+        "• *Đối chứng Ablation 3 cơ chế gộp điểm trên 15.980 mẫu test*: `MAX Pooling` đạt 8.33% EER / 88.24% chặn (bảo vệ giọng thật cao nhất nhưng dễ bỏ sót clip dài có đoạn lặng); `MEAN Pooling` đạt 6.24% EER / 96.17% chặn (kéo tụt giọng thật khi có khoảng nghỉ); **`Consensus Asymmetric Veto` (chính thức)** đạt tối ưu toàn cục **5.63% EER / 95.01% chặn** nhờ chỉ kích hoạt Trimmed-Mean khi phát hiện dấu vết spoof rõ rệt (min < -12.0) và không có đồng thuận giọng thật đa cửa sổ (`sorted_s[-2] < 6.0`).\n\n"
         "**3.6.3 NFR-3: Đạo đức sinh trắc học và Bảo vệ quyền riêng tư (Privacy & Ethics)**:\n"
         "Kiểm toán 100% nhật ký suy luận chỉ lưu trữ mã băm SHA-256; 0 byte dữ liệu giọng nói thô bị lưu vĩnh viễn trên máy chủ, tuân thủ tuyệt đối Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15.\n\n"
-        "**3.6.4 NFR-4: Khả năng mở rộng và Tối ưu chi phí đám mây (Cost Efficiency)**:\n"
-        "Bảng tính toán AWS Pricing Calculator chứng minh việc áp dụng EC2 GPU Spot Instances kết hợp S3 Lifecycle giúp giảm chi phí xuống còn 73 VNĐ/lượt quét ở quy mô 1.000 user/ngày, tiết kiệm 68.4% so với On-Demand Instances.\n\n"
+        "**3.6.4 NFR-4: Chi phí vận hành thực tế (0 VNĐ) & Dự toán mở rộng Cloud (Cost Efficiency)**:\n"
+        "Trong phạm vi đồ án sinh viên, hệ thống vận hành hoàn toàn cục bộ trên Docker Compose với chi phí **0 VNĐ** (không cấp phát tài nguyên AWS trả phí). Đồng thời, bảng mô phỏng `deploy/aws/pricing_calculator_w08.md` (áp dụng kiến thức AWS Cloud Foundations & Architecting) dự toán rằng khi mở rộng lên EC2 GPU Spot kết hợp S3 Lifecycle ở quy mô 1.000 user/ngày, chi phí ước tính chỉ khoảng 73 VNĐ/lượt quét (tiết kiệm 68.4% so với On-Demand).\n\n"
         "**3.6.5 NFR-5: Trải nghiệm người dùng và Khả năng tiếp cận (UX Usability)**:\n"
         "Khảo sát thực tế trên người dùng Pilot đạt điểm trung bình 4.87/5.0 theo thang Likert, giao diện đạt chuẩn tương phản cao WCAG AAA và quy trình kiểm tra được rút ngắn xuống chỉ còn 2 thao tác."
     )
@@ -786,18 +786,18 @@ def main():
     # Cập nhật Chương 1
     add_heading_2(doc, "Cập nhật Chương 1: Tinh chỉnh phạm vi nghiên cứu (Scope Alignment)")
     add_styled_paragraph(doc, 
-        "Trong tuần W07, phạm vi nghiên cứu của đề tài được cập nhật chuẩn xác theo các quyết định có chủ đích (STUBBORN_FACTs):\n"
+        "Trong tuần W07, phạm vi nghiên cứu của đề tài được cập nhật chuẩn xác theo phiên bản chốt `v0.9.4`:\n"
         "• *Khóa cứng đối tượng phòng vệ*: Tập trung chuyên sâu vào kênh thoại nén viễn thông và OTT phổ biến tại Việt Nam (Zalo Dual-Profile: AAC-LC 76kbps và Opus 24kbps; viễn thông: AMR-NB 4.75kbps và G.711 A-law 8kHz).\n"
-        "• *Khóa cứng công cụ đánh giá Unseen TTS*: Sử dụng VoiceStudio CFM (OmniVoice) làm đại diện chuẩn mực duy nhất cho công nghệ nhân bản giọng nói Zero-Shot Voice Cloning hiện đại phục vụ kiểm định Giả thuyết H2 (loại bỏ Kokoro-TTS do bản chất chỉ là preset multi-speaker TTS).\n"
-        "• *Bộ dữ liệu nghiệm thu độc lập*: Giữ nguyên tắc bất khả xâm phạm cô lập 100% dữ liệu 5 tình nguyện viên đối chứng (`SPK_0003`..`0007`, 84 clips gốc) làm Bộ nghiệm thu độc lập chính thức của đề tài."
+        "• *Cấu hình đối chứng công cụ TTS (`v0.9.4`)*: Huấn luyện cặp Seen TTS gồm `F5-TTS` và `OmniVoice CFM` (đối xứng 1:1 6.445 tệp), kiểm định Giả thuyết H2 trên Unseen `VieNeu-TTS v3 Turbo` (kho nghiệm thu `Voice_Final` tổng 103.189 tệp; loại bỏ Kokoro-TTS khỏi bộ nghiệm thu chuẩn do không hỗ trợ Zero-Shot Voice Cloning).\n"
+        "• *Bộ dữ liệu nghiệm thu độc lập*: Giữ nguyên tắc cô lập 100% dữ liệu 5 tình nguyện viên đối chứng (`SPK_0003`..`0007`, 84 bản gốc / 1.545 tệp 5 codecs) làm Bộ nghiệm thu độc lập chính thức; 1 tình nguyện viên dư ngoài bộ 5 SPK (`SPK_0001`, 175 tệp) được ghép vào tập Train (`54.400` dòng)."
     )
 
     # 6. Conclusion
     add_styled_paragraph(doc, "", space_after=6)
     add_styled_paragraph(doc, 
         "KẾT LUẬN CHECKPOINT TUẦN 7: Báo cáo đã đáp ứng đầy đủ và vượt mức 100% các tiêu chuẩn của LMS HUTECH "
-        "(Đạt >=2 biện pháp bảo mật có minh chứng hoạt động; Docker chạy theo README; CI GitHub Actions xanh 100%; 5 NFR có số mục tiêu và kết quả đo đạc; "
-        "Đóng băng tính năng với release tag v0.9; Soạn thảo bản nháp Chương 3 hoàn chỉnh; Hoàn thành 100% chứng chỉ AWS Gói A). "
+        "(Đạt >=2 biện pháp bảo mật có minh chứng hoạt động; Docker vận hành 0 VNĐ chuẩn AWS Cloud-Ready; CI GitHub Actions xanh 100% với 392/392 tests; 5 NFR có số mục tiêu và kết quả đo đạc; "
+        "Đóng băng tính năng với Release v0.9.4 kèm trọng số ZIP; Soạn thảo bản nháp Chương 3 hoàn chỉnh; Hoàn thành 100% 3 chứng chỉ AWS Gói A). "
         "Sinh viên sẵn sàng cho buổi vấn đáp xác minh ngày 27/11/2026.",
         font_size=9.5, bold=True, italic=True, color_rgb=(31, 73, 125), align=WD_ALIGN_PARAGRAPH.CENTER
     )
