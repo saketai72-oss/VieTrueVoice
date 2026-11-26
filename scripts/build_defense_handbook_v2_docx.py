@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Script to build the Comprehensive Technical & Defense Handbook v2 (DOCX & PDF) for ViTrueVoice:
 Title: SỔ TAY KỸ THUẬT CHUYÊN SÂU TOÀN DIỆN & CẨM NANG PHẢN BIỆN HỘI ĐỒNG — PHIÊN BẢN 2.0 (V2.0)
@@ -28,14 +27,14 @@ _ROOT = Path(__file__).resolve().parent.parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.handbook_generator.chapter_13_inverted import add_chapter_13_inverted
-from scripts.handbook_generator.chapters_1_to_3 import add_chapters_1_to_3
-from scripts.handbook_generator.chapters_4_to_6 import add_chapters_4_to_6
-from scripts.handbook_generator.chapters_7_to_9 import add_chapters_7_to_9
-from scripts.handbook_generator.chapters_10_to_12 import add_chapters_10_to_12
-from scripts.handbook_generator.diagrams import generate_all_handbook_diagrams
-from scripts.handbook_generator.global_foundations import add_global_foundations
-from scripts.handbook_generator.styles import (
+from scripts.handbook_generator.chapter_13_inverted import add_chapter_13_inverted  # noqa: E402
+from scripts.handbook_generator.chapters_1_to_3 import add_chapters_1_to_3  # noqa: E402
+from scripts.handbook_generator.chapters_4_to_6 import add_chapters_4_to_6  # noqa: E402
+from scripts.handbook_generator.chapters_7_to_9 import add_chapters_7_to_9  # noqa: E402
+from scripts.handbook_generator.chapters_10_to_12 import add_chapters_10_to_12  # noqa: E402
+from scripts.handbook_generator.diagrams import generate_all_handbook_diagrams  # noqa: E402
+from scripts.handbook_generator.global_foundations import add_global_foundations  # noqa: E402
+from scripts.handbook_generator.styles import (  # noqa: E402
     add_callout_box,
     add_styled_paragraph,
     set_cell_background,
@@ -135,13 +134,17 @@ def build_document_v2():
             ),
             (
                 "Phiên bản hệ thống:",
-                "ViTrueVoice v0.9.4 (`out/v0.9.4/best_model.pt`, Symmetric 6.445 OmniVoice CFM, Head-Calibration `head_blend_a0.75`, "
-                "`Consensus Asymmetric Veto`, `Platt Scaling T=16.0`, Docker cục bộ 0 VNĐ chuẩn AWS Gói A, 392/392 CI Tests 100% Green)",
+                (
+                    "ViTrueVoice v0.9.4 (`out/v0.9.4/best_model.pt`, Symmetric 6.445 OmniVoice CFM, Head-Calibration `head_blend_a0.75`, "
+                    "`Consensus Asymmetric Veto`, `Platt Scaling T=16.0`, Docker cục bộ 0 VNĐ chuẩn AWS Gói A, 392/392 CI Tests 100% Green)"
+                ),
             ),
             (
                 "Kết quả kiểm định chốt:",
-                "Test In-domain (15.980 mẫu / 5 Codecs): EER = 5,63% (Chặn 95,01%) | Unseen VieNeu-TTS (955 mẫu): EER = 12,05% (H2 PASS) | "
-                "5 SPK Độc Lập (1.545 tệp): Bonafide 94,76%, F5 100%, OmniVoice 83,47%, VieNeu 92,53% | Độ trễ: 0,705s–1,101s",
+                (
+                    "Test In-domain (15.980 mẫu / 5 Codecs): EER = 5,63% (Chặn 95,01%) | Unseen VieNeu-TTS (955 mẫu): EER = 12,05% (H2 PASS) | "
+                    "5 SPK Độc Lập (1.545 tệp): Bonafide 94,76%, F5 100%, OmniVoice 83,47%, VieNeu 92,53% | Độ trễ: 0,705s–1,101s"
+                ),
             ),
         ]
         t_meta = doc.add_table(rows=len(meta_info), cols=2)
@@ -259,7 +262,7 @@ def export_pdf(docx_path, pdf_path_1, pdf_path_2):
 
         shutil.copy2(pdf_path_1, pdf_path_2)
         print(f"[OK] Copied secondary PDF at: {pdf_path_2}")
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         print(f"[ERROR] Failed to export PDF via Word COM: {e}")
     finally:
         word.Quit()

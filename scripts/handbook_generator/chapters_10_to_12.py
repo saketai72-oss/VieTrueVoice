@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Chương 10, 11, 12 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
 - Chương 10: Tối ưu độ trễ suy luận thời gian thực (NFR1 ≤ 3.0 giây) & Hiệu suất phần cứng
@@ -11,7 +10,7 @@ from __future__ import annotations
 from .styles import (
     add_bullet_item,
     add_callout_box,
-    add_figure,
+    add_defense_qa,
     add_foundation_primer,
     add_heading_chapter,
     add_heading_section,
@@ -363,22 +362,11 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
         "và **Trả lời chuẩn mực 3 bước** bám sát hoàn toàn kiến trúc cùng số liệu nghiệm thu chính thức `v0.9.4`:",
     )
 
-    def _add_defense_qa(q_num: int, question: str, intent: str, step1: str, step2: str, step3: str) -> None:
-        add_heading_subsection(doc, f"Câu {q_num}: {question}")
-        add_styled_paragraph(
-            doc,
-            f"🎯 **Ý đồ kiểm tra của Giảng viên**: *{intent}*",
-            font_size=10.0,
-            color_rgb=(120, 53, 15),
-            space_before=2,
-            space_after=3,
-        )
-        add_bullet_item(doc, step1, bold_prefix="Bước 1 — Chốt kết luận trực diện", font_size=10.2, space_after=2)
-        add_bullet_item(doc, step2, bold_prefix="Bước 2 — Bản chất vật lý / toán học", font_size=10.2, space_after=2)
-        add_bullet_item(doc, step3, bold_prefix="Bước 3 — Bằng chứng thực nghiệm v0.9.4", font_size=10.2, space_after=6)
+    def _qa(q_num: int, question: str, intent: str, step1: str, step2: str, step3: str) -> None:
+        add_defense_qa(doc, q_num, question, intent, step1, step2, step3)
 
     # Q1: Anti-spoofing CM vs ASV
-    _add_defense_qa(
+    _qa(
         1,
         "Bài toán chống giả mạo giọng nói (Anti-spoofing CM) của đề tài khác gì so với nhận dạng / xác thực người nói (ASV)?",
         "Kiểm tra xem sinh viên có phân biệt rành mạch bài toán phát hiện giọng nói nhân tạo độc lập với bài toán so khớp danh tính vân giọng hay không.",
@@ -388,7 +376,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q2: Vietnamese Wav2Vec2-250h vs English XLSR or MFCC/LFCC
-    _add_defense_qa(
+    _qa(
         2,
         "Tại sao nhóm chọn mô hình tự giám sát tiếng Việt (wav2vec2-base-vietnamese-250h) thay vì XLSR đa ngữ/tiếng Anh hoặc đặc trưng thủ công MFCC/LFCC?",
         "Kiểm tra lý do khoa học của việc chọn biểu diễn học tự giám sát bản địa cho ngôn ngữ có thanh điệu như tiếng Việt.",
@@ -398,7 +386,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q3: Repeat Padding 64k vs Zero-Padding
-    _add_defense_qa(
+    _qa(
         3,
         "Tại sao khi đoạn thoại ngắn hơn 4.0 giây (< 64.000 mẫu), hệ thống bắt buộc nối lặp (Repeat Padding) thay vì đệm số 0 (Zero-Padding)?",
         "Kiểm tra sự am hiểu về xử lý tín hiệu số (DSP) và nguy cơ rò rỉ đặc trưng giả (artifact) do tiền xử lý sai cách.",
@@ -408,7 +396,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q4: Dynamic Weighted CE without WeightedRandomSampler + OMML
-    _add_defense_qa(
+    _qa(
         4,
         "Tại sao hàm mất mát Weighted Cross-Entropy phải tính động theo tần suất tập Train và tuyệt đối không dùng chung với WeightedRandomSampler?",
         "Kiểm tra kiến thức toán học về tối ưu hóa trên dữ liệu mất cân bằng lớp (Class Imbalance) trong học sâu.",
@@ -447,7 +435,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q5: Hard Speaker-Disjoint & Hard Text-Disjoint
-    _add_defense_qa(
+    _qa(
         5,
         "Ràng buộc Hard Speaker-Disjoint và Hard Text-Disjoint ngăn chặn hiện tượng học vẹt lối tắt (Shortcut Learning) như thế nào?",
         "Kiểm tra tính trung thực học thuật và phương pháp thiết kế tập dữ liệu chống rò rỉ thông tin (Data Leakage).",
@@ -457,7 +445,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q6: normalize_for_eval only for WER/CER while TTS gets raw text
-    _add_defense_qa(
+    _qa(
         6,
         "Tại sao hàm chuẩn hóa văn bản normalize_for_eval chỉ dùng cho cổng lọc WER/CER và khử trùng lặp, trong khi công cụ TTS phải nhận văn bản thô?",
         "Kiểm tra sự tinh tế khi xử lý ngôn ngữ tự nhiên tiếng Việt cho hệ thống Text-to-Speech và đánh giá ASR.",
@@ -467,7 +455,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q7: Zalo Dual-Profile + PSTN & Narrowband Codec Paradox
-    _add_defense_qa(
+    _qa(
         7,
         "Cấu hình kênh nén kép Zalo (AAC-LC 76k & Opus 24k) cùng mạng viễn thông PSTN (G.711, AMR-NB) hoạt động ra sao, và vì sao kênh băng hẹp đôi khi lại giúp bắt giả tốt hơn?",
         "Kiểm tra hiểu biết chuyên sâu về nén âm thanh viễn thông và giải thích quy luật thực nghiệm trên 5 biến thể kênh truyền.",
@@ -477,7 +465,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q8: 2-Phase training + Stage 3 head_blend_a0.75
-    _add_defense_qa(
+    _qa(
         8,
         "Tại sao nhóm phải huấn luyện 2 pha (Pha 1 đóng băng SSL, Pha 2 vi chỉnh phân tầng) rồi kết hợp hiệu chuẩn đầu phân loại Giai đoạn 3 (head_blend_a0.75)?",
         "Kiểm tra tư duy huấn luyện mạng tiền huấn luyện lớn (Transfer Learning) và kỹ thuật hiệu chuẩn không gian trọng số.",
@@ -487,7 +475,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q9: Consensus Asymmetric Veto vs Max (8.33%) & Mean (6.24%) -> 5.63% + OMML
-    _add_defense_qa(
+    _qa(
         9,
         "Tại sao thuật toán Consensus Asymmetric Veto vượt qua cả Max-Pooling (8.33% EER) lẫn Mean-Pooling (6.24% EER) để đạt 5.63% EER?",
         "Kiểm tra đóng góp thuật toán cốt lõi ở tầng suy luận đa cửa sổ trượt.",
@@ -526,7 +514,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q10: Threshold locked at theta = 0.0 (APCER vs BPCER cost trade-off)
-    _add_defense_qa(
+    _qa(
         10,
         "Tại sao hệ thống khóa cứng ngưỡng quyết định tại θ = 0.0 và bài toán đánh đổi chi phí giữa APCER với BPCER được xử lý ra sao?",
         "Kiểm tra nhận thức về quản trị rủi ro an ninh (Security Cost Trade-off) và tính liêm chính khi chọn ngưỡng vận hành.",
@@ -536,7 +524,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q11: Platt Scaling (T=16.0) & NIST [0.1%, 99.9%] clamp + OMML
-    _add_defense_qa(
+    _qa(
         11,
         "Cơ chế hiệu chuẩn Platt Scaling (T = 16.0) và kẹp biên NIST [0.1%, 99.9%] ngăn chặn hiện tượng 'độ tự tin ảo' như thế nào?",
         "Kiểm tra hiểu biết về hiệu chuẩn xác suất hậu nghiệm (Probability Calibration) và đạo đức giám định số pháp y.",
@@ -576,7 +564,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q12: Hypothesis H2 Unseen TTS (VieNeu 12.05% Dev EER & 92.53% 5-SPK block) & why Kokoro excluded
-    _add_defense_qa(
+    _qa(
         12,
         "Giả thuyết H2 (Tổng quát hóa sang công cụ Unseen TTS) được chứng minh ra sao trên VieNeu-TTS v3 Turbo và vì sao Kokoro-TTS bị loại bỏ?",
         "Kiểm tra tính chặt chẽ khoa học trong việc chọn công cụ kiểm định ngoại lai Zero-Shot Voice Cloning.",
@@ -586,7 +574,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q13: 5 Acceptance Volunteers 100% isolated (neutral mention of 6th volunteer SPK_0001)
-    _add_defense_qa(
+    _qa(
         13,
         "Năm (05) tình nguyện viên nghiệm thu (SPK_0003..0007) được cô lập như thế nào và kết quả trên 1.545 tệp kiểm định đạt mức nào?",
         "Kiểm tra nguyên tắc bất khả xâm phạm của tập kiểm định độc lập thu thập thực tế ngoài đời.",
@@ -596,7 +584,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q14: Deep-voice pitch robustness (-6st augmentation & m=0.20)
-    _add_defense_qa(
+    _qa(
         14,
         "Hệ thống giải quyết bài toán bền vững trước giọng nam trầm và tấn công hạ cao độ âm học (-6 semitones) như thế nào?",
         "Kiểm tra cách nhóm khắc phục lỗ hổng dịch tần số cơ bản (Pitch-shift) bằng thuật toán thay vì gán nhãn thủ công.",
@@ -606,7 +594,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q15: How NFR1 <= 3.0s latency is achieved (0.705s - 1.101s)
-    _add_defense_qa(
+    _qa(
         15,
         "Làm thế nào hệ thống vừa cắt đa cửa sổ trượt vừa giải mã đa định dạng mà vẫn giữ độ trễ 0.705s – 1.101s (≤ 3.0s NFR1)?",
         "Kiểm tra kỹ năng kỹ thuật hệ thống (Systems Engineering) khi đưa mô hình học sâu lớn lên môi trường thời gian thực.",
@@ -616,7 +604,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q16: Law 91/2025/QH15 & Decree 356/2025/ND-CP compliance
-    _add_defense_qa(
+    _qa(
         16,
         "Hệ thống tuân thủ Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP bằng những cơ chế kỹ thuật cụ thể nào?",
         "Kiểm tra tính tuân thủ pháp luật Việt Nam về dữ liệu sinh trắc học nhạy cảm.",
@@ -626,7 +614,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q17: AWS Academy Package A (3 courses) + 0 VND local operating cost
-    _add_defense_qa(
+    _qa(
         17,
         "Nhóm đã vận dụng 3 khóa học AWS Academy Gói A vào dự án như thế nào trong khi vẫn duy trì chi phí vận hành thực tế 0 VNĐ?",
         "Kiểm tra khả năng liên kết kiến thức học phần đám mây AWS với bài toán tối ưu chi phí thực tế của sinh viên.",
@@ -636,7 +624,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q18: Why WebRTC browser mic disables noiseSuppression / autoGainControl
-    _add_defense_qa(
+    _qa(
         18,
         "Tại sao khi thu âm trực tiếp từ micro trình duyệt (WebRTC), giao diện Web của nhóm bắt buộc tắt noiseSuppression và autoGainControl?",
         "Kiểm tra kinh nghiệm xử lý lỗi thực tế khi đưa mô hình phòng thí nghiệm ra giao diện thu âm người dùng thật.",
@@ -646,7 +634,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q19: Mode 2 Live OmniVoice CFM Cloning Audit
-    _add_defense_qa(
+    _qa(
         19,
         "Chế độ 2 (Live OmniVoice CFM Cloning & Forensic Audit) trên giao diện hoạt động ra sao để kiểm chứng trực tiếp trước Hội đồng?",
         "Kiểm tra khả năng trình diễn khép kín (Red-Team Live Attack & Blue-Team Defense) ngay trên hệ thống thực tế.",
@@ -656,7 +644,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q20: Enrollment IQR Guardrail (|offset| > 4 x IQR) + OMML
-    _add_defense_qa(
+    _qa(
         20,
         "Hàng rào an toàn Enrollment IQR Guardrail (|offset| > 4 × IQR) bảo vệ hệ thống trước rủi ro gì?",
         "Kiểm tra tư duy thiết kế an toàn phòng thủ chiều sâu (Defense-in-Depth) chống lạm dụng cơ chế hiệu chuẩn cá nhân.",
@@ -693,7 +681,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q21: TDD & CI verification (392/392 unit tests on GitHub Actions Ubuntu)
-    _add_defense_qa(
+    _qa(
         21,
         "Quy trình phát triển hướng kiểm thử (TDD) và đường ống GitHub Actions CI xác minh độ tin cậy mã nguồn của dự án như thế nào?",
         "Kiểm tra kỹ năng công nghệ phần mềm hiện đại (Software Engineering & MLOps Quality Assurance).",
@@ -703,7 +691,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
 
     # Q22: Remaining limitations & future direction (WavLM / multi-scale SSL)
-    _add_defense_qa(
+    _qa(
         22,
         "Hạn chế còn tồn đọng lớn nhất của phiên bản v0.9.4 là gì và hướng nghiên cứu tiếp theo để khắc phục triệt để là gì?",
         "Kiểm tra sự trung thực khoa học (Scientific Humility) và tầm nhìn nghiên cứu mở rộng sau đồ án.",

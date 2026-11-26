@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Chương 13 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
 Thực Nghiệm Đối Chứng Hoán Đổi Hai Chiều (Inverted Generalization Experiment: V7 vs V8.0 vs v0.9.4)
@@ -8,8 +7,8 @@ Thực Nghiệm Đối Chứng Hoán Đổi Hai Chiều (Inverted Generalization
 from __future__ import annotations
 
 from .styles import (
-    add_bullet_item,
     add_callout_box,
+    add_defense_qa,
     add_figure,
     add_foundation_primer,
     add_heading_chapter,
@@ -646,21 +645,10 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "13.4 Năm (05) Câu Hỏi Phản Biện Nâng Cao Về Thực Nghiệm Hoán Đổi Hai Chiều & Mô Hình v0.9.4 (Câu 23 – Câu 27)",
     )
 
-    def _add_adv_qa(q_num: int, question: str, intent: str, step1: str, step2: str, step3: str) -> None:
-        add_heading_subsection(doc, f"Câu {q_num}: {question}")
-        add_styled_paragraph(
-            doc,
-            f"🎯 **Ý đồ kiểm tra của Giảng viên**: *{intent}*",
-            font_size=10.0,
-            color_rgb=(120, 53, 15),
-            space_before=2,
-            space_after=3,
-        )
-        add_bullet_item(doc, step1, bold_prefix="Bước 1 — Chốt kết luận trực diện", font_size=10.2, space_after=2)
-        add_bullet_item(doc, step2, bold_prefix="Bước 2 — Bản chất vật lý / toán học", font_size=10.2, space_after=2)
-        add_bullet_item(doc, step3, bold_prefix="Bước 3 — Bằng chứng thực nghiệm v0.9.4", font_size=10.2, space_after=6)
+    def _qa(q_num: int, question: str, intent: str, step1: str, step2: str, step3: str) -> None:
+        add_defense_qa(doc, q_num, question, intent, step1, step2, step3)
 
-    _add_adv_qa(
+    _qa(
         23,
         "Tại sao nhóm không dừng lại ở mô hình V7 mà phải tốn công sinh lại 6.445 tệp OmniVoice CFM đối xứng 1:1 và thực hiện thí nghiệm hoán đổi hai chiều lên v0.9.4?",
         "Kiểm tra động lực nghiên cứu khoa học nghiêm túc và tính công bằng khi thiết kế thực nghiệm đối chứng.",
@@ -669,7 +657,7 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "Kết quả chứng minh thuyết phục trên tập `15.980` mẫu: mô hình chính thức **`v0.9.4`** kéo tổng EER giảm gần 60% tương đối — từ **`13.72%` (V7) → `6.79%` (V8.0 bán phần) → `5.63%` (`v0.9.4`)**, nâng tỷ lệ chặn giả toàn cục lên **95.01%**.",
     )
 
-    _add_adv_qa(
+    _qa(
         24,
         "Vì sao ở chiều thuận (V7: học VieNeu → kiểm tra OmniVoice) mô hình bị lọt lưới nhiều hơn hẳn chiều nghịch (v0.9.4: học OmniVoice → kiểm tra VieNeu)?",
         "Kiểm tra khả năng giải thích hiện tượng thực nghiệm bằng phương trình toán học gốc của bộ tạo sinh âm thanh.",
@@ -678,7 +666,7 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "Bằng chứng thực nghiệm khẳng định trọn vẹn lý thuyết này: dù `v0.9.4` hoàn toàn chưa từng thấy `VieNeu-TTS`, nó vẫn đạt **12.05% EER** trên tập benchmark `955` mẫu Dev (`≤ 15.0%` KPI H2) và chặn đứng **92.53% (347/375)** mẫu giả `VieNeu-TTS` trên bộ 5 tình nguyện viên độc lập!",
     )
 
-    _add_adv_qa(
+    _qa(
         25,
         "Sự khác biệt giữa hai lượt huấn luyện Run 1 (54.225 dòng) và Run 2 (54.400 dòng) trong v0.9.4 là gì và tại sao nó vẫn bảo toàn tuyệt đối tính khách quan nghiệm thu?",
         "Kiểm tra tính minh bạch trong quản trị các tập dữ liệu huấn luyện và ranh giới cô lập tình nguyện viên.",
@@ -687,7 +675,7 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "Thực nghiệm ghi nhận `Run 1` đã hội tụ rất tốt (`Dev EER = 6.32%`), và `Run 2` tiếp tục cải thiện nhẹ `Dev EER` Pha 2 xuống **`5.95%`**, trước khi đi qua bước hiệu chuẩn `head_blend_a0.75` để đạt **5.63% EER** trên tập Test `15.980` mẫu.",
     )
 
-    _add_adv_qa(
+    _qa(
         26,
         "Tại sao ở Giai đoạn 3 (head_blend_a0.75), nhóm chọn đóng băng 100% khối Wav2Vec 2.0 và trộn tuyến tính đầu phân loại thay vì huấn luyện tiếp toàn mạng thêm nhiều epoch?",
         "Kiểm tra hiểu biết về hiện tượng quá khớp (Overfitting), trôi biểu diễn (Representation Drift) và lý thuyết WiSE-FT.",
@@ -696,7 +684,7 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "Nhờ `head_blend_a0.75`, mô hình `v0.9.4` vừa đảo chiều chặn lại thành công **72.8% (142/195)** ca `OmniVoice` siêu khó ở Cổng 4 (so với `0.5%` của V7), vừa đạt **94.76%** nhận diện đúng giọng thật trên `420` tệp của 5 tình nguyện viên độc lập.",
     )
 
-    _add_adv_qa(
+    _qa(
         27,
         "Từ kết quả của Chương 13, bài học thiết kế quan trọng nhất để phòng thủ trước các công cụ Zero-Day Voice Cloning xuất hiện trong tương lai là gì?",
         "Kiểm tra khả năng đúc kết quy luật khái quát tầm kiến trúc sư hệ thống an ninh AI.",

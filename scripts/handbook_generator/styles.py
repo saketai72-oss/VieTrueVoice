@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Styling, native Word OMML equation builders, pedagogical boxes, and figure helpers
 for the ViTrueVoice v0.9.4 Defense & Study Handbook.
@@ -23,15 +22,15 @@ MATH_NS = (
 
 def set_cell_background(cell, fill_hex: str) -> None:
     """Set background color of a table cell."""
-    tcPr = cell._tc.get_or_add_tcPr()
+    tc_pr = cell._tc.get_or_add_tcPr()
     shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{fill_hex}"/>')
-    tcPr.append(shd)
+    tc_pr.append(shd)
 
 
 def set_cell_margins(cell, top: int = 100, bottom: int = 100, left: int = 140, right: int = 140) -> None:
     """Set inner cell padding in dxa (1 pt = 20 dxa)."""
-    tcPr = cell._tc.get_or_add_tcPr()
-    tcMar = parse_xml(
+    tc_pr = cell._tc.get_or_add_tcPr()
+    tc_mar = parse_xml(
         f'<w:tcMar {nsdecls("w")}>'
         f'<w:top w:w="{top}" w:type="dxa"/>'
         f'<w:bottom w:w="{bottom}" w:type="dxa"/>'
@@ -39,12 +38,12 @@ def set_cell_margins(cell, top: int = 100, bottom: int = 100, left: int = 140, r
         f'<w:right w:w="{right}" w:type="dxa"/>'
         f"</w:tcMar>"
     )
-    tcPr.append(tcMar)
+    tc_pr.append(tc_mar)
 
 
 def set_table_borders(table, color: str = "D3D3D3", sz: str = "4", val: str = "single") -> None:
     """Set subtle borders for a table."""
-    tblPr = table._tbl.tblPr
+    tbl_pr = table._tbl.tblPr
     borders = parse_xml(
         f'<w:tblBorders {nsdecls("w")}>'
         f'<w:top w:val="{val}" w:sz="{sz}" w:space="0" w:color="{color}"/>'
@@ -55,7 +54,45 @@ def set_table_borders(table, color: str = "D3D3D3", sz: str = "4", val: str = "s
         f'<w:insideV w:val="{val}" w:sz="{sz}" w:space="0" w:color="{color}"/>'
         f"</w:tblBorders>"
     )
-    tblPr.append(borders)
+    tbl_pr.append(borders)
+
+
+def _create_card_cell(
+    doc,
+    bg_color: str,
+    left_color: str,
+    left_sz: str = "24",
+    box_color: str | None = None,
+    box_sz: str = "4",
+    top_pad: int = 110,
+    bottom_pad: int = 110,
+    left_pad: int = 150,
+    right_pad: int = 150,
+):
+    """Create a styled single-cell card with left accent border and optional outer hairline borders."""
+    tbl = doc.add_table(rows=1, cols=1)
+    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    cell = tbl.cell(0, 0)
+    cell.width = Inches(6.7)
+    set_cell_background(cell, bg_color)
+    set_cell_margins(cell, top=top_pad, bottom=bottom_pad, left=left_pad, right=right_pad)
+
+    side_bdr = (
+        f'<w:top w:val="single" w:sz="{box_sz}" w:space="0" w:color="{box_color}"/>'
+        f'<w:bottom w:val="single" w:sz="{box_sz}" w:space="0" w:color="{box_color}"/>'
+        f'<w:right w:val="single" w:sz="{box_sz}" w:space="0" w:color="{box_color}"/>'
+        if box_color
+        else '<w:top w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/>'
+    )
+    tc_pr = cell._tc.get_or_add_tcPr()
+    borders = parse_xml(
+        f'<w:tcBorders {nsdecls("w")}>'
+        f'<w:left w:val="single" w:sz="{left_sz}" w:space="0" w:color="{left_color}"/>'
+        f"{side_bdr}"
+        f"</w:tcBorders>"
+    )
+    tc_pr.append(borders)
+    return cell
 
 
 def add_rich_runs(
@@ -145,21 +182,16 @@ def add_callout_box(
     bg_color: str = "F2F5F9",
 ) -> None:
     """Create a highlight callout box for key takeaways or defense tips."""
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cell = tbl.cell(0, 0)
-    cell.width = Inches(6.7)
-    set_cell_background(cell, bg_color)
-    set_cell_margins(cell, top=120, bottom=120, left=160, right=160)
-
-    tcPr = cell._tc.get_or_add_tcPr()
-    borders = parse_xml(
-        f'<w:tcBorders {nsdecls("w")}>'
-        f'<w:left w:val="single" w:sz="24" w:space="0" w:color="{border_color}"/>'
-        f'<w:top w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/>'
-        f"</w:tcBorders>"
+    cell = _create_card_cell(
+        doc,
+        bg_color=bg_color,
+        left_color=border_color,
+        left_sz="24",
+        top_pad=120,
+        bottom_pad=120,
+        left_pad=160,
+        right_pad=160,
     )
-    tcPr.append(borders)
 
     p = cell.paragraphs[0]
     p.paragraph_format.space_before = Pt(0)
@@ -175,50 +207,6 @@ def add_callout_box(
     doc.add_paragraph().paragraph_format.space_after = Pt(3)
 
 
-def add_prerequisite_box(
-    doc,
-    chapter_title: str,
-    concepts_summary: str,
-    border_color: str = "B8860B",
-    bg_color: str = "FFFDF5",
-) -> None:
-    """Backward-compatible chapter-level prerequisite overview box."""
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cell = tbl.cell(0, 0)
-    cell.width = Inches(6.7)
-    set_cell_background(cell, bg_color)
-    set_cell_margins(cell, top=110, bottom=110, left=150, right=150)
-
-    tcPr = cell._tc.get_or_add_tcPr()
-    borders = parse_xml(
-        f'<w:tcBorders {nsdecls("w")}>'
-        f'<w:left w:val="single" w:sz="24" w:space="0" w:color="{border_color}"/>'
-        f'<w:top w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>'
-        f'<w:bottom w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>'
-        f'<w:right w:val="single" w:sz="6" w:space="0" w:color="{border_color}"/>'
-        f"</w:tcBorders>"
-    )
-    tcPr.append(borders)
-
-    p = cell.paragraphs[0]
-    p.paragraph_format.space_before = Pt(0)
-    p.paragraph_format.space_after = Pt(3)
-    run_t = p.add_run(f"📌 KIẾN THỨC NỀN TẢNG CẦN NẮM TRƯỚC KHI ĐỌC {chapter_title.upper()}:")
-    run_t.font.name = "Times New Roman"
-    run_t.font.size = Pt(10.0)
-    run_t.bold = True
-    run_t.font.color.rgb = RGBColor(160, 105, 0)
-
-    p2 = cell.add_paragraph()
-    p2.paragraph_format.space_before = Pt(2)
-    p2.paragraph_format.space_after = Pt(2)
-    p2.paragraph_format.line_spacing = 1.18
-    add_rich_runs(p2, concepts_summary, font_size=9.5, default_italic=True, color_rgb=(55, 55, 55))
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(3)
-
-
 def add_foundation_primer(
     doc,
     process_name: str,
@@ -230,23 +218,14 @@ def add_foundation_primer(
     Pedagogical primer box placed BEFORE entering any technical pipeline/process.
     Explains in plain Vietnamese what foundational knowledge to know first.
     """
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cell = tbl.cell(0, 0)
-    cell.width = Inches(6.7)
-    set_cell_background(cell, "FFFBEB")
-    set_cell_margins(cell, top=110, bottom=110, left=150, right=150)
-
-    tcPr = cell._tc.get_or_add_tcPr()
-    borders = parse_xml(
-        f'<w:tcBorders {nsdecls("w")}>'
-        f'<w:left w:val="single" w:sz="24" w:space="0" w:color="D97706"/>'
-        f'<w:top w:val="single" w:sz="4" w:space="0" w:color="FDE68A"/>'
-        f'<w:bottom w:val="single" w:sz="4" w:space="0" w:color="FDE68A"/>'
-        f'<w:right w:val="single" w:sz="4" w:space="0" w:color="FDE68A"/>'
-        f"</w:tcBorders>"
+    cell = _create_card_cell(
+        doc,
+        bg_color="FFFBEB",
+        left_color="D97706",
+        left_sz="24",
+        box_color="FDE68A",
+        box_sz="4",
     )
-    tcPr.append(borders)
 
     p0 = cell.paragraphs[0]
     p0.paragraph_format.space_before = Pt(0)
@@ -257,19 +236,15 @@ def add_foundation_primer(
     rt.bold = True
     rt.font.color.rgb = RGBColor(180, 83, 9)
 
-    p_why = cell.add_paragraph()
-    p_why.paragraph_format.space_after = Pt(3)
-    p_why.paragraph_format.line_spacing = 1.15
-    add_rich_runs(p_why, f"• **Vì sao cần bước này?** {why_needed}", font_size=9.5, color_rgb=(35, 35, 35))
-
-    p_ana = cell.add_paragraph()
-    p_ana.paragraph_format.space_after = Pt(3)
-    p_ana.paragraph_format.line_spacing = 1.15
-    add_rich_runs(p_ana, f"• **Ví dụ đời thực dễ hình dung:** {real_analogy}", font_size=9.5, color_rgb=(35, 35, 35))
-
-    p_hdr = cell.add_paragraph()
-    p_hdr.paragraph_format.space_after = Pt(2)
-    add_rich_runs(p_hdr, "• **Kiến thức nền tảng cần bổ sung trước khi đọc tiếp:**", font_size=9.5, color_rgb=(35, 35, 35))
+    for prefix_text in (
+        f"• **Vì sao cần bước này?** {why_needed}",
+        f"• **Ví dụ đời thực dễ hình dung:** {real_analogy}",
+        "• **Kiến thức nền tảng cần bổ sung trước khi đọc tiếp:**",
+    ):
+        p_sec = cell.add_paragraph()
+        p_sec.paragraph_format.space_after = Pt(2.5)
+        p_sec.paragraph_format.line_spacing = 1.15
+        add_rich_runs(p_sec, prefix_text, font_size=9.5, color_rgb=(35, 35, 35))
 
     for idx, pt_text in enumerate(core_points, 1):
         p_item = cell.add_paragraph()
@@ -288,23 +263,18 @@ def add_term_glossary(doc, terms: list[tuple[str, str, str]]) -> None:
     """
     if not terms:
         return
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cell = tbl.cell(0, 0)
-    cell.width = Inches(6.7)
-    set_cell_background(cell, "F0FDFA")
-    set_cell_margins(cell, top=95, bottom=95, left=140, right=140)
-
-    tcPr = cell._tc.get_or_add_tcPr()
-    borders = parse_xml(
-        f'<w:tcBorders {nsdecls("w")}>'
-        f'<w:left w:val="single" w:sz="20" w:space="0" w:color="0D9488"/>'
-        f'<w:top w:val="single" w:sz="4" w:space="0" w:color="CCFBF1"/>'
-        f'<w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCFBF1"/>'
-        f'<w:right w:val="single" w:sz="4" w:space="0" w:color="CCFBF1"/>'
-        f"</w:tcBorders>"
+    cell = _create_card_cell(
+        doc,
+        bg_color="F0FDFA",
+        left_color="0D9488",
+        left_sz="20",
+        box_color="CCFBF1",
+        box_sz="4",
+        top_pad=95,
+        bottom_pad=95,
+        left_pad=140,
+        right_pad=140,
     )
-    tcPr.append(borders)
 
     p0 = cell.paragraphs[0]
     p0.paragraph_format.space_before = Pt(0)
@@ -412,23 +382,18 @@ def add_omml_equation(
     Render a genuine Microsoft Word OMML equation inside a clean formula card,
     with optional symbol-by-symbol explanation immediately underneath.
     """
-    tbl = doc.add_table(rows=1, cols=1)
-    tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-    cell = tbl.cell(0, 0)
-    cell.width = Inches(6.7)
-    set_cell_background(cell, "F8FAFC")
-    set_cell_margins(cell, top=90, bottom=90, left=140, right=140)
-
-    tcPr = cell._tc.get_or_add_tcPr()
-    borders = parse_xml(
-        f'<w:tcBorders {nsdecls("w")}>'
-        f'<w:left w:val="single" w:sz="18" w:space="0" w:color="2563EB"/>'
-        f'<w:top w:val="single" w:sz="4" w:space="0" w:color="DBEAFE"/>'
-        f'<w:bottom w:val="single" w:sz="4" w:space="0" w:color="DBEAFE"/>'
-        f'<w:right w:val="single" w:sz="4" w:space="0" w:color="DBEAFE"/>'
-        f"</w:tcBorders>"
+    cell = _create_card_cell(
+        doc,
+        bg_color="F8FAFC",
+        left_color="2563EB",
+        left_sz="18",
+        box_color="DBEAFE",
+        box_sz="4",
+        top_pad=90,
+        bottom_pad=90,
+        left_pad=140,
+        right_pad=140,
     )
-    tcPr.append(borders)
 
     p_title = cell.paragraphs[0]
     p_title.paragraph_format.space_before = Pt(0)
@@ -484,8 +449,8 @@ def add_heading_part(doc, title_str: str):
     r_box.bold = True
     r_box.font.color.rgb = RGBColor(128, 0, 0)
 
-    pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="double" w:sz="18" w:space="6" w:color="800000"/></w:pBdr>')
-    p_box._p.get_or_add_pPr().append(pBdr)
+    p_bdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="double" w:sz="18" w:space="6" w:color="800000"/></w:pBdr>')
+    p_box._p.get_or_add_pPr().append(p_bdr)
     return p_box
 
 
@@ -509,8 +474,8 @@ def add_heading_chapter(doc, number_str: str, title_str: str):
     r_title.bold = True
     r_title.font.color.rgb = RGBColor(31, 73, 125)
 
-    pBdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="12" w:space="4" w:color="1F497D"/></w:pBdr>')
-    p_title._p.get_or_add_pPr().append(pBdr)
+    p_bdr = parse_xml(f'<w:pBdr {nsdecls("w")}><w:bottom w:val="single" w:sz="12" w:space="4" w:color="1F497D"/></w:pBdr>')
+    p_title._p.get_or_add_pPr().append(p_bdr)
     return p_title
 
 
@@ -522,6 +487,22 @@ def add_heading_section(doc, text: str):
 def add_heading_subsection(doc, text: str):
     """Add a subsection heading (1.1.1, 1.1.2...)."""
     return add_styled_paragraph(doc, text, font_size=11, bold=True, italic=True, color_rgb=(40, 70, 110), space_before=6, space_after=2)
+
+
+def add_defense_qa(doc, q_num: int, question: str, intent: str, step1: str, step2: str, step3: str) -> None:
+    """Render a structured 3-step thesis defense Q&A block consistently across chapters."""
+    add_heading_subsection(doc, f"Câu {q_num}: {question}")
+    add_styled_paragraph(
+        doc,
+        f"🎯 **Ý đồ kiểm tra của Giảng viên**: *{intent}*",
+        font_size=10.0,
+        color_rgb=(120, 53, 15),
+        space_before=2,
+        space_after=3,
+    )
+    add_bullet_item(doc, step1, bold_prefix="Bước 1 — Chốt kết luận trực diện", font_size=10.2, space_after=2)
+    add_bullet_item(doc, step2, bold_prefix="Bước 2 — Bản chất vật lý / toán học", font_size=10.2, space_after=2)
+    add_bullet_item(doc, step3, bold_prefix="Bước 3 — Bằng chứng thực nghiệm v0.9.4", font_size=10.2, space_after=6)
 
 
 def add_styled_table(

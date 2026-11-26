@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 High-resolution (300 DPI) Vietnamese visual diagrams generator for the ViTrueVoice v0.9.4 Handbook.
 Generates 8 intuitive figures explaining complex math, signal processing, model architecture, and pooling.
@@ -9,6 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -283,7 +283,7 @@ def generate_all_handbook_diagrams(out_dir: str | Path) -> dict[str, Path]:
     rates = [94.76, 100.0, 83.47, 92.53]
     bar_cols = ["#16A34A", "#2563EB", "#7C3AED", "#D97706"]
     bars = ax2.bar(cats, rates, color=bar_cols, width=0.50)
-    for b, val in zip(bars, rates):
+    for b, val in zip(bars, rates, strict=True):
         ax2.text(b.get_x() + b.get_width() / 2, val + 1.5, f"{val:.2f}%", ha="center", fontsize=8.8, fontweight="bold")
     ax2.set_ylim(0, 112)
     ax2.set_ylabel("Tỷ lệ nhận diện / chặn đúng (%) — Càng cao càng tốt", fontsize=8.8)

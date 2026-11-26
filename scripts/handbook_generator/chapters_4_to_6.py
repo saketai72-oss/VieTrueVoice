@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Chương 4, 5, 6 của Sổ tay Bảo vệ & Nghiên cứu Chuyên sâu ViTrueVoice v0.9.4:
 - Chương 4: Kiến trúc mạng lai SSL-AASIST, Huấn luyện 2 pha & Hiệu chuẩn đầu phân loại head_blend_a0.75
@@ -27,8 +26,8 @@ from .styles import (
     omml_frac,
     omml_r,
     omml_sub,
-    omml_sup,
     omml_subsup,
+    omml_sup,
 )
 
 

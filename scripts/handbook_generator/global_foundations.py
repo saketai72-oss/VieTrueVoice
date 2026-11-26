@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Phần Đặc Biệt: Bản Đồ Kiến Thức Nền Tảng Toàn Cục & Khung Xương Sống Hệ Thống ViTrueVoice v0.9.4.
 Tài liệu học tập nền tảng và cẩm nang bảo vệ đồ án chuyên ngành dành cho sinh viên.
@@ -115,12 +114,18 @@ def add_global_foundations(doc) -> None:
             "hoàn toàn không phụ thuộc trên giấy viết câu gì hay chữ ký của ai!)."
         ),
         core_points=[
-            "Mỗi tín hiệu giọng nói mang đồng thời 3 lớp thông tin độc lập: Nội dung ngôn ngữ (Linguistic content), "
-            "Bản sắc cá nhân người nói (Speaker identity) và Dấu vết vật lý của nguồn phát âm (Production fidelity).",
-            "Các công cụ nhân bản giọng nói thế hệ mới (Zero-Shot Voice Cloning) được huấn luyện chuyên biệt để bắt chước "
-            "giống hệt bản sắc cá nhân người nói, khiến hệ thống xác thực danh tính truyền thống (ASV) bị đánh lừa dễ dàng.",
-            "Hệ thống phát hiện giả mạo độc lập (Stand-alone Countermeasure — CM) đi tìm sự khác biệt vi mô giữa cơ chế "
-            "rung dây thanh đới sinh học của con người và thuật toán tái tạo sóng âm của máy tính.",
+            (
+                "Mỗi tín hiệu giọng nói mang đồng thời 3 lớp thông tin độc lập: Nội dung ngôn ngữ (Linguistic content), "
+                "Bản sắc cá nhân người nói (Speaker identity) và Dấu vết vật lý của nguồn phát âm (Production fidelity)."
+            ),
+            (
+                "Các công cụ nhân bản giọng nói thế hệ mới (Zero-Shot Voice Cloning) được huấn luyện chuyên biệt để bắt chước "
+                "giống hệt bản sắc cá nhân người nói, khiến hệ thống xác thực danh tính truyền thống (ASV) bị đánh lừa dễ dàng."
+            ),
+            (
+                "Hệ thống phát hiện giả mạo độc lập (Stand-alone Countermeasure — CM) đi tìm sự khác biệt vi mô giữa cơ chế "
+                "rung dây thanh đới sinh học của con người và thuật toán tái tạo sóng âm của máy tính."
+            ),
         ],
     )
 

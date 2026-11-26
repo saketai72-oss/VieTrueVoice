@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Chương 1, 2, 3: Bài toán Deepfake Tiếng Việt & Hệ đo lường chuẩn quốc tế,
 Kiến trúc dữ liệu đối xứng v0.9.4 & Bộ lọc 4 cổng chống rò rỉ,

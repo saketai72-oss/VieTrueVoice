@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Chương 7, 8, 9 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
 - Chương 7: Đa dạng sinh học giọng nói (Deep-Voice F0), Độ bền vững dịch cao độ & Cô lập nghiệm thu 5 tình nguyện viên
@@ -19,15 +18,12 @@ from .styles import (
     add_foundation_primer,
     add_heading_chapter,
     add_heading_section,
-    add_heading_subsection,
     add_omml_equation,
     add_styled_paragraph,
     add_styled_table,
     add_term_glossary,
-    omml_delim,
     omml_frac,
     omml_r,
-    omml_sqrt,
     omml_sub,
     omml_sup,
 )
