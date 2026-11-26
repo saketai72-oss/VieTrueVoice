@@ -348,20 +348,8 @@ Hệ thống tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma =
 1. **Nền tảng 1 (File âm thanh viễn thông tải lên)**: Hỗ trợ kéo thả trực tiếp tệp `.wav`, `.m4a`, `.opus`, `.ogg`, `.mp3` qua Web UI hoặc Zalo/Telegram Bot.
 2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút Micro trên giao diện Gradio Web. Thuật toán bù đắp dither tự động khôi phục tính liên tục âm học tự nhiên cho các vùng khoảng lặng bị trình duyệt cắt cụt bởi bộ lọc tiếng ồn (noise suppression / AGC), ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
 
-### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu Toàn diện & Cẩm nang Phản biện Hội đồng
-
-#### Phiên bản 1.0 (V1.0)
-Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện v1 (22.637 từ, 445 đoạn văn, 27 bảng chuẩn mực, 22 câu hỏi phản biện) sang cả hai định dạng `.docx` và `.pdf`:
-```bash
-python scripts/build_defense_handbook_docx.py
-```
-Tài liệu được xuất bản và đồng bộ tự động tại:
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.docx`
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE.pdf`
-- Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
-
-#### Phiên bản 2.0 (V2.0) — Nâng cấp Thực nghiệm Đối chứng 2 Chiều V7 vs V8.0 & v0.9.4
-Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v2 (28.690+ từ, 514 đoạn văn, 38 bảng chuẩn mực, 27 câu hỏi phản biện toàn diện, bổ sung Chương 13 Thực nghiệm Đối chứng 2 Chiều Inverted Generalization V8.0 & mô hình chính thức v0.9.4, ma trận suy giảm 5 codecs, Layer-Wise Grafting, Head-Calibration `head_blend_a0.75` và Consensus Asymmetric Veto) sang cả hai định dạng `.docx` và `.pdf`:
+### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu Toàn diện & Cẩm nang Phản biện Hội đồng (Phiên bản 2.0 — Chuẩn `v0.9.4`)
+Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện V2 (đồng bộ 100% mô hình chính thức `v0.9.4` xuyên suốt 13 chương, tích hợp hộp kiến thức nền tảng trước mỗi quy trình, công thức toán học gốc Word OMML, sơ đồ trực quan 300 DPI, từ điển giải nghĩa thuật ngữ ngay bên dưới mỗi mục và 27 câu hỏi phản biện hội đồng) sang cả hai định dạng `.docx` và `.pdf`:
 ```bash
 python scripts/build_defense_handbook_v2_docx.py
 ```

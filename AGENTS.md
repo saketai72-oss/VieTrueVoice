@@ -132,8 +132,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - `python scripts/eval_v8_1_benchmark.py` & `python scripts/build_v8_1_reports.py`: Chạy benchmark 4.979/15.980/955 và tổng hợp báo cáo JSON chuẩn.
 - `python scripts/generate_omnivoice_train_manifests.py`: Tự động sinh dữ liệu OmniVoice train V8.0 và xuất manifests V8 chuẩn 18/19 cột.
 - `python scripts/build_v8_hybrid_checkpoint.py`: Thực thi quy trình ghép tầng Layer-Wise Grafting và tạo tập cân bằng `train_v8_balanced_ft.csv` (5.100 dòng).
-- `python scripts/build_defense_handbook_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu v1 sang .docx và .pdf.
-- `python scripts/build_defense_handbook_v2_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu Toàn diện v2 (Chương 13 Inverted Generalization & mô hình `v0.9.4`) sang .docx và .pdf.
+- `python scripts/build_defense_handbook_v2_docx.py`: Tự động biên dịch Sổ tay Kỹ thuật Chuyên sâu Toàn diện v2 (đồng bộ toàn bộ 13 chương chuẩn `v0.9.4`, hộp kiến thức nền tảng, công thức OMML gốc Word, sơ đồ trực quan 300 DPI & từ điển giải nghĩa) sang `.docx` và `.pdf`.
 - `python scripts/export_voice_final_dataset.py`: Xuất bản & tổ chức lại 103.189 files vào `Voice_Final/` (`bonafide/` & `spoof/{v7,v8}` đối xứng 1:1).
 - `python scripts/train_dual_seen.py --batch-size 8 --accum-steps 2`: Huấn luyện kép Dual-Seen (F5-TTS + VieNeu-TTS) kèm kiểm định SPK_0001.
 - `python scripts/eval_seen_vs_unseen_degradation.py --ckpt out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`: Đo đạc mức độ suy giảm Seen vs Unseen TTS trên checkpoint Dual-Seen.

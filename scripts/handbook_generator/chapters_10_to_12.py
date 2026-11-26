@@ -1,450 +1,907 @@
 # -*- coding: utf-8 -*-
 """
-Chương 10, 11, 12: Tối ưu hiệu năng NFR1, Cẩm nang 22 câu hỏi phản biện hội đồng và Bản đồ tra cứu bài báo khoa học
+Chương 10, 11, 12 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
+- Chương 10: Tối ưu độ trễ suy luận thời gian thực (NFR1 ≤ 3.0 giây) & Hiệu suất phần cứng
+- Chương 11: Cẩm nang 22 câu hỏi phản biện trọng tâm trước Hội đồng bảo vệ (Chuẩn hóa v0.9.4)
+- Chương 12: Hệ thống hóa từ khóa khoa học (7 trục Taxonomy) & Cẩm nang đọc bài báo quốc tế
 """
 
-from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from __future__ import annotations
 
 from .styles import (
+    add_bullet_item,
+    add_callout_box,
+    add_figure,
+    add_foundation_primer,
     add_heading_chapter,
     add_heading_section,
     add_heading_subsection,
+    add_omml_equation,
     add_styled_paragraph,
-    add_bullet_item,
-    add_callout_box,
-    add_prerequisite_box,
-    set_cell_background,
-    set_cell_margins,
-    set_table_borders,
+    add_styled_table,
+    add_term_glossary,
+    omml_delim,
+    omml_frac,
+    omml_r,
+    omml_sub,
+    omml_subsup,
+    omml_sup,
 )
 
-def add_chapters_10_to_12(doc):
-    """Add chapters 10, 11, and 12 with comprehensive prerequisites, 20 Q&As, and academic search guides."""
+
+def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
+    """Render Chapters 10, 11, and 12 with primers, native OMML math, v0.9.4 metrics, and glossaries."""
+    _ = figs  # Reserved for optional figure hooks from top-level document builder
 
     # =========================================================================
-    # CHƯƠNG 10
+    # CHƯƠNG 10: TỐI ƯU ĐỘ TRỄ SUY LUẬN THỜI GIAN THỰC (NFR1 ≤ 3.0 GIÂY)
     # =========================================================================
-    add_heading_chapter(doc, "Chương 10", "Tối Ưu Hóa Hiệu Năng & Khắc Phục Cold-Start Latency (NFR1)")
+    add_heading_chapter(
+        doc,
+        "Chương 10",
+        "Tối Ưu Độ Trễ Suy Luận Thời Gian Thực (NFR1 ≤ 3.0 Giây) & Hiệu Suất Phần Cứng",
+    )
 
-    add_prerequisite_box(doc, "Chương 10", 
-        "Hiện tượng khởi động nguội (Cold Start Latency trong ML Serving), Khởi tạo ngữ cảnh phần cứng CUDA Runtime, "
-        "Độ phức tạp thuật toán O(N^2) vs O(N log N), Kiến trúc bộ nhớ máy tính (VRAM, System RAM, Băng thông PCIe Bus, Paging swap).")
+    add_foundation_primer(
+        doc,
+        process_name="Kỹ thuật tối ưu độ trễ thời gian thực (Latency) & Độ phức tạp tính toán phần cứng",
+        why_needed=(
+            "Trong tình huống lừa đảo mạo danh người thân qua Zalo hoặc cuộc gọi khẩn cấp, nạn nhân thường bị kẻ gian "
+            "thúc ép chuyển tiền trong vài chục giây. Dù mô hình AI có tỷ lệ lỗi thấp đến đâu (như 5.63% EER của v0.9.4) "
+            "nhưng nếu người dùng phải chờ 15–30 giây mới nhận được kết quả cảnh báo thì hệ thống mất đi giá trị phòng vệ thực tiễn. "
+            "Vì vậy, Yêu cầu Phi chức năng số 1 (NFR1) của đồ án khóa cứng chỉ tiêu trung vị độ trễ phản hồi toàn trình ≤ 3.0 giây."
+        ),
+        real_analogy=(
+            "Hãy hình dung hai hình ảnh quen thuộc: (1) Khởi động xe máy vào buổi sáng trời lạnh (Cold-Start) tốn vài giây đề máy "
+            "để bơm xăng và làm nóng động cơ, nhưng khi xe đã nổ êm ở chế độ chờ (Warm-Start) thì chỉ cần nhích ga là vọt đi ngay; "
+            "(2) Thang máy chở cùng lúc 5 người lên tầng 10 trong 1 chuyến duy nhất (Vectorized Batch) nhanh gấp nhiều lần so với bắt "
+            "từng người đi lẻ 5 chuyến liên tiếp (Sequential Loop)."
+        ),
+        core_points=[
+            "**Khởi động lạnh (`Cold-Start`) so với Khởi động ấm (`Warm-Start`)**: Khi máy chủ vừa bật, lượt suy luận đầu tiên thường chậm bất thường (3–6 giây) vì PyTorch phải khởi tạo ngữ cảnh `CUDA Runtime`, biên dịch hạt nhân `cuDNN` và cấp phát vùng nhớ đệm trên card đồ họa. Chạy nháp một tensor giả (`Dummy Tensor Pre-warming`) ngay lúc khởi động máy chủ giúp gánh hết chi phí này trước khi người dùng đầu tiên truy cập.",
+            "**Độ phức tạp thuật toán (`Big-O`) — `O(N log N)` của FFT so với `O(L² · d)` của Transformer Attention**: Phép biến đổi phổ nhanh `FFT` trên `N = 64.000` mẫu âm thanh chỉ cần xấp xỉ `N · log₂(N) ≈ 1,02 triệu` phép tính. Ngược lại, cơ chế Tự chú ý (`Self-Attention`) trong 12 tầng Transformer của `Wav2Vec 2.0` có độ phức tạp bậc hai `O(L² · d)` theo số khung thời gian `L`. Khóa cố định mỗi cửa sổ đúng `4,0 giây` (`L = 199` khung, `d = 768`) giúp ngăn chặn sự bùng nổ chi phí bậc hai khi gặp tệp ghi âm dài.",
+            "**Cấp phát bộ nhớ `VRAM` & Nghẽn cổ chai giao tiếp `CPU–GPU PCIe`**: Âm thanh tải từ mạng nằm trên `RAM` của `CPU`. Muốn `GPU` tính toán, dữ liệu phải đi qua khe cắm `PCIe` sang `VRAM`. Nếu truyền nhỏ lẻ nhiều lần hoặc giải mã qua ổ cứng, thời gian chờ vận chuyển dữ liệu còn lâu hơn thời gian nhân ma trận của `GPU`.",
+            "**Vòng lặp tuần tự (`Sequential Loop`) so với Gom lô Vector hóa (`Vectorized Mini-Batch Tensor`)**: Một đoạn tin nhắn thoại dài 8 giây được cắt thành 5 cửa sổ trượt. Thay vì gọi mô hình chạy lặp 5 lần nối tiếp nhau (`5 × T_single`), việc xếp chồng 5 cửa sổ thành một khối tensor `(5, 64000)` cho phép hàng nghìn nhân `CUDA` tính toán đồng thời trong **1 lượt truyền tiến (`forward pass`) duy nhất**.",
+        ],
+    )
 
-    add_heading_section(doc, "10.0 Kiến Thức Nền Tảng Tiên Quyết Cần Nắm Vững Trước Khi Đọc Chương 10")
-    add_styled_paragraph(doc, 
-        "Tối ưu hóa hiệu năng để đạt chuẩn thời gian thực (Real-time latency < 3.0s) đòi hỏi người kỹ sư phải hiểu rõ "
-        "cơ chế vận hành vật lý của phần cứng máy tính và GPU. Người học cần nắm chắc 4 nguyên lý sau:")
+    add_heading_section(
+        doc,
+        "10.1 Phân Rã Toán Học Độ Trễ Toàn Trình (End-to-End Latency) & Độ Phức Tạp Khối Mạng",
+    )
+    add_styled_paragraph(
+        doc,
+        "Để tối ưu tốc độ một cách khoa học thay vì chỉnh sửa cảm tính, ViTrueVoice bóc tách tổng thời gian phản hồi "
+        "từ lúc máy chủ FastAPI hoặc Telegram Bot nhận gói tin âm thanh cho tới lúc trả về kết quả JSON thành 4 thành phần độc lập:",
+    )
 
-    add_heading_subsection(doc, "10.0.1 Hiện Tượng Khởi Động Nguội (Cold Start Latency) Trong ML Serving")
-    add_styled_paragraph(doc, 
-        "Khi một máy chủ API vừa khởi động, request đầu tiên của người dùng thường bị chậm bất thường (mất từ 3–8 giây), "
-        "trong khi các request tiếp theo lại chạy cực nhanh (chỉ mất vài chục mili-giây). "
-        "Nguyên nhân là do:\n"
-        "1. Trọng số mô hình chưa được nạp lên thanh ghi bộ nhớ nhanh của GPU.\n"
-        "2. Thư viện phần cứng (như NVIDIA cuDNN) phải chạy các phép đo thử nghiệm ngầm (Auto-tuner benchmark) "
-        "để chọn thuật toán nhân ma trận tối ưu nhất cho kích thước tensor hiện tại.\n"
-        "- Kỹ thuật **Warm-up Dummy Tensor**: Khi server vừa khởi động, ta chủ động đưa một mảng tensor giả lập $(1, 64000)$ "
-        "chạy qua mô hình một lần. Việc này giúp hoàn tất toàn bộ khâu khởi động ngầm trước khi người dùng thực tế đầu tiên gửi request đến!")
+    eq_lat_xml = (
+        omml_sub(omml_r("T"), omml_r("total", normal=True))
+        + omml_r(" = ", normal=True)
+        + omml_sub(omml_r("T"), omml_r("decode", normal=True))
+        + omml_r(" + ", normal=True)
+        + omml_sub(omml_r("T"), omml_r("DSP", normal=True))
+        + omml_r(" + ", normal=True)
+        + omml_sub(omml_r("T"), omml_r("forward", normal=True))
+        + omml_r(" + ", normal=True)
+        + omml_sub(omml_r("T"), omml_r("post", normal=True))
+        + omml_r(" ≤ 3,0 s", normal=True)
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Phương trình phân rã độ trễ suy luận toàn trình (End-to-End Latency Budget)",
+        omml_body_xml=eq_lat_xml,
+        variables=[
+            ("T_total", "Tổng độ trễ toàn trình đo từ lúc nhận luồng byte âm thanh đến khi xuất phản hồi JSON (mục tiêu NFR1 ≤ 3,0 giây)."),
+            ("T_decode", "Thời gian nhận diện chữ ký số `Magic Bytes` và giải mã đa định dạng (WAV, MP3, M4A, AAC, Opus, AMR) về sóng PCM 16 kHz đơn kênh trên bộ nhớ RAM."),
+            ("T_DSP", "Thời gian cắt khoảng lặng đầu/cuối, chuẩn hóa biên độ, nối lặp `Repeat Padding` và trích xuất lô đa cửa sổ trượt kích thước `(K, 64000)` với `1 ≤ K ≤ 5`."),
+            ("T_forward", "Thời gian truyền khối tensor qua khe cắm `PCIe` và chạy suy luận mạng `SSL-AASIST v0.9.4` trong chế độ `torch.inference_mode()`."),
+            ("T_post", "Thời gian gộp điểm bằng thuật toán `Consensus Asymmetric Veto`, hiệu chuẩn xác suất `Platt Scaling (T = 16,0)` và ghi nhật ký băm ẩn danh `SHA-256`."),
+        ],
+    )
 
-    add_heading_subsection(doc, "10.0.2 Độ Phức Tạp Thuật Toán: So Sánh O(N^2) Và O(N log N)")
-    add_styled_paragraph(doc, 
-        "Trong tiền xử lý âm thanh, nếu sử dụng các thuật toán phân tích cao độ cổ điển như YIN hay Tự tương quan (Autocorrelation) "
-        "ở miền thời gian, độ phức tạp tính toán là $\\mathcal{O}(N^2)$ (với $N$ mẫu, số phép tính tỷ lệ với $N^2$). "
-        "Đối với đoạn âm thanh $N = 64.000$ mẫu, $N^2 \\approx 4 \\times 10^9$ phép tính, làm đơ luồng xử lý chính!\n"
-        "- Ngược lại, biến đổi Fourier nhanh (FFT) và biến đổi STFT chỉ có độ phức tạp là $\\mathcal{O}(N \\log N)$ "
-        "($64.000 \\times 16 \\approx 10^6$ phép tính, nhanh gấp 4.000 lần!). "
-        "ViTrueVoice loại bỏ toàn bộ các bước trích xuất pitch nặng nề ở tầng suy luận thời gian thực để duy trì tốc độ tối đa.")
+    add_styled_paragraph(
+        doc,
+        "Trong 4 thành phần trên, `T_forward` phụ thuộc trực tiếp vào độ phức tạp tính toán của mặt trước tự giám sát "
+        "`Wav2Vec 2.0` (gồm 7 tầng tích chập `CNN` hạ mẫu với bước nhảy tổng cộng `320 mẫu` và 12 tầng `Transformer Encoder` chiều ẩn `d = 768`) "
+        "cùng mặt sau đồ thị không đồng nhất `Compact AASIST`. Khi khóa cứng chiều dài mỗi cửa sổ ở mức `N = 64.000` mẫu (`4,0 giây` tại `16 kHz`), "
+        "số khung biểu diễn đi vào khối Transformer luôn cố định chính xác tại `L = 199` khung:",
+    )
 
-    add_heading_subsection(doc, "10.0.3 Kiến Trúc Bộ Nhớ Máy Tính & Nghẽn Cổ Chai Băng Thông PCIe Bus")
-    add_styled_paragraph(doc, 
-        "Dữ liệu âm thanh từ mạng Internet đi vào System RAM của CPU. Để GPU xử lý được, dữ liệu này bắt buộc phải được "
-        "truyền qua bus giao tiếp PCIe (Peripheral Component Interconnect Express) sang bộ nhớ VRAM của GPU.\n"
-        "- Băng thông PCIe tuy rất lớn nhưng nếu liên tục truyền qua lại các tensor nhỏ lẻ, độ trễ truyền dữ liệu (Data Transfer Latency) "
-        "sẽ chiếm hơn 50% tổng thời gian! "
-        "Bằng cách gom các cửa sổ trượt thành một batch tensor duy nhất trên RAM rồi chuyển sang GPU trong 1 lệnh duy nhất (`tensor.to('cuda')`), "
-        "ta triệt tiêu hoàn toàn độ trễ nghẽn cổ chai PCIe.")
+    eq_comp_xml = (
+        omml_sub(omml_r("C"), omml_r("FFT", normal=True))
+        + omml_r(" = ", normal=True)
+        + omml_r("O", normal=True)
+        + omml_delim(
+            omml_r("N") + omml_r(" · ", normal=True) + omml_sub(omml_r("log", normal=True), omml_r("2", normal=True)) + omml_r("N")
+        )
+        + omml_r(" ,     ", normal=True)
+        + omml_sub(omml_r("C"), omml_r("Attn", normal=True))
+        + omml_r(" = ", normal=True)
+        + omml_r("O", normal=True)
+        + omml_delim(
+            omml_r("K") + omml_r(" · ", normal=True) + omml_sup(omml_r("L"), omml_r("2", normal=True)) + omml_r(" · ", normal=True) + omml_r("d")
+        )
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Đối sánh độ phức tạp tiệm cận giữa Biến đổi FFT và Tự chú ý Transformer theo cửa sổ trượt",
+        omml_body_xml=eq_comp_xml,
+        variables=[
+            ("N = 64.000", "Số mẫu âm thanh cố định của mỗi cửa sổ trượt 4,0 giây ở tần số lấy mẫu chuẩn 16.000 Hz."),
+            ("L = 199", "Số khung thời gian sau khối tích chập CNN của Wav2Vec 2.0, tính bởi `⌊(64.000 − 400) / 320⌋ + 1 = 199` khung."),
+            ("d = 768", "Số chiều vector đặc trưng ẩn tại mỗi tầng Transformer của mô hình `wav2vec2-base-vietnamese-250h`."),
+            ("K ≤ 5", "Số lượng cửa sổ trượt tối đa được lấy mẫu đều trên toàn bộ đoạn thoại. Nhờ chia thành `K` cửa sổ cố định thay vì đưa nguyên đoạn dài `5·L` vào mạng, chi phí giảm từ `(5·L)² = 25·L²` xuống chỉ còn `5·L²` (tiết kiệm gấp 5 lần phép tính và bộ nhớ VRAM!)."),
+        ],
+    )
 
-    # -------------------------------------------------------------------------
-    # 10.1 - 10.2 Chuyên sâu
-    # -------------------------------------------------------------------------
-    add_heading_section(doc, "10.1 Khắc Phục Triệt Để Độ Trễ Khởi Động Lạnh (Cold-Start Latency)")
-    add_styled_paragraph(doc, 
-        "Yêu cầu phi chức năng NFR1 của dự án đặt ra trần giới hạn rất khắt khe: **Độ trễ suy luận toàn trình phải <= 3.0 giây**. "
-        "Tuy nhiên, trong lần chạy đầu tiên sau khi khởi động máy chủ, độ trễ thường bị vọt lên tới 4.2 giây do hiện tượng Cold-Start.")
-    add_styled_paragraph(doc, 
-        "ViTrueVoice đã xử lý dứt điểm vấn đề này bằng kỹ thuật **Warm-up Dummy Tensor** ngay trong sự kiện `startup_event` của FastAPI:")
-    add_bullet_item(doc, "Ngay khi nạp xong trọng số mô hình `ssl_aasist.pt`, hệ thống tự động sinh một tensor giả lập "
-        "`dummy_tensor = torch.zeros(1, 64000, device='cuda')` và thực hiện một forward pass chạy ngầm.", "1. Dummy Forward Pass")
-    add_bullet_item(doc, "Quá trình này ép thư viện CUDA và driver NVIDIA khởi tạo sẵn Context, nạp kernel cuDNN vào cache "
-        "và cấp phát sẵn vùng nhớ tĩnh trên VRAM.", "2. Khởi tạo CUDA Context Sẵn")
-    add_bullet_item(doc, "Kết quả đo kiểm trên 1.000 request thực tế: Độ trễ của request đầu tiên giảm từ 4.2 giây xuống còn **210 mili-giây**; "
-        "Độ trễ trung vị của các request tiếp theo đạt mức kỷ lục: **66.3 mili-giây** (P90 = 68.2 mili-giây), nhanh gấp **45 lần** so với trần NFR1!", "3. Kết Quả Vượt Trội")
+    add_heading_section(
+        doc,
+        "10.2 Bốn (04) Kỹ Thuật Tối Ưu Hóa Độ Trễ Cốt Lõi Trong ViTrueVoice v0.9.4",
+    )
+    add_styled_paragraph(
+        doc,
+        "Hệ thống sản xuất của ViTrueVoice (`src/app/server.py`, `src/preprocessing/audio_loader.py` và `src/preprocessing/pooling.py`) "
+        "triển khai đồng bộ 4 kỹ thuật tối ưu hóa phần cứng và phần mềm để ép tổng độ trễ xuống dưới 1 giây:",
+    )
 
-    add_heading_section(doc, "10.2 Tối Ưu Hóa Bộ Nhớ VRAM & Giải Quyết Nghẽn PCIe Paging")
-    add_styled_paragraph(doc, 
-        "Khi triển khai trên các dòng card đồ họa phổ thông (như NVIDIA RTX 3050 4GB VRAM), mô hình rất dễ gặp lỗi quá tải bộ nhớ (Out-Of-Memory - OOM). "
-        "Hệ thống đã áp dụng 3 giải pháp tối ưu hóa phần cứng chuyên sâu:")
-    add_bullet_item(doc, "Giảm kích thước batch vật lý xuống `batch_size = 8` để tensor vừa vặn trong 3.2GB VRAM; "
-        "đồng thời tích hợp `gradient_accumulation_steps = 2` để duy trì kích thước batch toán học hiệu dụng tương đương 16.", "1. Gradient Accumulation")
-    add_bullet_item(doc, "Tắt hoàn toàn việc lưu trữ đồ thị đạo hàm (`with torch.no_grad():`) và bật chế độ suy luận tối ưu (`model.eval()`).", "2. Zero-Grad Inference")
-    add_bullet_item(doc, "Toàn bộ tensor âm thanh sau khi giải mã in-memory qua FFmpeg được pinned memory (`pin_memory=True`), "
-        "giúp việc truyền dữ liệu từ RAM CPU sang VRAM GPU đạt tốc độ tối đa qua giao thức DMA (Direct Memory Access).", "3. DMA Memory Transfer")
+    add_heading_subsection(
+        doc,
+        "10.2.1 Kỹ Thuật 1: Khởi Tạo Singleton Mô Hình & Làm Ấm Trước Bằng Tensor Giả (Dummy Tensor Pre-warming)",
+    )
+    add_bullet_item(
+        doc,
+        "Trọng số chính thức `out/v0.9.4/best_model.pt` được hàm `resolve_default_checkpoint()` nạp **duy nhất một lần** vào không gian bộ nhớ "
+        "theo mẫu thiết kế `Singleton` ngay khi tiến trình máy chủ khởi chạy, tuyệt đối không nạp lại tệp `.pt` ở từng lượt gọi API.",
+        bold_prefix="Nạp trọng số Singleton một lần",
+    )
+    add_bullet_item(
+        doc,
+        "Ngay sau khi chuyển sang trạng thái `model.eval()`, hệ thống tự động tạo một tensor giả lập kích thước chuẩn `(1, 64000)` "
+        "đặt trong ngữ cảnh `torch.inference_mode()` để chạy thông toàn bộ đồ thị `Wav2Vec 2.0 + Compact AASIST`. "
+        "Bước làm ấm này buộc trình điều khiển NVIDIA khởi tạo xong `CUDA Context`, biên dịch sẵn hạt nhân `cuDNN` và mở khóa bộ cấp phát bộ nhớ đệm (`PyTorch Caching Allocator`) trước khi mở cổng nhận truy cập.",
+        bold_prefix="Làm ấm hạt nhân bằng Dummy Tensor `(1, 64000)`",
+    )
+    add_bullet_item(
+        doc,
+        "Sử dụng ngữ cảnh `with torch.inference_mode():` (cấp tối ưu cao hơn cả `torch.no_grad()` trong PyTorch `2.6`) giúp tắt hoàn toàn "
+        "bộ đếm phiên bản tensor (`version counter`) và siêu dữ liệu đồ thị đạo hàm, giảm cả thời gian CPU điều phối lẫn dung lượng VRAM tiêu thụ.",
+        bold_prefix="Tắt triệt để đồ thị đạo hàm với `torch.inference_mode()`",
+    )
+
+    add_heading_subsection(
+        doc,
+        "10.2.2 Kỹ Thuật 2: Giải Mã Âm Thanh Đa Định Dạng Trực Tiếp Trên RAM (In-Memory FFmpeg Pipe)",
+    )
+    add_bullet_item(
+        doc,
+        "Thay vì ghi tệp âm thanh người dùng tải lên xuống ổ cứng rồi gọi câu lệnh đọc lại từ đĩa (gây trễ I/O 20–80 ms và để lại dấu vết dữ liệu sinh trắc học), "
+        "hàm `load_audio` đọc trực tiếp chuỗi byte thô trong bộ đệm `io.BytesIO` trên RAM.",
+        bold_prefix="Xử lý luồng byte hoàn toàn trên bộ nhớ `io.BytesIO`",
+    )
+    add_bullet_item(
+        doc,
+        "Bộ phân tích chữ ký nhị phân đầu tệp (`Magic Bytes`: `RIFF/WAVE`, `OggS`, `ID3`, `ftyp`, `#!AMR`) nhận diện tức thì định dạng thật sự "
+        "mà không phụ thuộc đuôi tệp tin, sau đó đẩy luồng dữ liệu qua đường ống `FFmpeg stdin/stdout pipe` để chuẩn hóa về mảng `float32` đơn kênh `16.000 Hz` trong vài chục mili-giây.",
+        bold_prefix="Nhận diện `Magic Bytes` & giải mã qua đường ống `FFmpeg Pipe`",
+    )
+
+    add_heading_subsection(
+        doc,
+        "10.2.3 Kỹ Thuật 3: Vector Hóa Đa Cửa Sổ Thành Mini-Batch `(5, 64000)` Trong 1 Lượt Forward Duy Nhất",
+    )
+    add_styled_paragraph(
+        doc,
+        "Đây là quyết định kiến trúc mang lại bước nhảy tốc độ lớn nhất cho thuật toán cắt đa cửa sổ (`src/preprocessing/pooling.py`). "
+        "Hàm `extract_window_batch` cắt tối đa `K = 5` cửa sổ trượt chồng lấp (`win = 64.000`, `hop = 16.000`, bật `dense_slicing = True`) "
+        "và xếp chồng chúng bằng `torch.stack(windows, dim=0)` thành một tensor liên tục `(5, 64000)`. Hàm `batch_window_forward` đẩy toàn bộ khối này "
+        "qua GPU trong **1 lượt truyền tiến duy nhất** thay vì chạy vòng lặp `for` 5 lần:",
+    )
+
+    eq_batch_xml = (
+        omml_sub(omml_r("T"), omml_r("batch", normal=True))
+        + omml_delim(omml_r("K"))
+        + omml_r(" = ", normal=True)
+        + omml_sub(omml_r("T"), omml_r("PCIe", normal=True))
+        + omml_delim(omml_r("K"))
+        + omml_r(" + ", normal=True)
+        + omml_sub(omml_r("T"), omml_r("GPU", normal=True))
+        + omml_delim(omml_r("K"))
+        + omml_r(" ≪ ", normal=True)
+        + omml_r("K")
+        + omml_r(" · ", normal=True)
+        + omml_delim(
+            omml_sub(omml_r("T"), omml_r("PCIe", normal=True))
+            + omml_delim(omml_r("1", normal=True))
+            + omml_r(" + ", normal=True)
+            + omml_sub(omml_r("T"), omml_r("GPU", normal=True))
+            + omml_delim(omml_r("1", normal=True))
+        )
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Định luật tiết kiệm độ trễ nhờ gộp lô song song đa cửa sổ trên GPU",
+        omml_body_xml=eq_batch_xml,
+        variables=[
+            ("T_batch(K)", "Thời gian suy luận thực tế khi gom tất cả `K` cửa sổ thành 1 mini-batch `(K, 64000)` chạy trong 1 lượt gọi mô hình."),
+            ("T_PCIe(K)", "Chi phí khởi tạo giao dịch truyền dữ liệu từ RAM sang VRAM qua bus `PCIe` (chỉ tốn 1 lần mở giao dịch thay vì `K` lần)."),
+            ("T_GPU(K)", "Thời gian các nhân Tensor/CUDA thực thi phép nhân ma trận song song. Trên `NVIDIA RTX 3050 4GB`, `K = 5` cửa sổ vẫn nằm gọn trong băng thông nhân song song nên `T_batch(5)` chỉ mất trung vị **66,3 ms** (`P90 = 68,2 ms`)."),
+        ],
+    )
+
+    add_heading_subsection(
+        doc,
+        "10.2.4 Kỹ Thuật 4: Tinh Gọn Chiều Đồ Thị Compact AASIST & Kỷ Luật Quản Trị Bộ Nhớ FP16 / FP32",
+    )
+    add_bullet_item(
+        doc,
+        "Khối `Compact AASIST` chiếu biểu diễn `768 chiều` của `Wav2Vec 2.0` xuống không gian nút thời gian – tần số thu gọn trước khi đi vào "
+        "các tầng chú ý đồ thị không đồng nhất `HS-GAL` và `Master Node`, giúp giảm hơn 60% số phép nhân ma trận dư thừa mà vẫn giữ trọn độ nhạy phát hiện vi nhiễu pha.",
+        bold_prefix="Thu gọn chiều không gian đồ thị `Compact AASIST`",
+    )
+    add_bullet_item(
+        doc,
+        "Trong pha huấn luyện trên card đồ họa phổ thông `RTX 3050 4GB VRAM`, hệ thống kết hợp độ chính xác hỗn hợp tự động (`AMP FP16`) "
+        "với tích lũy đạo hàm (`batch_size = 8`, `accum_steps = 2`, tương đương lô hiệu dụng `16`) để giữ mức chiếm dụng VRAM ổn định ở `2,8–3,2 GB`. "
+        "Khi sang pha suy luận thời gian thực, đầu phân loại tính điểm ở `FP32` chuẩn xác nhằm tránh sai số làm tròn gần ngưỡng quyết định `θ = 0,0`.",
+        bold_prefix="Kỷ luật bộ nhớ `FP16` khi huấn luyện & `FP32` chính xác khi suy luận",
+    )
+
+    add_heading_section(
+        doc,
+        "10.3 Bảng Kết Quả Thực Đo Độ Trễ Đã Kiểm Chứng Của Hệ Thống v0.9.4",
+    )
+    add_styled_paragraph(
+        doc,
+        "Bảng 10.1 tổng hợp đầy đủ các mốc đo độ trễ thực nghiệm của ViTrueVoice `v0.9.4` từ bước nghe thủ công ban đầu đến "
+        "các kịch bản kiểm định API, nhật ký vận hành thực tế và tốc độ thuần của mô hình trên phần cứng GPU:",
+    )
+
+    add_styled_table(
+        doc,
+        headers=[
+            "Cấp Độ / Kịch Bản Đo Kiểm",
+            "Phạm Vi Bao Phủ Kỹ Thuật",
+            "Nguồn Dữ Liệu Kiểm Chứng",
+            "Trung Vị (P50)",
+            "So Với Trần NFR1 (≤ 3.0s)",
+        ],
+        rows=[
+            (
+                "Baseline Thủ Công (Trước đề tài)",
+                "Người dùng tự nghe tai trực tiếp 72 lượt (hoặc gọi xác minh người thân 2–5 phút)",
+                "`benchmarks/human_baseline_metrics.csv`",
+                "5,310 giây",
+                "Vượt trần (Chậm & EER 34,72%)",
+            ),
+            (
+                "Benchmark Chính Thức 30 Ca API / Bot",
+                "Toàn trình HTTP/Bot + giải mã FFmpeg in-memory + 5 cửa sổ trượt + Platt + SHA-256 log",
+                "`benchmarks/latency_benchmark.csv` (30 lượt chuẩn)",
+                "**1,101 giây**",
+                "**ĐẠT — Nhanh gấp ~2,7 lần trần 3.0s**",
+            ),
+            (
+                "Telemetry Vận Hành Cục Bộ Thực Tế",
+                "Toàn trình API sản xuất ghi nhận qua 140 lượt thẩm định thực tế ẩn danh SHA-256",
+                "`benchmarks/latency_log.json` (140 lượt chạy)",
+                "**0,705 giây**",
+                "**ĐẠT — Nhanh gấp ~4,3 lần trần 3.0s**",
+            ),
+            (
+                "Lượt Truyền Tiến Thuần Mô Hình GPU",
+                "1 forward pass gộp lô `(5, 64000)` của `SSL-AASIST v0.9.4` trên GPU `RTX 3050 4GB`",
+                "`scripts/benchmark_latency.py --pooling`",
+                "**66,3 ms** (`P90 = 68,2 ms`)",
+                "**ĐẠT — Nhanh gấp ~45 lần trần 3.0s**",
+            ),
+        ],
+        col_widths=[1.45, 1.85, 1.35, 1.0, 1.05],
+        highlight_row_pred=lambda idx, _: idx in (1, 2, 3),
+    )
+
+    add_callout_box(
+        doc,
+        "Khi Hội đồng hỏi về tốc độ xử lý, sinh viên cần phân biệt rành mạch hai con số để thể hiện sự chính xác kỹ thuật: "
+        "**(1) Độ trễ toàn trình tính cả tải tệp, giải mã FFmpeg trên RAM và trả JSON** đạt trung vị **1,101 giây** trên bộ 30 ca chuẩn "
+        "và **0,705 giây** trên 140 lượt chạy thực tế; **(2) Riêng lượt chạy mạng nơ-ron đa cửa sổ `(5, 64000)` trên GPU RTX 3050 4GB** "
+        "chỉ mất **66,3 mili-giây** (`P90 = 68,2 ms`). Cả hai đều bỏ xa ngưỡng yêu cầu **NFR1 ≤ 3,0 giây**!",
+        title="MẸO PHẢN BIỆN CHƯƠNG 10: PHÂN BIỆT RÕ ĐỘ TRỄ TOÀN TRÌNH VÀ ĐỘ TRỄ THUẦN GPU",
+    )
+
+    add_term_glossary(
+        doc,
+        terms=[
+            ("NFR", "Non-Functional Requirement", "Yêu cầu phi chức năng — quy định chất lượng vận hành hệ thống (như độ trễ ≤ 3,0 giây, bảo mật không lưu vết) bên cạnh độ chính xác nhận diện."),
+            ("Latency", "End-to-End Inference Latency", "Độ trễ suy luận toàn trình — tổng thời gian chờ từ lúc gửi đoạn thoại đến lúc nhận về nhãn Thật/Giả trên giao diện."),
+            ("Cold-Start", "Cold-Start Latency", "Hiện tượng lượt gọi đầu tiên sau khi bật máy chủ bị trễ nhiều giây do phần cứng GPU và thư viện phần mềm chưa khởi tạo xong bộ nhớ đệm."),
+            ("Pre-warming", "Dummy Tensor Warm-up", "Kỹ thuật chạy nháp một tensor giả lập `(1, 64000)` ngay lúc bật máy chủ để làm nóng toàn bộ hạt nhân tính toán trước khi phục vụ người dùng."),
+            ("Big-O Complexity", "Asymptotic Computational Complexity", "Ký hiệu toán học đo tốc độ tăng số phép tính khi kích thước đầu vào lớn lên, ví dụ `O(N log N)` hoặc `O(L² · d)`."),
+            ("FFT", "Fast Fourier Transform", "Thuật toán Biến đổi Fourier Nhanh chuyển tín hiệu âm thanh từ miền thời gian sang miền tần số với chi phí siêu nhẹ `O(N log N)`."),
+            ("VRAM", "Video Random Access Memory", "Bộ nhớ chuyên dụng tốc độ cao nằm ngay trên card đồ họa GPU để chứa trọng số mô hình và các khối tensor đang tính toán."),
+            ("Vectorization / Batching", "Vectorized Mini-Batch Processing", "Kỹ thuật gom nhiều cửa sổ dữ liệu thành một mảng đa chiều duy nhất `(5, 64000)` để GPU xử lý song song trong một nhịp lệnh."),
+            ("P50 / Median & P90", "50th & 90th Percentile Latency", "`P50` (trung vị) là mốc thời gian mà 50% số lượt chạy nhanh hơn mốc đó; `P90` là mốc mà 90% số lượt chạy đều hoàn tất nhanh hơn, giúp đánh giá độ ổn định khi tải cao."),
+        ],
+    )
 
     # =========================================================================
-    # CHƯƠNG 11
+    # CHƯƠNG 11: CẨM NANG 22 CÂU HỎI PHẢN BIỆN TRỌNG TÂM (CHUẨN HÓA v0.9.4)
     # =========================================================================
-    add_heading_chapter(doc, "Chương 11", "Cẩm Nang 22 Câu Hỏi & Câu Trả Lời Phản Biện Trước Hội Đồng Bảo Vệ")
+    add_heading_chapter(
+        doc,
+        "Chương 11",
+        "Cẩm Nang 22 Câu Hỏi Phản Biện Trọng Tâm Trước Hội Đồng Bảo Vệ (Chuẩn Hóa v0.9.4)",
+    )
 
-    add_prerequisite_box(doc, "Chương 11", 
-        "Tâm lý học và nguyên tắc vàng khi bảo vệ trước Hội đồng, Mô hình trả lời 3 tầng (Claim -> Evidence -> Impact), "
-        "Kỹ năng nhận diện và hóa giải các câu hỏi bẫy/câu hỏi xoáy từ giám khảo phản biện.")
+    add_foundation_primer(
+        doc,
+        process_name="Công thức vàng 3 bước trả lời phản biện trước Hội đồng chấm đồ án",
+        why_needed=(
+            "Tại buổi bảo vệ đồ án tốt nghiệp, quỹ thời gian hỏi – đáp chỉ kéo dài 10–15 phút cho hàng chục quyết định kỹ thuật. "
+            "Nếu sinh viên trả lời lan man, kể lể lịch sử dài dòng mới vào ý chính, Giảng viên phản biện rất dễ ngắt lời hoặc đánh giá "
+            "sinh viên không nắm chắc bản chất cốt lõi của hệ thống mình xây dựng."
+        ),
+        real_analogy=(
+            "Hãy trả lời Hội đồng giống như một bác sĩ báo cáo hội chẩn cấp cứu: (1) Nêu ngay chẩn đoán kết luận trong câu mở đầu, "
+            "(2) Giải thích ngắn gọn cơ chế sinh lý dẫn tới chẩn đoán đó, và (3) Đưa ngay tờ phiếu xét nghiệm có chỉ số định lượng "
+            "để chứng minh không thể bác bỏ."
+        ),
+        core_points=[
+            "**Bước 1 — Chốt thẳng kết luận trực diện trong 1 câu đầu tiên**: Mở lời bằng câu khẳng định rõ ràng (*\"Dạ thưa Thầy/Cô, nhóm em thiết kế cơ chế X nhằm giải quyết trực tiếp bài toán Y...\"*), tuyệt đối không vòng vo.",
+            "**Bước 2 — Giải thích bản chất vật lý / toán học dễ hiểu**: Lý giải tại sao hiện tượng đó xảy ra (do đứt gãy pha sóng âm, do nén mất mát codec, do đạo hàm hàm mất mát hay do ranh giới phân phối dữ liệu) bằng ngôn từ mạch lạc, chuẩn thuật ngữ.",
+            "**Bước 3 — Đưa con số thực nghiệm `v0.9.4` đã kiểm chứng làm bằng chứng thép**: Khép lại câu trả lời bằng số liệu thực đo chính xác của phiên bản `v0.9.4` (`5.63%` EER trên `15.980` mẫu, `12.05%` EER trên Unseen `VieNeu-TTS`, `94.76%–100%` trên bộ 5 tình nguyện viên độc lập, độ trễ `0.705s–1.101s`, `392/392` unit tests xanh, vận hành Docker cục bộ `0 VNĐ`).",
+        ],
+    )
 
-    add_heading_section(doc, "11.0 Kiến Thức Nền Tảng Tiên Quyết Cần Nắm Vững Trước Khi Đọc Chương 11")
-    add_styled_paragraph(doc, 
-        "Buổi bảo vệ đồ án tốt nghiệp không phải là một kỳ thi kiểm tra trí nhớ, mà là một **phiên điều trần khoa học**. "
-        "Hội đồng muốn thấy sự tự tin, sự trung thực khoa học và khả năng bảo vệ các quyết định kỹ thuật của bạn. "
-        "Trước khi học thuộc 22 câu trả lời bên dưới, hãy nắm chắc 3 bí quyết vàng sau:")
+    add_heading_section(
+        doc,
+        "11.1 Toàn Văn 22 Câu Hỏi & Đáp Án Chuẩn Mực 3 Bước (Cập Nhật Đầy Đủ Số Liệu v0.9.4)",
+    )
+    add_styled_paragraph(
+        doc,
+        "Mỗi câu hỏi dưới đây được cấu trúc thống nhất gồm **Câu hỏi của Hội đồng**, **Ý đồ kiểm tra của Giảng viên** "
+        "và **Trả lời chuẩn mực 3 bước** bám sát hoàn toàn kiến trúc cùng số liệu nghiệm thu chính thức `v0.9.4`:",
+    )
 
-    add_heading_subsection(doc, "11.0.1 Tâm Lý Học Và Nguyên Tắc Vàng Khi Đối Mặt Với Hội Đồng")
-    add_styled_paragraph(doc, 
-        "1. **Bình tĩnh lắng nghe hết câu hỏi**: Không ngắt lời Thầy/Cô. Dành 2–3 giây suy nghĩ để định hình xem câu hỏi thuộc về: Dữ liệu, Mô hình, Đánh giá, hay Thực tế.\n"
-        "2. **Tuyệt đối không đoán mò hay bao biện**: Nếu một vấn đề nằm ngoài phạm vi đề tài, hãy thẳng thắn thừa nhận đó là giới hạn nghiên cứu (Research limitation) "
-        "và nêu hướng mở rộng trong tương lai. Hội đồng luôn đánh giá cực kỳ cao tính trung thực khoa học!\n"
-        "3. **Luôn nói có sách, mách có chứng**: Mọi khẳng định đưa ra đều phải kèm theo số liệu cụ thể (ví dụ: 'EER giảm 40.5%', 'độ trễ 66.3ms', 'kiểm định trên 795 clips').")
+    def _add_defense_qa(q_num: int, question: str, intent: str, step1: str, step2: str, step3: str) -> None:
+        add_heading_subsection(doc, f"Câu {q_num}: {question}")
+        add_styled_paragraph(
+            doc,
+            f"🎯 **Ý đồ kiểm tra của Giảng viên**: *{intent}*",
+            font_size=10.0,
+            color_rgb=(120, 53, 15),
+            space_before=2,
+            space_after=3,
+        )
+        add_bullet_item(doc, step1, bold_prefix="Bước 1 — Chốt kết luận trực diện", font_size=10.2, space_after=2)
+        add_bullet_item(doc, step2, bold_prefix="Bước 2 — Bản chất vật lý / toán học", font_size=10.2, space_after=2)
+        add_bullet_item(doc, step3, bold_prefix="Bước 3 — Bằng chứng thực nghiệm v0.9.4", font_size=10.2, space_after=6)
 
-    add_heading_subsection(doc, "11.0.2 Cấu Trúc Câu Trả Lời 3 Tầng Chuẩn Khoa Học: Claim -> Evidence -> Impact")
-    add_styled_paragraph(doc, 
-        "Mọi câu hỏi kỹ thuật hóc búa của hội đồng đều có thể được bẻ khóa hoàn hảo bằng cấu trúc 3 tầng:\n"
-        "- **Tầng 1 (Claim - Khẳng định trực tiếp)**: Trả lời thẳng vào câu hỏi trong đúng 1 câu ngắn gọn (Ví dụ: 'Dạ thưa Thầy/Cô, chúng em chọn giải pháp A vì lý do B...').\n"
-        "- **Tầng 2 (Evidence - Bằng chứng số liệu thực nghiệm)**: Trích dẫn chính xác con số từ thí nghiệm của mình (Ví dụ: 'Trong thí nghiệm đối chứng giữa nhánh A và nhánh B, giải pháp này giúp giảm EER từ 14.85% xuống 8.84%...').\n"
-        "- **Tầng 3 (Impact - Ý nghĩa thực tiễn)**: Nêu bật giá trị kỹ thuật và tác động xã hội (Ví dụ: 'Điều này đảm bảo khi kẻ gian gọi qua mạng di động GSM 8kHz, hệ thống vẫn bắt được cuộc gọi lừa đảo!').")
+    # Q1: Anti-spoofing CM vs ASV
+    _add_defense_qa(
+        1,
+        "Bài toán chống giả mạo giọng nói (Anti-spoofing CM) của đề tài khác gì so với nhận dạng / xác thực người nói (ASV)?",
+        "Kiểm tra xem sinh viên có phân biệt rành mạch bài toán phát hiện giọng nói nhân tạo độc lập với bài toán so khớp danh tính vân giọng hay không.",
+        "Dạ thưa Thầy/Cô, ViTrueVoice giải quyết bài toán **Phát hiện giả mạo tiếng nói độc lập (`Stand-alone Anti-spoofing Countermeasure - CM`)**, hoàn toàn khác mục tiêu với hệ thống Xác thực người nói (`Automatic Speaker Verification - ASV`).",
+        "Hệ thống `ASV` trả lời câu hỏi *\"Người đang nói có đúng là anh Nguyễn Văn A đã đăng ký vân giọng từ trước hay không?\"* thông qua khoảng cách cosine giữa hai vector đặc trưng người nói (`Speaker Embedding`). Ngược lại, khối `CM` của chúng em trả lời câu hỏi *\"Sóng âm này phát ra từ dây thanh quản sinh học của con người thật hay do thuật toán AI tổng hợp ra?\"* dựa trên các vi nhiễu pha và hài âm mà hoàn toàn không cần biết người nói tên là gì hay phải thu thập mẫu giọng đăng ký trước.",
+        "Nhờ kiến trúc `CM` độc lập người nói, ViTrueVoice `v0.9.4` bảo vệ tức thì bất kỳ người dân nào nhận tin nhắn thoại lạ trên Zalo/Telegram mà không cần kho vân giọng quốc gia, đạt **5.63% EER** trên `15.980` mẫu kiểm thử của những người nói chưa từng xuất hiện trong tập huấn luyện.",
+    )
 
-    add_heading_subsection(doc, "11.0.3 Chiến Thuật Hóa Giải Câu Hỏi Bẫy Và Câu Hỏi Xoáy")
-    add_styled_paragraph(doc, 
-        "Giám khảo phản biện thường đặt các câu hỏi bẫy để xem sinh viên có thực sự tự làm hay chỉ chạy theo các bài hướng dẫn trên mạng. "
-        "Dấu hiệu câu hỏi bẫy: Thầy/Cô gợi ý một giải pháp tưởng chừng rất 'thời thượng' (như: 'Sao không dùng ChatGPT?', 'Sao không dùng mô hình to hơn?', 'Sao không thu thêm nhiều giọng thật?').\n"
-        "- Chiến thuật: Bình tĩnh chỉ ra **Cái giá phải trả (Trade-off)** của giải pháp đó (Về độ trễ thời gian thực, về nguy cơ rò rỉ dữ liệu, về chi phí phần cứng) "
-        "và khẳng định giải pháp hiện tại của nhóm là tối ưu nhất dựa trên bằng chứng thực nghiệm.")
+    # Q2: Vietnamese Wav2Vec2-250h vs English XLSR or MFCC/LFCC
+    _add_defense_qa(
+        2,
+        "Tại sao nhóm chọn mô hình tự giám sát tiếng Việt (wav2vec2-base-vietnamese-250h) thay vì XLSR đa ngữ/tiếng Anh hoặc đặc trưng thủ công MFCC/LFCC?",
+        "Kiểm tra lý do khoa học của việc chọn biểu diễn học tự giám sát bản địa cho ngôn ngữ có thanh điệu như tiếng Việt.",
+        "Dạ thưa Thầy/Cô, chúng em chọn `wav2vec2-base-vietnamese-250h` vì tiếng Việt là ngôn ngữ đơn âm tiết có **6 thanh điệu** phức tạp, nơi các công cụ nhân bản giọng nói dễ bộc lộ sai lệch vi mô nhất ở đường cong tần số cơ bản `F0` và chuyển tiếp nguyên âm.",
+        "Các đặc trưng thủ công như `MFCC` hay `LFCC` dùng hệ bộ lọc tần số cố định và lấy log biên độ nên đánh mất phần lớn thông tin pha tinh vi, lại dễ bị sụp đổ khi kênh thoại Zalo/GSM cắt mất dải tần trên `3.400 Hz`. Trong khi đó, mô hình `XLSR` đa ngữ phải chia sẻ dung lượng tham số cho hàng chục ngôn ngữ không thanh điệu; còn `wav2vec2-base-vietnamese-250h` được tiền huấn luyện tự giám sát chuyên biệt trên `250 giờ` tiếng Việt chuẩn nên nắm bắt cực nhạy cấu trúc hài âm của thanh hỏi, thanh ngã và thanh nặng.",
+        "Thực nghiệm đối chứng trong đồ án chứng minh mô hình `SSL-AASIST` dùng `wav2vec2-base-vietnamese-250h` kéo giảm sai số vượt trội so với baseline `LFCC+GMM`, đưa `In-domain EER` trên toàn bộ 5 biến thể kênh nén của `v0.9.4` xuống mức **4.88% – 6.11%** (trung bình gộp **5.63%**).",
+    )
 
-    # -------------------------------------------------------------------------
-    # 22 Câu hỏi và câu trả lời
-    # -------------------------------------------------------------------------
-    add_heading_section(doc, "11.1 Danh Mục 22 Câu Hỏi & Câu Trả Lời Chi Tiết Trước Hội Đồng")
+    # Q3: Repeat Padding 64k vs Zero-Padding
+    _add_defense_qa(
+        3,
+        "Tại sao khi đoạn thoại ngắn hơn 4.0 giây (< 64.000 mẫu), hệ thống bắt buộc nối lặp (Repeat Padding) thay vì đệm số 0 (Zero-Padding)?",
+        "Kiểm tra sự am hiểu về xử lý tín hiệu số (DSP) và nguy cơ rò rỉ đặc trưng giả (artifact) do tiền xử lý sai cách.",
+        "Dạ thưa Thầy/Cô, chúng em khóa cứng kỹ thuật **Nối lặp (`Repeat Padding` qua `np.tile` / `torch.tile`)** và nghiêm cấm `Zero-Padding` để bảo toàn tính liên tục phổ – thời gian cho khối tích chập của `Wav2Vec 2.0` và đồ thị `AASIST`.",
+        "Nếu chèn một chuỗi số `0` vào đuôi đoạn âm thanh ngắn, tại ranh giới chuyển tiếp sẽ xuất hiện một vách đứt gãy biên độ đột ngột (gây hiện tượng rung `Gibbs` làm loang năng lượng giả lên toàn bộ các dải tần số cao), đồng thời tạo ra vùng năng lượng bằng `0` nhân tạo khiến mạng đồ thị `HS-GAL` học nhầm độ dài đoạn thoại thay vì học dấu vết giả mạo.",
+        "Quy tắc `Repeat Padding` đủ chính xác `64.000 mẫu` (`4.0 giây @ 16 kHz`) là một bất biến kỹ thuật được kiểm tra tự động trong bộ **`392/392 bài kiểm thử đơn vị (unit tests)`**, giúp các mẫu thoại ngắn dưới 4 giây trong bộ nghiệm thu 5 tình nguyện viên đạt tỷ lệ nhận diện đúng tới **100% (64/64)** trên 4 người nói đối chứng `SPK_0004..0007`.",
+    )
 
-    qa_list = [
-        ("Câu 1: Đề tài của các em giải quyết bài toán gì và khác gì so với nhận dạng người nói (Speaker Verification)?",
-         "Dạ thưa Thầy/Cô, hệ thống của chúng em giải quyết bài toán **Phát hiện giả mạo tiếng nói độc lập (Stand-alone Anti-Spoofing / Deepfake Detection)**. "
-         "Điểm khác biệt cốt lõi: Nhận dạng người nói (ASV) tập trung trả lời câu hỏi 'Người này là ai?' dựa trên việc so khớp vân giọng với một mẫu đã đăng ký từ trước. "
-         "Ngược lại, hệ thống của chúng em trả lời câu hỏi 'Giọng nói này là của con người sinh học tự nhiên hay do trí tuệ nhân tạo (AI/TTS) tạo ra?'. "
-         "Hệ thống hoàn toàn không cần biết người nói là ai và không cần cơ sở dữ liệu vân giọng của người dùng."),
+    # Q4: Dynamic Weighted CE without WeightedRandomSampler + OMML
+    _add_defense_qa(
+        4,
+        "Tại sao hàm mất mát Weighted Cross-Entropy phải tính động theo tần suất tập Train và tuyệt đối không dùng chung với WeightedRandomSampler?",
+        "Kiểm tra kiến thức toán học về tối ưu hóa trên dữ liệu mất cân bằng lớp (Class Imbalance) trong học sâu.",
+        "Dạ thưa Thầy/Cô, chúng em tính động trọng số lớp theo tỷ lệ nghịch tần suất mẫu thực tế qua hàm `loss_weights_from_counts` và cấm tuyệt đối việc bật đồng thời `WeightedRandomSampler` nhằm ngăn chặn lỗi **Bù trừ kép (`Double Penalty`)**.",
+        "Tập huấn luyện chính thức `54.400` dòng có tỷ lệ giọng thật nhiều hơn giọng giả khoảng `6,4 : 1`. Khi đặt trọng số mất mát tỉ lệ nghịch `w_c = N / (2 · N_c)`, tổng đóng góp đạo hàm kỳ vọng của lớp Giọng thật và lớp Giọng giả trong mỗi epoch đã cân bằng chính xác `1 : 1`. Nếu còn dùng thêm `WeightedRandomSampler` để ép mỗi mini-batch có tỷ lệ mẫu `50 : 50`, lớp thiểu số sẽ bị nhân hệ số khuếch đại hai lần liên tiếp, làm lệch nghiêm trọng biên quyết định `θ = 0.0`.",
+        "Nhờ cơ chế trọng số động không bù trừ kép kết hợp `AM-Softmax (s = 30.0, m = 0.20)`, mô hình `v0.9.4` hội tụ mượt mà trên tập `54.400` dòng, đạt cân bằng tối ưu giữa khả năng chặn giả (**95.01%**) và tỷ lệ báo nhầm người thật thấp (**BPCER = 6.73%**).",
+    )
 
-        ("Câu 2: Tại sao các em không dùng chỉ số Accuracy mà lại dùng EER và minDCF để đánh giá?",
-         "Dạ thưa Thầy/Cô, trong các bài toán an ninh sinh trắc học và phòng chống tội phạm, tập dữ liệu thực tế luôn bị mất cân bằng nghiêm trọng "
-         "(ví dụ 95% cuộc gọi là thật, chỉ 5% là lừa đảo). Nếu dùng Accuracy, một mô hình tầm thường chỉ cần đoán mọi cuộc gọi là người thật sẽ đạt ngay 95% độ chính xác "
-         "nhưng lại bỏ sót 100% các cuộc tấn công deepfake. Do đó, theo chuẩn quốc tế của NIST và ASVspoof Consortium, chúng em bắt buộc sử dụng **EER (Equal Error Rate)** "
-         "để đo lường điểm cân bằng sai số độc lập với ngưỡng cắt, và **minDCF** để phản ánh chi phí thiệt hại thực tế của việc bỏ sót lừa đảo."),
+    eq_wce_xml = (
+        omml_sub(omml_r("w"), omml_r("c"))
+        + omml_r(" = ", normal=True)
+        + omml_frac(
+            omml_r("N"),
+            omml_r("2", normal=True) + omml_r(" · ", normal=True) + omml_sub(omml_r("N"), omml_r("c")),
+        )
+        + omml_r(" ,     ", normal=True)
+        + omml_sub(omml_r("L"), omml_r("WCE", normal=True))
+        + omml_r(" = − ", normal=True)
+        + omml_subsup(omml_r("∑", normal=True), omml_r("c=0", normal=True), omml_r("1", normal=True))
+        + omml_sub(omml_r("w"), omml_r("c"))
+        + omml_r(" · ", normal=True)
+        + omml_sub(omml_r("y"), omml_r("c"))
+        + omml_r(" · ", normal=True)
+        + omml_r("log", normal=True)
+        + omml_delim(omml_sub(omml_r("p"), omml_r("c")))
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Trọng số lớp động nghịch đảo tần suất trong hàm mất mát Weighted Cross-Entropy",
+        omml_body_xml=eq_wce_xml,
+        variables=[
+            ("N", "Tổng số mẫu âm thanh trong tập huấn luyện thực tế (ví dụ `N = 54.400` dòng ở tập Train chính thức `v0.9.4`)."),
+            ("N_c", "Số lượng mẫu thuộc lớp `c` (`c = 0`: Giọng giả `Spoof`, `c = 1`: Giọng thật `Bonafide`)."),
+            ("w_c", "Trọng số phạt động của lớp `c`, đảm bảo `N_0 · w_0 = N_1 · w_1 = N / 2` mà không cần lấy mẫu lặp `WeightedRandomSampler`."),
+        ],
+    )
 
-        ("Câu 3: Tại sao các em lại sử dụng kỹ thuật Repeat Padding thay vì Zero-Padding cho âm thanh ngắn?",
-         "Dạ thưa Thầy/Cô, mô hình Wav2Vec 2.0 và AASIST yêu cầu tensor đầu vào cố định 64.000 mẫu (4.0 giây). "
-         "Nếu dùng Zero-Padding (chèn số 0), sẽ tạo ra một cú nhảy biên độ gián đoạn đột ngột tại điểm giao cắt và tạo ra một vùng năng lượng bằng 0 kéo dài. "
-         "Điều này sinh ra hiện tượng Gibbs, làm méo mó các đặc trưng phổ STFT và tạo ra một shortcut nhân tạo khiến bộ lọc đồ thị AASIST bị nhầm lẫn. "
-         "Kỹ thuật Repeat Padding (`np.tile`) giúp duy trì tính liên tục của dạng sóng và bảo toàn phân bố năng lượng tự nhiên của giọng nói."),
+    # Q5: Hard Speaker-Disjoint & Hard Text-Disjoint
+    _add_defense_qa(
+        5,
+        "Ràng buộc Hard Speaker-Disjoint và Hard Text-Disjoint ngăn chặn hiện tượng học vẹt lối tắt (Shortcut Learning) như thế nào?",
+        "Kiểm tra tính trung thực học thuật và phương pháp thiết kế tập dữ liệu chống rò rỉ thông tin (Data Leakage).",
+        "Dạ thưa Thầy/Cô, hai ràng buộc này cô lập tuyệt đối cả **danh tính người nói** lẫn **nội dung câu chữ** giữa các tập `Train`, `Dev` và `Test` để buộc mạng nơ-ron phải học dấu vết vật lý của thuật toán tổng hợp thay vì học thuộc lòng giọng người hay văn bản.",
+        "Nếu cùng một người nói xuất hiện ở cả Train và Test, mô hình sẽ nhớ âm sắc thanh quản của người đó; còn nếu cùng một câu văn xuất hiện ở cả hai tập (hoặc vừa làm câu mẫu `prompt` vừa làm câu tổng hợp `eval`), mô hình sẽ nhớ chuỗi âm vị của câu chữ đó. Chúng em áp dụng lọc một chiều nghiêm ngặt: khóa nguyên vẹn tập `Test` → xóa mọi câu trùng khỏi `Dev` → xóa mọi câu trùng khỏi `Train`, đồng thời tách rời hoàn toàn tệp `prompt` tham chiếu khỏi tệp đánh giá.",
+        "Toàn bộ 5 tệp manifest chuẩn 19 cột của `v0.9.4` (tổng kho `Voice_Final` **103.189 tệp**) đều vượt qua kịch bản kiểm toán tự động với **0% rò rỉ người nói** và **0% rò rỉ văn bản**.",
+    )
 
-        ("Câu 4: Nêu bản chất của bộ lọc cắt khoảng lặng RMS P20 Trimming và tại sao nó tốt hơn ngưỡng cứng -40 dB?",
-         "Dạ thưa Thầy/Cô, cắt khoảng lặng bằng ngưỡng cứng (ví dụ cố định -40 dBFS) sẽ bị thất bại khi gặp môi trường ồn: nếu clip có tiếng ồn nền lớn (ví dụ -35 dB), "
-         "bộ lọc sẽ không cắt được gì; còn nếu clip thu âm quá nhỏ, nó sẽ cắt lẹm vào cả giọng nói thật. "
-         "Giải pháp **RMS P20** của chúng em tính toán động năng lượng của từng khung âm thanh và lấy phân vị thứ 20 làm ngưỡng cắt. "
-         "Điều này giúp bộ lọc tự động thích ứng với mức độ ồn nền của từng clip, bảo toàn 100% các đoạn phát âm hữu ích."),
+    # Q6: normalize_for_eval only for WER/CER while TTS gets raw text
+    _add_defense_qa(
+        6,
+        "Tại sao hàm chuẩn hóa văn bản normalize_for_eval chỉ dùng cho cổng lọc WER/CER và khử trùng lặp, trong khi công cụ TTS phải nhận văn bản thô?",
+        "Kiểm tra sự tinh tế khi xử lý ngôn ngữ tự nhiên tiếng Việt cho hệ thống Text-to-Speech và đánh giá ASR.",
+        "Dạ thưa Thầy/Cô, chúng em tách bạch hai luồng văn bản vì **chấm điểm nhận dạng chữ (`ASR WER/CER`) cần đồng nhất mặt chữ viết**, trong khi **tổng hợp tiếng nói (`TTS`) cần giữ nguyên dấu câu và nhịp nghỉ ngữ âm tự nhiên**.",
+        "Trong tiếng Việt, cùng một âm tiết như *\"hòa\"* hay *\"hoà\"* có thể khác vị trí đặt dấu thanh hoặc bảng mã Unicode (`NFD` so với `NFC`). Hàm `normalize_for_eval` chuẩn hóa về `NFC`, chỉnh vị trí dấu thanh cuối từ qua `_fix_tone_token` (không làm hỏng các vần như *\"toàn\"*) và loại câu chứa chữ số `has_digits` để tính `WER/CER` công bằng. Ngược lại, nếu đưa chuỗi đã lột sạch dấu phẩy, dấu chấm và chữ viết hoa vào `F5-TTS` hay `OmniVoice CFM`, mô hình TTS sẽ đọc liền một mạch không ngắt nghỉ, tạo ra lỗi nhịp điệu nhân tạo rất dễ bị phát hiện (làm bài toán trở nên dễ giả tạo).",
+        "Nhờ giữ nguyên văn bản thô có đầy đủ dấu câu cho đầu vào TTS và chỉ dùng `normalize_for_eval` tại Cổng lọc 1, toàn bộ **6.445 mẫu `OmniVoice_CFM`** và **6.170 mẫu `F5-TTS`** đạt độ tự nhiên ngữ điệu rất cao, tạo ra thử thách sát thực tế nhất cho mô hình phòng thủ.",
+    )
 
-        ("Câu 5: Tại sao trong hàm mất mát, các em không được dùng đồng thời WeightedRandomSampler và Weighted Loss?",
-         "Dạ thưa Thầy/Cô, đây là một STUBBORN_FACT trong kỹ thuật huấn luyện của chúng em để tránh lỗi **Bù trừ kép (Double Penalty)**. "
-         "`WeightedRandomSampler` đã thực hiện việc tái lấy mẫu để đưa tỷ lệ các lớp trong từng mini-batch về mức cân bằng (50:50). "
-         "Nếu ta lại tiếp tục nhân thêm trọng số phạt nghịch đảo tần suất $w_c = \\frac{N}{2 N_c}$ trong hàm Cross-Entropy Loss, "
-         "mô hình sẽ bị phạt hai lần liên tiếp cho cùng một sự mất cân bằng. Điều này làm gradient bị thiên lệch cực đoan, phá hủy hoàn toàn khả năng phân loại."),
+    # Q7: Zalo Dual-Profile + PSTN & Narrowband Codec Paradox
+    _add_defense_qa(
+        7,
+        "Cấu hình kênh nén kép Zalo (AAC-LC 76k & Opus 24k) cùng mạng viễn thông PSTN (G.711, AMR-NB) hoạt động ra sao, và vì sao kênh băng hẹp đôi khi lại giúp bắt giả tốt hơn?",
+        "Kiểm tra hiểu biết chuyên sâu về nén âm thanh viễn thông và giải thích quy luật thực nghiệm trên 5 biến thể kênh truyền.",
+        "Dạ thưa Thầy/Cô, hệ thống mô phỏng chính xác 5 môi trường truyền dẫn thực tế tại Việt Nam qua các bộ mã hóa chuẩn liên kết đồng bộ theo `base_utt`, và phát hiện ra **hiệu ứng tương phản lỗi pha trên kênh băng hẹp 8 kHz**.",
+        "Hai cấu hình mục tiêu của Zalo gồm `Profile A (aac_zalo_76k, AAC-LC 76 kbps @ 48 kHz mono)` và `Profile B (opus_zalo_24k, Opus 24 kbps OGG)` dùng biến đổi `MDCT` tâm thính giác làm mượt nhẹ phổ cao tần. Trong khi đó, kênh thoại truyền thống `G.711 A-law` và `AMR-NB 8 kHz` không chỉ cắt băng thông về `300–3.400 Hz` mà `AMR-NB` còn dùng bộ dự đoán tuyến tính kích thích mã (`CELP`) thiết kế riêng cho thanh quản sinh học con người. Khi sóng âm tổng hợp AI đi qua bộ lọc `CELP`, sự lệch pha vi mô giữa sóng nhân tạo và mô hình thanh quản tuyến tính gây ra méo cộng hưởng rõ rệt.",
+        "Số liệu thực nghiệm trên `15.980` mẫu Test của `v0.9.4` chứng minh đúng quy luật vật lý này: kênh `AMR-NB 8 kHz` đạt EER thấp kỷ lục **4.88%**, trong khi các kênh khó hơn như `Zalo AAC-LC 76k` (**5.79%**) và `Zalo Opus 24k` (**6.02%**) vẫn nằm sâu dưới trần mục tiêu `≤ 8.0%`.",
+    )
 
-        ("Câu 6: Khối Front-end Wav2Vec 2.0 tiếng Việt đem lại lợi thế gì so với việc dùng spectrogram thô hay mô hình tiếng Anh?",
-         "Dạ thưa Thầy/Cô, tiếng Việt là ngôn ngữ thanh điệu phức tạp (gồm 6 thanh: ngang, huyền, sắc, hỏi, ngã, nặng). "
-         "Các công cụ sinh giọng nói AI khi nói tiếng Việt rất dễ bị lộ dấu vết mất tự nhiên ở cao độ của thanh hỏi và thanh ngã. "
-         "Mô hình `wav2vec2-base-vietnamese-250h` được huấn luyện tự giám sát trên 250 giờ tiếng Việt, đóng vai trò như một bộ tai bản địa, "
-         "giúp trích xuất các đặc trưng ngữ âm vi mô và sự biến thiên thanh điệu mà các spectrogram thô hoặc mô hình tiếng Anh hoàn toàn không nắm bắt được."),
+    # Q8: 2-Phase training + Stage 3 head_blend_a0.75
+    _add_defense_qa(
+        8,
+        "Tại sao nhóm phải huấn luyện 2 pha (Pha 1 đóng băng SSL, Pha 2 vi chỉnh phân tầng) rồi kết hợp hiệu chuẩn đầu phân loại Giai đoạn 3 (head_blend_a0.75)?",
+        "Kiểm tra tư duy huấn luyện mạng tiền huấn luyện lớn (Transfer Learning) và kỹ thuật hiệu chuẩn không gian trọng số.",
+        "Dạ thưa Thầy/Cô, quy trình 3 chặng này vừa ngăn chặn hiện tượng **Quên thảm khốc (`Catastrophic Forgetting`)** trên backbone `Wav2Vec 2.0`, vừa khử triệt để **độ lệch biên âm (`Negative Classifier Bias`)** ở tầng phân loại cuối.",
+        "Ở **Pha 1**, đầu phân loại đồ thị `AASIST` mới khởi tạo ngẫu nhiên nên đạo hàm rất lớn; đóng băng `Wav2Vec 2.0` (`LR = 1e-4` cho AASIST) giúp làm ấm đồ thị mà không phá hỏng tri thức tiếng Việt 250 giờ. Sang **Pha 2**, mở khóa toàn mạng với tốc độ học phân tầng cực nhỏ (`SSL LR = 1e-6`, `AASIST LR = 1e-5`) giúp mạng học sâu dấu vết `OmniVoice CFM`. Tuy nhiên, sau Pha 2, biên phân loại tuyến tính hơi dịch sang vùng âm để ép chặt mẫu giả CFM. Vì vậy ở **Giai đoạn 3 (`head_blend_a0.75`)**, chúng em đóng băng nguyên vẹn 100% khối `Wav2Vec 2.0`, chỉ vi chỉnh nhẹ đầu phân loại 1 epoch trên tập cân bằng `5.100` dòng rồi nội suy tuyến tính `25% Pha 2 + 75% Head-Only`.",
+        "Kỹ thuật `head_blend_a0.75` giữ trọn năng lực chặn `OmniVoice CFM` (**91.52%** trên tập Test `15.980` mẫu) đồng thời kéo tỷ lệ nhận diện đúng giọng thật người nói trầm và 5 tình nguyện viên đối chứng lên **93.3% – 95.2%** (`100%` trên `SPK_0004..0007`), đưa tổng EER về mức tốt nhất **5.63%**.",
+    )
 
-        ("Câu 7: Trình bày cơ chế hoạt động của Nút Chủ Quyền (Master Node) trong khối Compact AASIST?",
-         "Dạ thưa Thầy/Cô, khối Compact AASIST sử dụng đồ thị không đồng nhất HS-GAL gồm các nút thời gian và các nút tần số. "
-         "Nút Chủ Quyền (Master Node) là một nút đặc biệt được thiết lập kết nối chéo với TẤT CẢ các nút thời gian và TẤT CẢ các nút tần số. "
-         "Nó đóng vai trò là một trung tâm điều phối thông tin toàn cục: thu thập đặc trưng từ cả hai miền và phát hiện sự phi logic "
-         "giữa diễn tiến thời gian và cấu trúc hài âm tần số — dấu vết đặc trưng không thể che giấu của các thuật toán vocoder tổng hợp giọng nói."),
+    # Q9: Consensus Asymmetric Veto vs Max (8.33%) & Mean (6.24%) -> 5.63% + OMML
+    _add_defense_qa(
+        9,
+        "Tại sao thuật toán Consensus Asymmetric Veto vượt qua cả Max-Pooling (8.33% EER) lẫn Mean-Pooling (6.24% EER) để đạt 5.63% EER?",
+        "Kiểm tra đóng góp thuật toán cốt lõi ở tầng suy luận đa cửa sổ trượt.",
+        "Dạ thưa Thầy/Cô, `Consensus Asymmetric Veto` khắc phục đồng thời điểm mù lọt lưới giả của `Max-Pooling` và điểm mù báo nhầm người thật của `Mean-Pooling` bằng cơ chế **kiểm tra đồng thuận hai cửa sổ độc lập**.",
+        "Khi cắt một đoạn thoại thành `K ≤ 5` cửa sổ: (1) Nếu dùng `Max-Pooling` đơn thuần, một mẫu giả `OmniVoice CFM` có 4 cửa sổ đầu mang điểm âm sâu (`-22`) nhưng cửa sổ cuối rơi vào nhịp nghỉ im lặng mang điểm dương nhẹ (`+7`) sẽ bị lấy giá trị cực đại `+7` và lọt lưới; (2) Ngược lại, nếu dùng `Mean-Pooling`, một người thật có 1 nhịp lấy hơi đầu câu bị điểm âm sâu (`-18`) sẽ kéo tụt trung bình cộng của cả đoạn xuống dưới `0`. Thuật toán `Consensus Asymmetric Veto` quy định: khi phát hiện ít nhất một cửa sổ nghi giả mạnh (`min < −12,0`), hệ thống chỉ bảo vệ là giọng thật nếu **cửa sổ cao thứ nhì cũng đạt `≥ +6,0`** (tức có ít nhất 2 cửa sổ độc lập cùng khẳng định giọng thật); bằng không, hệ thống loại bỏ cửa sổ cao nhất gây nhiễu và lấy trung bình cắt ngọn (`trimmed mean`) để chặn đứng mẫu giả!",
+        "Trên cùng một mô hình `v0.9.4` và tập kiểm thử độc lập `15.980` mẫu, `Max-Pooling` đạt `8.33%` EER, `Mean-Pooling` đạt `6.24%` EER (`BPCER` vọt lên `8.80%`), còn **`Consensus Asymmetric Veto` đạt đỉnh cao `5.63%` EER** với tỷ lệ chặn giả **95.01%** và `BPCER` giữ ở mức thấp **6.73%**.",
+    )
 
-        ("Câu 8: Tại sao lại áp dụng chiến lược huấn luyện 2 pha (Two-Phase Fine-Tuning) thay vì huấn luyện tất cả từ đầu?",
-         "Dạ thưa Thầy/Cô, nếu mở khóa toàn bộ mô hình và huấn luyện ngay từ đầu với tốc độ học lớn, mạng sẽ gặp hiện tượng **Quên thảm khốc (Catastrophic Forgetting)**: "
-         "các trọng số ngữ âm quý giá của Wav2Vec 2.0 sẽ bị xóa sạch. "
-         "Quy trình 2 pha giúp bảo vệ mô hình: Pha 1 khóa chặt Wav2Vec2 để khối AASIST học cách phân loại cơ bản; "
-         "Pha 2 mở khóa vi chỉnh với tốc độ học phân tầng cực nhỏ ($10^{-6}$ cho SSL và $10^{-4}$ cho AASIST) giúp cả hệ thống đạt độ hội tụ hoàn hảo."),
+    eq_veto_xml = (
+        omml_sub(omml_r("s"), omml_r("veto", normal=True))
+        + omml_r(" = ", normal=True)
+        + omml_sub(omml_r("s"), omml_delim(omml_r("K−1")))
+        + omml_r("  (nếu ", normal=True)
+        + omml_sub(omml_r("s"), omml_delim(omml_r("1", normal=True)))
+        + omml_r(" < −12,0 và ", normal=True)
+        + omml_sub(omml_r("s"), omml_delim(omml_r("K−1")))
+        + omml_r(" ≥ +6,0) ;   ", normal=True)
+        + omml_frac(
+            omml_r("1", normal=True),
+            omml_r("K − 1"),
+        )
+        + omml_subsup(omml_r("∑", normal=True), omml_r("i=1", normal=True), omml_r("K−1"))
+        + omml_sub(omml_r("s"), omml_delim(omml_r("i")))
+        + omml_r("  (nếu ngược lại khi ", normal=True)
+        + omml_sub(omml_r("s"), omml_delim(omml_r("1", normal=True)))
+        + omml_r(" < −12,0)", normal=True)
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Quy tắc gộp điểm đa cửa sổ có kiểm tra đồng thuận Consensus Asymmetric Veto (khi K ≥ 3)",
+        omml_body_xml=eq_veto_xml,
+        variables=[
+            ("s_(1) ≤ s_(2) ≤ … ≤ s_(K)", "Dãy điểm thô của `K` cửa sổ trượt sau khi sắp xếp tăng dần (`s_(1)` là cửa sổ thấp nhất, `s_(K−1)` là cửa sổ cao thứ nhì, `s_(K)` là cửa sổ cao nhất)."),
+            ("−12,0 và +6,0", "Hai ngưỡng gác cổng bất đối xứng: `s_(1) < −12,0` báo hiệu xuất hiện phân đoạn mang dấu vết giả mạo rõ rệt; `s_(K−1) ≥ +6,0` xác nhận có tối thiểu 2 cửa sổ độc lập đồng thuận là giọng người thật. Nếu mọi cửa sổ đều `≥ −12,0`, hàm trả về `s_(K)` (`Max-Pooling`) để bảo vệ tối đa giọng thật."),
+        ],
+    )
 
-        ("Câu 9: Giải thuật Multi-Window Max-Pooling hoạt động như thế nào và tại sao nó giải quyết được hiện tượng nhận diện nhầm người thật?",
-         "Dạ thưa Thầy/Cô, trong thực tế, người thật khi bắt đầu nói thường có 1–2 giây đầu lấy hơi, thở dài hoặc ậm ừ, "
-         "khiến lát cắt 4.0 giây đầu tiên bị chấm điểm âm (nghi ngờ giả mạo). "
-         "Giải thuật của chúng em trích xuất tối đa 5 cửa sổ trượt (mỗi cửa sổ 4.0s, bước nhảy 1.0s) và gom thành 1 batch tensor chạy song song trên GPU. "
-         "Toán tử Max-Pooling $s_{\\text{final}} = \\max(s_1, \\dots, s_N)$ đảm bảo: chỉ cần người nói có ít nhất một đoạn thể hiện rõ "
-         "đặc trưng sinh trắc học tự nhiên của con người, giá trị cực đại đó sẽ khẳng định đây là người thật, loại bỏ hoàn toàn các lỗi báo động giả."),
+    # Q10: Threshold locked at theta = 0.0 (APCER vs BPCER cost trade-off)
+    _add_defense_qa(
+        10,
+        "Tại sao hệ thống khóa cứng ngưỡng quyết định tại θ = 0.0 và bài toán đánh đổi chi phí giữa APCER với BPCER được xử lý ra sao?",
+        "Kiểm tra nhận thức về quản trị rủi ro an ninh (Security Cost Trade-off) và tính liêm chính khi chọn ngưỡng vận hành.",
+        "Dạ thưa Thầy/Cô, chúng em khóa cứng ngưỡng vận hành tiên nghiệm tại **`θ = 0.0`** (`s ≥ 0.0` là Giọng thật, `s < 0.0` là Giọng giả) để đảm bảo ưu tiên chặn lừa đảo mà tuyệt đối không gian lận tinh chỉnh ngưỡng trên tập Test.",
+        "Trong bối cảnh phòng chống tội phạm tài chính, hậu quả của lỗi **Bỏ sót giọng giả (`APCER`)** là nạn nhân mất trắng tài sản, nghiêm trọng hơn rất nhiều so với lỗi **Báo nhầm giọng thật (`BPCER`)** — vốn chỉ yêu cầu người dùng gọi xác minh lại qua kênh khác. Điểm thô `s = z_bonafide − z_spoof` có tâm đối xứng toán học tự nhiên tại `θ = 0.0`. Thay vì dịch ngưỡng sau khi nhìn tập kiểm thử, chúng em đưa sự cân bằng về đúng tâm `0.0` ngay từ khâu hiệu chuẩn đầu phân loại `head_blend_a0.75` kết hợp `Consensus Asymmetric Veto`.",
+        "Tại đúng ngưỡng cứng `θ = 0.0`, ViTrueVoice `v0.9.4` chặn đứng **95.01%** mẫu giả mạo (`APCER = 4.99%`) trong khi vẫn giữ tỷ lệ báo nhầm người thật ở mức thấp **BPCER = 6.73%** trên `15.980` mẫu Test (và chỉ **5.24% BPCER** trên `420` tệp giọng thật của 5 tình nguyện viên độc lập).",
+    )
 
-        ("Câu 10: Tại sao các em không dùng hàm Sigmoid trực tiếp mà phải dùng Platt Scaling?",
-         "Dạ thưa Thầy/Cô, điểm số thô $s$ của mô hình có dải giá trị rất rộng (từ -50 đến +50). "
-         "Hàm Sigmoid thông thường sẽ lập tức bão hòa ở hai cực, biến mọi điểm số thành 99.9% thật hoặc 99.9% giả mạo, hoàn toàn mất đi ý nghĩa xác suất. "
-         "Platt Scaling sử dụng một mô hình hồi quy Logistic tối ưu hóa trên tập Dev để đưa điểm số về đúng phân phối xác suất thực tế, "
-         "giúp con số hiển thị phản ánh chính xác mức độ tự tin của hệ thống."),
+    # Q11: Platt Scaling (T=16.0) & NIST [0.1%, 99.9%] clamp + OMML
+    _add_defense_qa(
+        11,
+        "Cơ chế hiệu chuẩn Platt Scaling (T = 16.0) và kẹp biên NIST [0.1%, 99.9%] ngăn chặn hiện tượng 'độ tự tin ảo' như thế nào?",
+        "Kiểm tra hiểu biết về hiệu chuẩn xác suất hậu nghiệm (Probability Calibration) và đạo đức giám định số pháp y.",
+        "Dạ thưa Thầy/Cô, chúng em áp dụng phép co giãn nhiệt độ **`Platt / Temperature Scaling` với `T = 16.0`** kèm **vùng cảnh báo biên `|s| ≤ 8.0`** và **kẹp trần chuẩn pháp y `NIST [0.1%, 99.9%]`** để loại bỏ hoàn toàn các con số phần trăm tự tin giả tạo.",
+        "Do mô hình huấn luyện với `AM-Softmax (s = 30.0)`, điểm hiệu số logit `s` trải rộng trên miền `[-50, +50]`. Nếu đưa thẳng vào hàm `Sigmoid` tiêu chuẩn (`T = 1.0`), một mẫu mập mờ ngay sát biên như `s = +5.0` đã bị vọt lên `99.3%` độ tin cậy, gây ngộ nhận nguy hiểm cho người dùng! Chia cho nhiệt độ `T = 16.0` (`k = 0.0625`) kèm khấu trừ phương sai liên cửa sổ (`khi độ lệch chuẩn giữa các cửa sổ > 6.0`) giúp các điểm vùng biên `|s| ≤ 8.0` chỉ hiển thị xác suất thận trọng `50% – 62%` và gắn nhãn `BORDERLINE`. Đồng thời, chuẩn giám định pháp y của `NIST` khẳng định không một phép đo sinh trắc học nào tuyệt đối `100%`, nên xác suất hiển thị luôn được kẹp trong `[0.1%, 99.9%]`.",
+        "Cơ chế này được đồng bộ nhất quán 100% trên cả API FastAPI, giao diện Web Forensics và Telegram Bot của phiên bản `v0.9.4` thông qua module dùng chung `src/app/decision.py`.",
+    )
 
-        ("Câu 11: Tại sao giao diện của các em hiển thị xác suất cao nhất chỉ là 99.9% mà không bao giờ là 100%?",
-         "Dạ thưa Thầy/Cô, đây là quy chuẩn an toàn bắt buộc tuân thủ Hướng dẫn Giám định Kỹ thuật Hình sự Pháp y của Viện Tiêu chuẩn NIST Hoa Kỳ. "
-         "Trong khoa học giám định sinh trắc học, luôn tồn tại sai số biên vật lý của thiết bị thu âm và sự biến thiên sinh học của con người. "
-         "Không có một hệ thống khoa học nào được phép khẳng định chắc chắn 100%. "
-         "Việc kẹp an toàn trong khoảng [0.1%, 99.9%] thể hiện sự trung thực khoa học và đảm bảo tính khách quan tư pháp."),
+    eq_platt_xml = (
+        omml_sub(omml_r("P"), omml_r("calib", normal=True))
+        + omml_delim(omml_r("y = 1 | s", normal=True))
+        + omml_r(" = ", normal=True)
+        + omml_r("clip", normal=True)
+        + omml_delim(
+            omml_frac(
+                omml_r("1", normal=True),
+                omml_r("1 + ", normal=True)
+                + omml_sup(
+                    omml_r("e"),
+                    omml_r("−", normal=True)
+                    + omml_frac(omml_r("s − θ"), omml_r("T")),
+                ),
+            )
+            + omml_r(" ,  0,001 ,  0,999", normal=True)
+        )
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Hàm hiệu chuẩn xác suất hậu nghiệm Platt / Temperature Scaling và kẹp biên pháp y NIST",
+        omml_body_xml=eq_platt_xml,
+        variables=[
+            ("s", "Điểm thô sau khi gộp đa cửa sổ trượt (`Pooled Raw Score`), mang dấu dương cho Giọng thật và dấu âm cho Giọng giả."),
+            ("θ = 0,0", "Ngưỡng quyết định cố định của hệ thống; tại `s = θ`, xác suất trả về đúng bằng `0,50 (50,0%)`."),
+            ("T = 16,0", "Hệ số nhiệt độ hiệu chuẩn khớp với thang đo `AM-Softmax [-50, +50]`, chống bão hòa sớm ở vùng cận biên."),
+            ("[0,001 ; 0,999]", "Khoảng kẹp xác suất tương ứng `[0,1% ; 99,9%]` tuân thủ nguyên tắc trung thực giám định số của `NIST`."),
+        ],
+    )
 
-        ("Câu 12: Hãy giải thích trường hợp ngoại lai của tình nguyện viên SPK_0001 và bài học rút ra là gì?",
-         "Dạ thưa Thầy/Cô, SPK_0001 là một trường hợp nghiên cứu khoa học rất giá trị của đề tài. Tình nguyện viên này có giọng siêu trầm đặc biệt "
-         "(Pitch chỉ 85–95 Hz, độ lệch phân vị lên tới -9.91 IQR), khiến mô hình ban đầu nhầm lẫn là méo dạng âm học. "
-         "Khi chúng em đưa 125 dòng của SPK_0001 vào tập train (phiên bản V6), điểm số lập tức đảo chiều lên dương (+10.05), "
-         "trong khi 5 tình nguyện viên đối chứng còn lại vẫn đạt tỷ lệ nhận diện đúng 96.4%. "
-         "Bài học rút ra: Mô hình không bị lỗi thuật toán, mà cần đảm bảo độ đa dạng phân phối sinh học trong tập huấn luyện."),
+    # Q12: Hypothesis H2 Unseen TTS (VieNeu 12.05% Dev EER & 92.53% 5-SPK block) & why Kokoro excluded
+    _add_defense_qa(
+        12,
+        "Giả thuyết H2 (Tổng quát hóa sang công cụ Unseen TTS) được chứng minh ra sao trên VieNeu-TTS v3 Turbo và vì sao Kokoro-TTS bị loại bỏ?",
+        "Kiểm tra tính chặt chẽ khoa học trong việc chọn công cụ kiểm định ngoại lai Zero-Shot Voice Cloning.",
+        "Dạ thưa Thầy/Cô, Giả thuyết `H2` (yêu cầu `EER ≤ 15.0%` trước công cụ nhân bản giọng nói chưa từng thấy) đã **ĐẠT THÀNH CÔNG** trên `VieNeu-TTS v3 Turbo` với **12.05% EER**, và `Kokoro-TTS` bị loại khỏi bộ nghiệm thu chính thức vì không phải công cụ nhân bản giọng nói Zero-Shot thực thụ.",
+        "Mối đe dọa thực tế của tội phạm lừa đảo mạo danh là thu 3–5 giây giọng thật của nạn nhân rồi nhại lại đúng âm sắc người đó (`Zero-Shot Voice Cloning`). Qua kiểm toán kỹ thuật, `Kokoro-TTS` chỉ là bộ đọc văn bản đa giọng cố định có sẵn (`Preset Multi-speaker TTS`), không nhận tệp âm thanh mẫu để nhại giọng nạn nhân nên không phản ánh đúng kịch bản tấn công mạo danh. Ngược lại, ở phiên bản `v0.9.4`, mô hình chỉ học trên hai công cụ dòng chảy `F5-TTS` và `OmniVoice CFM`, còn công cụ Zero-Shot `VieNeu-TTS v3 Turbo` (kiến trúc `Acoustic LM + NeuCodec RVQ` hoàn toàn khác họ) được cô lập 100% làm Unseen TTS.",
+        "Khi đối mặt lần đầu với `VieNeu-TTS v3 Turbo`, mô hình `v0.9.4` đạt **12.05% EER** trên tập benchmark `955` mẫu Dev (vượt xa KPI `≤ 15.0%`) và chặn đứng **92.53% (347/375 tệp)** trên bộ nghiệm thu 5 tình nguyện viên qua cả 5 biến thể kênh nén.",
+    )
 
-        ("Câu 13: Tại sao các em kiên quyết cô lập 5 tình nguyện viên còn lại (SPK_0003 đến SPK_0007) khỏi tập huấn luyện?",
-         "Dạ thưa Thầy/Cô, theo STUBBORN_FACT và nguyên tắc liêm chính học thuật, 5 tình nguyện viên này là **Bộ Nghiệm Thu Độc Lập Chính Thức Của Đồ Án**. "
-         "Nếu chúng em đưa họ vào tập huấn luyện hoặc dùng họ để chọn ngưỡng, kết quả nghiệm thu sẽ bị vướng vào lỗi rò rỉ dữ liệu (Data Leakage) và mất đi tính khách quan. "
-         "Việc giữ họ độc lập 100% chứng minh rằng hệ thống của chúng em có khả năng tổng quát hóa thực sự trên những người chưa từng thấy."),
+    # Q13: 5 Acceptance Volunteers 100% isolated (neutral mention of 6th volunteer SPK_0001)
+    _add_defense_qa(
+        13,
+        "Năm (05) tình nguyện viên nghiệm thu (SPK_0003..0007) được cô lập như thế nào và kết quả trên 1.545 tệp kiểm định đạt mức nào?",
+        "Kiểm tra nguyên tắc bất khả xâm phạm của tập kiểm định độc lập thu thập thực tế ngoài đời.",
+        "Dạ thưa Thầy/Cô, **5 tình nguyện viên (`SPK_0003`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`)** được khóa cứng làm **Bộ Nghiệm Thu Độc Lập Chính Thức** với mức cô lập tuyệt đối **100%** khỏi toàn bộ quá trình huấn luyện, thẩm định Dev, chọn ngưỡng và hiệu chuẩn.",
+        "Trong tổng số 6 tình nguyện viên thu thập có phiếu đồng thuận, ngay từ khâu quy hoạch dữ liệu, 5 tình nguyện viên `SPK_0003..0007` (84 tệp gốc × 5 biến thể codec = `420` tệp giọng thật, kèm `375` tệp giả cho mỗi công cụ `F5-TTS`, `OmniVoice CFM`, `VieNeu-TTS`, tổng cộng **`1.545` tệp**) được niêm phong riêng để đo lường khả năng tổng quát hóa thực tế; còn tình nguyện viên thứ 6 dư ra ngoài bộ 5 người nghiệm thu (`SPK_0001`, 175 mẫu) được phân bổ vào tập Train chính thức `54.400` dòng cùng với `VIVOS` và `Common Voice`.",
+        "Trên toàn bộ `1.545` tệp nghiệm thu độc lập của 5 tình nguyện viên qua 5 codecs, `v0.9.4` đạt tỷ lệ nhận diện đúng giọng thật **94.76% (398/420)**, chặn đứng **100.0% (375/375)** mẫu giả `F5-TTS`, chặn **83.47% (313/375)** mẫu giả `OmniVoice CFM` và chặn **92.53% (347/375)** mẫu giả chưa từng thấy `VieNeu-TTS`.",
+    )
 
-        ("Câu 14: Giả thuyết H1 của các em là gì và số liệu nào chứng minh H1 đã thành công?",
-         "Dạ thưa Thầy/Cô, Giả thuyết H1 phát biểu: Mô hình được huấn luyện tăng cường kênh thoại (Nhánh B) giảm ít nhất 30% tỷ lệ lỗi EER tương đối trên tập nén viễn thông. "
-         "Kết quả thực nghiệm đã chứng minh: Trên kênh di động GSM AMR-NB 8kHz, EER giảm từ 14.85% xuống 8.84% (giảm **40.5%**); "
-         "Trên kênh PSTN G.711 8kHz, EER giảm từ 16.20% xuống 8.50% (giảm **47.6%**). "
-         "Cả hai chỉ số đều vượt xa mục tiêu cam kết 30%, khẳng định H1 PASS 100%."),
+    # Q14: Deep-voice pitch robustness (-6st augmentation & m=0.20)
+    _add_defense_qa(
+        14,
+        "Hệ thống giải quyết bài toán bền vững trước giọng nam trầm và tấn công hạ cao độ âm học (-6 semitones) như thế nào?",
+        "Kiểm tra cách nhóm khắc phục lỗ hổng dịch tần số cơ bản (Pitch-shift) bằng thuật toán thay vì gán nhãn thủ công.",
+        "Dạ thưa Thầy/Cô, chúng em giải quyết đồng thời bằng **tăng cường dữ liệu dịch cao độ hai chiều (bao gồm hạ sâu `-6 semitones` cho cả giọng thật lẫn giọng giả)** kết hợp **điều chỉnh biên góc `AM-Softmax` về `m = 0.20`**.",
+        "Trong nghiên cứu bóc tách trước đó, chúng em phát hiện nếu kẻ tấn công dùng phase-vocoder hạ cao độ giọng giả xuống `-6 bán cung (-6st)`, các hài âm co cụm lại ở dải tần thấp dễ đánh lừa mạng nơ-ron chưa từng học biến thể trầm; ngược lại, nếu đặt biên phạt góc `AM-Softmax` quá gắt (`m = 0.35`), những người đàn ông có giọng trầm tự nhiên (`F0 < 100 Hz`) lại dễ bị đẩy sang miền điểm âm. Việc tiền sinh các mẫu tăng cường dịch pitch hai chiều kết hợp nới biên `m = 0.20` giúp mặt phân cách bao trọn vùng giọng trầm tự nhiên nhưng vẫn nhận diện được vết méo pha do kéo giãn cao độ nhân tạo.",
+        "Nhờ giải pháp thuần thuật toán này, ở phiên bản `v0.9.4`, nhóm người nói giọng trầm đạt tỷ lệ nhận diện đúng **93.3% (14/15)** ở cả 3 chế độ pooling mà không làm suy giảm độ nhạy chặn giả trên tập `15.980` mẫu.",
+    )
 
-        ("Câu 15: Giả thuyết H2 của các em là gì và kết quả thực nghiệm đạt được như thế nào?",
-         "Dạ thưa Thầy/Cô, Giả thuyết H2 phát biểu: Mô hình duy trì EER <= 15.0% trên công cụ tổng hợp giọng nói chưa từng thấy (Unseen Zero-Shot TTS - VoiceStudio CFM). "
-         "Kết quả thực nghiệm: EER trên VoiceStudio CFM đạt từ 15.87% đến 21.88%. "
-         "Mặc dù tiệm cận mục tiêu 15%, sự suy giảm hiệu năng khi gặp công cụ mới chỉ là khiêm tốn (+2.54% EER so với công cụ Seen TTS), "
-         "chứng minh mô hình có tính bền vững cao trước các công nghệ Voice Cloning thế hệ mới."),
+    # Q15: How NFR1 <= 3.0s latency is achieved (0.705s - 1.101s)
+    _add_defense_qa(
+        15,
+        "Làm thế nào hệ thống vừa cắt đa cửa sổ trượt vừa giải mã đa định dạng mà vẫn giữ độ trễ 0.705s – 1.101s (≤ 3.0s NFR1)?",
+        "Kiểm tra kỹ năng kỹ thuật hệ thống (Systems Engineering) khi đưa mô hình học sâu lớn lên môi trường thời gian thực.",
+        "Dạ thưa Thầy/Cô, tốc độ **0,705 giây – 1,101 giây** đạt được nhờ triệt tiêu hoàn toàn hai nút cổ chai lớn nhất là **đọc/ghi ổ cứng** và **vòng lặp suy luận tuần tự trên GPU**.",
+        "Thứ nhất, mô hình được nạp sẵn theo mẫu `Singleton` và làm ấm hạt nhân `CUDA` bằng `Dummy Tensor (1, 64000)` ngay lúc khởi động container. Thứ hai, luồng âm thanh được giải mã trực tiếp trên bộ nhớ `io.BytesIO` qua đường ống `FFmpeg Pipe` không chạm đĩa cứng. Thứ ba, cả 5 cửa sổ trượt được xếp chồng thành một khối tensor duy nhất `(5, 64000)` để chạy gọn trong **1 lượt truyền tiến duy nhất** dưới chế độ `torch.inference_mode()`.",
+        "Kết quả kiểm định thực tế: lượt chạy mô hình trên GPU `RTX 3050 4GB` chỉ tốn trung vị **66,3 ms** (`P90 = 68,2 ms`); tổng thời gian toàn trình đạt trung vị **1,101 giây** trên bộ 30 ca benchmark chuẩn và **0,705 giây** trên 140 lượt vận hành thực tế — nhanh gấp **~3 đến ~45 lần** yêu cầu `NFR1 ≤ 3,0 giây`.",
+    )
 
-        ("Câu 16: Làm thế nào hệ thống đạt được độ trễ suy luận 66.3ms, vượt xa chỉ tiêu NFR1 <= 3.0s?",
-         "Dạ thưa Thầy/Cô, hệ thống đạt được tốc độ đột phá này nhờ 4 giải pháp đồng bộ: "
-         "(1) Áp dụng kỹ thuật Warm-up Dummy Tensor để triệt tiêu hoàn toàn độ trễ khởi động lạnh (Cold-start); "
-         "(2) Gom các cửa sổ trượt thành 1 mini-batch chạy song song trong 1 forward pass duy nhất trên GPU; "
-         "(3) Loại bỏ toàn bộ các bước trích xuất đặc trưng pitch phức tạp ở tầng suy luận; "
-         "(4) Xử lý luồng âm thanh trực tiếp trên RAM (In-memory stream), không tốn thời gian đọc/ghi đĩa cứng."),
+    # Q16: Law 91/2025/QH15 & Decree 356/2025/ND-CP compliance
+    _add_defense_qa(
+        16,
+        "Hệ thống tuân thủ Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 và Nghị định 356/2025/NĐ-CP bằng những cơ chế kỹ thuật cụ thể nào?",
+        "Kiểm tra tính tuân thủ pháp luật Việt Nam về dữ liệu sinh trắc học nhạy cảm.",
+        "Dạ thưa Thầy/Cô, giọng nói là dữ liệu sinh trắc học nhạy cảm nên toàn bộ kiến trúc API và Bot của chúng em thực thi nghiêm ngặt nguyên tắc **Không lưu vết (`Zero-Persistence`)** kết hợp **Ẩn danh hóa một chiều `SHA-256`**.",
+        "Cụ thể ở tầng mã nguồn: (1) Mọi luồng âm thanh tải lên Web API được đọc vào bộ đệm RAM `io.BytesIO`, nhận diện định dạng qua `Magic Bytes` rồi giải phóng khỏi bộ nhớ ngay khi trả kết quả (đối với Telegram Bot hoặc luồng clone tạm, khối `try...finally` cưỡng bức xóa hủy tệp tạm tức thì); (2) Tệp nhật ký vận hành `benchmarks/latency_log.json` tuyệt đối không lưu tên tệp, địa chỉ IP, số điện thoại hay ID người dùng, mà chỉ lưu mã băm mật mã một chiều `SHA-256` của nội dung byte kèm số đo độ trễ phục vụ kiểm toán kỹ thuật.",
+        "Nhờ đó, ngay cả trong kịch bản máy chủ ứng dụng bị xâm nhập trái phép, kẻ tấn công thu được **0 byte giọng nói thô** và không thể khôi phục danh tính bất kỳ người dùng nào, đáp ứng trọn vẹn Luật `91/2025/QH15` và Nghị định `356/2025/NĐ-CP`.",
+    )
 
-        ("Câu 17: Hệ thống của các em bảo vệ quyền riêng tư và dữ liệu cá nhân của người dùng như thế nào?",
-         "Dạ thưa Thầy/Cô, hệ thống tuân thủ nghiêm ngặt Luật Bảo vệ Dữ liệu Cá nhân 91/2025/QH15 theo nguyên tắc **Zero-Persistence (Không Lưu Vết)**. "
-         "Âm thanh của người dùng chỉ tồn tại trên RAM trong 66ms suy luận và bị hủy ngay lập tức. "
-         "Trong nhật ký hệ thống, chúng em tuyệt đối không ghi lại tên file, số điện thoại hay ID người dùng, "
-         "mà chỉ lưu trữ mã băm an mật một chiều SHA-256 để phục vụ kiểm toán."),
+    # Q17: AWS Academy Package A (3 courses) + 0 VND local operating cost
+    _add_defense_qa(
+        17,
+        "Nhóm đã vận dụng 3 khóa học AWS Academy Gói A vào dự án như thế nào trong khi vẫn duy trì chi phí vận hành thực tế 0 VNĐ?",
+        "Kiểm tra khả năng liên kết kiến thức học phần đám mây AWS với bài toán tối ưu chi phí thực tế của sinh viên.",
+        "Dạ thưa Thầy/Cô, hệ thống trực tiếp của đồ án hiện vận hành **100% cục bộ trên cụm Docker Compose với chi phí thực tế 0 VNĐ**, đồng thời áp dụng trọn vẹn nguyên lý kiến trúc và bảo mật từ **3 khóa học AWS Academy Gói A** kèm bộ đặc tả sẵn sàng lên mây (`Cloud-Ready`) tại thư mục `deploy/aws/`.",
+        "Cụ thể cách vận dụng từng khóa học trong Gói A: (1) Từ khóa **`AWS Academy Cloud Foundations`**, chúng em chuẩn hóa kiến trúc vi dịch vụ đóng gói 2 container độc lập (`vitruevoice-api` và `vitruevoice-bot`) và lập bảng dự toán tổng chi phí sở hữu (`TCO`); (2) Từ khóa **`AWS Academy Cloud Security Foundations`**, chúng em thực thi nguyên tắc đặc quyền tối thiểu (`non-root appuser`, gắn kết thư mục trọng số `out/v0.9.4` ở chế độ chỉ đọc `:ro`, tách biến bí mật qua `.env`) và viết chính sách `IAM Least Privilege` (`deploy/aws/iam_policy.json`) cùng quy tắc `S3 Lifecycle` tự hủy dữ liệu tạm sau 24 giờ (`s3_lifecycle_policy.json`); (3) Từ khóa **`AWS Academy Cloud Architecting`**, chúng em thiết kế cơ chế tự kiểm tra sức khỏe `HEALTHCHECK /health` mỗi 30 giây, tự khởi động lại khi sự cố và kịch bản triển khai `EC2 Spot / Auto-Scaling` (`scripts/aws_deploy_ec2.sh`).",
+        "Cách tiếp cận kép này giúp đồ án chạy demo thực nghiệm bền bỉ **24/7 với chi phí 0 VNĐ** trên phần cứng cục bộ, nhưng khi doanh nghiệp cần mở rộng lên đám mây AWS Singapore thì đã có sẵn toàn bộ cấu hình chuẩn mực với chi phí lý thuyết ước tính chỉ khoảng **~73 VNĐ / lượt quét** ở quy mô thử nghiệm.",
+    )
 
-        ("Câu 18: Kỹ thuật Adaptive Comfort Dithering (RFC 3389) giải quyết vấn đề gì trong thực tế và ranh giới âm học là gì?",
-         "Dạ thưa Thầy/Cô, kỹ thuật này giải quyết 2 bài toán âm học đối nghịch rất sâu sắc:\n"
-         "(1) Đối với giọng Micro thật: Khi người dùng thu âm bằng thiết bị có AI Noise Suppression, các khoảng lặng bị ép về giá trị phẳng tuyệt đối ($0.0000$). "
-         "Chuỗi số 0 phẳng lì này là shortcut nhân tạo khiến mô hình nhầm lẫn báo động giả. Dithering tự động rải lớp nhiễu siêu mịn (-75 dBFS) tuân thủ chuẩn ITU-T RFC 3389 vào các vùng phẳng, xóa bỏ hoàn toàn hiện tượng nhận diện nhầm người thật (BPCER = 0%).\n"
-         "(2) Đối với âm thanh Clone nhân tạo: Nghiên cứu phát hiện tuyệt đối KHÔNG được áp dither lên audio tổng hợp CFM. "
-         "Lớp dither ngẫu nhiên sẽ làm mờ (masking) các vết tích bất liên tục pha ở tần số cao của vocoder, vô tình che chở cho deepfake và khiến mô hình nhận nhầm clone thành giọng thật (False Negative: điểm số từ -40.25 vọt lên +23.45). "
-         "Vì vậy, hệ thống bắt buộc thiết lập cờ `apply_dither=False` trên luồng clone để bảo toàn đặc trưng phân tách pháp y."),
+    # Q18: Why WebRTC browser mic disables noiseSuppression / autoGainControl
+    _add_defense_qa(
+        18,
+        "Tại sao khi thu âm trực tiếp từ micro trình duyệt (WebRTC), giao diện Web của nhóm bắt buộc tắt noiseSuppression và autoGainControl?",
+        "Kiểm tra kinh nghiệm xử lý lỗi thực tế khi đưa mô hình phòng thí nghiệm ra giao diện thu âm người dùng thật.",
+        "Dạ thưa Thầy/Cô, chúng em bắt buộc đặt `noiseSuppression: false`, `echoCancellation: false` và `autoGainControl: false` trong cấu hình `WebRTC` vì các bộ lọc khử ồn tự động của trình duyệt **vô tình xóa sạch nền âm học vật lý của phòng thu, tạo ra dấu vết giống hệt bộ tổng hợp giọng giả**.",
+        "Trong môi trường tự nhiên, giữa hai từ người thật nói luôn có tiếng nền phòng cực nhỏ liên tục (`Room Tone`). Khi trình duyệt bật `AI Noise Suppression`, nó cắt phăng các khoảng nghỉ này về chuỗi số `0.0000` phẳng tuyệt đối và bóp méo các phụ âm xát tần số cao. Khối `Wav2Vec 2.0 + AASIST` sẽ nhận diện vùng chết số học phẳng lì đó như sản phẩm của một `Neural Vocoder` nhân tạo, gây báo động giả cho người thật! Bên cạnh việc tắt lọc trình duyệt, hàm `_condition_audio_for_inference` còn cắt khoảng lặng thừa (`top_db = 25`), chuẩn hóa đỉnh `0.95` và chỉ cho phép rải nhiễu nền vi mô `Comfort Dither` trên luồng micro trực tiếp (tuyệt đối đặt `apply_dither = False` cho tệp tải lên để không làm mờ vết giả CFM).",
+        "Giải pháp phối hợp tiền xử lý `WebRTC` này triệt tiêu hoàn toàn hiện tượng báo động giả khi thử nghiệm nói trực tiếp qua micro trước Hội đồng mà vẫn bảo toàn nguyên vẹn độ nhạy bắt giọng giả tải lên.",
+    )
 
-        ("Câu 19: Ràng buộc Hard Text-Disjoint được thực hiện như thế nào và tại sao nó quan trọng?",
-         "Dạ thưa Thầy/Cô, nếu cùng một câu văn bản xuất hiện ở cả tập Train và Test, mô hình sẽ học thuộc đặc trưng âm vị của câu chữ đó thay vì học dấu vết của AI. "
-         "Chúng em thực hiện Hard Text-Disjoint theo cơ chế 1 chiều tuyệt đối: "
-         "Giữ nguyên câu thoại của tập Test -> Lọc bỏ toàn bộ câu trùng trong tập Dev -> Lọc bỏ toàn bộ câu trùng trong tập Train. "
-         "Đồng thời, câu làm giọng mẫu (Prompt) hoàn toàn tách biệt khỏi câu dùng để tổng hợp giọng nói."),
+    # Q19: Mode 2 Live OmniVoice CFM Cloning Audit
+    _add_defense_qa(
+        19,
+        "Chế độ 2 (Live OmniVoice CFM Cloning & Forensic Audit) trên giao diện hoạt động ra sao để kiểm chứng trực tiếp trước Hội đồng?",
+        "Kiểm tra khả năng trình diễn khép kín (Red-Team Live Attack & Blue-Team Defense) ngay trên hệ thống thực tế.",
+        "Dạ thưa Thầy/Cô, **Chế độ 2** là phòng thí nghiệm đối kháng khép kín cho phép bất kỳ thành viên Hội đồng nào **thu âm 4–6 giây giọng thật của chính mình, để hệ thống tự nhân bản giọng giả bằng `OmniVoice CFM` tại chỗ, rồi lập tức đưa mẫu vừa nhân bản vào bộ thẩm định `v0.9.4` để vạch trần**.",
+        "Quy trình chạy hoàn toàn tự động qua 3 bước: (1) Tiền xử lý bản thu mẫu của Giảng viên (chuẩn hóa `16 kHz`, cắt khoảng lặng đầu/cuối tránh lỗi sụp đổ thời lượng `Duration Collapse`, chuẩn hóa biên độ `0.95`); (2) Động cơ `LiveVoiceStudioCloner` giải phương trình vi phân dòng chảy `OmniVoice CFM` để đọc một câu kịch bản chuyển tiền lừa đảo bằng đúng âm sắc của Giảng viên; (3) Luồng âm thanh giả vừa sinh (với cờ `apply_dither = False` để giữ nguyên dấu vết vocoder) được chuyển thẳng sang `SSL-AASIST v0.9.4` phân tích đa cửa sổ và xuất biểu đồ điểm số từng cửa sổ trượt.",
+        "Chế độ này chứng minh trực quan trước mắt Hội đồng rằng dù giọng nhân bản `OmniVoice CFM` nghe bằng tai người cực kỳ giống người thật, mô hình `v0.9.4` vẫn bóc tách chính xác vi nhiễu tích phân số học và chặn đứng với điểm thô âm sâu.",
+    )
 
-        ("Câu 20: Nếu triển khai thực tế trên mạng viễn thông, hệ thống của các em sẽ được tích hợp ở đâu?",
-         "Dạ thưa Thầy/Cô, hệ thống được thiết kế dạng Microservice đóng gói Docker Compose chuẩn mực. "
-         "Trong thực tế, nó có thể được triển khai tại 3 vị trí: "
-         "(1) Tích hợp trực tiếp vào tổng đài viễn thông (VoIP Gateway / SIP Trunking) để quét các cuộc gọi nghi vấn; "
-         "(2) Đóng vai trò là Middleware API cho các ngân hàng xác thực giao dịch chuyển tiền qua giọng nói; "
-         "(3) Cung cấp Bot dịch vụ xã hội trên Zalo/Telegram để người dân chủ động chuyển tiếp tin nhắn âm thanh thẩm định lừa đảo."),
+    # Q20: Enrollment IQR Guardrail (|offset| > 4 x IQR) + OMML
+    _add_defense_qa(
+        20,
+        "Hàng rào an toàn Enrollment IQR Guardrail (|offset| > 4 × IQR) bảo vệ hệ thống trước rủi ro gì?",
+        "Kiểm tra tư duy thiết kế an toàn phòng thủ chiều sâu (Defense-in-Depth) chống lạm dụng cơ chế hiệu chuẩn cá nhân.",
+        "Dạ thưa Thầy/Cô, hàng rào **`|offset| > 4 × IQR`** trong hàm `calibrate_by_enrollment` đóng vai trò cầu chì an toàn: **tự động từ chối dịch ngưỡng hiệu chuẩn nếu các mẫu đăng ký ban đầu bị nhiễu nặng, lệch chuẩn cực đoan hoặc bị kẻ tấn công cố tình đầu độc (`Enrollment Poisoning`)**.",
+        "Khi một người dùng doanh nghiệp đăng ký tối thiểu `3 mẫu giọng thật` để hiệu chỉnh độ lệch cá nhân `offset = median(s_enroll) − median(s_dev)`, nếu kẻ gian lén nộp 3 mẫu giọng giả có điểm âm rất sâu (ví dụ `-30`) làm mẫu đăng ký mà hệ thống ngây thơ trừ đi `offset` đó, mọi mẫu giọng giả tiếp theo sẽ được cộng bù hàng chục điểm để biến thành giọng thật! Bằng cách đo khoảng tứ phân vị bền vững `IQR = Q75 − Q25` trên tập Dev và khóa trần `4 × IQR`, bất kỳ độ lệch bất thường nào vượt ngưỡng đều bị từ chối hiệu chuẩn ngay lập tức, giữ nguyên điểm thô gốc để chuyển sang quy trình kiểm tra thủ công.",
+        "Toàn bộ các ca biên của hàng rào `IQR Guardrail` (dưới 3 mẫu, `IQR ≤ 0`, độ lệch vượt `4 × IQR`) đều được kiểm chứng chặt chẽ bằng kịch bản kiểm thử đơn vị tự động trong `tests/`.",
+    )
 
-        ("Câu 21: Tại sao khi clone trực tiếp từ micro trên Web (WebRTC), âm thanh tổng hợp CFM ban đầu bị im lặng/rè và các em đã khắc phục thế nào?",
-         "Dạ thưa Thầy/Cô, âm thanh thu từ WebRTC trình duyệt mặc định ở 48kHz Float32 thường bị trôi lệch một chiều (DC Offset), nhiễu ù đất 50Hz và chứa khoảng lặng dài ở hai đầu bản ghi. "
-         "Động cơ Flow-Matching CFM khi nhận prompt có DC Offset và khoảng lặng dài sẽ bị sụp đổ ước lượng thời lượng (Duration Collapse), dẫn tới sinh ra sóng âm phẳng hoàn toàn (im lặng) hoặc tiếng rè. "
-         "Chúng em đã khắc phục triệt để bằng chuỗi tiền xử lý 3 bước: "
-         "(1) Resample chuẩn 16.000 Hz Mono qua FFmpeg in-memory pipe; "
-         "(2) Dùng `librosa.effects.trim(y, top_db=25)` cắt bỏ sạch vùng lặng chết và DC offset; "
-         "(3) Chuẩn hóa biên độ đạt 95% đỉnh ($0.95 \\cdot y / \\max(|y|)$) để cung cấp prompt âm học rõ nét nhất cho CFM."),
+    eq_iqr_xml = (
+        omml_delim(omml_sub(omml_r("Δ"), omml_r("enroll", normal=True)), beg="|", end="|")
+        + omml_r(" = ", normal=True)
+        + omml_delim(
+            omml_r("median", normal=True)
+            + omml_delim(omml_sub(omml_r("s"), omml_r("enroll", normal=True)))
+            + omml_r(" − ", normal=True)
+            + omml_r("median", normal=True)
+            + omml_delim(omml_sub(omml_r("s"), omml_r("dev", normal=True))),
+            beg="|",
+            end="|",
+        )
+        + omml_r(" > 4 · ", normal=True)
+        + omml_sub(omml_r("IQR"), omml_r("dev", normal=True))
+        + omml_r("  ⇒  Từ chối hiệu chuẩn", normal=True)
+    )
+    add_omml_equation(
+        doc,
+        formula_title="Điều kiện kích hoạt cầu chì an toàn Enrollment IQR Guardrail",
+        omml_body_xml=eq_iqr_xml,
+        variables=[
+            ("s_enroll", "Tập điểm thô của tối thiểu 3 mẫu giọng đăng ký tham chiếu từ người nói cần hiệu chuẩn."),
+            ("median(s_dev), IQR_dev", "Trung vị và khoảng tứ phân vị (`Q75 − Q25`) của phân phối giọng thật chuẩn trên tập thẩm định `Dev`."),
+            ("4 · IQR_dev", "Ngưỡng biên an toàn tối đa cho phép dịch chuyển; vượt quá ngưỡng này hệ thống giữ nguyên `raw_score` gốc để ngăn chặn đầu độc mẫu đăng ký."),
+        ],
+    )
 
-        ("Câu 22: Làm thế nào các em đảm bảo tính tái lập và độ tin cậy của mã nguồn khi chạy trên các môi trường máy chủ khác nhau (CI/CD)?",
-         "Dạ thưa Thầy/Cô, toàn bộ dự án tuân thủ nghiêm ngặt phương pháp luận Test-Driven Development (TDD) với bộ kiểm thử tự động gồm 310 bài test "
-         "bao phủ 100% các module: xử lý tín hiệu DSP, phân chia tập dữ liệu speaker-disjoint, forward pass mô hình B_zalo V6, pooling đa cửa sổ và các endpoint API. "
-         "Hệ thống tích hợp GitHub Actions CI chạy tự động trên Ubuntu runner. "
-         "Để tránh gãy CI do các module nặng nằm trong `.gitignore` (như VoiceStudio), chúng em áp dụng cơ chế cô lập mock độc lập qua `sys.modules`, "
-         "đồng thời khóa cứng quy tắc Pre-Push CI Rule: luôn kiểm thử 310 bài test xanh 100% cục bộ trước khi push và xác nhận pipeline GitHub Actions đạt trạng thái Success tuyệt đối.")
-    ]
+    # Q21: TDD & CI verification (392/392 unit tests on GitHub Actions Ubuntu)
+    _add_defense_qa(
+        21,
+        "Quy trình phát triển hướng kiểm thử (TDD) và đường ống GitHub Actions CI xác minh độ tin cậy mã nguồn của dự án như thế nào?",
+        "Kiểm tra kỹ năng công nghệ phần mềm hiện đại (Software Engineering & MLOps Quality Assurance).",
+        "Dạ thưa Thầy/Cô, mọi mô-đun cốt lõi của ViTrueVoice đều được phát triển theo quy trình **Viết kiểm thử trước – Viết mã thực thi sau (`TDD`)** và được bảo vệ tự động bởi **`392/392 bài kiểm thử đơn vị (unit tests)`** chạy xanh 100% trên máy chủ sạch `GitHub Actions Ubuntu`.",
+        "Trong các dự án AI nghiên cứu, lỗi phổ biến nhất là sửa một hàm tiền xử lý hoặc đổi đường dẫn checkpoint làm hỏng ngầm kết quả đánh giá cũ. Bộ `392` bài kiểm thử của chúng em khóa chặt tất cả các bất biến sống còn: nối lặp `Repeat Padding 64.000 mẫu`, trọng số mất mát động, ranh giới `0%` rò rỉ manifest, toán tử `Consensus Asymmetric Veto`, hiệu chuẩn `Platt Scaling`, ẩn danh `SHA-256` trên API/Bot và cô lập giả lập (`mock`) các thư viện ngoài nằm trong `.gitignore` để không bao giờ gãy trên máy chủ đám mây Ubuntu sạch.",
+        "Trước mỗi lần cập nhật phiên bản `v0.9.4`, toàn bộ **`392/392 bài kiểm thử đơn vị (unit tests)`** đều đạt trạng thái **100% PASS** cả ở môi trường cục bộ lẫn trên đường ống `GitHub Actions CI`.",
+    )
 
-    for q_idx, (q_text, a_text) in enumerate(qa_list):
-        add_heading_subsection(doc, q_text)
-        add_styled_paragraph(doc, a_text, font_size=10.5, line_spacing=1.15, space_after=6)
+    # Q22: Remaining limitations & future direction (WavLM / multi-scale SSL)
+    _add_defense_qa(
+        22,
+        "Hạn chế còn tồn đọng lớn nhất của phiên bản v0.9.4 là gì và hướng nghiên cứu tiếp theo để khắc phục triệt để là gì?",
+        "Kiểm tra sự trung thực khoa học (Scientific Humility) và tầm nhìn nghiên cứu mở rộng sau đồ án.",
+        "Dạ thưa Thầy/Cô, hạn chế còn tồn đọng rõ nhất của `v0.9.4` là vẫn còn một tỷ lệ nhỏ mẫu giả **`OmniVoice CFM` chất lượng phòng thu siêu sạch trùng khớp âm sắc bị lọt lưới (`7.95%` trên tập Test nội bộ và `16.53%` trên bộ 5 tình nguyện viên độc lập)**, cùng giới hạn quy mô mẫu người nói thu thập thực tế.",
+        "Nguyên nhân vật lý là `wav2vec2-base-vietnamese-250h` hoạt động ở tần số lấy mẫu `16 kHz` (tần số Nyquist tối đa `8 kHz`) và được tiền huấn luyện chủ yếu cho bài toán nhận dạng chữ viết (`ASR`), nên ở những câu thoại ngắn, rõ nét, không nhiễu nền mà bộ giải phương trình vi phân `OmniVoice CFM` tái tạo cực mượt dưới `8 kHz`, khoảng cách biểu diễn với giọng thật trở nên rất hẹp.",
+        "Hướng phát triển tiếp theo của chúng em gồm 3 mũi nhọn: (1) Nâng cấp mặt trước lên kiến trúc **`WavLM` hoặc `Multi-scale SSL`** kết hợp nhánh phổ pha băng rộng `24 kHz` để bắt vi nhiễu tích phân bậc cao trên `8 kHz`; (2) Mở rộng tăng cường dữ liệu biến đổi pha – cao độ hai chiều cho đa công cụ Flow Matching; và (3) Phối hợp kiểm thử thực địa `Red-Team Pilot` diện rộng cùng CLB An toàn thông tin HUTECH.",
+    )
+
+    add_term_glossary(
+        doc,
+        terms=[
+            ("CM vs ASV", "Countermeasure vs Automatic Speaker Verification", "`CM` phân biệt giọng người sinh học với giọng tổng hợp AI độc lập danh tính; `ASV` xác minh xem giọng nói có khớp với người dùng đã đăng ký trước hay không."),
+            ("APCER & BPCER", "Attack / Bona Fide Presentation Classification Error Rate", "Theo chuẩn `ISO/IEC 30107-3`, `APCER` là tỷ lệ lọt lưới mẫu tấn công giả mạo; `BPCER` là tỷ lệ từ chối nhầm người dùng thật."),
+            ("EER & minDCF", "Equal Error Rate & Minimum Detection Cost Function", "`EER` là tỷ lệ lỗi tại điểm `APCER = BPCER`; `minDCF` là hàm chi phí phát hiện cực tiểu có tính đến mức độ thiệt hại bất đối xứng của việc bỏ sót lừa đảo."),
+            ("Shortcut Learning", "Spurious Correlation Learning", "Hiện tượng mạng học sâu gian lận bằng cách nhớ khoảng lặng đầu câu, tên người nói hoặc nội dung văn bản thay vì học bản chất giả mạo âm học."),
+            ("Platt Scaling", "Logistic / Temperature Probability Calibration", "Kỹ thuật biến đổi điểm thô logit về phân phối xác suất hậu nghiệm trung thực để ngăn chặn hiện tượng báo độ tự tin ảo 99,9% ở vùng mập mờ."),
+            ("IQR Guardrail", "Interquartile Range Safety Bound", "Hàng rào thống kê dùng khoảng tứ phân vị `Q75 − Q25` để chặn đứng các phép hiệu chuẩn bất thường vượt quá `4 × IQR`."),
+            ("Zero-Persistence", "In-Memory Ephemeral Processing", "Kiến trúc xử lý dữ liệu sinh trắc học thuần trên bộ nhớ RAM và hủy tức thì, không lưu lại tệp giọng nói trên ổ cứng dài hạn."),
+            ("TCO", "Total Cost of Ownership", "Tổng chi phí sở hữu và vận hành hạ tầng (đạt `0 VNĐ` khi chạy cục bộ trên Docker Compose và khoảng `~73 VNĐ/lượt quét` theo dự toán đám mây AWS)."),
+            ("TDD & CI", "Test-Driven Development & Continuous Integration", "Phương pháp viết bài kiểm thử tự động trước khi viết mã nguồn và tự động chạy kiểm tra toàn bộ `392/392` bài test mỗi khi đẩy mã lên kho lưu trữ."),
+        ],
+    )
 
     # =========================================================================
-    # CHƯƠNG 12
+    # CHƯƠNG 12: HỆ THỐNG HÓA TỪ KHÓA KHOA HỌC (7 TRỤC TAXONOMY) & ĐỌC BÀI BÁO
     # =========================================================================
-    add_heading_chapter(doc, "Chương 12", "Bản Đồ Từ Khóa Công Nghệ Học Máy & Hướng Dẫn Tra Cứu Tài Liệu Khoa Học")
+    add_heading_chapter(
+        doc,
+        "Chương 12",
+        "Hệ Thống Hóa Từ Khóa Khoa Học (7 Trục Taxonomy) & Cẩm Nang Đọc Bài Báo Quốc Tế",
+    )
 
-    add_prerequisite_box(doc, "Chương 12", 
-        "Cấu trúc bài báo khoa học chuẩn quốc tế IMRAD, Chiến lược xây dựng chuỗi truy vấn Boolean học thuật (AND, OR, NOT), "
-        "Bản đồ các nguồn dữ liệu & hội thảo khoa học hàng đầu thế giới (arXiv, ISCA Interspeech, IEEE Xplore, Google Scholar).")
+    add_foundation_primer(
+        doc,
+        process_name="Phương pháp đọc bài báo quốc tế 3 lượt (3-Pass Reading) & Truy vấn học thuật Boolean",
+        why_needed=(
+            "Lĩnh vực phát hiện giọng giả (Audio Deepfake Detection) thay đổi từng tháng với hàng trăm công trình mới trên "
+            "Interspeech, ICASSP và NeurIPS. Nếu sinh viên tìm kiếm bằng câu tiếng Việt thông thường hoặc đọc tuần tự từng chữ "
+            "từ trang đầu đến trang cuối một bài báo nặng công thức toán, sinh viên sẽ nhanh chóng bị ngợp và bỏ cuộc."
+        ),
+        real_analogy=(
+            "Đọc bài báo quốc tế giống như khảo sát địa hình bằng bản đồ vệ tinh: Lượt 1 bay lướt trên cao để biết thành phố có mấy quận chính; "
+            "Lượt 2 phóng xuống xem các trục đường lớn và biển chỉ dẫn (sơ đồ kiến trúc, bảng kết quả); chỉ khi xác định đúng tòa nhà cần tìm "
+            "thì Lượt 3 mới bước vào soi từng viên gạch (chứng minh đạo hàm và tham số huấn luyện)."
+        ),
+        core_points=[
+            "**Cấu trúc chuẩn quốc tế `IMRAD`** (*Introduction – Methods – Results – Analysis & Discussion*): Mọi bài báo đỉnh cao đều đặt câu hỏi nghiên cứu ở *Introduction*, mô tả kiến trúc và hàm mất mát ở *Methods*, chứng minh bằng bảng đối chứng `EER / minDCF` ở *Results*, và mổ xẻ giới hạn ở *Discussion*.",
+            "**Truy vấn học thuật bằng toán tử Logic `Boolean` (`AND`, `OR`, dấu ngoặc kép `\"...\"`)**: Trên `Google Scholar`, `IEEE Xplore` hay `ISCA Interspeech Archive`, luôn khóa cụm thuật ngữ chính xác trong dấu ngoặc kép, dùng `OR` để gom các từ đồng nghĩa và dùng `AND` để giao cắt đúng bài toán mục tiêu.",
+            "**Quy trình đọc bài báo nặng toán học trong 3 lượt (`3-Pass Method`)**: *Lượt 1 (5–10 phút)* đọc Tiêu đề, Tóm tắt (`Abstract`), Kết luận và nhìn lướt hình vẽ kiến trúc; *Lượt 2 (30 phút)* đọc kỹ các bảng số liệu đối chứng (`Ablation Tables`) và hiểu ý nghĩa đầu vào/đầu ra của từng phương trình mà chưa cần tự chứng minh lại; *Lượt 3 (60–90 phút)* tự viết lại công thức cốt lõi ra giấy, kiểm tra chiều tensor và đối chiếu với mã nguồn thực thi.",
+        ],
+    )
 
-    add_heading_section(doc, "12.0 Kiến Thức Nền Tảng Tiên Quyết Cần Nắm Vững Trước Khi Đọc Chương 12")
-    add_styled_paragraph(doc, 
-        "Nghiên cứu khoa học đòi hỏi sinh viên phải biết cách tự đào sâu, đối chiếu và kế thừa các thành tựu của cộng đồng quốc tế. "
-        "Người đọc cần nắm vững 3 kỹ năng tra cứu học thuật nền tảng sau:")
+    add_heading_section(
+        doc,
+        "12.1 Bảng Phân Loại Hệ Thống Từ Khóa Nghiên Cứu Theo 7 Trục Công Nghệ (7-Axis Taxonomy)",
+    )
+    add_styled_paragraph(
+        doc,
+        "Bảng 12.1 hệ thống hóa toàn bộ không gian thuật ngữ quốc tế gắn liền với kiến trúc ViTrueVoice `v0.9.4` thành **7 trục chuyên môn**, "
+        "giúp sinh viên dùng làm bản đồ tra cứu nhanh khi viết khóa luận hoặc mở rộng nghiên cứu lên bậc sau đại học:",
+    )
 
-    add_heading_subsection(doc, "12.0.1 Cấu Trúc Bài Báo Khoa Học Chuẩn Quốc Tế IMRAD")
-    add_styled_paragraph(doc, 
-        "Một bài báo khoa học xuất bản tại các hội thảo hàng đầu (như Interspeech, ICASSP, NeurIPS) luôn tuân thủ cấu trúc IMRAD:\n"
-        "- **I (Introduction - Đặt vấn đề)**: Tại sao bài toán này quan trọng? Các nghiên cứu trước đây thất bại ở điểm nào?\n"
-        "- **M (Methods - Phương pháp đề xuất)**: Kiến trúc toán học, thuật toán, hàm mất mát và quy trình tiền xử lý chi tiết.\n"
-        "- **R (Results - Kết quả thực nghiệm)**: Các bảng số liệu, đường cong lỗi EER, minDCF và các nghiên cứu bóc tách (Ablation).\n"
-        "- **A-and-D (Discussion - Thảo luận & Kết luận)**: Đóng góp khoa học, các giới hạn nghiên cứu và hướng đi tương lai.")
+    add_styled_table(
+        doc,
+        headers=[
+            "Trục Phân Loại Khoa Học",
+            "Các Từ Khóa Quốc Tế Cốt Lõi (English Research Keywords)",
+            "Ánh Xạ Trực Tiếp Trong Hệ Thống ViTrueVoice v0.9.4",
+        ],
+        rows=[
+            (
+                "Trục 1: Tạo Sinh Dòng Chảy Liên Tục (Continuous Flow Matching)",
+                "`Continuous Flow Matching (CFM)`, `Optimal Transport ODE`, `Vector Field Estimation`, `Midpoint / Euler Solver`, `Diffusion Transformer (DiT)`, `Zero-Shot Voice Cloning`, `OmniVoice`, `F5-TTS`",
+                "Hai công cụ Seen TTS chủ lực (`F5-TTS` 6.170 mẫu & `OmniVoice CFM` 6.445 mẫu đối xứng 1:1) dùng huấn luyện và kiểm định chống lọt lưới dòng liên tục.",
+            ),
+            (
+                "Trục 2: Mã Hóa Âm Thanh Thần Kinh Rời Rạc (Discrete Neural Audio Codecs)",
+                "`Discrete Neural Audio Codec`, `Residual Vector Quantization (RVQ)`, `EnCodec`, `SpeechTokenizer`, `NeuCodec`, `Acoustic Language Model`, `Quantization Micro-Artifacts`, `VieNeu-TTS`",
+                "Công cụ Unseen TTS độc lập `VieNeu-TTS v3 Turbo` (955 mẫu Dev & 375 mẫu 5-SPK) phục vụ kiểm định Giả thuyết H2 (`12.05%` EER, `92.53%` chặn).",
+            ),
+            (
+                "Trục 3: Mặt Trước Tự Giám Sát & Đồ Thị Chú Ý (SSL + Graph Backbones)",
+                "`Self-Supervised Learning (SSL)`, `Wav2Vec 2.0`, `WavLM`, `Tonal Speech Representation`, `AASIST`, `Heterogeneous Stacking Graph Attention Layer (HS-GAL)`, `Master Node Readout`",
+                "Kiến trúc `wav2vec2-base-vietnamese-250h` ghép nối `Compact AASIST` trích xuất đồng thời bất thường thời gian và hài âm thanh điệu tiếng Việt.",
+            ),
+            (
+                "Trục 4: Hiệu Chuẩn Không Gian Trọng Số & Huấn Luyện (Weight-Space Calibration)",
+                "`Two-Phase Fine-Tuning`, `Differential Learning Rate`, `Weight-Space Ensembles (WiSE-FT)`, `Linear Head-Blending`, `AM-Softmax`, `Dynamic Inverse-Frequency Weighted CE`, `RawBoost`",
+                "Huấn luyện 2 pha (`am_m = 0.20`) kết hợp Giai đoạn 3 `head_blend_a0.75` (`0.25 · Run2_P2 + 0.75 · HeadOnly`) khử lệch biên âm, giữ nguyên 100% SSL.",
+            ),
+            (
+                "Trục 5: Suy Luận Đa Cửa Sổ Đồng Thuận (Multi-Window Consensus Pooling)",
+                "`Sliding-Window Batched Inference`, `Repeat Padding Continuity`, `Dense Overlap Slicing`, `Consensus Asymmetric Veto`, `Trimmed Mean Outlier Filtering`, `Order-Statistic Pooling`",
+                "Gom lô `(5, 64000)` chạy trong 1 forward pass (`66,3 ms`) kèm bộ lọc `Consensus Asymmetric Veto` hạ EER từ `8.33%` (Max) xuống **5.63%**.",
+            ),
+            (
+                "Trục 6: Hiệu Chuẩn Sinh Trắc & Pháp Y Số (Biometric Calibration & PAD)",
+                "`ISO/IEC 30107-3 PAD`, `APCER & BPCER`, `Equal Error Rate (EER)`, `minDCF`, `DET Curve`, `Platt Scaling`, `Temperature Scaling`, `NIST Forensic Bounds`, `IQR Enrollment Guardrail`",
+                "Khóa ngưỡng `θ = 0.0`, hiệu chuẩn `Platt Scaling (T = 16.0)`, vùng biên `|s| ≤ 8.0`, kẹp `[0.1%, 99.9%]` và cầu chì đăng ký `|offset| > 4 × IQR`.",
+            ),
+            (
+                "Trục 7: MLOps Bảo Mật Quyền Riêng Tư (Privacy-Preserving MLOps)",
+                "`Zero-Persistence In-Memory Stream`, `Magic-Byte Sniffing`, `FFmpeg Pipe Decoding`, `SHA-256 Audit Logging`, `Non-Root Docker Container`, `IAM Least Privilege`, `S3 Lifecycle`",
+                "Vận hành Docker Compose cục bộ `0 VNĐ` tuân thủ Luật `91/2025/QH15`, áp dụng 3 khóa AWS Academy Gói A và duy trì `392/392` unit tests CI xanh.",
+            ),
+        ],
+        col_widths=[1.45, 2.55, 2.7],
+    )
 
-    add_heading_subsection(doc, "12.0.2 Nghệ Thuật Xây Dựng Chuỗi Truy Vấn Học Thuật (Boolean Search)")
-    add_styled_paragraph(doc, 
-        "Không bao giờ tìm kiếm bằng các câu hỏi ngôn ngữ tự nhiên thông thường (như 'làm thế nào để phát hiện deepfake'). "
-        "Các nhà nghiên cứu sử dụng **Toán tử Logic Boolean**:\n"
-        "- Sử dụng dấu ngoặc kép `\"...\"` cho các thuật ngữ chính xác bắt buộc (ví dụ: `\"audio anti-spoofing\"`).\n"
-        "- Sử dụng toán tử `AND` để kết hợp các điều kiện ràng buộc (ví dụ: `\"voice cloning\" AND \"telephony codec\"`).\n"
-        "- Sử dụng toán tử `OR` để mở rộng các biến thể công nghệ (ví dụ: `(\"flow matching\" OR \"diffusion\")`).\n"
-        "- Sử dụng toán tử `-` hoặc `NOT` để loại bỏ các chủ đề không mong muốn (ví dụ: `-image -video` để lọc bỏ deepfake hình ảnh).")
+    add_heading_section(
+        doc,
+        "12.2 Lộ Trình Đọc Các Bài Báo Nền Tảng Kinh Điển (Curated Reading Roadmap) & Cú Pháp Tìm Kiếm",
+    )
+    add_styled_paragraph(
+        doc,
+        "Để nắm vững nền tảng lý thuyết đứng sau từng mô-đun trong kho mã nguồn ViTrueVoice, sinh viên nên đọc theo đúng thứ tự "
+        "7 cụm công trình kinh điển dưới đây (từ biểu diễn tiếng nói cơ sở đến mô hình tạo sinh và hiệu chuẩn trọng số hiện đại):",
+    )
 
-    add_heading_subsection(doc, "12.0.3 Bản Đồ Các Nguồn Dữ Liệu & Hội Thảo Khoa Học Uy Tín Hàng Đầu")
-    add_styled_paragraph(doc, 
-        "Trong lĩnh vực trí tuệ nhân tạo và xử lý tiếng nói, 4 kho tàng học thuật uy tín nhất sinh viên bắt buộc phải biết:\n"
-        "1. **ISCA Interspeech Archive (`isca-speech.org`)**: Thánh đường số 1 thế giới về xử lý tiếng nói. Toàn bộ các bài báo đều mở hoàn toàn (Open Access).\n"
-        "2. **IEEE Xplore / ICASSP (`ieeexplore.ieee.org`)**: Hội thảo quốc tế lớn nhất về xử lý tín hiệu và âm thanh.\n"
-        "3. **arXiv.org (`arxiv.org/archive/cs`)**: Nơi các bài báo công nghệ mới nhất được công bố trước khi xuất bản chính thức (Pre-print).\n"
-        "4. **Google Scholar (`scholar.google.com`)**: Công cụ tìm kiếm học thuật toàn diện nhất, cho phép theo dõi số lượt trích dẫn (Citations).")
+    add_styled_table(
+        doc,
+        headers=[
+            "Thứ Tự & Công Trình Gốc",
+            "Đóng Góp Khoa Học Cốt Lõi Cần Đọc Hiểu",
+            "Phần Cần Tập Trung Khi Đọc (3-Pass Focus)",
+        ],
+        rows=[
+            (
+                "1. Baevski et al. (NeurIPS 2020)\n*wav2vec 2.0: Self-Supervised Learning of Speech Representations*",
+                "Đặt nền móng trích xuất đặc trưng ngữ âm trực tiếp từ sóng âm thô 16 kHz qua 7 tầng CNN và mạng Transformer che mặt nạ đối tương phản.",
+                "Đọc kỹ Hình 1 (kiến trúc Feature Encoder bước nhảy 320 mẫu tạo ra 199 khung cho 4 giây) và mục Contrastive Loss.",
+            ),
+            (
+                "2. Jung et al. (ICASSP 2022)\n*AASIST: Integrated Spectro-Temporal Graph Attention Networks*",
+                "Đề xuất mạng chú ý đồ thị không đồng nhất `HS-GAL` kết hợp hai miền Thời gian – Tần số và nút điều phối toàn cục `Master Node`.",
+                "Đọc kỹ mục Heterogeneous Graph Attention và bảng Ablation chứng minh vai trò của `Master Node` khi bắt lỗi vocoder.",
+            ),
+            (
+                "3. Tak et al. (ICASSP & Odyssey 2022)\n*SSL-AASIST & RawBoost Data Augmentation*",
+                "Ghép nối mặt trước `Wav2Vec 2.0` với đồ thị `AASIST` cùng nhiễu tuyến tính / tích chập `RawBoost` để chống suy giảm kênh truyền viễn thông.",
+                "Đọc kỹ cấu hình ghép nối SSL front-end, tốc độ học vi chỉnh nhỏ (`1e-6`) và 3 thành phần nhiễu của `RawBoost`.",
+            ),
+            (
+                "4. Lipman et al. (ICLR 2023) & Chen et al. (2024)\n*Flow Matching for Generative Modeling & F5-TTS*",
+                "Xây dựng phương trình vi phân thường `ODE` dọc theo quỹ đạo vận chuyển tối ưu (`Optimal Transport`), tạo ra sóng âm nhân bản siêu mượt.",
+                "Đọc phương trình trường vận tốc thẳng `x_t = (1 − t)x_0 + t·x_1` để hiểu tại sao `OmniVoice CFM` ít để lại gai nhiễu hơn Diffusion cũ.",
+            ),
+            (
+                "5. Défossez et al. (2023) & Zhang et al. (ICLR 2024)\n*EnCodec & SpeechTokenizer (Discrete RVQ)*",
+                "Nén sóng âm thành chuỗi mã rời rạc qua nhiều tầng lượng tử hóa phần dư (`Residual Vector Quantization - RVQ`) cho các mô hình ngôn ngữ âm học.",
+                "Đọc cơ chế cộng dồn phần dư qua `M` cuốn từ điển mã (`codebooks`) để hiểu nguồn gốc sai số lượng tử hóa trong `VieNeu-TTS`.",
+            ),
+            (
+                "6. Wortsman et al. (CVPR 2022)\n*WiSE-FT: Weight-Space Ensembles for Fine-Tuning*",
+                "Chứng minh phép nội suy tuyến tính giữa trọng số trước và sau tinh chỉnh giữ được cả độ chính xác miền đích lẫn độ bền vững ngoại lai.",
+                "Đọc công thức trộn trọng số tuyến tính theo hệ số `α` — chính là cơ sở lý thuyết trực tiếp của bước `head_blend_a0.75` trong `v0.9.4`.",
+            ),
+            (
+                "7. Giao thức ASVspoof 2019 / 2021 / ASVspoof 5\n*(Yamagishi, Nautsch, Wang et al.)*",
+                "Thiết lập chuẩn mực quốc tế về chia tập `Speaker-Disjoint`, thử thách nén codec điện thoại thực tế và thước đo `EER`, `minDCF`, `ISO/IEC 30107-3`.",
+                "Đọc phần Evaluation Plan để nắm chắc công thức tính `APCER`, `BPCER`, đường cong `DET` và lý do không dùng `Accuracy`.",
+            ),
+        ],
+        col_widths=[1.85, 2.55, 2.3],
+    )
 
-    # -------------------------------------------------------------------------
-    # 12.1 - 12.3 Chuyên sâu
-    # -------------------------------------------------------------------------
-    add_heading_section(doc, "12.1 Bảng Phân Loại Từ Khóa Theo 7 Trục Công Nghệ Cốt Lõi")
-    add_styled_paragraph(doc, 
-        "Để giúp sinh viên dễ dàng tra cứu tài liệu học thuật và đào sâu nền tảng lý thuyết trên Google Scholar, arXiv hoặc IEEE Xplore, "
-        "bảng dưới đây hệ thống hóa toàn bộ từ khóa công nghệ của đề tài theo 7 trục nghiên cứu chuyên sâu:")
+    add_heading_subsection(doc, "12.2.1 Bốn Chuỗi Truy Vấn Boolean Mẫu Dùng Ngay Trên Google Scholar & IEEE Xplore")
+    add_bullet_item(
+        doc,
+        '`("audio anti-spoofing" OR "speech deepfake detection") AND ("wav2vec 2.0" OR "WavLM") AND ("AASIST" OR "graph attention")`',
+        bold_prefix="Truy vấn 1 — Kiến trúc mạng SSL kết hợp đồ thị chú ý",
+    )
+    add_bullet_item(
+        doc,
+        '`("flow matching" OR "zero-shot voice cloning") AND ("spoofing detection" OR "deepfake") AND ("generalization" OR "unseen")`',
+        bold_prefix="Truy vấn 2 — Phát hiện giọng giả sinh bởi Flow Matching thế hệ mới",
+    )
+    add_bullet_item(
+        doc,
+        '`("voice anti-spoofing" OR "deepfake audio") AND ("telephony" OR "Opus" OR "AMR-NB" OR "AAC") AND "EER"`',
+        bold_prefix="Truy vấn 3 — Độ bền vững qua kênh nén thoại viễn thông & OTT",
+    )
+    add_bullet_item(
+        doc,
+        '`("weight-space ensembles" OR "WiSE-FT" OR "probability calibration" OR "Platt scaling") AND ("biometrics" OR "anti-spoofing")`',
+        bold_prefix="Truy vấn 4 — Hiệu chuẩn không gian trọng số & xác suất sinh trắc học",
+    )
 
-    keywords_axes = [
-        ("Trục 1: Xử Lý Tín Hiệu Âm Thanh (Audio DSP)",
-         "Linear PCM, Polyphase Resampling, Kaiser Window, Short-Time Fourier Transform (STFT), Spectrogram, "
-         "Formants (F1/F2/F3), Fundamental Frequency (F0), YIN Algorithm, Root Mean Square (RMS), "
-         "Loudness Normalization, EBU R128, LUFS, dBFS, Z-Score Normalization, Comfort Noise, Dithering (RFC 3389, AES-17), "
-         "Repeat Padding vs. Zero-Padding, Non-stationary Noise."),
-
-        ("Trục 2: Học Biểu Diễn Tự Giám Sát (SSL)",
-         "Self-Supervised Learning (SSL), Wav2Vec 2.0, Contrastive Learning, Masked Latent Reconstruction, "
-         "Transformer Encoder, Multi-Head Self-Attention, Positional Encoding, Catastrophic Forgetting, "
-         "Differential Learning Rates, Layer-wise Learning Rate Decay (LLRD), Cross-lingual Representation Transfer, Tonal Phonetics."),
-
-        ("Trục 3: Mạng Nơ-ron Đồ Thị (Graph Neural Networks)",
-         "Graph Neural Network (GNN), Graph Attention Network (GAT), Adjacency Matrix, Message Passing Scheme, "
-         "Heterogeneous Graph, AASIST (Audio Anti-Spoofing using Integrated Spectro-Temporal Graph Attention), "
-         "HS-GAL (Heterogeneous Spatio-Temporal Graph Attention Layer), Master Node, Temporal Nodes, Spectral Nodes, Graph Readout."),
-
-        ("Trục 4: Tiêu Chuẩn Thẩm Định & Chỉ Số An Ninh Sinh Trắc",
-         "ISO/IEC 30107-3, ASVspoof Challenge, Stand-alone Anti-Spoofing, Presentation Attack Detection (PAD), "
-         "Equal Error Rate (EER), Minimum Detection Cost Function (minDCF), APCER (Attack Presentation Classification Error Rate), "
-         "BPCER (Bona Fide Presentation Classification Error Rate), Detection Error Trade-off (DET Curve), ROC-AUC, "
-         "Raw Logit Score, Calibration Error (ECE), Brier Score, Wilson Score Confidence Interval, NIST SRE."),
-
-        ("Trục 5: Kênh Truyền Viễn Thông & Tăng Cường Dữ Liệu",
-         "Lossy Audio Compression, Psychoacoustic Masking, Modified Discrete Cosine Transform (MDCT), "
-         "Opus Codec (RFC 6716), AAC-LC (Advanced Audio Coding Low Complexity), Adaptive Multi-Rate Narrowband (AMR-NB, 3GPP TS 26.071), "
-         "PSTN Telephony, G.711 A-law / mu-law, Bandwidth Limitation (8kHz Narrowband vs. 16kHz Wideband), "
-         "RawBoost (Data Augmentation for Anti-Spoofing), Additive Linear Noise, Convolutive Impulse Noise."),
-
-        ("Trục 6: Công Nghệ Tổng Hợp Tiếng Nói & Voice Cloning (TTS)",
-         "Text-to-Speech (TTS), Zero-Shot Voice Cloning, Acoustic Model, Neural Vocoder, HiFi-GAN, "
-         "Diffusion Probabilistic Models, Continuous Flow Matching (CFM), F5-TTS, StyleTTS 2, "
-         "Speaker Embedding, ECAPA-TDNN, Cosine Similarity, Word Error Rate (WER), Character Error Rate (CER), Levenshtein Distance."),
-
-        ("Trục 7: Triển Khai Kỹ Thuật & Hiệu Năng Thời Gian Thực",
-         "Sliding Window Inference, Max-Pooling over Time, Tensor Batching, Platt Scaling (Logistic Regression on Logits), "
-         "Real-time Latency (NFR1), Cold-Start Latency Mitigation, CUDA Context Initialization, Dummy Warm-up, "
-         "Memory Footprint Optimization, Gradient Accumulation, Direct Memory Access (DMA), In-Memory Stream Processing (Zero-Persistence), "
-         "SHA-256 Hashing, C4 Model (Container Diagram), Docker Containerization, FastAPI, Gradio UI, Telegram Bot Daemon.")
-    ]
-
-    t_kw = doc.add_table(rows=len(keywords_axes) + 1, cols=2)
-    t_kw.alignment = WD_TABLE_ALIGNMENT.CENTER
-    set_table_borders(t_kw)
-
-    kw_hdr = t_kw.rows[0]
-    set_cell_background(kw_hdr.cells[0], "1F497D"); set_cell_background(kw_hdr.cells[1], "1F497D")
-    set_cell_margins(kw_hdr.cells[0], 80, 80, 100, 100); set_cell_margins(kw_hdr.cells[1], 80, 80, 100, 100)
-    kw_hdr.cells[0].width, kw_hdr.cells[1].width = Inches(2.2), Inches(4.7)
-    p = kw_hdr.cells[0].paragraphs[0]; r = p.add_run("Trục Nghiên Cứu Công Nghệ"); r.bold = True; r.font.color.rgb = RGBColor(255, 255, 255); r.font.name = "Times New Roman"; r.font.size = Pt(9.5)
-    p = kw_hdr.cells[1].paragraphs[0]; r = p.add_run("Các Từ Khóa Học Thuật Cốt Lõi (Academic Keywords)"); r.bold = True; r.font.color.rgb = RGBColor(255, 255, 255); r.font.name = "Times New Roman"; r.font.size = Pt(9.5)
-
-    for i, (axis_title, axis_kws) in enumerate(keywords_axes):
-        row = t_kw.rows[i+1]
-        c0, c1 = row.cells[0], row.cells[1]
-        c0.width, c1.width = Inches(2.2), Inches(4.7)
-        if i % 2 == 0:
-            set_cell_background(c0, "F9FAFC"); set_cell_background(c1, "F9FAFC")
-        set_cell_margins(c0, 60, 60, 90, 90); set_cell_margins(c1, 60, 60, 90, 90)
-        p0 = c0.paragraphs[0]; p0.paragraph_format.space_after = Pt(0)
-        r0 = p0.add_run(axis_title); r0.bold = True; r0.font.name = "Times New Roman"; r0.font.size = Pt(9.5); r0.font.color.rgb = RGBColor(31, 73, 125)
-        p1 = c1.paragraphs[0]; p1.paragraph_format.space_after = Pt(0); p1.paragraph_format.line_spacing = 1.15
-        r1 = p1.add_run(axis_kws); r1.font.name = "Times New Roman"; r1.font.size = Pt(9); r1.font.color.rgb = RGBColor(30, 30, 30)
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(8)
-
-    add_heading_section(doc, "12.2 Danh Mục 12 Bài Báo Khoa Học Kinh Điển (Nên Tìm Đọc Gốc)")
-    add_styled_paragraph(doc, 
-        "Dưới đây là 12 công trình khoa học nền tảng định hình nên toàn bộ kiến trúc và phương pháp luận của đề tài ViTrueVoice:")
-
-    papers_data = [
-        ("1. AASIST (Interspeech 2022)", "Jung et al., 'AASIST: Audio Anti-Spoofing Using Integrated Spectro-Temporal Graph Attention'. Bài báo gốc đề xuất mạng đồ thị HS-GAL và Master Node kết nối miền thời gian - tần số."),
-        ("2. Wav2Vec 2.0 (NeurIPS 2020)", "Baevski et al., 'wav2vec 2.0: A Framework for Self-Supervised Learning of Speech Representations'. Công trình đột phá về học tự giám sát từ âm thanh thô qua tái cấu trúc ẩn."),
-        ("3. RawBoost (ICASSP 2022)", "Tak et al., 'RawBoost: A Data Boost Technique for Raw Audio Anti-Spoofing'. Kỹ thuật tăng cường dữ liệu âm thanh thô mô phỏng méo tuyến tính, phi tuyến và tạp âm dải tần."),
-        ("4. ASVspoof 2021 (IEEE JSTSP 2022)", "Yamagishi et al., 'ASVspoof 2021: Accelerating progress in spoofed and deepfake speech detection'. Tiêu chuẩn đánh giá quốc tế về độ bền kênh truyền (Channel Robustness)."),
-        ("5. F5-TTS (arXiv 2024)", "Chen et al., 'F5-TTS: A Fairytaler that Fakes Fluent and Faithful Speech with Flow Matching'. Kiến trúc Flow Matching Transformer đột phá về Zero-shot Voice Cloning."),
-        ("6. Continuous Flow Matching (ICML 2023)", "Lipman et al., 'Flow Matching for Generative Modeling'. Lý thuyết nền tảng về phương trình vi phân và dòng vector cho các mô hình sinh thế hệ mới."),
-        ("7. AM-Softmax (IEEE SPL 2018)", "Wang et al., 'Additive Margin Softmax for Face Verification'. Hàm mất mát biên độ góc ép chặt không gian biểu diễn trên siêu cầu, ứng dụng xuất sắc cho chống giả mạo."),
-        ("8. Platt Scaling (1999)", "Platt, J., 'Probabilistic Outputs for Support Vector Machines and Comparisons to Regularized Likelihood Methods'. Phương pháp hiệu chuẩn xác suất kinh điển từ logits."),
-        ("9. ECAPA-TDNN (Interspeech 2020)", "Desplanques et al., 'ECAPA-TDNN: Emphasized Channel Attention, Propagation and Aggregation in TDNN Based Speaker Verification'. Mô hình trích xuất vân giọng chuẩn tại Cổng 2."),
-        ("10. YIN Pitch Estimator (JASA 2002)", "de Cheveigné & Kawahara, 'YIN, a fundamental frequency estimator for speech and music'. Thuật toán trích xuất F0 chuẩn xác tại Cổng 3 của bộ lọc MultiGate."),
-        ("11. EBU R128 Standard (2014)", "European Broadcasting Union, 'Loudness normalisation and permitted maximum level of audio signals'. Tiêu chuẩn quốc tế về chuẩn hóa độ to -23 LUFS."),
-        ("12. NIST SRE Guidelines (2024)", "National Institute of Standards and Technology, 'Speaker Recognition Evaluation and Forensic Voice Comparison Standards'. Quy chuẩn pháp y về đánh giá minDCF và khoảng tin cậy.")
-    ]
-
-    for p_title, p_desc in papers_data:
-        add_bullet_item(doc, p_desc, bold_prefix=p_title)
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(8)
-
-    add_heading_section(doc, "12.3 Chiến Lược & Cú Pháp Tìm Kiếm Bài Báo Khoa Học (Search Queries)")
-    add_styled_paragraph(doc, 
-        "Khi cần tìm các tài liệu mở rộng hoặc chuẩn bị bài thuyết trình, sinh viên có thể sao chép trực tiếp các chuỗi truy vấn chuẩn mực dưới đây vào Google Scholar hoặc arXiv:")
-
-    search_queries = [
-        ("Tìm nghiên cứu về chống giả mạo âm thanh qua kênh thoại nén:",
-         '("audio deepfake detection" OR "voice anti-spoofing") AND ("telephony codec" OR "lossy compression" OR "opus" OR "amr-nb") AND "EER"'),
-
-        ("Tìm các cải tiến trên kiến trúc mạng đồ thị AASIST:",
-         '("AASIST" OR "spectro-temporal graph attention") AND ("self-supervised learning" OR "wav2vec2") AND "spoofing"'),
-
-        ("Tìm nghiên cứu về kỹ thuật tăng cường RawBoost:",
-         '"RawBoost" AND ("audio anti-spoofing" OR "deepfake speech") AND ("data augmentation")'),
-
-        ("Tìm tài liệu về hiệu chuẩn độ tin cậy và Platt Scaling trong AI an ninh:",
-         '("probability calibration" OR "Platt scaling" OR "expected calibration error") AND ("deepfake detection" OR "biometrics")'),
-
-        ("Tìm nghiên cứu mới nhất về Flow Matching và Voice Cloning:",
-         '("flow matching" OR "continuous flow matching") AND ("zero-shot voice cloning" OR "text-to-speech")')
-    ]
-
-    for q_name, q_syntax in search_queries:
-        add_styled_paragraph(doc, f"**{q_name}**", font_size=10.5, bold=True, color_rgb=(31, 73, 125), space_before=4, space_after=1)
-        p_code = doc.add_paragraph()
-        p_code.paragraph_format.left_indent = Inches(0.2)
-        p_code.paragraph_format.space_after = Pt(4)
-        r_code = p_code.add_run(q_syntax)
-        r_code.font.name = "Courier New"
-        r_code.font.size = Pt(9)
-        r_code.font.color.rgb = RGBColor(192, 0, 0)
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
+    add_term_glossary(
+        doc,
+        terms=[
+            ("IMRAD", "Introduction, Methods, Results, and Discussion", "Bố cục 4 phần chuẩn mực bắt buộc của hầu hết các bài báo thực nghiệm quốc tế trong ngành Khoa học Máy tính và Trí tuệ Nhân tạo."),
+            ("ISCA Interspeech", "International Speech Communication Association", "Hội nghị khoa học uy tín bậc nhất thế giới chuyên sâu về công nghệ xử lý tiếng nói, nhận dạng giọng nói và chống giả mạo âm thanh."),
+            ("ICASSP", "IEEE International Conference on Acoustics, Speech and Signal Processing", "Hội nghị hàng đầu của Hiệp hội Kỹ sư Điện và Điện tử `IEEE` về xử lý tín hiệu số, âm học và học sâu âm thanh."),
+            ("Pre-print / arXiv", "Open-Access Electronic Preprint Archive", "Bản thảo công trình khoa học được nhóm tác giả công bố sớm trên kho mở `arXiv.org` trước hoặc song song với quá trình bình duyệt tạp chí/hội nghị."),
+            ("Ablation Study", "Component Removal / Isolation Experiment", "Nghiên cứu bóc tách — thí nghiệm lần lượt tắt hoặc thay thế từng thành phần (như tắt `RawBoost`, đổi chế độ `Pooling`) để đo chính xác đóng góp riêng của nó."),
+            ("Taxonomy", "Systematic Scientific Classification", "Hệ thống phân loại khoa học sắp xếp các khái niệm và thuật ngữ phức tạp vào từng trục kiến trúc rõ ràng, không chồng chéo."),
+            ("WiSE-FT", "Weight-Space Ensembles for Fine-Tuning", "Kỹ thuật trộn tuyến tính hai bộ trọng số trong không gian tham số để đạt điểm cân bằng tối ưu mà không tốn gấp đôi chi phí suy luận."),
+            ("RVQ", "Residual Vector Quantization", "Lượng tử hóa vector phần dư — kỹ thuật xấp xỉ liên tiếp phần sai số còn lại qua nhiều bảng mã rời rạc trong các bộ `Neural Audio Codec` hiện đại."),
+        ],
+    )
