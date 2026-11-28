@@ -58,6 +58,10 @@ def test_gradio_and_legacy_playground_completely_removed():
     assert not any("gradio" in line for line in active_reqs), (
         "gradio dependency must be removed from requirements.txt"
     )
+    assert any("pydub" in line for line in active_reqs), (
+        "pydub must be in requirements.txt so OmniVoice CFM loads inside Docker"
+    )
+    assert (ROOT / "run.bat").is_file(), "run.bat launcher for local CUDA execution must exist"
 
 
 def test_web_ui_wires_both_real_endpoints_and_has_zero_mocks():

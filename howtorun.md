@@ -117,8 +117,8 @@ python scripts/compare_h1.py --a out/eval_metrics_B0.csv --b out/eval_metrics_B.
 ### Chạy Batch Dataset Processor (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo)
 ```bash
 python -c "
-from src.VieTrueVoice.pipeline import VieTrueVoiceDualPipeline, PipelineMode
-from src.VieTrueVoice.batch_processor import BatchDatasetProcessor
+from src.vitruevoice.pipeline import VieTrueVoiceDualPipeline, PipelineMode
+from src.vitruevoice.batch_processor import BatchDatasetProcessor
 
 pipeline = VieTrueVoiceDualPipeline()
 processor = BatchDatasetProcessor(pipeline=pipeline, mode=PipelineMode.DUAL_OUTPUT, only_pass=True, min_dur=3.5, max_dur=7.5, allow_stitching=False)
@@ -127,8 +127,14 @@ processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'S
 ```
 
 ### Chạy Máy Chủ API & Brutalist WebGL Forensics Web UI (FastAPI cổng 8000)
+```bat
+:: Cách nhanh nhất trên Windows với GPU CUDA (tự kiểm tra RTX CUDA & xung đột cổng):
+run.bat
+:: Hoặc chỉ định cổng khác nếu Docker đang chiếm cổng 8000:
+run.bat 8010
+```
 ```bash
-# Checkpoint mặc định tự động nạp: out/v0.9.4/best_model.pt
+# Hoặc chạy trực tiếp bằng uvicorn (checkpoint mặc định: out/v0.9.4/best_model.pt):
 uvicorn src.app.server:app --reload --port 8000
 # Giao diện Web UI: http://localhost:8000/ | Swagger API: http://localhost:8000/docs
 ```
@@ -188,7 +194,7 @@ python scripts/demo_predict.py --web
 
 #### 🧪 Tab 02 (`02 // CLONE & KIỂM CHỨNG OMNIVOICE CFM` — `POST /api/v1/clone-and-audit`)
 - **Đầu vào linh hoạt**: Tải tệp, thu âm trực tiếp qua Microphone trình duyệt, hoặc 1-click mẫu chuẩn `SPK_0004`, kèm hộp nhập văn bản mục tiêu tiếng Việt (`target_text`) và tùy chọn `custom_ref_text` (tự động nhận diện ASR Wav2Vec2 nếu để trống).
-- **Ma trận đối soát 2 chiều**: Hiển thị banner chênh lệch **`Δ MARGIN GAP` (`delta_margin`)**, văn bản ASR đã dùng, trạng thái `LIVE OMNIVOICE CFM` / `CFM PRESET FALLBACK`, 2 thẻ so sánh trực tiếp **Bản Gốc (Bona Fide)** vs **Bản Nhân Bản (OmniVoice CFM Clone)** kèm trình phát âm thanh, nút tải `.wav` clone và biểu đồ phổ/sóng âm/cửa sổ thời gian thực từ `bonafide.forensics` và `clone.forensics`.
+- **Ma trận đối soát 2 chiều (tải 2 pha)**: Ngay khi nhấn nút nhân bản, cột trái **Bản Gốc (Bona Fide)** được phân tích và hiển thị trước (~150–400 ms), trong khi cột phải hiển thị chuyển động loading trực tiếp cho đến khi **OmniVoice CFM Clone** hoàn tất; sau đó cập nhật banner **`Δ MARGIN GAP` (`delta_margin`)**, văn bản ASR đã dùng, trạng thái `LIVE OMNIVOICE CFM` / `CFM PRESET FALLBACK` cùng 2 cột đối xứng hoàn toàn (trình phát âm thanh + 3 biểu đồ sóng âm/phổ/cửa sổ).
 - **Tuân thủ Quyền riêng tư (Luật 91/2025/QH15)**: Âm thanh xử lý in-memory trên RAM, dọn dẹp file tạm ngay lập tức sau khi suy luận và chỉ lưu log mã băm SHA-256.
 
 ### Cách 2: Thử Nghiệm Nhanh Trên Dòng Lệnh (CLI Demo)
@@ -224,17 +230,17 @@ Hệ thống VieTrueVoice được đóng gói container hóa theo chuẩn bảo
 ### 6.1 Khởi chạy bằng Docker
 1. **Xây dựng Docker Image**:
    ```bash
-   docker build -t VieTrueVoice:latest .
+   docker build -t vietruevoice:latest .
    ```
 2. **Khởi chạy container độc lập (FastAPI Server + Brutalist WebGL Forensics Web UI)**:
    ```bash
    docker run -d \
-     --name VieTrueVoice-api \
+     --name vietruevoice-api \
      -p 8000:8000 \
      -v ${PWD}/out:/app/out:ro \
      -v ${PWD}/data/bonafide_ref:/app/data/bonafide_ref:ro \
      -v ${PWD}/external:/app/external:ro \
-     VieTrueVoice:latest
+     vietruevoice:latest
    ```
 3. **Truy cập các giao diện trực tiếp tại cổng 8000**:
    - **Brutalist WebGL Forensics Web UI**: Mở trình duyệt tại `http://localhost:8000/` (Tích hợp Tab 01 Thẩm định giọng nói `/api/v1/predict` & Tab 02 Nhân bản và Kiểm chứng OmniVoice CFM `/api/v1/clone-and-audit`).
