@@ -1,4 +1,4 @@
-# ViTrueVoice — Hướng Dẫn Chạy, Huấn Luyện & Triển Khai
+# VieTrueVoice — Hướng Dẫn Chạy, Huấn Luyện & Triển Khai
 
 Dự án hỗ trợ huấn luyện trực tiếp trên GPU cục bộ (`scripts/run_v8_1_phase_train.py`, `scripts/train.py`), kiểm thử CI (`pytest`) và triển khai qua FastAPI / Brutalist WebGL Forensics Web UI (`/`) / Docker. Các trình sinh notebook Colab/Kaggle nằm trong `scripts/build_*_notebook.py` (tạo tự động khi cần).
 
@@ -92,7 +92,7 @@ python scripts/train.py --branch A --manifest-dir data/manifests --audio-root . 
 # Nhánh B0 (Chỉ nén Codec, không RawBoost)
 python scripts/train.py --branch B0 --manifest-dir data/manifests --audio-root . --out-dir out/run_B0
 
-# Nhánh B (ViTrueVoice: Codec + RawBoost Online)
+# Nhánh B (VieTrueVoice: Codec + RawBoost Online)
 python scripts/train.py --branch B --manifest-dir data/manifests --audio-root . --out-dir out/run_B
 ```
 
@@ -117,10 +117,10 @@ python scripts/compare_h1.py --a out/eval_metrics_B0.csv --b out/eval_metrics_B.
 ### Chạy Batch Dataset Processor (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo)
 ```bash
 python -c "
-from src.vitruevoice.pipeline import ViTrueVoiceDualPipeline, PipelineMode
-from src.vitruevoice.batch_processor import BatchDatasetProcessor
+from src.VieTrueVoice.pipeline import VieTrueVoiceDualPipeline, PipelineMode
+from src.VieTrueVoice.batch_processor import BatchDatasetProcessor
 
-pipeline = ViTrueVoiceDualPipeline()
+pipeline = VieTrueVoiceDualPipeline()
 processor = BatchDatasetProcessor(pipeline=pipeline, mode=PipelineMode.DUAL_OUTPUT, only_pass=True, min_dur=3.5, max_dur=7.5, allow_stitching=False)
 processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'SPK_0007'], seeds=[100, 200, 300], codecs=['clean_16khz', 'g711_alaw', 'amr_nb'])
 "
@@ -219,22 +219,22 @@ In bảng tổng kết toàn diện trên 5 người nói đối chứng (SPK_00
 
 ## 6. Hướng Dẫn Đóng Gói Docker & Triển Khai Trên AWS
 
-Hệ thống ViTrueVoice được đóng gói container hóa theo chuẩn bảo mật điện toán đám mây (AWS Security / CIS Docker Benchmark):
+Hệ thống VieTrueVoice được đóng gói container hóa theo chuẩn bảo mật điện toán đám mây (AWS Security / CIS Docker Benchmark):
 
 ### 6.1 Khởi chạy bằng Docker
 1. **Xây dựng Docker Image**:
    ```bash
-   docker build -t vitruevoice:latest .
+   docker build -t VieTrueVoice:latest .
    ```
 2. **Khởi chạy container độc lập (FastAPI Server + Brutalist WebGL Forensics Web UI)**:
    ```bash
    docker run -d \
-     --name vitruevoice-api \
+     --name VieTrueVoice-api \
      -p 8000:8000 \
      -v ${PWD}/out:/app/out:ro \
      -v ${PWD}/data/bonafide_ref:/app/data/bonafide_ref:ro \
      -v ${PWD}/external:/app/external:ro \
-     vitruevoice:latest
+     VieTrueVoice:latest
    ```
 3. **Truy cập các giao diện trực tiếp tại cổng 8000**:
    - **Brutalist WebGL Forensics Web UI**: Mở trình duyệt tại `http://localhost:8000/` (Tích hợp Tab 01 Thẩm định giọng nói `/api/v1/predict` & Tab 02 Nhân bản và Kiểm chứng OmniVoice CFM `/api/v1/clone-and-audit`).
@@ -274,7 +274,7 @@ Sau khi khởi chạy:
 
 ## 7. Hướng Dẫn Tích Hợp & Mô Phỏng Nền Tảng Zalo Official Account (OA)
 
-Hệ thống ViTrueVoice tích hợp đầy đủ module tiếp nhận tin nhắn thoại Zalo Webhook chuẩn OpenAPI v3.0 của Zalo for Developers:
+Hệ thống VieTrueVoice tích hợp đầy đủ module tiếp nhận tin nhắn thoại Zalo Webhook chuẩn OpenAPI v3.0 của Zalo for Developers:
 
 ### 7.1 Kiểm thử nhanh bằng Bộ mô phỏng (Zalo Webhook Simulator)
 Khởi chạy kiểm thử mô phỏng gửi voice note Zalo kèm chữ ký số HMAC-SHA256:
@@ -288,7 +288,7 @@ python scripts/simulate_zalo_webhook.py --audio data/spoof_f5tts/CV_08110ec9e6/C
 
 ### 7.2 Cấu hình triển khai Zalo Official Account thật trong sản xuất
 1. Mở trang quản trị [Zalo for Developers](https://developers.zalo.me/) và tạo Zalo App liên kết Zalo OA.
-2. Thiết lập Webhook URL trỏ về máy chủ ViTrueVoice:
+2. Thiết lập Webhook URL trỏ về máy chủ VieTrueVoice:
    ```text
    https://<ten-mien-cua-ban>/api/v1/zalo/webhook
    ```
@@ -339,8 +339,8 @@ Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện
 python scripts/build_defense_handbook_v2_docx.py
 ```
 Tài liệu được xuất bản và đồng bộ tự động tại:
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx`
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.pdf`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.docx`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
 ### 8.6 Khởi chạy Phòng Thí Nghiệm Nhân Bản Trực Tiếp OmniVoice CFM (Web UI Tab 02 tại `/`)
@@ -361,7 +361,7 @@ Tự động biên dịch Phiếu khảo sát UX Pilot, Biên bản nghiệm thu
 python scripts/build_pilot_and_w08_docs.py
 ```
 Tài liệu được xuất bản và đồng bộ tự động tại:
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.docx` & `.pdf`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_VieTrueVoice.docx` & `.pdf`
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\Bang_Chi_Phi_AWS_Va_So_Tay_Su_Co_Runbook.docx` & `.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 

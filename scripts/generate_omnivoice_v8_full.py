@@ -7,7 +7,7 @@ Muc tieu:
    - CommonVoice: 245 clean = 1.225 files (25 nguoi noi)
    - SPK_Volunteers: 85 clean = 425 files (SPK_0001: 10 clean = 50 files; SPK_0003..0007: 75 clean = 375 files)
 2. Giai nen chon loc file ref con thieu (15 Test VIVOS + 5 OOD CommonVoice) va bo audio test_indomain
-   tu data/vitruevoice_data_processed.zip + transcode proxy Zalo (AAC 76k, Opus 24k).
+   tu data/VieTrueVoice_data_processed.zip + transcode proxy Zalo (AAC 76k, Opus 24k).
 3. Tai su dung thong minh cac mau OmniVoice hop le da sinh trong:
    - data/spoof_train/omnivoice/ (108 clean hop le)
    - data/spoof_unseen/omnivoice_15spk/ (191 clean khop Dev V7)
@@ -227,7 +227,7 @@ def is_complete_5_codecs(spk_dir: Path, base_utt: str) -> bool:
 
 def extract_missing_refs_and_test_audio(root: Path = _ROOT) -> None:
     """Selectively extract missing bonafide_ref WAVs (20 speakers) and test_indomain audio from zip."""
-    zip_path = root / "data/vitruevoice_data_processed.zip"
+    zip_path = root / "data/VieTrueVoice_data_processed.zip"
     if not zip_path.exists():
         raise FileNotFoundError(f"Missing zip archive: {zip_path}")
 
@@ -327,7 +327,7 @@ def build_target_catalog(root: Path = _ROOT) -> list[TargetUtterance]:
     test_in = pd.read_csv(root / "data/manifests_zalo/test_indomain_zalo.csv")
     unseen_om_5spk = pd.read_csv(root / "data/manifests_zalo/unseen_omnivoice_benchmark.csv")
 
-    with zipfile.ZipFile(root / "data/vitruevoice_data_processed.zip", "r") as zf:
+    with zipfile.ZipFile(root / "data/VieTrueVoice_data_processed.zip", "r") as zf:
         with zf.open("data/manifests/full_manifest.csv") as f:
             z_full = pd.read_csv(f)
         with zf.open("data/manifests/test_ood.csv") as f:
@@ -817,7 +817,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print("=" * 80)
-    print("VITRUEVOICE V8.1 — FULL 1:1 OMNIVOICE_CFM RESTORATION PIPELINE")
+    print("VieTrueVoice V8.1 — FULL 1:1 OMNIVOICE_CFM RESTORATION PIPELINE")
     print("=" * 80)
 
     extract_missing_refs_and_test_audio(_ROOT)

@@ -1,4 +1,4 @@
-# Bộ Dữ Liệu 5 Tình Nguyện Viên (Biometric Consent - ViTrueVoice)
+# Bộ Dữ Liệu 5 Tình Nguyện Viên (Biometric Consent - VieTrueVoice)
 
 ## 1. Thông Tin & Mục Đích Sử Dụng
 - **Số lượng người nói**: 5 người (`SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`).

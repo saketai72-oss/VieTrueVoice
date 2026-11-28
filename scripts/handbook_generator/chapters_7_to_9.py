@@ -1,5 +1,5 @@
 """
-Chương 7, 8, 9 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
+Chương 7, 8, 9 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng VieTrueVoice v0.9.4:
 - Chương 7: Đa dạng sinh học giọng nói (Deep-Voice F0), Độ bền vững dịch cao độ & Cô lập nghiệm thu 5 tình nguyện viên
 - Chương 8: Tổng hợp kết quả thực nghiệm chính thức v0.9.4 trên toàn bộ ma trận kiểm định
 - Chương 9: Kiến trúc hệ thống C4, Docker cục bộ 0 VNĐ, Áp dụng Gói A AWS & Đạo đức sinh trắc học
@@ -88,7 +88,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
     add_styled_paragraph(
         doc,
         "Chuỗi thực nghiệm bóc tách pháp y âm học (`Forensic Audio Audit`) của dự án đã làm sáng tỏ 3 phát hiện kỹ thuật mang tính bước ngoặt, "
-        "định hình trực tiếp kiến trúc huấn luyện của phiên bản chính thức **`ViTrueVoice v0.9.4`**:",
+        "định hình trực tiếp kiến trúc huấn luyện của phiên bản chính thức **`VieTrueVoice v0.9.4`**:",
     )
 
     add_bullet_item(
@@ -274,7 +274,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
 
     add_styled_paragraph(
         doc,
-        "Bảng 8.1 tóm tắt hành trình tiến hóa thực nghiệm của đồ án từ bài toán cơ sở cổ điển đến phiên bản phát hành chính thức **`ViTrueVoice v0.9.4`** "
+        "Bảng 8.1 tóm tắt hành trình tiến hóa thực nghiệm của đồ án từ bài toán cơ sở cổ điển đến phiên bản phát hành chính thức **`VieTrueVoice v0.9.4`** "
         "(chạy dưới cơ chế gộp chuẩn sản xuất `Consensus Asymmetric Veto` trên ma trận đánh giá `15.980` mẫu đối xứng và tập kiểm chứng ngoại lai H2):",
     )
 
@@ -324,7 +324,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
                 "Dữ liệu CFM chưa đủ đối xứng 1:1",
             ),
             (
-                "**ViTrueVoice v0.9.4 (Chính thức)**",
+                "**VieTrueVoice v0.9.4 (Chính thức)**",
                 "**Seen đối xứng 6.445 Omni + F5, 2-Run + `head_blend_a0.75` + Consensus Veto**",
                 "**5,63% EER** (`eval_only`: **5,61%**) — ĐẠT ≤ 8,0%",
                 "**95,01%** (`F5`: **98,49%**, `Omni`: **91,52%**)",
@@ -526,7 +526,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
         add_figure(
             doc,
             figs["fig8"],
-            "Hình 8.1: Tổng quan hiệu năng kiểm định chính thức ViTrueVoice v0.9.4. Khung A (Trái): So sánh EER qua 5 biến thể kênh thoại trên 15.980 mẫu "
+            "Hình 8.1: Tổng quan hiệu năng kiểm định chính thức VieTrueVoice v0.9.4. Khung A (Trái): So sánh EER qua 5 biến thể kênh thoại trên 15.980 mẫu "
             "giữa V7 Best (13,72%), V8.0 Legacy (6,79%) và v0.9.4 Chính thức (5,63%) vượt xa ngưỡng mục tiêu ≤ 8,0%. Khung B (Phải): Tỷ lệ nhận diện đúng "
             "giọng thật (94,76%) và chặn đứng 3 công cụ giả mạo (F5-TTS 100%, OmniVoice 83,47%, Unseen VieNeu-TTS 92,53%) trên 1.545 tệp của 5 tình nguyện viên độc lập.",
         )
@@ -538,7 +538,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
         "• **Giả thuyết H2 (PASS)**: Đạt **`12,05% EER ≤ 15,0%`** trên `955` mẫu Unseen `VieNeu-TTS v3 Turbo` (chặn `79,6%`) và chặn **`92,53%`** trên bộ 5 tình nguyện viên.\n"
         "• **Nghiệm thu độc lập (PASS)**: Trên `1.545` tệp cô lập 100% của 5 tình nguyện viên (`SPK_0003..0007`), nhận diện đúng người thật **`94,76%`** (gốc **`95,24%`**, `max` **`98,81%`**) "
         "và chặn đứng giả mạo từ **`83,47%`** (`OmniVoice CFM`) tới **`100,00%`** (`F5-TTS`).",
-        title="BẢNG VÀNG CHỈ SỐ CHỨNG MINH THÀNH CÔNG KHOA HỌC CỦA VITRUEVOICE v0.9.4",
+        title="BẢNG VÀNG CHỈ SỐ CHỨNG MINH THÀNH CÔNG KHOA HỌC CỦA VieTrueVoice v0.9.4",
     )
 
     add_term_glossary(
@@ -594,7 +594,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
         ),
         core_points=[
             "**Mô hình kiến trúc C4 (Context → Containers → Components → Code)**: Bản vẽ phân rã kiến trúc theo 4 cấp độ thu phóng; ở Mức 2 (`Container Diagram`), đồ án chia rạch ròi dịch vụ Web/API, tiến trình Bot Telegram, lõi suy luận AI và kho trọng số chỉ đọc.",
-            "**Đóng gói đa dịch vụ `Docker Compose`**: Khởi chạy đồng bộ cụm 2 container độc lập (`vitruevoice-api` và `vitruevoice-bot`) giao tiếp nội bộ qua mạng bridge cô lập chỉ bằng một lệnh `docker compose up -d`.",
+            "**Đóng gói đa dịch vụ `Docker Compose`**: Khởi chạy đồng bộ cụm 2 container độc lập (`VieTrueVoice-api` và `VieTrueVoice-bot`) giao tiếp nội bộ qua mạng bridge cô lập chỉ bằng một lệnh `docker compose up -d`.",
             "**API phi trạng thái (`Stateless REST API`)**: Máy chủ FastAPI không lưu phiên đăng nhập hay lịch sử âm thanh của người dùng giữa các lượt gọi, giúp mở rộng tải ngang dễ dàng.",
             "**Đường ống nhị phân trên RAM (`io.BytesIO` + `FFmpeg Pipe`)**: Tệp âm thanh người dùng gửi tới được giữ nguyên dưới dạng luồng byte trong RAM, giải mã thẳng sang tensor float32 rồi giải phóng bộ nhớ ngay khi trả kết quả.",
             "**Hàm băm mật mã một chiều (`SHA-256`)**: Biến đổi dữ liệu nhị phân bất kỳ thành chuỗi 64 ký tự lục giác duy nhất để ghi log đối soát mà không ai có thể dịch ngược lại thành giọng nói gốc.",
@@ -603,14 +603,14 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
 
     add_styled_paragraph(
         doc,
-        "Hệ thống `ViTrueVoice v0.9.4` được tổ chức theo mô hình **C4 Mức 2 (`Container Diagram`)** gồm 4 thành phần phối hợp đồng bộ:",
+        "Hệ thống `VieTrueVoice v0.9.4` được tổ chức theo mô hình **C4 Mức 2 (`Container Diagram`)** gồm 4 thành phần phối hợp đồng bộ:",
     )
     add_bullet_item(
         doc,
         "Máy chủ web hiệu năng cao cung cấp các endpoint công nghiệp (`/api/v1/predict`, `/health`, `/metrics`, `/playground`), đồng thời tích hợp "
         "cơ chế **`Pre-warming`** nạp sẵn `out/v0.9.4/best_model.pt` (`sha256: 30a383256458740e...`) qua hàm thống nhất `resolve_default_checkpoint()`, "
         "giới hạn tốc độ (`Rate Limiting`), kiểm tra kích thước tải lên (`≤ 15 MB`) và xác thực chữ ký nhị phân `Magic Bytes`.",
-        "1. Container `vitruevoice-api` (FastAPI Core Engine — Port `8000`)",
+        "1. Container `VieTrueVoice-api` (FastAPI Core Engine — Port `8000`)",
     )
     add_bullet_item(
         doc,
@@ -624,8 +624,8 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
     add_bullet_item(
         doc,
         "Tiến trình chạy ngầm (`asyncio` daemon) kết nối Telegram Bot API. Người dân chỉ cần chuyển tiếp tin nhắn thoại `.ogg/.opus` hoặc tệp âm thanh từ "
-        "Zalo/Telegram cho Bot; Bot gửi luồng byte qua mạng nội bộ Docker bridge (`http://vitruevoice-api:8000`) và phản hồi kết quả cảnh báo lừa đảo trong ~`0,7–1,1 giây`.",
-        "3. Container `vitruevoice-bot` (Telegram Voice Verification Daemon)",
+        "Zalo/Telegram cho Bot; Bot gửi luồng byte qua mạng nội bộ Docker bridge (`http://VieTrueVoice-api:8000`) và phản hồi kết quả cảnh báo lừa đảo trong ~`0,7–1,1 giây`.",
+        "3. Container `VieTrueVoice-bot` (Telegram Voice Verification Daemon)",
     )
     add_bullet_item(
         doc,
@@ -639,8 +639,8 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
         add_figure(
             doc,
             c4_path,
-            "Hình 9.1: Sơ đồ Kiến trúc Hệ thống ViTrueVoice (C4 Model Level 2 Container Diagram) — Minh họa tương tác giữa Người dùng Web/Telegram, "
-            "Container vitruevoice-api, Container vitruevoice-bot và luồng kiểm định an ninh In-Memory.",
+            "Hình 9.1: Sơ đồ Kiến trúc Hệ thống VieTrueVoice (C4 Model Level 2 Container Diagram) — Minh họa tương tác giữa Người dùng Web/Telegram, "
+            "Container VieTrueVoice-api, Container VieTrueVoice-bot và luồng kiểm định an ninh In-Memory.",
             width_inches=6.2,
         )
 
@@ -691,7 +691,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
             (
                 "3. **AWS Academy Cloud Architecting**\n*(Cô lập Mạng VPC, Healthcheck & Tự phục hồi)*",
                 "Phân tầng mạng riêng tư (`Private Subnet`), tự động kiểm tra sức khỏe (`Healthcheck`), tự khởi động lại khi gặp sự cố và hạ tầng dưới dạng mã (`IaC`).",
-                "Cô lập giao tiếp giữa `vitruevoice-bot` và `vitruevoice-api` trong **mạng Docker Bridge nội bộ**; gắn `HEALTHCHECK /health` chu kỳ 30s và cơ chế `restart: unless-stopped`.",
+                "Cô lập giao tiếp giữa `VieTrueVoice-bot` và `VieTrueVoice-api` trong **mạng Docker Bridge nội bộ**; gắn `HEALTHCHECK /health` chu kỳ 30s và cơ chế `restart: unless-stopped`.",
                 "`scripts/aws_deploy_ec2.sh`: Kịch bản tự động hóa (`IaC` Bash 6 bước) sẵn sàng triển khai lên máy chủ GPU `EC2 g4dn.xlarge` (`NVIDIA T4`) kèm NVIDIA Container Toolkit khi cần mở rộng.",
             ),
         ],
@@ -730,7 +730,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
         doc,
         "Theo **Luật Bảo vệ Dữ liệu Cá nhân số `91/2025/QH15`** và **Nghị định `356/2025/NĐ-CP`**, dữ liệu giọng nói tự nhiên của công dân thuộc nhóm "
         "**Dữ liệu cá nhân nhạy cảm (Sinh trắc học)**. Nếu một hệ thống chống lừa đảo lại tự ý lưu trữ bản ghi âm người dùng trên máy chủ, chính máy chủ đó "
-        "sẽ trở thành kho nguyên liệu cho tin tặc đánh cắp làm giọng giả! ViTrueVoice khóa cứng 4 hàng rào an ninh tuân thủ:",
+        "sẽ trở thành kho nguyên liệu cho tin tặc đánh cắp làm giọng giả! VieTrueVoice khóa cứng 4 hàng rào an ninh tuân thủ:",
     )
     add_bullet_item(
         doc,
@@ -760,7 +760,7 @@ def add_chapters_7_to_9(doc, figs: dict | None = None) -> None:
     add_callout_box(
         doc,
         "Khi Hội đồng hỏi: **\"Đề tài yêu cầu áp dụng kiến thức gói A AWS nhưng hệ thống lại chạy miễn phí 0 VNĐ trên máy cục bộ, vậy nhóm đã áp dụng cụ thể ở đâu?\"**, "
-        "hãy trả lời tự tin 2 vế rõ ràng: *\"Dạ thưa Thầy/Cô, để bảo đảm chi phí vận hành thực tế đúng `0 VNĐ` cho đồ án sinh viên, cụm `vitruevoice-api` và `vitruevoice-bot` "
+        "hãy trả lời tự tin 2 vế rõ ràng: *\"Dạ thưa Thầy/Cô, để bảo đảm chi phí vận hành thực tế đúng `0 VNĐ` cho đồ án sinh viên, cụm `VieTrueVoice-api` và `VieTrueVoice-bot` "
         "chạy hoàn toàn cục bộ trên Docker Compose; tuy nhiên chúng em đã áp dụng trọn vẹn cả 3 khóa AWS Academy Gói A vào chính cấu trúc Docker này và bộ khuôn mẫu `Cloud-Ready` đi kèm: "
         "(1) **Cloud Foundations**: đóng gói phi trạng thái và tính bảng TCO tại `deploy/aws/pricing_calculator_w08.md`; "
         "(2) **Cloud Security Foundations**: container `appuser` non-root, volume trọng số chỉ đọc `:ro`, tách bí mật `.env`, `iam_policy.json` đặc quyền tối thiểu và `s3_lifecycle_policy.json` tự hủy sau 24 giờ; "

@@ -1,5 +1,5 @@
 /**
- * ViTrueVoice v0.9.4 — Real HD Canvas Forensic Charts Renderer
+ * VieTrueVoice v0.9.4 — Real HD Canvas Forensic Charts Renderer
  * Renders 4 scientific visualizations directly from backend `response.forensics`
  * (ZERO mock data):
  *   1. Mel-Spectrogram Heatmap (Magma/Thermal LUT + Slaney 3.4kHz & 4.0kHz cutoffs)
@@ -718,7 +718,7 @@
     });
   }
 
-  window.ViTrueVoiceCharts = {
+  window.VieTrueVoiceCharts = {
     renderMelSpectrogram: renderMelSpectrogram,
     renderWaveform: renderWaveform,
     renderWindowVetoChart: renderWindowVetoChart,

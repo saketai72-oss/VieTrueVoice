@@ -25,7 +25,7 @@ def _extract_legacy_v8_0_report(inv_report_path: Path) -> dict[str, Any] | None:
     existing = _load_json(inv_report_path)
     if "v8_0_legacy_report" in existing and isinstance(existing["v8_0_legacy_report"], dict):
         return existing["v8_0_legacy_report"]
-    if str(existing.get("model_version", "")).startswith("ViTrueVoice B_zalo V8 Inverted"):
+    if str(existing.get("model_version", "")).startswith("VieTrueVoice B_zalo V8 Inverted"):
         return existing
     return None
 
@@ -111,7 +111,7 @@ def build_all_reports(root: Path = ROOT) -> tuple[Path, Path, Path]:
 
     inv_report: dict[str, Any] = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "model_version": "ViTrueVoice B_zalo V8.1 Inverted Dual-Seen (Full 6,445 OmniVoice)",
+        "model_version": "VieTrueVoice B_zalo V8.1 Inverted Dual-Seen (Full 6,445 OmniVoice)",
         "seen_tts": ["F5-TTS", "OmniVoice CFM (VoiceStudio)"],
         "unseen_tts": ["VieNeu-TTS v3 Turbo"],
         "winning_model": winning_name,
@@ -187,7 +187,7 @@ def build_all_reports(root: Path = ROOT) -> tuple[Path, Path, Path]:
     pool_path = bench / "v8_pooling_ablation_report.json"
     pool_report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "model_version": "ViTrueVoice B_zalo V8.1",
+        "model_version": "VieTrueVoice B_zalo V8.1",
         "winning_model": winning_name,
         "winning_checkpoint": winning_ckpt_v8_1,
         "promoted_production_checkpoint": promoted_prod_ckpt,

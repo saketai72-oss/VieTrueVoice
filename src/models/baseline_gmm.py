@@ -1,4 +1,4 @@
-"""Baseline LFCC + GMM cho ViTrueVoice.
+"""Baseline LFCC + GMM cho VieTrueVoice.
 
 Quy ước: bonafide = 1, spoof = 0; điểm cao = giống bonafide.
 Điểm = trung bình theo khung của log P(x|bona) - log P(x|spoof).

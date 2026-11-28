@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quy trình huấn luyện và đánh giá mô hình ViTrueVoice V8 Hoán Đổi (Inverted Generalization).
+"""Quy trình huấn luyện và đánh giá mô hình VieTrueVoice V8 Hoán Đổi (Inverted Generalization).
 
 Seen TTS:   F5-TTS + OmniVoice CFM (VoiceStudio)
 Unseen TTS: VieNeu-TTS v3 Turbo
@@ -371,7 +371,7 @@ def update_server_default_checkpoint(new_ckpt_path: str) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ViTrueVoice V8 Inverted Generalization Dual Training & 4-Gate Evaluation")
+    parser = argparse.ArgumentParser(description="VieTrueVoice V8 Inverted Generalization Dual Training & 4-Gate Evaluation")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--accum-steps", type=int, default=2)

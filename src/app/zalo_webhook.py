@@ -1,4 +1,4 @@
-"""Zalo Official Account (OA) Webhook integration for ViTrueVoice anti-spoofing verification.
+"""Zalo Official Account (OA) Webhook integration for VieTrueVoice anti-spoofing verification.
 
 Implements official Zalo for Developers OpenAPI v3.0 specs:
 1. HMAC-SHA256 webhook signature validation.
@@ -74,7 +74,7 @@ def build_zalo_reply_message(
     """Construct a clear, fraud-preventing response message for Zalo chat users."""
     if is_bonafide:
         return (
-            "🛡️ [ViTrueVoice] KẾT QUẢ: GIỌNG NÓI THẬT (BONAFIDE)\n\n"
+            "🛡️ [VieTrueVoice] KẾT QUẢ: GIỌNG NÓI THẬT (BONAFIDE)\n\n"
             f"• Điểm phân định: {raw_score:+.4f} (Ngưỡng: {threshold:+.4f})\n"
             f"• Phân tích đa cửa sổ: {n_windows} cửa sổ trượt (Max-Pooling)\n"
             f"• Độ tin cậy: {confidence_str}\n"
@@ -84,7 +84,7 @@ def build_zalo_reply_message(
         )
     else:
         return (
-            "🚨 [ViTrueVoice] CẢNH BÁO LỪA ĐẢO: ĐÂY LÀ GIỌNG NÓI GIẢ MẠO (SPOOF)\n\n"
+            "🚨 [VieTrueVoice] CẢNH BÁO LỪA ĐẢO: ĐÂY LÀ GIỌNG NÓI GIẢ MẠO (SPOOF)\n\n"
             f"• Điểm phân định: {raw_score:+.4f} (Ngưỡng: {threshold:+.4f})\n"
             f"• Phân tích đa cửa sổ: {n_windows} cửa sổ trượt (Max-Pooling)\n"
             f"• Độ tin cậy phát hiện: {confidence_str}\n"

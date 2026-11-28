@@ -1,15 +1,15 @@
 r"""
-Script to build the Comprehensive Technical & Defense Handbook v2 (DOCX & PDF) for ViTrueVoice:
+Script to build the Comprehensive Technical & Defense Handbook v2 (DOCX & PDF) for VieTrueVoice:
 Title: SỔ TAY KỸ THUẬT CHUYÊN SÂU TOÀN DIỆN & CẨM NANG PHẢN BIỆN HỘI ĐỒNG — PHIÊN BẢN 2.0 (V2.0)
 Topic: Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát
 Student: Nguyễn Thành Tài - MSSV: 2380601959 - Lớp: 23DTHD5 - HUTECH
 Instructor: TS. Nguyễn Quang Trung
 
 Output destinations:
-- C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx
-- C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.pdf
-- C:\Users\saket\Documents\Đồ án chuyên ngành\Content\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx
-- C:\Users\saket\Documents\Đồ án chuyên ngành\Content\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.pdf
+- C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.docx
+- C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.pdf
+- C:\Users\saket\Documents\Đồ án chuyên ngành\Content\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.docx
+- C:\Users\saket\Documents\Đồ án chuyên ngành\Content\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.pdf
 """
 
 from __future__ import annotations
@@ -45,8 +45,8 @@ from scripts.handbook_generator.styles import (  # noqa: E402
 OUTPUT_DIR_1 = Path(r"C:\Users\saket\Documents\Đồ án chuyên ngành")
 OUTPUT_DIR_2 = Path(r"C:\Users\saket\Documents\Đồ án chuyên ngành\Content")
 
-DOCX_NAME_V2 = "SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx"
-PDF_NAME_V2 = "SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.pdf"
+DOCX_NAME_V2 = "SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.docx"
+PDF_NAME_V2 = "SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.pdf"
 
 OUTPUT_DOCX_1 = OUTPUT_DIR_1 / DOCX_NAME_V2
 OUTPUT_DOCX_2 = OUTPUT_DIR_2 / DOCX_NAME_V2
@@ -98,7 +98,7 @@ def build_document_v2():
         add_styled_paragraph(
             doc,
             "SỔ TAY KỸ THUẬT CHUYÊN SÂU TOÀN DIỆN & CẨM NANG PHẢN BIỆN HỘI ĐỒNG — PHIÊN BẢN 2.0 (CHUẨN v0.9.4)\n"
-            "HỆ THỐNG PHÁT HIỆN GIỌNG NÓI GIẢ TIẾNG VIỆT QUA KÊNH THOẠI NÉN DỰA TRÊN HỌC BIỂU DIỄN TỰ GIÁM SÁT (VITRUEVOICE)",
+            "HỆ THỐNG PHÁT HIỆN GIỌNG NÓI GIẢ TIẾNG VIỆT QUA KÊNH THOẠI NÉN DỰA TRÊN HỌC BIỂU DIỄN TỰ GIÁM SÁT (VieTrueVoice)",
             font_size=13.5,
             bold=True,
             color_rgb=(192, 0, 0),
@@ -121,7 +121,7 @@ def build_document_v2():
         meta_info = [
             (
                 "Tên đề tài:",
-                "Hệ thống phát hiện giọng nói giả tiếng Việt hỗ trợ phòng chống lừa đảo mạo danh cuộc gọi và tin nhắn thoại (ViTrueVoice)",
+                "Hệ thống phát hiện giọng nói giả tiếng Việt hỗ trợ phòng chống lừa đảo mạo danh cuộc gọi và tin nhắn thoại (VieTrueVoice)",
             ),
             (
                 "Sinh viên thực hiện:",
@@ -135,7 +135,7 @@ def build_document_v2():
             (
                 "Phiên bản hệ thống:",
                 (
-                    "ViTrueVoice v0.9.4 (`out/v0.9.4/best_model.pt`, Symmetric 6.445 OmniVoice CFM, Head-Calibration `head_blend_a0.75`, "
+                    "VieTrueVoice v0.9.4 (`out/v0.9.4/best_model.pt`, Symmetric 6.445 OmniVoice CFM, Head-Calibration `head_blend_a0.75`, "
                     "`Consensus Asymmetric Veto`, `Platt Scaling T=16.0`, Docker cục bộ 0 VNĐ chuẩn AWS Gói A, 392/392 CI Tests 100% Green)"
                 ),
             ),
@@ -179,7 +179,7 @@ def build_document_v2():
 
         add_callout_box(
             doc,
-            "Sổ tay Phiên bản 2.0 đã được **đồng bộ toàn diện 100% với mô hình phát hành `ViTrueVoice v0.9.4`** xuyên suốt từ Phần Mở đầu "
+            "Sổ tay Phiên bản 2.0 đã được **đồng bộ toàn diện 100% với mô hình phát hành `VieTrueVoice v0.9.4`** xuyên suốt từ Phần Mở đầu "
             "tới hết Chương 13 (không còn lẫn số liệu hay câu lệnh của các phiên bản cũ). Để giúp sinh viên học chắc từ gốc và phản biện "
             "thuyết phục trước Hội đồng, tài liệu bổ sung đồng loạt 4 trang bị sư phạm:\n"
             "• **Hộp Kiến thức Nền tảng (🧭)** đặt ngay trước mỗi quy trình kỹ thuật giải thích *vì sao cần bước đó* bằng ví dụ đời thực.\n"

@@ -4,7 +4,7 @@ Mô phỏng quy trình thực tế của Zalo for Developers:
 1. Khởi động máy chủ tạm thời để cung cấp luồng âm thanh thử nghiệm.
 2. Tạo bản tin Webhook chuẩn Zalo OA (sự kiện: user_send_audio).
 3. Ký chữ ký HMAC-SHA256 hợp lệ với Zalo App Secret.
-4. Gửi tới máy chủ ViTrueVoice (POST /api/v1/zalo/webhook).
+4. Gửi tới máy chủ VieTrueVoice (POST /api/v1/zalo/webhook).
 5. In kết quả phân định, độ tin cậy Platt Scaling và nội dung phản hồi Zalo.
 """
 
@@ -61,7 +61,7 @@ def get_host_ip() -> str:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Mô phỏng gửi tin nhắn thoại Zalo Webhook tới ViTrueVoice")
+    parser = argparse.ArgumentParser(description="Mô phỏng gửi tin nhắn thoại Zalo Webhook tới VieTrueVoice")
     parser.add_argument(
         "--audio",
         default="data/bonafide_ref/SPK_0004/SPK_0004_01.wav",
@@ -70,11 +70,11 @@ def main():
     parser.add_argument(
         "--endpoint",
         default="http://localhost:8000/api/v1/zalo/webhook",
-        help="URL Webhook của ViTrueVoice",
+        help="URL Webhook của VieTrueVoice",
     )
     parser.add_argument(
         "--secret",
-        default=os.getenv("ZALO_APP_SECRET", "vitruevoice_zalo_secret_demo"),
+        default=os.getenv("ZALO_APP_SECRET", "VieTrueVoice_zalo_secret_demo"),
         help="Zalo App Secret để ký HMAC",
     )
     args = parser.parse_args()
@@ -112,7 +112,7 @@ def main():
             "id": "zalo_user_demo_001"
         },
         "recipient": {
-            "id": "oa_vitruevoice_official"
+            "id": "oa_VieTrueVoice_official"
         },
         "event_name": "user_send_audio",
         "message": {
@@ -152,7 +152,7 @@ def main():
     if resp.status_code == 200:
         res_json = resp.json()
         print("\n" + "=" * 65)
-        print("📥 KẾT QUẢ PHẢN HỒI TỪ VITRUEVOICE ZALO WEBHOOK:")
+        print("📥 KẾT QUẢ PHẢN HỒI TỪ VieTrueVoice ZALO WEBHOOK:")
         print("=" * 65)
         if res_json.get("error") == 0 and "data" in res_json:
             data = res_json["data"]

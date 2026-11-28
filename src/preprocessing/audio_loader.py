@@ -1,4 +1,4 @@
-"""Universal in-memory audio loader for ViTrueVoice (Pha 3).
+"""Universal in-memory audio loader for VieTrueVoice (Pha 3).
 
 Supports:
 - WAV, FLAC, OGG via soundfile fast path

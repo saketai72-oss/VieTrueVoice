@@ -1,4 +1,4 @@
-"""Dataset ViTrueVoice (manifest dạng dài). Nhãn: spoof = 0, bonafide = 1."""
+"""Dataset VieTrueVoice (manifest dạng dài). Nhãn: spoof = 0, bonafide = 1."""
 from __future__ import annotations
 from math import gcd
 from pathlib import Path
@@ -40,7 +40,7 @@ def check_unseen_excluded(df, pattern, name):
         raise ValueError(f"{name}: có {int(hit.sum())} hàng thuộc TTS '{pattern}'")
 
 
-class ViTrueVoiceDataset(Dataset):
+class VieTrueVoiceDataset(Dataset):
     """mode: 'clean' (chỉ clean_16khz), 'augmented' (áp transform khi train=True),
     'eval' (mọi codec, không transform)."""
 

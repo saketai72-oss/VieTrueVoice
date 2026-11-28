@@ -25,7 +25,7 @@ def build_dev_eval_notebook(out_path: Path = Path("deploy_dev_eval/eval_dev.ipyn
             "cell_type": "markdown",
             "metadata": {},
             "source": [
-                "# ViTrueVoice — Đánh Giá Inference-Only Toàn Bộ Tập Dev Seen-Only Trên Kaggle GPU (Version 4 — 16kHz Resampled Pipeline)\n",
+                "# VieTrueVoice — Đánh Giá Inference-Only Toàn Bộ Tập Dev Seen-Only Trên Kaggle GPU (Version 4 — 16kHz Resampled Pipeline)\n",
                 "\n",
                 "Notebook này thực thi quy trình suy luận độc lập (inference-only) trên toàn bộ 6.786 mẫu Dev seen-only bằng Checkpoint B (`best_model_B.pt`).\n",
                 "Đặc biệt: Đường đọc audio chuẩn hóa tần số lấy mẫu chính xác 16.000 Hz (`load_wave`) trước khi fit_length 64.000 mẫu, đảm bảo tính nhất quán (parity) 100% với tập huấn luyện.\n",
@@ -101,14 +101,14 @@ def build_dev_eval_notebook(out_path: Path = Path("deploy_dev_eval/eval_dev.ipyn
             ]
         },
 
-        # Cell 2: Khởi tạo mã nguồn ViTrueVoice
+        # Cell 2: Khởi tạo mã nguồn VieTrueVoice
         {
             "cell_type": "code",
             "execution_count": None,
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 2. Khởi tạo mã nguồn ViTrueVoice trên Kaggle container\n",
+                "# 2. Khởi tạo mã nguồn VieTrueVoice trên Kaggle container\n",
                 "import base64\n",
                 "import zlib\n",
                 "import json\n",
@@ -226,11 +226,11 @@ def build_dev_eval_notebook(out_path: Path = Path("deploy_dev_eval/eval_dev.ipyn
                 "\n",
                 "# Định vị Data ZIP qua rglob + fallback\n",
                 "zip_candidates = (\n",
-                "    list(Path('/kaggle/input').rglob('*vitruevoice*.zip')) +\n",
+                "    list(Path('/kaggle/input').rglob('*VieTrueVoice*.zip')) +\n",
                 "    list(Path('/kaggle/input').rglob('*.zip')) +\n",
                 "    [\n",
-                "        Path('/kaggle/input/vietrue-model-training/vitruevoice_data_processed.zip'),\n",
-                "        Path('vitruevoice_data_processed.zip'),\n",
+                "        Path('/kaggle/input/vietrue-model-training/VieTrueVoice_data_processed.zip'),\n",
+                "        Path('VieTrueVoice_data_processed.zip'),\n",
                 "    ]\n",
                 ")\n",
                 "zip_path = None\n",
@@ -419,7 +419,7 @@ def build_dev_eval_notebook(out_path: Path = Path("deploy_dev_eval/eval_dev.ipyn
                 "    def __getitem__(self, idx):\n",
                 "        row = self.df.iloc[idx]\n",
                 "        p = self.root / row['audio_path'].replace('\\\\', '/')\n",
-                "        # Chuẩn hóa tần số lấy mẫu 16.000 Hz đồng bộ hoàn toàn với ViTrueVoiceDataset\n",
+                "        # Chuẩn hóa tần số lấy mẫu 16.000 Hz đồng bộ hoàn toàn với VieTrueVoiceDataset\n",
                 "        wav = load_wave(p, sr=16000)\n",
                 "        # Cố định chính xác 64.000 mẫu bằng repeat padding\n",
                 "        wav = fit_length(wav, 64000, False, np.random.default_rng(0))\n",

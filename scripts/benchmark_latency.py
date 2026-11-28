@@ -1,4 +1,4 @@
-"""Đo độ trễ chuẩn hóa 30 lần liên tiếp cho dịch vụ suy luận ViTrueVoice.
+"""Đo độ trễ chuẩn hóa 30 lần liên tiếp cho dịch vụ suy luận VieTrueVoice.
 
 Tiêu chuẩn: Trung vị thời gian phản hồi <= 3.0s (NFR1 / Must #3).
 Xuất kết quả: benchmarks/latency_benchmark.csv và log ẩn danh benchmarks/latency_log.json.
@@ -151,7 +151,7 @@ def run_benchmark(
 
 
 def main():
-    p = argparse.ArgumentParser(description="Benchmark độ trễ hệ thống suy luận ViTrueVoice.")
+    p = argparse.ArgumentParser(description="Benchmark độ trễ hệ thống suy luận VieTrueVoice.")
     p.add_argument("--audio", required=True, help="Đường dẫn file âm thanh đo (5-10s)")
     p.add_argument("--iterations", type=int, default=30, help="Số lần lặp (mặc định 30)")
     p.add_argument("--ckpt", default="out/zalo_b_zalo_v5_local/best_model.pt", help="Checkpoint mô hình")

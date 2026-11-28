@@ -1,7 +1,7 @@
 """Đánh giá baseline LFCC+GMM theo codec và theo công cụ TTS.
 
 Quy ước: bonafide = 1, spoof = 0; điểm cao = giống bonafide.
-Hỗ trợ cả manifest dạng "rộng" (mỗi codec một cột) và dạng "dài" (18 cột chuẩn của ViTrueVoice).
+Hỗ trợ cả manifest dạng "rộng" (mỗi codec một cột) và dạng "dài" (18 cột chuẩn của VieTrueVoice).
 """
 from __future__ import annotations
 import argparse
@@ -179,7 +179,7 @@ def main():
                 id_cols = [actual_label_col, actual_speaker_col, actual_tts_col]
                 long = to_long(df, path_cols, id_cols)
             else:
-                # Manifest dạng dài (long format - chuẩn 18 cột của ViTrueVoice)
+                # Manifest dạng dài (long format - chuẩn 18 cột của VieTrueVoice)
                 long = pd.DataFrame()
                 long["path"] = df[a.audio_path_col]
                 long["condition"] = df[a.codec_col]

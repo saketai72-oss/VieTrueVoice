@@ -9,11 +9,15 @@ STATIC_DIR = ROOT / "src" / "app" / "static"
 
 REQUIRED_STATIC_FILES = (
     "index.html",
+    "favicon.ico",
     "css/app.css",
     "js/webgl-orb.js",
     "js/audio-recorder.js",
     "js/charts.js",
     "js/app.js",
+    "assets/logo.svg",
+    "assets/favicon-32x32.png",
+    "assets/apple-touch-icon.png",
     "assets/card_01_zalo_opus.png",
     "assets/card_02_amrnb_cutoff.png",
     "assets/card_03_cfm_comparison.png",
@@ -30,6 +34,8 @@ def test_required_web_ui_assets_exist_and_pngs_valid():
         assert full_path.stat().st_size > 0, f"Empty static Web UI asset: {rel_path}"
 
     for png_name in (
+        "assets/favicon-32x32.png",
+        "assets/apple-touch-icon.png",
         "assets/card_01_zalo_opus.png",
         "assets/card_02_amrnb_cutoff.png",
         "assets/card_03_cfm_comparison.png",
@@ -96,4 +102,6 @@ def test_forensic_overlay_scroll_alignment_and_progressive_clone():
     assert "clone-fake-loading" in index_html
     assert "clone-fake-content" in index_html
     assert "setCloneRightLoading" in app_js
+    assert 'rel="icon" type="image/svg+xml" href="/static/assets/logo.svg"' in index_html
+    assert 'href="/favicon.ico"' in index_html
 

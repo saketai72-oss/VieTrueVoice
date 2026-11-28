@@ -1,4 +1,4 @@
-"""Tiện ích chuẩn hóa văn bản tiếng Việt cho ViTrueVoice.
+"""Tiện ích chuẩn hóa văn bản tiếng Việt cho VieTrueVoice.
 
 Hàm normalize_for_eval CHỈ DÙNG cho:
 1. Tính WER/CER ở Gate 1 ASR (tránh lỗi lệch dấu thanh hoà/hòa, khoẻ/khỏe).

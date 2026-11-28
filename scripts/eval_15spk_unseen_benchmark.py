@@ -1,4 +1,4 @@
-"""Kịch bản đánh giá toàn diện mô hình ViTrueVoice B_zalo V7 trên tập Unseen TTS quy mô lớn (15 người nói).
+"""Kịch bản đánh giá toàn diện mô hình VieTrueVoice B_zalo V7 trên tập Unseen TTS quy mô lớn (15 người nói).
 Đo đạc ma trận suy giảm (Degradation Analysis):
 - Seen TTS: F5-TTS, VieNeu-TTS (192 clean + 768 codecs = 960 clips mỗi loại).
 - Unseen TTS: VoiceStudio CFM (OmniVoice, 193 clean + 772 codecs = 965 clips).

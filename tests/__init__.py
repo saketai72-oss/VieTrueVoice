@@ -1,1 +1,1 @@
-"""Test suite for ViTrueVoice."""
+"""Test suite for VieTrueVoice."""

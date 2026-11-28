@@ -1,5 +1,5 @@
 /**
- * ViTrueVoice v0.9.4 — Main Forensic Editorial & Studio Application Controller
+ * VieTrueVoice v0.9.4 — Main Forensic Editorial & Studio Application Controller
  * Connects:
  *   - Cinematic Preloader (00 -> 100 wipe)
  *   - Lenis Smooth Scroll + GSAP ScrollTrigger (Clip-Path Cinema Reveal + Sticky Cards)
@@ -628,17 +628,17 @@
   }
 
   function renderPredictCharts(data) {
-    if (!data || !window.ViTrueVoiceCharts) return;
+    if (!data || !window.VieTrueVoiceCharts) return;
     const f = data.forensics || {};
     const verdict = data.prediction || 'SPOOF';
     const isBorderline = Boolean(data.is_borderline);
 
-    window.ViTrueVoiceCharts.renderMelSpectrogram(
+    window.VieTrueVoiceCharts.renderMelSpectrogram(
       $('chart-predict-mel'),
       f.mel_spectrogram,
       { durationSec: f.duration_sec, compact: false }
     );
-    window.ViTrueVoiceCharts.renderWaveform(
+    window.VieTrueVoiceCharts.renderWaveform(
       $('chart-predict-wave'),
       f.waveform,
       {
@@ -649,14 +649,14 @@
         compact: false,
       }
     );
-    window.ViTrueVoiceCharts.renderWindowVetoChart(
+    window.VieTrueVoiceCharts.renderWindowVetoChart(
       $('chart-predict-windows'),
       f.windows,
       f.pooling,
       data.threshold,
       { compact: false }
     );
-    window.ViTrueVoiceCharts.renderPlattAndBands(
+    window.VieTrueVoiceCharts.renderPlattAndBands(
       $('chart-predict-platt'),
       data.raw_score,
       data.threshold,
@@ -977,45 +977,45 @@
   }
 
   function renderCloneBonaCharts(bona) {
-    if (!bona || !window.ViTrueVoiceCharts) return;
+    if (!bona || !window.VieTrueVoiceCharts) return;
     const fb = bona.forensics || {};
-    window.ViTrueVoiceCharts.renderWaveform($('chart-clone-bona-wave'), fb.waveform, {
+    window.VieTrueVoiceCharts.renderWaveform($('chart-clone-bona-wave'), fb.waveform, {
       verdict: bona.prediction || 'BONA_FIDE',
       isBorderline: Boolean(bona.is_borderline),
       durationSec: fb.duration_sec || bona.duration_s,
       peakDb: fb.peak_db,
       compact: true,
     });
-    window.ViTrueVoiceCharts.renderMelSpectrogram($('chart-clone-bona-mel'), fb.mel_spectrogram, {
+    window.VieTrueVoiceCharts.renderMelSpectrogram($('chart-clone-bona-mel'), fb.mel_spectrogram, {
       durationSec: fb.duration_sec || bona.duration_s,
       compact: true,
     });
-    window.ViTrueVoiceCharts.renderWindowVetoChart($('chart-clone-bona-windows'), fb.windows, fb.pooling, bona.threshold, {
+    window.VieTrueVoiceCharts.renderWindowVetoChart($('chart-clone-bona-windows'), fb.windows, fb.pooling, bona.threshold, {
       compact: true,
     });
   }
 
   function renderCloneFakeCharts(fake) {
-    if (!fake || !window.ViTrueVoiceCharts) return;
+    if (!fake || !window.VieTrueVoiceCharts) return;
     const ff = fake.forensics || {};
-    window.ViTrueVoiceCharts.renderWaveform($('chart-clone-fake-wave'), ff.waveform, {
+    window.VieTrueVoiceCharts.renderWaveform($('chart-clone-fake-wave'), ff.waveform, {
       verdict: fake.prediction || 'SPOOF',
       isBorderline: Boolean(fake.is_borderline),
       durationSec: ff.duration_sec || fake.duration_s,
       peakDb: ff.peak_db,
       compact: true,
     });
-    window.ViTrueVoiceCharts.renderMelSpectrogram($('chart-clone-fake-mel'), ff.mel_spectrogram, {
+    window.VieTrueVoiceCharts.renderMelSpectrogram($('chart-clone-fake-mel'), ff.mel_spectrogram, {
       durationSec: ff.duration_sec || fake.duration_s,
       compact: true,
     });
-    window.ViTrueVoiceCharts.renderWindowVetoChart($('chart-clone-fake-windows'), ff.windows, ff.pooling, fake.threshold, {
+    window.VieTrueVoiceCharts.renderWindowVetoChart($('chart-clone-fake-windows'), ff.windows, ff.pooling, fake.threshold, {
       compact: true,
     });
   }
 
   function renderCloneCharts(data) {
-    if (!data || !window.ViTrueVoiceCharts) return;
+    if (!data || !window.VieTrueVoiceCharts) return;
     if (data.bonafide) renderCloneBonaCharts(data.bonafide);
     if (data.clone) renderCloneFakeCharts(data.clone);
   }
@@ -1248,7 +1248,7 @@
   // 10. Wire Mic Recorders (Tab 01 & Tab 02), Drag-Drop, Health & Events
   // =========================================================================
   function initRecorders() {
-    if (typeof window.ViTrueVoiceRecorder === 'undefined') return;
+    if (typeof window.VieTrueVoiceRecorder === 'undefined') return;
 
     // Tab 01 Mic Recorder (auto-submits to POST /api/v1/predict when stopped!)
     const btnMic1 = $('btn-predict-mic');
@@ -1256,7 +1256,7 @@
     const db1 = $('predict-mic-db');
     const meter1 = $('predict-mic-meter-fill');
 
-    state.predictRecorder = new window.ViTrueVoiceRecorder({
+    state.predictRecorder = new window.VieTrueVoiceRecorder({
       onStateChange: function (st) {
         if (!btnMic1) return;
         if (st === 'recording') {
@@ -1300,7 +1300,7 @@
     const db2 = $('clone-mic-db');
     const meter2 = $('clone-mic-meter-fill');
 
-    state.cloneRecorder = new window.ViTrueVoiceRecorder({
+    state.cloneRecorder = new window.VieTrueVoiceRecorder({
       onStateChange: function (st) {
         if (!btnMic2) return;
         if (st === 'recording') {

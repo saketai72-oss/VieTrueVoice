@@ -1,6 +1,6 @@
 """
 Styling, native Word OMML equation builders, pedagogical boxes, and figure helpers
-for the ViTrueVoice v0.9.4 Defense & Study Handbook.
+for the VieTrueVoice v0.9.4 Defense & Study Handbook.
 """
 
 from __future__ import annotations

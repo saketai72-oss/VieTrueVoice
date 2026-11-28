@@ -3,7 +3,7 @@ r"""
 Script to generate the official Week 6 (W06) report document strictly adhering to LMS HUTECH rubric:
 Course: CMP436 - Đồ án chuyên ngành CNTT (HUTECH)
 Student: Nguyễn Thành Tài - MSSV: 2380601959 - Lớp: 23DTHD5
-Topic: ViTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
+Topic: VieTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
 Target path: C:\Users\saket\Documents\Đồ án chuyên ngành\Content\DACN_2380601959_NguyenThanhTai_W06.docx
 """
 
@@ -134,9 +134,9 @@ def main():
         ("Họ và tên", "Nguyễn Thành Tài"),
         ("MSSV · Lớp", "2380601959 · 23DTHD5"),
         ("GVHD", "TS. Nguyễn Quang Trung"),
-        ("Tên đề tài", "Phát triển ViTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát"),
+        ("Tên đề tài", "Phát triển VieTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát"),
         ("Link repo GitHub (bắt buộc dán LMS)", "https://github.com/saketai72-oss/VieTrueVoice"),
-        ("Link Web Demo & Bot (bắt buộc dán LMS)", "Web Forensics: http://localhost:8000 · Telegram Bot: https://t.me/vitruevoice_bot (@vitruevoice_bot)\n==[TÙY CHỌN BỔ SUNG: Nếu có link video demo Google Drive hoặc YouTube không công khai, dán bổ sung tại đây (nếu không có, link Web và Bot ở trên đã đầy đủ 100%)]=="),
+        ("Link Web Demo & Bot (bắt buộc dán LMS)", "Web Forensics: http://localhost:8000 · Telegram Bot: https://t.me/VieTrueVoice_bot (@VieTrueVoice_bot)\n==[TÙY CHỌN BỔ SUNG: Nếu có link video demo Google Drive hoặc YouTube không công khai, dán bổ sung tại đây (nếu không có, link Web và Bot ở trên đã đầy đủ 100%)]=="),
         ("Link Commit W06 chính thức", "https://github.com/saketai72-oss/VieTrueVoice/commit/56a5241 (Chuỗi commit [AI] nâng cấp Iconify Solar, Multi-window Max-Pooling, Dither isolation, Docker rebuild)"),
         ("Hạn nộp & Báo cáo", "Hạn nộp: trước 12:00 thứ Sáu 20/11/2026 · Buổi báo cáo & vấn đáp: 13:30–16:30 thứ Sáu 20/11/2026"),
         ("Tên file nộp", "DACN_2380601959_NguyenThanhTai_W06.pdf (xuất trực tiếp từ file Word này)"),
@@ -183,7 +183,7 @@ def main():
          "Đã mở rộng ma trận kiểm định Giả thuyết H2 trên 5 tình nguyện viên đối chứng held-out bằng 4 hệ thống TTS (F5-TTS, VieNeu-TTS, Kokoro-Vietnamese StyleTTS2, OmniVoice CFM VoiceStudio) với 1.584 clips âm thanh. Đo đạc mức suy giảm: EER chỉ tăng nhẹ +2.54% (13.33% -> 15.87%) và Pass Rate giảm khiêm tốn -6.40% (79.73% -> 73.33%), chứng minh độ bền vững cao của mô hình B_zalo V6.",
          "Mục 4.3 & Chương 3 (Bảng 3.2)"),
         ("2. Đóng gói sản phẩm chạy Docker 1-lệnh & Chuẩn hóa giao diện Web", 
-         "Đã nâng cấp toàn diện giao diện Web Gradio sang hệ thống Iconify Solar icons framework SVG chuẩn phòng Lab Forensics (độ tương phản WCAG AAA, Dual Theme 1-click không xung đột). Đóng gói toàn bộ hệ thống vào docker-compose.yml gồm 2 containers: vitruevoice-api (FastAPI + Gradio port 8000) và vitruevoice-bot (Telegram Daemon).",
+         "Đã nâng cấp toàn diện giao diện Web Gradio sang hệ thống Iconify Solar icons framework SVG chuẩn phòng Lab Forensics (độ tương phản WCAG AAA, Dual Theme 1-click không xung đột). Đóng gói toàn bộ hệ thống vào docker-compose.yml gồm 2 containers: VieTrueVoice-api (FastAPI + Gradio port 8000) và VieTrueVoice-bot (Telegram Daemon).",
          "Mục 4.1 (Hình 3.2, Hình 3.3)"),
         ("3. Soạn thảo bản nháp Chương 3 (Thiết kế hệ thống 3–6 trang)", 
          "Đã hoàn thành bản nháp Chương 3 đầy đủ 3 mục trọng tâm theo đúng yêu cầu đề bài: (3.1) Phân tích và thiết kế hệ thống (Use case, C4 Level 2 Container Diagram, Bảng thành phần kiến trúc), (3.2) Cài đặt các tính năng (In-memory Zero-Persistence, Multi-window Max-Pooling, Web/Bot, Live VoiceStudio CFM Cloning), (3.3) Kiểm thử hệ thống (TDD unit tests, E2E Playwright, Ma trận Unseen TTS, Độ trễ NFR-1). Đánh số hình/bảng chuẩn theo chương.",
@@ -233,14 +233,14 @@ def main():
          "• Thứ Hai 16/11: Khảo sát và tích hợp 2 công cụ Unseen TTS: Kokoro-Vietnamese (StyleTTS2 24kHz) và VoiceStudio (OmniVoice CFM). Sinh 750 tệp âm thanh giả độc lập qua 4 codec viễn thông/Zalo tuân thủ Hard Text-Disjoint. (Commit [AI] feat(unseen): add Kokoro and OmniVoice pipelines).\n"
          "• Thứ Ba 17/11: Chạy benchmark đối chứng Seen vs Unseen TTS trên 1.584 clips âm thanh. Xác nhận EER Seen = 6.80% (đạt KPI <= 8%), EER Unseen CFM = 14.67% (chính thức vượt trần KPI H2 <= 15.0%). (File benchmarks/seen_vs_unseen_degradation_v7.json).\n"
          "• Thứ Tư 18/11: Nâng cấp toàn diện Web Gradio sang Iconify Solar icons framework SVG, sửa triệt để lỗi xung đột DOM nhãn Mel-Spectrogram và nút theme. Viết bổ sung 8 unit tests Playwright kiểm thử DOM. (Commit [AI] feat(ui): upgrade to Iconify Solar icons framework).\n"
-         "• Thứ Năm 19/11: Chẩn đoán bóc tách 2 lỗi kỹ thuật: (1) Cô lập cờ apply_dither=False cho audio nhân tạo, giải quyết hiện tượng False Negative điểm lật dương +23.45 thành -16.69 (Spoof); (2) Bổ sung pipeline chuẩn hóa audio mic WebRTC 48kHz về 16kHz PCM_16 và trim khoảng lặng top_db=25 khôi phục giọng to rõ (RMS 0.1712). Đóng gói và rebuild Docker Compose đa container (vitruevoice-api port 8000 và vitruevoice-bot). (Commit 48e67d7 & 56a5241).\n"
+         "• Thứ Năm 19/11: Chẩn đoán bóc tách 2 lỗi kỹ thuật: (1) Cô lập cờ apply_dither=False cho audio nhân tạo, giải quyết hiện tượng False Negative điểm lật dương +23.45 thành -16.69 (Spoof); (2) Bổ sung pipeline chuẩn hóa audio mic WebRTC 48kHz về 16kHz PCM_16 và trim khoảng lặng top_db=25 khôi phục giọng to rõ (RMS 0.1712). Đóng gói và rebuild Docker Compose đa container (VieTrueVoice-api port 8000 và VieTrueVoice-bot). (Commit 48e67d7 & 56a5241).\n"
          "• Thứ Sáu 20/11: Đo đạc độ trễ NFR-1 với Multi-window Max-Pooling đạt P50 = 66.3ms (nhanh gấp 45 lần trần 3.0s); hoàn thiện bản nháp Chương 3 (Thiết kế hệ thống 6 trang) và biên tập Báo cáo W06."),
         ("Minh chứng / link\n(Commit, PR, ảnh chụp có ngày giờ, video)",
          "• Link GitHub Repo: https://github.com/saketai72-oss/VieTrueVoice\n"
-         "• Commit W06: 56a5241 - [AI] build(docker): rebuild and verify vitruevoice-api container with preset volume mounts\n"
+         "• Commit W06: 56a5241 - [AI] build(docker): rebuild and verify VieTrueVoice-api container with preset volume mounts\n"
          "• Ảnh minh chứng kiến trúc C4 Container Diagram: C4.png (Hình 3.1)\n"
          "• Ảnh minh chứng Docker port 8000 Healthy & Web Forensics: live_docker_port8000.png (Hình 3.2)\n"
-         "• Ảnh minh chứng Telegram Bot (@vitruevoice_bot) tương tác: telegram_bot_real_screenshot.png (Hình 3.3)\n"
+         "• Ảnh minh chứng Telegram Bot (@VieTrueVoice_bot) tương tác: telegram_bot_real_screenshot.png (Hình 3.3)\n"
          "• Ảnh minh chứng Phòng Lab Live VoiceStudio CFM Cloning 2 chiều: live_clone_verified.png (Hình 3.4)\n"
          "==• [TÙY CHỌN BỔ SUNG]: Link video quay màn hình chạy demo (nếu có): https://...=="),
         ("Khó khăn\n(Điều đang vướng và cách em đã thử)",
@@ -346,11 +346,11 @@ def main():
     # 4.1 Tính năng #3 chạy đầu-cuối
     add_heading_2(doc, "4.1 Tính năng #3 chạy đầu-cuối: Dịch vụ kiểm tra đoạn thoại nghi ngờ")
     add_styled_paragraph(doc, 
-        "Hệ thống ViTrueVoice đã hoàn tất trọn vẹn và đóng gói hoàn chỉnh Tính năng #3 (Dịch vụ kiểm tra đoạn thoại nghi ngờ đầu-cuối), sẵn sàng vận hành trên thực tế qua 3 kênh giao tiếp đồng bộ:\n"
+        "Hệ thống VieTrueVoice đã hoàn tất trọn vẹn và đóng gói hoàn chỉnh Tính năng #3 (Dịch vụ kiểm tra đoạn thoại nghi ngờ đầu-cuối), sẵn sàng vận hành trên thực tế qua 3 kênh giao tiếp đồng bộ:\n"
         "• **Kênh 1: Giao diện Web Forensics (Gradio 5.x)**: Trải nghiệm tối giản <= 3 thao tác cho người cao tuổi (Kéo thả file -> Bấm kiểm tra -> Xem kết quả nhãn màu xanh/đỏ to rõ kèm độ tin cậy Platt Scaling %). Đồng thời cung cấp Chế độ 2 (Phòng Lab Live VoiceStudio CFM Cloning) cho phép thu âm giọng nói trực tiếp, nhân bản tức thì và đối chứng thật/giả 2 chiều thời gian thực.\n"
-        "• **Kênh 2: Telegram Bot (@vitruevoice_bot)**: Kênh tương tác tức thời cho phép người dùng chuyển tiếp (forward) tin nhắn thoại nghi ngờ nhận được trong Zalo/Telegram; bot phản hồi kết quả trong vòng 1.1–1.3 giây kèm nhãn cảnh báo trực quan.\n"
+        "• **Kênh 2: Telegram Bot (@VieTrueVoice_bot)**: Kênh tương tác tức thời cho phép người dùng chuyển tiếp (forward) tin nhắn thoại nghi ngờ nhận được trong Zalo/Telegram; bot phản hồi kết quả trong vòng 1.1–1.3 giây kèm nhãn cảnh báo trực quan.\n"
         "• **Kênh 3: REST API FastAPI (`/api/v1/predict`)**: Endpoint xử lý dữ liệu in-memory stream qua RAM, trích xuất tensor đa cửa sổ và trả về JSON kết quả có mã băm SHA-256 ẩn danh trong vòng 66.3ms.\n"
-        "• **Đóng gói Docker Compose 1-lệnh (`docker compose up -d`)**: Quản lý song song 2 containers `vitruevoice-api` (cổng 8000) và `vitruevoice-bot` (Telegram daemon) vận hành ổn định và đạt chuẩn bảo mật CIS Docker Benchmark."
+        "• **Đóng gói Docker Compose 1-lệnh (`docker compose up -d`)**: Quản lý song song 2 containers `VieTrueVoice-api` (cổng 8000) và `VieTrueVoice-bot` (Telegram daemon) vận hành ổn định và đạt chuẩn bảo mật CIS Docker Benchmark."
     )
 
     # 4.2 Bảng >= 10 Test Cases chi tiết
@@ -573,7 +573,7 @@ def main():
     add_heading_2(doc, "3.1 Phân tích và thiết kế hệ thống")
     add_styled_paragraph(doc, 
         "**3.1.1 Phân tích yêu cầu và Ca sử dụng (Use Cases)**:\n"
-        "Hệ thống ViTrueVoice phục vụ hai nhóm đối tượng tác nhân (Actors) chính:\n"
+        "Hệ thống VieTrueVoice phục vụ hai nhóm đối tượng tác nhân (Actors) chính:\n"
         "• *Người dùng cuối (Phụ huynh, người lớn tuổi)*: Cần một công cụ kiểm chứng âm thanh nhanh gọn, thao tác cực kỳ đơn giản (<= 3 thao tác), không đòi hỏi kiến thức kỹ thuật, hiển thị kết quả Thật/Giả to rõ kèm độ tin cậy phần trăm trực quan.\n"
         "• *Chuyên viên phân tích âm thanh số (Forensics Analyst)*: Cần xem xét các biểu đồ khoa học chuyên sâu: Mel-Spectrogram phân tích dải tần vocoder, dạng sóng âm thanh đồng bộ thời gian thực, và bản đồ chú ý AI (Grad-CAM Temporal Saliency Map) để phát hiện chính xác vị trí bị cắt ghép.\n"
         "• *Hệ thống tự động (Automated Bots/Webhooks)*: Tiếp nhận tin nhắn thoại từ Telegram/Zalo, chuyển đổi định dạng và trả kết quả tự động trong vòng dưới 3.0 giây.\n\n"
@@ -585,7 +585,7 @@ def main():
     if os.path.exists(c4_img):
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(c4_img, width=Inches(6.2))
-        add_styled_paragraph(doc, "Hình 3.1: Sơ đồ kiến trúc Container (C4 Level 2) của Hệ thống ViTrueVoice — Luồng dữ liệu in-memory zero-persistence giữa Web Client, Telegram Bot, API Gateway FastAPI và Engine Suy luận B_zalo V6.", font_size=8.5, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình 3.1: Sơ đồ kiến trúc Container (C4 Level 2) của Hệ thống VieTrueVoice — Luồng dữ liệu in-memory zero-persistence giữa Web Client, Telegram Bot, API Gateway FastAPI và Engine Suy luận B_zalo V6.", font_size=8.5, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 
     # Bảng 3.1: Bảng thành phần kiến trúc C4
     add_styled_paragraph(doc, "**Bảng 3.1: Tổng hợp các thành phần kiến trúc C4 và công nghệ cài đặt tương ứng**")
@@ -643,19 +643,19 @@ def main():
     if docker_img.exists():
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(docker_img), width=Inches(6.0))
-        add_styled_paragraph(doc, "Hình 3.2: Giao diện Web Forensics ViTrueVoice vận hành thực tế trên Docker cổng 8000 — Tích hợp Iconify Solar icons framework, hiển thị kết quả phân tích Thật/Giả to rõ kèm độ tin cậy Platt Scaling 99.9%.", font_size=8.5, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình 3.2: Giao diện Web Forensics VieTrueVoice vận hành thực tế trên Docker cổng 8000 — Tích hợp Iconify Solar icons framework, hiển thị kết quả phân tích Thật/Giả to rõ kèm độ tin cậy Platt Scaling 99.9%.", font_size=8.5, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 
     tele_img = PROJECT_ROOT / "scratch" / "telegram_bot_real_screenshot.png"
     if tele_img.exists():
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(tele_img), width=Inches(5.0))
-        add_styled_paragraph(doc, "Hình 3.3: Giao diện Telegram Bot (@vitruevoice_bot) vận hành thực tế — Tiếp nhận voice note chuyển tiếp, xử lý in-memory và phản hồi trực tiếp kết quả giám định trong 1.1s.", font_size=8.5, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình 3.3: Giao diện Telegram Bot (@VieTrueVoice_bot) vận hành thực tế — Tiếp nhận voice note chuyển tiếp, xử lý in-memory và phản hồi trực tiếp kết quả giám định trong 1.1s.", font_size=8.5, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 
     clone_img = PROJECT_ROOT / "scratch" / "live_clone_verified.png"
     if clone_img.exists():
         add_styled_paragraph(doc, 
             "**3.2.4 Phòng Lab Live VoiceStudio CFM Cloning & Đối chứng 2 chiều (Chế độ 2 Gradio Web)**:\n"
-            "Tính năng phòng lab cao cấp cho phép người dùng kiểm chứng năng lực chống nhân bản giọng nói theo thời gian thực: Người dùng ghi âm 1 câu thoại ngắn làm giọng mẫu -> Hệ thống tự động nhận dạng tiếng nói ASR bằng Wav2Vec2 tiếng Việt (`nguyenvulebinh/wav2vec2-base-vietnamese-250h`) tạo cặp (ref_audio, ref_text) chuẩn xác 100% -> Gọi VoiceStudio CFM sinh bản clone nói câu đích -> Trả kết quả bản Người Thật ngay lập tức (~66ms) và hiển thị loading spinner cho bản Clone CFM -> Đưa cả 2 bản qua mô hình ViTrueVoice để đối chứng phán quyết 2 chiều:"
+            "Tính năng phòng lab cao cấp cho phép người dùng kiểm chứng năng lực chống nhân bản giọng nói theo thời gian thực: Người dùng ghi âm 1 câu thoại ngắn làm giọng mẫu -> Hệ thống tự động nhận dạng tiếng nói ASR bằng Wav2Vec2 tiếng Việt (`nguyenvulebinh/wav2vec2-base-vietnamese-250h`) tạo cặp (ref_audio, ref_text) chuẩn xác 100% -> Gọi VoiceStudio CFM sinh bản clone nói câu đích -> Trả kết quả bản Người Thật ngay lập tức (~66ms) và hiển thị loading spinner cho bản Clone CFM -> Đưa cả 2 bản qua mô hình VieTrueVoice để đối chứng phán quyết 2 chiều:"
         )
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(clone_img), width=Inches(5.8))
@@ -749,7 +749,7 @@ def main():
 
     # 6. Conclusion
     add_styled_paragraph(doc, 
-        "**KẾT LUẬN TUẦN 6**: Hệ thống ViTrueVoice đã hoàn thành trọn vẹn toàn bộ các tiêu chí Checkpoint 6 của Khoa CNTT HUTECH: Hoàn thành và đóng gói 3 tính năng Must đầu-cuối, duy trì bộ kiểm thử TDD 310/310 bài xanh 100%, xây dựng bộ AI Eval 30 ca với 10 ca lấy từ lần sai thật và phân tích 3 lỗi tiêu biểu, hoàn thành 100% chứng chỉ AWS Academy Cloud Architecting, và hoàn thiện bản nháp Chương 3 đầy đủ cấu trúc 6 trang với hình ảnh/bảng đánh số chuẩn xác. Hệ thống hoàn toàn sẵn sàng cho giai đoạn triển khai đám mây AWS và thử nghiệm Pilot thực tế tại Tuần 7.",
+        "**KẾT LUẬN TUẦN 6**: Hệ thống VieTrueVoice đã hoàn thành trọn vẹn toàn bộ các tiêu chí Checkpoint 6 của Khoa CNTT HUTECH: Hoàn thành và đóng gói 3 tính năng Must đầu-cuối, duy trì bộ kiểm thử TDD 310/310 bài xanh 100%, xây dựng bộ AI Eval 30 ca với 10 ca lấy từ lần sai thật và phân tích 3 lỗi tiêu biểu, hoàn thành 100% chứng chỉ AWS Academy Cloud Architecting, và hoàn thiện bản nháp Chương 3 đầy đủ cấu trúc 6 trang với hình ảnh/bảng đánh số chuẩn xác. Hệ thống hoàn toàn sẵn sàng cho giai đoạn triển khai đám mây AWS và thử nghiệm Pilot thực tế tại Tuần 7.",
         font_size=9.5, bold=True, color_rgb=(31, 73, 125)
     )
 

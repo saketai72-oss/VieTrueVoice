@@ -1,4 +1,4 @@
-# Kế Hoạch Khắc Phục Nhận Diện Sai Giọng Thật (BPCER → 0) — ViTrueVoice v0.4.3
+# Kế Hoạch Khắc Phục Nhận Diện Sai Giọng Thật (BPCER → 0) — VieTrueVoice v0.4.3
 
 > **Mã văn bản**: `plan-bpcer-remediation.md`
 > **Trạng thái**: Hoàn tất triển khai Pha A + C + D (Completed & Verified) — Gate 2 đạt 63/64 (98.4%), APCER 6.77% <= 8%, Latency 66.3ms <= 3.0s, 272/272 tests passed 100%
@@ -288,7 +288,7 @@ Khởi tạo từ `out/best_model_B_zalo.pt` (`ckpt-49k-pitchaug`, SHA `5b566d92
 
 #### C1. Enrollment-based offset (hợp lệ, **mô-đun tùy chọn**)
 
-**Định vị sản phẩm**: ViTrueVoice là bộ phát hiện **zero-shot**, không yêu cầu đăng ký mẫu trước. Do đó Pha C phải là **plugin độc lập, mặc định TẮT**, không làm biến dạng luồng API cốt lõi. Nếu người dùng không bật, hệ thống chạy đúng như Pha A.
+**Định vị sản phẩm**: VieTrueVoice là bộ phát hiện **zero-shot**, không yêu cầu đăng ký mẫu trước. Do đó Pha C phải là **plugin độc lập, mặc định TẮT**, không làm biến dạng luồng API cốt lõi. Nếu người dùng không bật, hệ thống chạy đúng như Pha A.
 
 Khi bật, người dùng đăng ký 3–5 câu giọng của chính mình. Đó là dữ liệu **của họ**, không phải tập test.
 

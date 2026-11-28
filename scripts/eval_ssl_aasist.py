@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 
 from scripts.eval_gmm import build_table
 from src.models.ssl_aasist import SSLAASIST
-from src.training.dataset import ViTrueVoiceDataset
+from src.training.dataset import VieTrueVoiceDataset
 
 
 def filter_role(df, role):
@@ -89,7 +89,7 @@ def main():
         df = filter_role(pd.read_csv(csv, keep_default_na=False), a.role)
         if a.limit:
             df = df.head(a.limit)
-        ds = ViTrueVoiceDataset(df, audio_root=a.audio_root, mode="eval")
+        ds = VieTrueVoiceDataset(df, audio_root=a.audio_root, mode="eval")
         sc = score_manifest(model, ds, device, a.batch_size)
         check_tts_labels(sc)
         sc["split"] = name

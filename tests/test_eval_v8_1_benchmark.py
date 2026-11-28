@@ -226,7 +226,7 @@ def test_build_all_reports_idempotent_with_legacy_snapshot(tmp_path):
     entry = {"modes": modes}
 
     (bench / "v8_inverted_evaluation_report.json").write_text(
-        json.dumps({"model_version": "ViTrueVoice B_zalo V8 Inverted Dual-Seen", "winning_checkpoint": "legacy.pt"}),
+        json.dumps({"model_version": "VieTrueVoice B_zalo V8 Inverted Dual-Seen", "winning_checkpoint": "legacy.pt"}),
         encoding="utf-8",
     )
     (bench / "v8_1_run1_eval.json").write_text(json.dumps({"checkpoints": {"run1_phase1": entry, "run1_phase2": entry}}), encoding="utf-8")

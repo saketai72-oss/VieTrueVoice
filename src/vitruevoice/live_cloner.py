@@ -100,7 +100,7 @@ def evaluate_audio_sample(
     apply_dither: bool = False,
 ) -> Dict[str, Any]:
     """
-    Thẩm định 1 mẫu âm thanh qua detector ViTrueVoice (Multi-window Max-Pooling + Platt Scaling).
+    Thẩm định 1 mẫu âm thanh qua detector VieTrueVoice (Multi-window Max-Pooling + Platt Scaling).
     - apply_dither: Chỉ bật khi âm thanh thu từ microphone WebRTC bị squelch noise-gating.
                     Tuyệt đối tắt (False) khi thẩm định âm thanh nhân bản (Clone / Spoof) để
                     tránh nhiễu che lấp các đặc trưng âm học vi mô.
@@ -231,7 +231,7 @@ class LiveVoiceStudioCloner:
                 if not ref_text or len(ref_text.strip()) == 0:
                     ref_text = DEFAULT_REF_PROMPT
 
-        tmp_dir = Path(tempfile.gettempdir()) / "vitruevoice_clone"
+        tmp_dir = Path(tempfile.gettempdir()) / "VieTrueVoice_clone"
         tmp_dir.mkdir(parents=True, exist_ok=True)
         tmp_24k = tmp_dir / f"tmp_omni_{int(time.time()*1000)}_24k.wav"
 
@@ -351,7 +351,7 @@ class LiveVoiceStudioCloner:
 
             if omni_out is not None:
                 omni_int16, omni_sr, ref_used = omni_out
-                # Chuyển đổi sang float32 16kHz để detector ViTrueVoice thẩm định
+                # Chuyển đổi sang float32 16kHz để detector VieTrueVoice thẩm định
                 omni_float = (omni_int16.astype(np.float32) / 32768.0)
                 omni_eval = evaluate_audio_sample(
                     omni_float,

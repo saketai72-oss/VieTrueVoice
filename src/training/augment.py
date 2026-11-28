@@ -84,7 +84,7 @@ class RawBoostTransform:
 
 
 def make_rawboost(p_lnl=0.5, p_isd=0.3, p_ssi=0.5, p_pitch=0.0, semitones_range=(-7.0, 4.0), always_one=True):
-    """Trả về transform(x, rng) cho ViTrueVoiceDataset(mode='augmented')."""
+    """Trả về transform(x, rng) cho VieTrueVoiceDataset(mode='augmented')."""
     return RawBoostTransform(p_lnl=p_lnl, p_isd=p_isd, p_ssi=p_ssi,
                              p_pitch=p_pitch, semitones_range=semitones_range, always_one=always_one)
 

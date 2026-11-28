@@ -195,8 +195,8 @@ def test_checkpoint_contains_branch(tmp_path):
     from src.models.ssl_aasist import SSLAASIST
     model = SSLAASIST(ssl_config=_tiny_ssl_config(), d_graph=32, conv_channels=(8, 16))
     from src.training.trainer import Trainer
-    from src.training.dataset import ViTrueVoiceDataset
-    dataset = ViTrueVoiceDataset(
+    from src.training.dataset import VieTrueVoiceDataset
+    dataset = VieTrueVoiceDataset(
         train_df, audio_root=str(tmp_path), mode=mode,
         train=True, transform=transform, target_len=SR,
     )
@@ -239,8 +239,8 @@ def test_branch_A_dataset_only_clean(tmp_path):
     df = _make_manifest(tmp_path)
     train_df = df[df["split"] == "train"]
     _, mode, _ = train.build_branch_config("A", out_dir="out/A")
-    from src.training.dataset import ViTrueVoiceDataset
-    ds = ViTrueVoiceDataset(train_df, audio_root=str(tmp_path), mode=mode, target_len=SR)
+    from src.training.dataset import VieTrueVoiceDataset
+    ds = VieTrueVoiceDataset(train_df, audio_root=str(tmp_path), mode=mode, target_len=SR)
     assert set(ds.df["codec"]) == {"clean_16khz"}
 
 
@@ -249,8 +249,8 @@ def test_branch_B_dataset_has_all_codecs(tmp_path):
     df = _make_manifest(tmp_path)
     train_df = df[df["split"] == "train"]
     _, mode, _ = train.build_branch_config("B", out_dir="out/B")
-    from src.training.dataset import ViTrueVoiceDataset
-    ds = ViTrueVoiceDataset(train_df, audio_root=str(tmp_path), mode=mode, target_len=SR)
+    from src.training.dataset import VieTrueVoiceDataset
+    ds = VieTrueVoiceDataset(train_df, audio_root=str(tmp_path), mode=mode, target_len=SR)
     assert {"clean_16khz", "g711_alaw", "amr_nb"}.issubset(set(ds.df["codec"]))
 
 

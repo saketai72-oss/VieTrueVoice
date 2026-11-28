@@ -1,4 +1,4 @@
-"""Kịch bản kiểm định đa tầng (Pha 3 Gate Evaluation) cho ViTrueVoice Version 5.
+"""Kịch bản kiểm định đa tầng (Pha 3 Gate Evaluation) cho VieTrueVoice Version 5.
 
 Đánh giá đồng thời 3 tầng độc lập:
 1. Gate 1 (G1): SPK_0001 (15 file) & Bộ VoiCes (15 file) -> FRR <= 20% (>= 12/15 bona fide)
@@ -154,7 +154,7 @@ def eval_checkpoint_gates(ckpt_path: str, device: str = "cpu", pooling: bool = T
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(description="Multi-gate verification for ViTrueVoice checkpoints")
+    ap = argparse.ArgumentParser(description="Multi-gate verification for VieTrueVoice checkpoints")
     ap.add_argument("--ckpt", default="out/zalo_b_zalo_v4/best_model_B_zalo.pt")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     ap.add_argument("--pooling", action=argparse.BooleanOptionalAction, default=True, help="Enable multi-window max pooling (default: True)")

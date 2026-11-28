@@ -1,5 +1,5 @@
 """
-High-resolution (300 DPI) Vietnamese visual diagrams generator for the ViTrueVoice v0.9.4 Handbook.
+High-resolution (300 DPI) Vietnamese visual diagrams generator for the VieTrueVoice v0.9.4 Handbook.
 Generates 8 intuitive figures explaining complex math, signal processing, model architecture, and pooling.
 """
 
@@ -165,7 +165,7 @@ def generate_all_handbook_diagrams(out_dir: str | Path) -> dict[str, Path]:
     ax2.set_xlim(0, 9600)
     ax2.invert_yaxis()
     ax2.set_xlabel("Dải tần số âm thanh giữ lại được (Hz)", fontsize=9.2)
-    ax2.set_title("B. Băng thông tần số của 5 kênh truyền trong ViTrueVoice", fontsize=10.0, fontweight="bold")
+    ax2.set_title("B. Băng thông tần số của 5 kênh truyền trong VieTrueVoice", fontsize=10.0, fontweight="bold")
     ax2.grid(axis="x", alpha=0.25)
     fig.tight_layout()
     p3 = out / "fig3_padding_and_codecs.png"
@@ -304,9 +304,9 @@ def generate_all_handbook_diagrams(out_dir: str | Path) -> dict[str, Path]:
     ax.axis("off")
     ax.text(5.0, 3.52, "KIẾN TRÚC DOCKER CỤC BỘ 0 VNĐ (CHUẨN AWS GÓI A) & BẢO VỆ SINH TRẮC HỌC IN-MEMORY", ha="center", fontsize=10.3, fontweight="bold", color="#1E3A8A")
 
-    _draw_box(ax, 0.2, 1.3, 2.0, 1.8, "Người Dùng Đầu Cuối\n• Web Playground /UI\n  (http://localhost:8000)\n• Telegram Voice Note\n  (@vitruevoice_bot)", "#F8FAFC", "#475569", 8.4)
-    _draw_box(ax, 2.7, 2.0, 2.3, 1.15, "Container 1: vitruevoice-api\n• Non-root user (appuser)\n• Volume out/v0.9.4 chỉ đọc (:ro)\n• HEALTHCHECK /health 30s", "#EFF6FF", "#2563EB", 8.2)
-    _draw_box(ax, 2.7, 0.45, 2.3, 1.15, "Container 2: vitruevoice-bot\n• Mạng nội bộ Docker Bridge\n• Tách bí mật qua file .env\n• Khôi phục tự động (restart)", "#F5F3FF", "#7C3AED", 8.2)
+    _draw_box(ax, 0.2, 1.3, 2.0, 1.8, "Người Dùng Đầu Cuối\n• Web Playground /UI\n  (http://localhost:8000)\n• Telegram Voice Note\n  (@VieTrueVoice_bot)", "#F8FAFC", "#475569", 8.4)
+    _draw_box(ax, 2.7, 2.0, 2.3, 1.15, "Container 1: VieTrueVoice-api\n• Non-root user (appuser)\n• Volume out/v0.9.4 chỉ đọc (:ro)\n• HEALTHCHECK /health 30s", "#EFF6FF", "#2563EB", 8.2)
+    _draw_box(ax, 2.7, 0.45, 2.3, 1.15, "Container 2: VieTrueVoice-bot\n• Mạng nội bộ Docker Bridge\n• Tách bí mật qua file .env\n• Khôi phục tự động (restart)", "#F5F3FF", "#7C3AED", 8.2)
     _draw_box(ax, 5.5, 1.3, 2.1, 1.8, "Xử Lý Trên RAM (Zero-Persistence)\n1. Kiểm tra Magic Bytes\n2. Giải mã io.BytesIO trên RAM\n3. Suy luận 5 cửa sổ (~0.7s)\n4. Xóa hủy file tạm tức thì", "#ECFDF5", "#059669", 8.2)
     _draw_box(ax, 8.0, 1.3, 1.8, 1.8, "Nhật Ký Ẩn Danh\n• Chỉ lưu mã băm\n  SHA-256 + độ trễ\n• 0 byte giọng thô\n• Tuân thủ Luật\n  91/2025/QH15", "#FFFBEB", "#D97706", 8.2)
 

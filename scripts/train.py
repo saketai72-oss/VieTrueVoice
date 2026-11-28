@@ -1,4 +1,4 @@
-"""Entry-point huấn luyện CLI cho ViTrueVoice — 3 nhánh A / B0 / B.
+"""Entry-point huấn luyện CLI cho VieTrueVoice — 3 nhánh A / B0 / B.
 
 Dùng: python scripts/train.py --branch B --manifest-dir data/manifests
              --audio-root . --out-dir out/run_B --batch-size 16
@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader
 
 from src.models.ssl_aasist import SSLAASIST
 from src.training.augment import make_rawboost
-from src.training.dataset import ViTrueVoiceDataset, check_unseen_excluded
+from src.training.dataset import VieTrueVoiceDataset, check_unseen_excluded
 from src.training.losses import loss_weights_from_counts
 from src.training.trainer import TrainConfig, Trainer
 
@@ -45,7 +45,7 @@ def build_branch_config(
 
     - A  : clean only, phase2 = 60 (×3 để cân bằng optimizer steps)
     - B0 : augmented, không RawBoost   (bóc tách đóng góp codec)
-    - B  : augmented + RawBoost online (ViTrueVoice đầy đủ)
+    - B  : augmented + RawBoost online (VieTrueVoice đầy đủ)
     """
     if branch == "A":
         cfg = TrainConfig(branch="A", phase1_epochs=4, phase2_epochs=60, out_dir=out_dir)
@@ -132,7 +132,7 @@ def resolve_manifest_paths(
 # ─────────────────────────────────────────────
 
 def _parse_args():
-    p = argparse.ArgumentParser(description="Huấn luyện ViTrueVoice SSL-AASIST")
+    p = argparse.ArgumentParser(description="Huấn luyện VieTrueVoice SSL-AASIST")
     p.add_argument("--branch", required=True, choices=["A", "B0", "B", "B_zalo"],
                    help="Nhánh thí nghiệm: A (clean), B0 (codec), B (codec+RawBoost), B_zalo (Zalo fine-tune)")
     p.add_argument("--init-ckpt", default=None,
@@ -241,11 +241,11 @@ def main():
     print(f"⚖️  class_weights [spoof, bona] = {cfg.class_weights}")
 
     # ── Dataset & DataLoader ─────────────────────────────────────────────────
-    train_ds = ViTrueVoiceDataset(
+    train_ds = VieTrueVoiceDataset(
         train_df, audio_root=args.audio_root,
         mode=mode, train=True, transform=transform, target_len=_TARGET_LEN,
     )
-    dev_ds = ViTrueVoiceDataset(
+    dev_ds = VieTrueVoiceDataset(
         dev_df, audio_root=args.audio_root,
         mode="eval", train=False, target_len=_TARGET_LEN,
     )

@@ -44,7 +44,7 @@
 
 ---
 
-## 2. Tuyển Chọn Clip Đơn Dải Vàng ($3.5\text{s}$–$7.5\text{s}$) & Khung Sinh Kép (`ViTrueVoiceDualPipeline`)
+## 2. Tuyển Chọn Clip Đơn Dải Vàng ($3.5\text{s}$–$7.5\text{s}$) & Khung Sinh Kép (`VieTrueVoiceDualPipeline`)
 
 ### Tuyển Chọn 2 Tầng Không Ghép Nối (`allow_stitching=False`)
 - Cố định dải thời lượng vàng: `min_dur=3.5s`, `max_dur=7.5s`.

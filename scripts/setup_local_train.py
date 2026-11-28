@@ -3,7 +3,7 @@
 
 Các tác vụ tự động:
 1. Xác thực Kaggle API và tải Checkpoint B (379MB) nếu chưa có.
-2. Tải trực tiếp tệp nén âm thanh 3.26GB (vitruevoice_data_processed.zip) bằng ApiDownloadKernelOutputRequest.
+2. Tải trực tiếp tệp nén âm thanh 3.26GB (VieTrueVoice_data_processed.zip) bằng ApiDownloadKernelOutputRequest.
 3. Giải nén chọn lọc (Bijective Selective Unzip) các file audio cần cho Train & Dev Zalo vào thư mục data/.
 4. Chuyển mã trước các tệp proxy Zalo (Profile A: AAC 76k, Profile B: Opus 24k).
 5. Tiền sinh offline 500 biến thể bona fide trầm (F0 < 120Hz) bổ sung vào train manifest.
@@ -91,8 +91,8 @@ def ensure_audio_zip(zip_path: Path) -> Path:
         print(f"✅ Audio ZIP đã có sẵn: {zip_path} ({zip_path.stat().st_size / (1024**2):.1f} MB)")
         return zip_path
 
-    print("📥 Đang tải vitruevoice_data_processed.zip (3.26 GB) từ Kaggle...")
-    download_kaggle_kernel_file("nguyenthanhtai1959", "vietrue-model-training", "vitruevoice_data_processed.zip", zip_path)
+    print("📥 Đang tải VieTrueVoice_data_processed.zip (3.26 GB) từ Kaggle...")
+    download_kaggle_kernel_file("nguyenthanhtai1959", "vietrue-model-training", "VieTrueVoice_data_processed.zip", zip_path)
     return zip_path
 
 
@@ -230,8 +230,8 @@ def verify_audio_integrity(df_tr: pd.DataFrame, df_dv: pd.DataFrame, target_root
 
 
 def main():
-    p = argparse.ArgumentParser(description="Thiết lập dữ liệu huấn luyện cục bộ cho ViTrueVoice B_zalo")
-    p.add_argument("--data-zip", default="data/vitruevoice_data_processed.zip", help="Đường dẫn lưu file ZIP âm thanh 3.26GB")
+    p = argparse.ArgumentParser(description="Thiết lập dữ liệu huấn luyện cục bộ cho VieTrueVoice B_zalo")
+    p.add_argument("--data-zip", default="data/VieTrueVoice_data_processed.zip", help="Đường dẫn lưu file ZIP âm thanh 3.26GB")
     p.add_argument("--ckpt", default="out/kaggle_ssl_out/best_model_B.pt", help="Đường dẫn lưu Checkpoint B gốc")
     p.add_argument("--skip-download", action="store_true", help="Bỏ qua bước tải xuống nếu file đã có")
     args = p.parse_args()

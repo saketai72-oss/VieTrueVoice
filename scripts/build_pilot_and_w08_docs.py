@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""
 Script to build:
-1. Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice (DOCX & PDF) - W07/W08 Deliverable
+1. Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_VieTrueVoice (DOCX & PDF) - W07/W08 Deliverable
 2. Bang_Chi_Phi_AWS_Va_So_Tay_Su_Co_Runbook (DOCX & PDF) - W08 Deliverable
 
 Author: Nguyen Thanh Tai - MSSV: 2380601959 - HUTECH CMP436
@@ -175,7 +175,7 @@ def build_pilot_document():
     add_styled_paragraph(doc, "TRƯỜNG ĐẠI HỌC CÔNG NGHỆ TP. HỒ CHÍ MINH (HUTECH)", font_size=11, bold=True, color_rgb=(31, 73, 125), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=1)
     add_styled_paragraph(doc, "KHOA CÔNG NGHỆ THÔNG TIN — CHUYÊN NGÀNH MÁY HỌC VÀ ỨNG DỤNG", font_size=10, bold=True, color_rgb=(90, 90, 90), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=10)
     
-    add_styled_paragraph(doc, "PHIẾU KHẢO SÁT TRẢI NGHIỆM NGƯỜI DÙNG (UX FEEDBACK)\n& BIÊN BẢN NGHIỆM THU PILOT HỆ THỐNG VITRUEVOICE", font_size=13.5, bold=True, color_rgb=(192, 0, 0), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
+    add_styled_paragraph(doc, "PHIẾU KHẢO SÁT TRẢI NGHIỆM NGƯỜI DÙNG (UX FEEDBACK)\n& BIÊN BẢN NGHIỆM THU PILOT HỆ THỐNG VieTrueVoice", font_size=13.5, bold=True, color_rgb=(192, 0, 0), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=4)
     add_styled_paragraph(doc, "(Biểu mẫu chuẩn phục vụ triển khai thử nghiệm thực tế — Checkpoint Tuần 7 và Tuần 8 — HK1 2026–2027)", font_size=9.5, italic=True, color_rgb=(80, 80, 80), align=WD_ALIGN_PARAGRAPH.CENTER, space_after=12)
 
     # Info table
@@ -183,7 +183,7 @@ def build_pilot_document():
     set_table_borders(t_info, color="CCCCCC")
     t_info.alignment = WD_TABLE_ALIGNMENT.CENTER
     info_data = [
-        ("Tên đề tài:", "Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (ViTrueVoice)"),
+        ("Tên đề tài:", "Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (VieTrueVoice)"),
         ("Sinh viên thực hiện:", "Nguyễn Thành Tài — MSSV: 2380601959 — Lớp: 23DTHD5"),
         ("Giảng viên hướng dẫn:", "TS. Nguyễn Quang Trung"),
         ("Đơn vị phối hợp thử nghiệm:", "...................................................................................................................................................."),
@@ -203,7 +203,7 @@ def build_pilot_document():
     # Section 1: Pilot Overview (Blank Form)
     add_heading_1(doc, "1. DANH SÁCH NGƯỜI DÙNG THAM GIA THỬ NGHIỆM PILOT")
     add_styled_paragraph(doc, 
-        "Căn cứ yêu cầu Checkpoint W07 & W08, hệ thống ViTrueVoice được chuyển giao thử nghiệm thực tế "
+        "Căn cứ yêu cầu Checkpoint W07 & W08, hệ thống VieTrueVoice được chuyển giao thử nghiệm thực tế "
         "tới các nhóm người dùng đại diện (gồm chuyên gia kỹ thuật ATTT, người lớn tuổi và kiểm thử viên độc lập). "
         "Thông tin người tham gia thử nghiệm được ghi nhận bên dưới:")
     
@@ -346,13 +346,13 @@ def build_pilot_document():
     p1.add_run("ĐẠI DIỆN ĐƠN VỊ / NHÓM NGƯỜI DÙNG PILOT\n(Ký, ghi rõ họ tên và đóng dấu nếu có)\n\n\n\n").font.name = "Times New Roman"
     p1.add_run("................................................................\nChức vụ: ................................................................").font.name = "Times New Roman"
 
-    output_docx = DIR_OUT_2 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.docx"
+    output_docx = DIR_OUT_2 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_VieTrueVoice.docx"
     doc.save(str(output_docx))
     shutil.copy2(output_docx, DIR_OUT_1 / output_docx.name)
     print(f"[OK] Built Pilot DOCX (Blank Template): {output_docx}")
 
-    output_pdf_1 = DIR_OUT_1 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.pdf"
-    output_pdf_2 = DIR_OUT_2 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.pdf"
+    output_pdf_1 = DIR_OUT_1 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_VieTrueVoice.pdf"
+    output_pdf_2 = DIR_OUT_2 / "Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_VieTrueVoice.pdf"
     export_to_pdf_word_com(output_docx, output_pdf_1, output_pdf_2)
 
 
@@ -378,7 +378,7 @@ def build_w08_aws_cost_and_runbook_document():
     set_table_borders(t_info, color="CCCCCC")
     t_info.alignment = WD_TABLE_ALIGNMENT.CENTER
     info_data = [
-        ("Tên đề tài:", "Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (ViTrueVoice)"),
+        ("Tên đề tài:", "Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (VieTrueVoice)"),
         ("Sinh viên thực hiện:", "Nguyễn Thành Tài — MSSV: 2380601959 — Lớp: 23DTHD5"),
         ("Giảng viên hướng dẫn:", "TS. Nguyễn Quang Trung"),
         ("Hạ tầng kiểm định:", "Amazon Web Services (AWS) Singapore (ap-southeast-1) — EC2, S3, ALB, CloudWatch")
@@ -456,7 +456,7 @@ def build_w08_aws_cost_and_runbook_document():
         format_cell_text(cell, h, bold=True, font_size=8.5, color_rgb=(255, 255, 255), align=WD_ALIGN_PARAGRAPH.CENTER)
 
     rb_data = [
-        ("INC-01: CUDA OOM\n(Tràn bộ nhớ VRAM GPU)", "Nhiều luồng gọi Live VoiceStudio CFM cùng lúc khi VRAM < 4GB.", "Chạy lệnh giải phóng VRAM:\n`docker restart vitruevoice-api`\nhoặc `torch.cuda.empty_cache()`", "Cấu hình hàng đợi Celery/Redis giới hạn tối đa 2 tác vụ CFM đồng thời."),
+        ("INC-01: CUDA OOM\n(Tràn bộ nhớ VRAM GPU)", "Nhiều luồng gọi Live VoiceStudio CFM cùng lúc khi VRAM < 4GB.", "Chạy lệnh giải phóng VRAM:\n`docker restart VieTrueVoice-api`\nhoặc `torch.cuda.empty_cache()`", "Cấu hình hàng đợi Celery/Redis giới hạn tối đa 2 tác vụ CFM đồng thời."),
         ("INC-02: Micro Silent Audio\n(WebRTC âm thanh rè/phẳng)", "Micro di động 48kHz bị trôi lệch DC offset và tiếng ù đất 50Hz.", "Bật tự động module tiền xử lý:\n`librosa.effects.trim(top_db=25)`\nvà chuẩn hóa đỉnh 95%.", "Ép chuẩn Mono PCM_16 ngay trên luồng thu WebRTC của trình duyệt."),
         ("INC-03: Cold-start Timeout\n(Lượt gọi đầu trễ > 3.0s)", "PyTorch CUDA Context chưa được nạp sẵn khi container mới bật.", "Gửi request khởi động mồi:\n`curl http://localhost:8000/health`\nkèm dummy tensor 64.000 mẫu.", "Tích hợp script warm-up tự động trong Dockerfile ENTRYPOINT."),
         ("INC-04: Audio Format Error\n(Lỗi định dạng codec lạ)", "Người dùng tải lên file bị lỗi header hoặc sai phần mở rộng.", "Bộ giải mã `audio_loader.py` tự động đọc Magic Bytes qua FFmpeg stream.", "Chặn tệp không hợp lệ tại tầng Gateway trước khi nạp vào AI Core."),
@@ -510,7 +510,7 @@ def build_w08_aws_cost_and_runbook_document():
 
     add_styled_paragraph(doc, "", space_after=6)
     add_styled_paragraph(doc, 
-        "KẾT LUẬN: Đồ án ViTrueVoice đạt tỷ lệ hoàn thành 100.0% tính đến cột mốc Tuần 8, đảm bảo tính liên tục học thuật, "
+        "KẾT LUẬN: Đồ án VieTrueVoice đạt tỷ lệ hoàn thành 100.0% tính đến cột mốc Tuần 8, đảm bảo tính liên tục học thuật, "
         "đầy đủ minh chứng kiểm thử độc lập và hoàn toàn sẵn sàng cho giai đoạn hoàn thiện báo cáo và bảo vệ trước Hội đồng chấm Đồ án chuyên ngành.", 
         bold=True, italic=True)
 

@@ -1,4 +1,4 @@
-"""FastAPI inference service for ViTrueVoice anti-spoofing detection."""
+"""FastAPI inference service for VieTrueVoice anti-spoofing detection."""
 
 from __future__ import annotations
 import base64
@@ -298,7 +298,7 @@ def create_app(
             pass
 
     app = FastAPI(
-        title="ViTrueVoice Anti-Spoofing Inference API",
+        title="VieTrueVoice Anti-Spoofing Inference API",
         version=APP_VERSION,
         description="Phát hiện giọng nói giả mạo tiếng Việt qua kênh thoại nén.",
     )
@@ -319,6 +319,16 @@ def create_app(
         if not INDEX_HTML_PATH.exists():
             raise HTTPException(status_code=404, detail="Index HTML not found")
         return FileResponse(INDEX_HTML_PATH, media_type="text/html")
+
+    @app.get("/favicon.ico", include_in_schema=False)
+    def favicon() -> FileResponse:
+        ico_path = STATIC_DIR / "favicon.ico"
+        if ico_path.exists():
+            return FileResponse(ico_path, media_type="image/x-icon")
+        svg_path = STATIC_DIR / "assets" / "logo.svg"
+        if svg_path.exists():
+            return FileResponse(svg_path, media_type="image/svg+xml")
+        raise HTTPException(status_code=404, detail="Favicon not found")
 
     @app.get("/health")
     def health() -> dict[str, Any]:

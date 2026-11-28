@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Đánh giá toàn diện mô hình ViTrueVoice trên toàn bộ tập Unseen TTS và Bona Fide của 5 tình nguyện viên đối chứng held-out (SPK_0003..0007).
+"""Đánh giá toàn diện mô hình VieTrueVoice trên toàn bộ tập Unseen TTS và Bona Fide của 5 tình nguyện viên đối chứng held-out (SPK_0003..0007).
 
 Tập kiểm định:
 - Bona Fide: 420 clips (84 clips gốc x 5 kênh codec: Clean, AAC-LC 76k, Opus 24k, AMR-NB, G.711)

@@ -26,7 +26,7 @@ def main():
     df = pd.read_csv(full_csv)
 
     print("=" * 70)
-    print("📊 BÁO CÁO TỔNG QUAN TẬP DỮ LIỆU VITRUEVOICE (KAGGLE GPU OUTPUT)")
+    print("📊 BÁO CÁO TỔNG QUAN TẬP DỮ LIỆU VieTrueVoice (KAGGLE GPU OUTPUT)")
     print("=" * 70)
     print(f"Tổng số mẫu âm thanh : {len(df):,}")
     print(f"Tổng số người nói     : {df['speaker_id'].nunique()}")

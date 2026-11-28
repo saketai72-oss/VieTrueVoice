@@ -4,7 +4,7 @@
 > 1. Bản clone từ file SPK có sẵn sinh thành công nhưng mô hình nhận nhầm là Bona Fide (sai lệch APCER / False Negative).
 > 2. Ghi âm trực tiếp qua Microphone trên Gradio Web thì bản clone sinh ra bị lỗi không nghe thấy gì.
 >
-> **Tài liệu tham chiếu**: [PLAN.md](PLAN.md), [AGENTS.md](AGENTS.md), [live_cloner.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/live_cloner.py), [ui.py](file:///c:/Codes/VieTrueVoice/src/app/ui.py).
+> **Tài liệu tham chiếu**: [PLAN.md](PLAN.md), [AGENTS.md](AGENTS.md), [live_cloner.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/live_cloner.py), [ui.py](file:///c:/Codes/VieTrueVoice/src/app/ui.py).
 
 ---
 
@@ -17,7 +17,7 @@
   - **Khi tắt dither (`apply_dither=False`)**: Score = **-24.3263** $\rightarrow$ **SPOOF CHÍNH XÁC 100%**!
   - **Khi bật dither (`apply_dither=True`)**: Score = **+23.4550** $\rightarrow$ **BỊ ĐẢO CHIỀU SANG BONAFIDE**!
 - **Nguyên nhân kỹ thuật**:
-  - Trong `src/vitruevoice/live_cloner.py` (hàm `evaluate_audio_sample`), cờ `apply_dither=True` bị gán cứng cho cả 2 mẫu âm thanh.
+  - Trong `src/VieTrueVoice/live_cloner.py` (hàm `evaluate_audio_sample`), cờ `apply_dither=True` bị gán cứng cho cả 2 mẫu âm thanh.
   - Thuật toán `apply_comfort_dither` bơm nhiễu Gaussian ($\sigma = 0.0035$) vốn chỉ được thiết kế cho audio thu trực tiếp từ WebRTC browser (để bù đắp khoảng lặng zero-floor do tính năng chống ồn của trình duyệt cắt cụt).
   - Khi bơm nhiễu này vào bản clone tổng hợp CFM (Bản 2), nhiễu đã che lấp toàn bộ các vết tích vi mô phổ - thời gian (phase & harmonic artifacts) mà mạng nơ-ron SSL-AASIST dùng để phân biệt spoof, khiến mô hình nhầm lẫn bản clone thành giọng người thật!
 
@@ -76,7 +76,7 @@
 - [ ] **Task 1.2**: Bổ sung unit test kiểm tra luồng chuẩn hóa mic audio 48kHz:
   - Giả lập đầu vào numpy 48.000 Hz có khoảng lặng, kiểm tra đầu ra ref_audio được chuyển đổi thành đúng 16.000 Hz mono sạch.
 
-### Phase 2: Sửa Lỗi Detector & Cơ Chế Dither (`src/vitruevoice/live_cloner.py`)
+### Phase 2: Sửa Lỗi Detector & Cơ Chế Dither (`src/VieTrueVoice/live_cloner.py`)
 - [ ] **Task 2.1**: Cập nhật hàm `evaluate_audio_sample`:
   - Thêm tham số `apply_dither: bool = False`.
   - Chỉ áp dụng dither khi tham số này là `True`.

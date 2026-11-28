@@ -1,4 +1,4 @@
-"""ASR Word Error Rate (WER) filtering module for synthetic audio in ViTrueVoice.
+"""ASR Word Error Rate (WER) filtering module for synthetic audio in VieTrueVoice.
 
 Filters out defective, mumbled, or hallucinated spoofed speech before training.
 Complies with Step 1.3 of PLAN.md.

@@ -1,4 +1,4 @@
-"""Sliding window extraction and multi-window score pooling for ViTrueVoice.
+"""Sliding window extraction and multi-window score pooling for VieTrueVoice.
 
 STUBBORN_FACTs:
 - Every extracted window tensor has a fixed shape of exactly 64,000 samples (4.0s @ 16kHz).

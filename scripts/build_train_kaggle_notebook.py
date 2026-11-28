@@ -25,7 +25,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "cell_type": "markdown",
             "metadata": {},
             "source": [
-                "# ViTrueVoice — Pipeline Huấn Luyện SSL-AASIST & Đánh Giá Đối Chứng H1/H2 Trên Kaggle GPU\n",
+                "# VieTrueVoice — Pipeline Huấn Luyện SSL-AASIST & Đánh Giá Đối Chứng H1/H2 Trên Kaggle GPU\n",
                 "\n",
                 "**Mục tiêu thí nghiệm (Must #2 - W5)**:\n",
                 "1. **Khử trùng lặp Unseen TTS**: Loại bỏ toàn bộ `VieNeu-TTS` khỏi tập Train và Dev để đảm bảo tính hợp lệ học thuật của Giả thuyết H2 (Unseen TTS generalization).\n",
@@ -33,7 +33,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "3. **Huấn luyện 3 nhánh thí nghiệm chính thức**:\n",
                 "   - **Nhánh A (Không tăng cường)**: `mode=\"clean\"` (khoảng 9.971 mẫu), không transform, Phase 1 = 4 epochs, Phase 2 = 60 epochs (nhân 3 để cân bằng optimizer steps).\n",
                 "   - **Nhánh B0 (Chỉ nén Codec, không RawBoost)**: `mode=\"augmented\"` (khoảng 29.143 mẫu), không transform, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
-                "   - **Nhánh B (ViTrueVoice Đầy đủ: Codec + RawBoost)**: `mode=\"augmented\"` (khoảng 29.143 mẫu), `make_rawboost()`, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
+                "   - **Nhánh B (VieTrueVoice Đầy đủ: Codec + RawBoost)**: `mode=\"augmented\"` (khoảng 29.143 mẫu), `make_rawboost()`, Phase 1 = 4 epochs, Phase 2 = 20 epochs.\n",
                 "4. **Đánh giá tự động trên Test In-domain và Test OOD** qua `scripts/eval_ssl_aasist.py`.\n",
                 "5. **Kiểm chứng giả thuyết khoa học** qua `scripts/compare_h1.py`:\n",
                 "   - **H1**: Giảm $\\ge 30\\%$ EER tương đối trên kênh nén (G.711 A-law, AMR-NB) so với Mô hình A.\n",
@@ -74,7 +74,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 2. Khởi tạo mã nguồn ViTrueVoice trên Kaggle container\n",
+                "# 2. Khởi tạo mã nguồn VieTrueVoice trên Kaggle container\n",
                 "import base64\n",
                 "import zlib\n",
                 "import json\n",
@@ -115,7 +115,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "candidates = [\n",
                 "    working_dir / 'data',\n",
                 "    Path('/kaggle/input/vietrue-model-training/data'),\n",
-                "    Path('/kaggle/input/vitruevoice-data-processed/data'),\n",
+                "    Path('/kaggle/input/VieTrueVoice-data-processed/data'),\n",
                 "    Path('/kaggle/input/vietruevoice-processed/data'),\n",
                 "    Path('./data'),\n",
                 "]\n",
@@ -129,9 +129,9 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "if not data_dir:\n",
                 "    # Tìm file ZIP đã nén từ kernel sinh dữ liệu vietrue-model-training\n",
                 "    zip_candidates = (\n",
-                "        list(Path('/kaggle/input').rglob('*vitruevoice*.zip')) +\n",
-                "        list(working_dir.glob('*vitruevoice*.zip')) +\n",
-                "        list(Path('out').glob('*vitruevoice*.zip'))\n",
+                "        list(Path('/kaggle/input').rglob('*VieTrueVoice*.zip')) +\n",
+                "        list(working_dir.glob('*VieTrueVoice*.zip')) +\n",
+                "        list(Path('out').glob('*VieTrueVoice*.zip'))\n",
                 "    )\n",
                 "    if zip_candidates:\n",
                 "        zip_path = zip_candidates[0]\n",
@@ -298,7 +298,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "metadata": {},
             "outputs": [],
             "source": [
-                "# 9. Huấn luyện Mô hình B (ViTrueVoice Đầy Đủ: Codec + RawBoost Online)\n",
+                "# 9. Huấn luyện Mô hình B (VieTrueVoice Đầy Đủ: Codec + RawBoost Online)\n",
                 "# mode='augmented' (khoảng 29.143 mẫu), transform=make_rawboost(), Phase 1 = 4 ep, Phase 2 = 20 ep\n",
                 "run([\n",
                 "    sys.executable, '-u', 'scripts/train.py',\n",
@@ -307,7 +307,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
                 "    '--audio-root', str(audio_root),\n",
                 "    '--out-dir', 'out/run_B',\n",
                 "    '--batch-size', '16',\n",
-                "], 'Huấn luyện Nhánh B (ViTrueVoice Đầy Đủ)')\n"
+                "], 'Huấn luyện Nhánh B (VieTrueVoice Đầy Đủ)')\n"
             ]
         },
         # Cell 10: Automated Evaluation on Test Sets
@@ -349,7 +349,7 @@ def build_notebook(out_path: Path = Path("train_kaggle.ipynb")) -> None:
             "outputs": [],
             "source": [
                 "# 11. Kiểm chứng giả thuyết khoa học H1 & H2\n",
-                "# 11a. Đối chứng chính thức H1 & H2 giữa Mô hình A (Không tăng cường) và B (ViTrueVoice)\n",
+                "# 11a. Đối chứng chính thức H1 & H2 giữa Mô hình A (Không tăng cường) và B (VieTrueVoice)\n",
                 "if Path('out/eval_metrics_A.csv').exists() and Path('out/eval_metrics_B.csv').exists():\n",
                 "    run([\n",
                 "        sys.executable, '-u', 'scripts/compare_h1.py',\n",

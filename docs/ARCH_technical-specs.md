@@ -4,7 +4,7 @@
 
 ## 1. Bảng Tổng Quan Kiến Trúc Pipeline Kỹ Thuật (4 Chặng)
 
-ViTrueVoice là hệ thống phân loại nhị phân độc lập từng mẫu âm thanh tiếng Việt nhằm phân biệt giữa **Giọng thật (`Bona fide` - nhãn `1`)** và **Giọng giả (`Spoof` - nhãn `0`)** truyền qua kênh thoại viễn thông và mạng xã hội bị nén suy hao (Opus, AMR-NB, G.711 A-law, lọc băng tần $8\text{ kHz}$).
+VieTrueVoice là hệ thống phân loại nhị phân độc lập từng mẫu âm thanh tiếng Việt nhằm phân biệt giữa **Giọng thật (`Bona fide` - nhãn `1`)** và **Giọng giả (`Spoof` - nhãn `0`)** truyền qua kênh thoại viễn thông và mạng xã hội bị nén suy hao (Opus, AMR-NB, G.711 A-law, lọc băng tần $8\text{ kHz}$).
 
 ```mermaid
 graph TD
@@ -20,7 +20,7 @@ graph TD
 | :--- | :--- | :--- | :--- |
 | **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Dữ liệu khoa học VIVOS (65 spk) & Common Voice 8.0 (419 spk) + Bộ nghiệm thu độc lập 5 tình nguyện viên `SPK_0003`..`SPK_0007` (84 clips x 5 codecs = 420 clips + 375 clips Unseen VoiceStudio CFM Spoof cô lập 100% khỏi train/dev/test) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
 | **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng (24kHz / 48kHz / 16kHz, Stereo/Mono) | Chuyển Mono, Resample 16kHz, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc 8kHz | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
-| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Huấn luyện Baseline LFCC+GMM (`scripts/eval_gmm.py`) và 3 nhánh SSL-AASIST trên Kaggle GPU (`train_kaggle.ipynb`): Nhánh A (Clean, 4+60ep), Nhánh B0 (Codec, 4+20ep), Nhánh B (ViTrueVoice: Codec+RawBoost, 4+20ep). Weighted CE động $w_c = \frac{N}{2 \cdot N_c}$ (tập Train Dual-Seen ở v0.4.7+ bao gồm cả F5-TTS và VieNeu-TTS v3 Turbo, cô lập 100% Unseen VoiceStudio CFM). | Checkpoint `best_model_{A,B0,B}.pt` + Bảng đối chứng `h1_comparison.csv` ($\Delta\text{EER} \ge 30\%$) & `h2_unseen_tts.csv` ($\text{EER} \le 15\%$) |
+| **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Huấn luyện Baseline LFCC+GMM (`scripts/eval_gmm.py`) và 3 nhánh SSL-AASIST trên Kaggle GPU (`train_kaggle.ipynb`): Nhánh A (Clean, 4+60ep), Nhánh B0 (Codec, 4+20ep), Nhánh B (VieTrueVoice: Codec+RawBoost, 4+20ep). Weighted CE động $w_c = \frac{N}{2 \cdot N_c}$ (tập Train Dual-Seen ở v0.4.7+ bao gồm cả F5-TTS và VieNeu-TTS v3 Turbo, cô lập 100% Unseen VoiceStudio CFM). | Checkpoint `best_model_{A,B0,B}.pt` + Bảng đối chứng `h1_comparison.csv` ($\Delta\text{EER} \ge 30\%$) & `h2_unseen_tts.csv` ($\text{EER} \le 15\%$) |
 | **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; 310/310 unit tests xanh 100%, bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
 ---
@@ -29,7 +29,7 @@ graph TD
 
 | Chỉ số | Mục tiêu KPI | Phương pháp & Bằng chứng nghiệm thu |
 |--------|--------------|-----------------------------------|
-| **Độ bền nén kênh thoại (CH1 / Giả thuyết H1)** | `Giảm >= 30% EER tương đối` trên tập nén | So sánh mô hình B (ViTrueVoice) với mô hình A (không tăng cường) trên G.711 A-law & AMR-NB; script `scripts/compare_h1.py` xuất `out/comparison_A_B/h1_comparison.csv` |
+| **Độ bền nén kênh thoại (CH1 / Giả thuyết H1)** | `Giảm >= 30% EER tương đối` trên tập nén | So sánh mô hình B (VieTrueVoice) với mô hình A (không tăng cường) trên G.711 A-law & AMR-NB; script `scripts/compare_h1.py` xuất `out/comparison_A_B/h1_comparison.csv` |
 | **Độ bền công cụ lạ (CH2 / Giả thuyết H2)** | `EER <= 15%` trên Unseen TTS | Đánh giá mô hình B_zalo V7 trên công cụ Unseen TTS thuần Zero-Shot Voice Cloning là `VoiceStudio (OmniVoice CFM)` (cô lập 100% khỏi Train/Dev); đạt EER = **14.67%** $\le 15.0\%$ (PASS). Báo cáo chi tiết tại `docs/BENCHMARK_seen_vs_unseen_degradation.md` (kết quả khảo sát ban đầu trên VieNeu-TTS ở W05 lưu tại `out/comparison_A_B/h2_unseen_tts.csv`). |
 | **Bóc tách đóng góp RawBoost (CH1 bổ trợ)** | Định lượng $\Delta\text{EER}$ và `ci_overlap` | So sánh mô hình B (Codec + RawBoost) với mô hình B0 (chỉ Codec) qua `scripts/compare_h1.py` |
 | **Độ chính xác nội bộ (In-domain EER)** | `EER <= 8%` | Đánh giá trên tập kiểm thử nội bộ người nói chưa từng thấy (`test_indomain.csv`) |
@@ -42,7 +42,7 @@ graph TD
 ### Kiến Trúc Hybrid (Local Code <-> Kaggle GPU)
 1. **Máy Local**: Quản lý kho mã nguồn Git, viết kịch bản TDD bằng `pytest` (310/310 unit tests xanh 100%), đóng gói mã nguồn và kiểm soát ranh giới split.
 2. **Kaggle GPU & Google Colab GPU (Tesla T4 16GB VRAM)**:
-   - Kernel sinh dữ liệu: `nguyenthanhtai1959/vietrue-model-training` (V22) tạo ra `vitruevoice_data_processed.zip` (3.26 GB).
+   - Kernel sinh dữ liệu: `nguyenthanhtai1959/vietrue-model-training` (V22) tạo ra `VieTrueVoice_data_processed.zip` (3.26 GB).
    - Kernel huấn luyện: `nguyenthanhtai1959/vietrue-ssl-training` nạp dữ liệu qua `kernel_sources: ["nguyenthanhtai1959/vietrue-model-training"]`.
    - Kernel fine-tuning Zalo: `deploy_zalo_train/train_zalo.ipynb` hỗ trợ triển khai kép tự động (Kaggle và Google Colab), đồng bộ mã nguồn qua Git clone (0% Base64), stream tải tệp dữ liệu 3.26 GB qua `ApiDownloadKernelOutputRequest` trực tiếp không phân trang, tiền sinh offline 500 mẫu bona fide trầm ($F_0 < 120$ Hz) và huấn luyện AM-Softmax $m=0.35$.
    - Tải kết quả về máy Local: `python manage_kaggle.py output` (lưu vào `./out/`).

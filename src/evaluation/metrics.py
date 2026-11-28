@@ -1,4 +1,4 @@
-"""Chỉ số đánh giá cho ViTrueVoice.
+"""Chỉ số đánh giá cho VieTrueVoice.
 
 Quy ước: nhãn bonafide = 1, spoof = 0; điểm càng cao càng giống bonafide.
 """

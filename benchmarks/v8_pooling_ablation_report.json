@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-11-24 23:57:13",
-  "model_version": "ViTrueVoice B_zalo V8.1",
+  "model_version": "VieTrueVoice B_zalo V8.1",
   "winning_model": "head_blend_a0.75",
   "winning_checkpoint": "out/zalo_b_zalo_v8_1_with_spk1/best_model.pt",
   "promoted_production_checkpoint": "out/zalo_b_zalo_v8_inverted/best_model.pt",

@@ -103,7 +103,7 @@ experiment_id,model_name,augmentation,test_condition,tts_generator,eer_percent,m
 
 ## 5. Quy Chuẩn Thử Thách Nhân Bản Giọng Trực Tiếp 4 Chiều (Quad-Forensics Benchmark — v0.5.0)
 
-Nhằm phục vụ đánh giá năng lực phát hiện Deepfake tương tác trực tiếp với người dùng và hội đồng bảo vệ, hệ thống chuẩn hóa luồng thử nghiệm đối chứng 4 chiều (`src/vitruevoice/live_cloner.py` & `src/app/ui.py` Tab 2):
+Nhằm phục vụ đánh giá năng lực phát hiện Deepfake tương tác trực tiếp với người dùng và hội đồng bảo vệ, hệ thống chuẩn hóa luồng thử nghiệm đối chứng 4 chiều (`src/VieTrueVoice/live_cloner.py` & `src/app/ui.py` Tab 2):
 
 ### 5.1. Luồng Sinh Mẫu Zero-Shot Tự Động & Câu Thoại Chuẩn
 1. **Âm thanh tham chiếu (Reference Audio)**: Ghi âm trực tiếp qua Microphone trình duyệt (3 - 5 giây).

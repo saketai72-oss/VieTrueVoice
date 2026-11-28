@@ -1,4 +1,4 @@
-# Ước Tính Chi Phí Vận Hành Hệ Thống ViTrueVoice Trên Hạ Tầng Đám Mây AWS (Bảng 3.4 Đề Cương v4)
+# Ước Tính Chi Phí Vận Hành Hệ Thống VieTrueVoice Trên Hạ Tầng Đám Mây AWS (Bảng 3.4 Đề Cương v4)
 
 > **Mô hình kiến trúc**: Áp dụng tri thức từ 3 chứng chỉ AWS Academy Gói A (Cloud Foundations, Security Foundations, Cloud Architecting).  
 > **Khu vực tính toán**: `ap-southeast-1` (Singapore - độ trễ thấp nhất về Việt Nam, RTT ~30-40ms).  

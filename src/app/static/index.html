@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ViTrueVoice v0.9.4 // Hệ Thống Xác Thực Giọng Nói Tiếng Việt</title>
+  <title>VieTrueVoice v0.9.4 - Hệ Thống Xác Thực Giọng Nói Tiếng Việt</title>
   <meta name="description" content="Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát SSL-AASIST v0.9.4 &amp; Consensus Asymmetric Veto." />
+  <meta name="theme-color" content="#0e0e10" />
+
+  <!-- VieTrueVoice Custom Brand Logo & Multi-Resolution Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/static/assets/logo.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon-32x32.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/apple-touch-icon.png" />
 
   <!-- Fonts: Be Vietnam Pro + JetBrains Mono + Material Symbols Outlined -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -49,7 +56,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
 
-  <!-- ViTrueVoice Brutalist Forensics CSS -->
+  <!-- VieTrueVoice Brutalist Forensics CSS -->
   <link rel="stylesheet" href="/static/css/app.css" />
 </head>
 <body class="bg-background text-on-surface antialiased selection:bg-[#00e599] selection:text-[#0e0e10]">
@@ -59,7 +66,10 @@
        ======================================================================= -->
   <div id="vtv-preloader" aria-label="Đang khởi tạo hệ thống thẩm định giọng nói">
     <div class="flex items-center justify-between border-b border-on-surface-variant/15 pb-4">
-      <span class="font-mono text-xs tracking-[0.22em] text-primary font-bold">VITRUEVOICE // FORENSIC ENGINE</span>
+      <span class="inline-flex items-center gap-2.5 font-mono text-xs tracking-[0.22em] text-primary font-bold">
+        <img src="/static/assets/logo.svg" alt="VieTrueVoice" width="20" height="20" class="w-5 h-5 shrink-0" />
+        VIETRUEVOICE // FORENSIC ENGINE
+      </span>
       <span class="font-mono text-xs tracking-[0.18em] text-on-surface-variant">CORE_v0.9.4 // SSL-AASIST</span>
     </div>
 
@@ -103,9 +113,15 @@
   <header class="fixed top-0 inset-x-0 z-50 border-b border-on-surface-variant/15 bg-surface-container-lowest/80 backdrop-blur-md">
     <div class="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
       <a href="#hero-section" class="flex items-center gap-3 group" data-cursor="QUÉT">
-        <span class="w-2.5 h-2.5 bg-primary-strong shadow-[0_0_12px_#00e599]"></span>
+        <img
+          src="/static/assets/logo.svg"
+          alt="VieTrueVoice Logo"
+          width="28"
+          height="28"
+          class="w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-105"
+        />
         <span class="font-mono text-xs sm:text-sm font-bold tracking-[0.2em] text-on-surface group-hover:text-primary transition-colors">
-          VITRUEVOICE
+          VIETRUEVOICE
         </span>
         <span class="hidden sm:inline-block font-mono text-[10px] px-2 py-0.5 border border-on-surface-variant/20 text-on-surface-variant tracking-widest">
           v0.9.4
@@ -188,7 +204,7 @@
             data-cursor="QUÉT"
             class="vtv-btn-emerald px-5 sm:px-6 py-3 font-mono text-xs font-bold tracking-[0.14em] uppercase flex items-center gap-2"
           >
-            <span>+ KIỂM TRA GIỌNG NÓI</span>
+            <span>KIỂM TRA GIỌNG NÓI</span>
           </button>
 
           <button
@@ -198,7 +214,7 @@
             data-cursor-tone="danger"
             class="vtv-btn-crimson px-5 sm:px-6 py-3 font-mono text-xs font-bold tracking-[0.14em] uppercase flex items-center gap-2"
           >
-            <span>⚡ CLONE OMNIVOICE</span>
+            <span>CLONE OMNIVOICE</span>
           </button>
 
           <button
@@ -359,7 +375,7 @@
           </div>
           <p class="max-w-md text-sm text-on-surface-variant leading-relaxed">
             Mọi tệp âm thanh và biểu đồ phổ dưới đây đều trích xuất trực tiếp từ tập nghiệm thu
-            <span class="font-mono text-on-surface">ViTrueVoice v0.9.4</span> — nghe thử hoặc quét trực tiếp qua API suy luận thực.
+            <span class="font-mono text-on-surface">VieTrueVoice v0.9.4</span> — nghe thử hoặc quét trực tiếp qua API suy luận thực.
           </p>
         </div>
 
@@ -558,7 +574,7 @@
     <div class="max-w-[1360px] mx-auto flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
       <div class="space-y-2 max-w-2xl">
         <p class="font-mono text-xs font-bold tracking-[0.22em] uppercase text-primary">
-          VITRUEVOICE v0.9.4 // ZERO-PERSISTENCE ARCHITECTURE
+          VieTrueVoice v0.9.4 // ZERO-PERSISTENCE ARCHITECTURE
         </p>
         <p class="text-sm text-on-surface-variant leading-relaxed">
           Toàn bộ luồng âm thanh được giải mã và suy luận trực tiếp trên RAM (in-memory) và hủy tức thì sau khi trả kết quả.
@@ -600,7 +616,7 @@
     data-lenis-prevent
     data-lenis-prevent-wheel
     data-lenis-prevent-touch
-    aria-label="Phòng Lab Thẩm Định & Nhân Bản Giọng Nói ViTrueVoice"
+    aria-label="Phòng Lab Thẩm Định & Nhân Bản Giọng Nói VieTrueVoice"
   >
     <div class="min-h-screen flex flex-col">
       <!-- Sticky Studio Header + 2-Tab Switcher -->
@@ -608,7 +624,7 @@
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <div class="h-16 flex items-center justify-between gap-4">
             <div class="flex items-center gap-3">
-              <span class="w-2.5 h-2.5 bg-primary-strong"></span>
+              <img src="/static/assets/logo.svg" alt="VieTrueVoice Logo" width="24" height="24" class="w-6 h-6 shrink-0" />
               <span class="font-mono text-xs sm:text-sm font-bold tracking-[0.2em] uppercase text-on-surface">
                 FORENSIC STUDIO // v0.9.4
               </span>
@@ -1106,7 +1122,7 @@
                 data-cursor-tone="danger"
                 class="vtv-btn-crimson w-full py-4 px-6 font-mono text-xs sm:text-sm font-bold tracking-[0.16em] uppercase flex items-center justify-center gap-2"
               >
-                <span>⚡ NHÂN BẢN OMNIVOICE &amp; THẨM ĐỊNH</span>
+                <span>NHÂN BẢN OMNIVOICE &amp; THẨM ĐỊNH</span>
               </button>
             </div>
           </div>
@@ -1314,7 +1330,7 @@
     </div>
   </div>
 
-  <!-- ViTrueVoice Modular Forensics Scripts -->
+  <!-- VieTrueVoice Modular Forensics Scripts -->
   <script src="/static/js/webgl-orb.js" defer></script>
   <script src="/static/js/audio-recorder.js" defer></script>
   <script src="/static/js/charts.js" defer></script>

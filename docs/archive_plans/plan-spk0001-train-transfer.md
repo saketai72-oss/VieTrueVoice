@@ -4,7 +4,7 @@
 > **Phiên bản đích**: v0.4.4 / Model B_zalo V6 Local  
 > **Trạng thái**: Draft / Chờ phê duyệt thực thi  
 > **Ngày lập**: 2026-11-08  
-> **Tác giả**: project-planner (ViTrueVoice Team)  
+> **Tác giả**: project-planner (VieTrueVoice Team)  
 > **Điểm neo kiến trúc**: [AGENTS.md](AGENTS.md), [PLAN.md](PLAN.md), [docs/LOGIC_models.md](docs/LOGIC_models.md), [docs/SPEC_loso_exploratory_ablation.md](docs/SPEC_loso_exploratory_ablation.md)
 
 ---

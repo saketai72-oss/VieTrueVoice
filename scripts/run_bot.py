@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CLI runner cho ViTrueVoice Telegram Bot."""
+"""CLI runner cho VieTrueVoice Telegram Bot."""
 
 import sys
 from pathlib import Path

@@ -1,7 +1,7 @@
 {
   "Rules": [
     {
-      "ID": "ViTrueVoice-Biometric-AutoDelete-Rule",
+      "ID": "VieTrueVoice-Biometric-AutoDelete-Rule",
       "Status": "Enabled",
       "Filter": {
         "Prefix": "biometric-temp/"

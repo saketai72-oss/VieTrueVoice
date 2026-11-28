@@ -1,5 +1,5 @@
 """
-Phần Đặc Biệt: Bản Đồ Kiến Thức Nền Tảng Toàn Cục & Khung Xương Sống Hệ Thống ViTrueVoice v0.9.4.
+Phần Đặc Biệt: Bản Đồ Kiến Thức Nền Tảng Toàn Cục & Khung Xương Sống Hệ Thống VieTrueVoice v0.9.4.
 Tài liệu học tập nền tảng và cẩm nang bảo vệ đồ án chuyên ngành dành cho sinh viên.
 """
 
@@ -25,16 +25,16 @@ from .styles import (
 
 
 def add_global_foundations(doc) -> None:
-    """Render the Global Foundations & Architectural Backbone section for ViTrueVoice v0.9.4."""
+    """Render the Global Foundations & Architectural Backbone section for VieTrueVoice v0.9.4."""
     add_heading_part(
         doc,
-        "PHẦN ĐẶC BIỆT: BẢN ĐỒ KIẾN THỨC NỀN TẢNG TOÀN CỤC & KHUNG XƯƠNG SỐNG HỆ THỐNG VITRUEVOICE v0.9.4",
+        "PHẦN ĐẶC BIỆT: BẢN ĐỒ KIẾN THỨC NỀN TẢNG TOÀN CỤC & KHUNG XƯƠNG SỐNG HỆ THỐNG VieTrueVoice v0.9.4",
     )
 
     add_styled_paragraph(
         doc,
         "Trước khi đi sâu vào chi tiết toán học và mã nguồn của từng chương, phần mở đầu này đóng vai trò là "
-        "**bản đồ định hướng toàn cục** cho toàn bộ hệ thống **ViTrueVoice v0.9.4**. Mục tiêu của phần này là giúp "
+        "**bản đồ định hướng toàn cục** cho toàn bộ hệ thống **VieTrueVoice v0.9.4**. Mục tiêu của phần này là giúp "
         "sinh viên nắm vững từ gốc rễ bản chất bài toán, không bao giờ nhầm lẫn khái niệm khi Hội đồng đặt câu hỏi "
         "xoáy, đồng thời nhìn thấy bức tranh tổng thể kết nối xuyên suốt từ sóng âm vật lý đến quyết định pháp y số.",
         font_size=10.5,
@@ -51,7 +51,7 @@ def add_global_foundations(doc) -> None:
     add_styled_paragraph(
         doc,
         "Cuốn sổ tay này được thiết kế theo phương pháp sư phạm **Từ trực giác đời thực → Kiến thức nền tảng → "
-        "Toán học chính xác → Cơ chế thực thi trong `ViTrueVoice v0.9.4`**. Để việc ôn tập đạt hiệu quả cao nhất, "
+        "Toán học chính xác → Cơ chế thực thi trong `VieTrueVoice v0.9.4`**. Để việc ôn tập đạt hiệu quả cao nhất, "
         "sinh viên hãy tận dụng 5 thành phần trực quan được bố trí nhất quán trong mọi chương:",
     )
 
@@ -110,7 +110,7 @@ def add_global_foundations(doc) -> None:
             "(1) Đọc dòng chữ ghi số tiền và nội dung chuyển khoản trên tờ séc chính là bài toán ASR (nói nội dung gì?); "
             "(2) So sánh chữ ký của khách hàng với chữ ký mẫu đã đăng ký lúc mở tài khoản chính là bài toán ASV (của ai?); "
             "(3) Đưa tờ giấy vào máy soi tia cực tím để xem phôi giấy, sợi bảo an và mực in là giấy thật của Ngân hàng Nhà nước "
-            "hay giấy in giả bằng máy in phun màu chính là bài toán Speech Anti-Spoofing / CM của ViTrueVoice (thật hay giả, "
+            "hay giấy in giả bằng máy in phun màu chính là bài toán Speech Anti-Spoofing / CM của VieTrueVoice (thật hay giả, "
             "hoàn toàn không phụ thuộc trên giấy viết câu gì hay chữ ký của ai!)."
         ),
         core_points=[
@@ -139,7 +139,7 @@ def add_global_foundations(doc) -> None:
         doc,
         "Trả lời câu hỏi **'Người nói đang nói nội dung gì?'** (*Speech-to-Text*). Đầu vào là sóng âm thanh, đầu ra là "
         "chuỗi từ ngữ văn bản. Mô hình ASR được thiết kế để **triệt tiêu sự khác biệt giọng vùng miền, nam/nữ và thật/giả** "
-        "nhằm chép lời chính xác nhất. Trong dự án `ViTrueVoice v0.9.4`, ASR không dùng để bắt giả mạo trực tiếp mà đóng "
+        "nhằm chép lời chính xác nhất. Trong dự án `VieTrueVoice v0.9.4`, ASR không dùng để bắt giả mạo trực tiếp mà đóng "
         "vai trò trợ lý kiểm định chất lượng mẫu sinh tại Cổng lọc số 1 và chép lời tham chiếu cho chế độ Live Cloning.",
         "1. Bài toán ASR (Automatic Speech Recognition — Nhận dạng tiếng nói thành văn bản)",
     )
@@ -156,7 +156,7 @@ def add_global_foundations(doc) -> None:
     add_bullet_item(
         doc,
         "Trả lời câu hỏi **'Âm thanh này phát ra từ bộ máy phát âm sinh học của con người hay do thuật toán AI tổng hợp?'** "
-        "(*Biological Human Speech vs. Synthetic/Converted Artifact*). Đây là **trọng tâm 100% của đề tài `ViTrueVoice v0.9.4`**. "
+        "(*Biological Human Speech vs. Synthetic/Converted Artifact*). Đây là **trọng tâm 100% của đề tài `VieTrueVoice v0.9.4`**. "
         "Hệ thống hoạt động hoàn toàn **độc lập với danh tính người nói (*Speaker-Independent*)** và **độc lập với nội dung "
         "câu chữ (*Text-Independent*)**: không cần thu thập trước kho vân giọng của người dân, bất kỳ tin nhắn thoại Zalo hay "
         "ghi âm cuộc gọi nào gửi vào đều được thẩm định tức thì dựa trên vi cấu trúc phổ - pha và động học phát âm.",
@@ -169,7 +169,7 @@ def add_global_foundations(doc) -> None:
             "Tiêu Chí Đối Chiếu",
             "ASR (Speech-to-Text)",
             "ASV (Speaker Verification)",
-            "Speech Anti-Spoofing / CM (ViTrueVoice v0.9.4)",
+            "Speech Anti-Spoofing / CM (VieTrueVoice v0.9.4)",
         ],
         rows=[
             (
@@ -203,7 +203,7 @@ def add_global_foundations(doc) -> None:
                 "Phát hiện và chặn đứng giả mạo (chặn 95,01% trên 15.980 mẫu kiểm thử).",
             ),
             (
-                "Vai trò trong dự án ViTrueVoice v0.9.4",
+                "Vai trò trong dự án VieTrueVoice v0.9.4",
                 "Cổng lọc chất lượng WER/CER (Gate 1) & hỗ trợ ASR cho Live Demo.",
                 "Cổng lọc độ giống vân giọng ECAPA-TDNN (Gate 2) khi tạo tập dữ liệu.",
                 "Mô hình phòng thủ trung tâm SSL-AASIST vận hành trên API, Web & Telegram Bot.",
@@ -215,13 +215,13 @@ def add_global_foundations(doc) -> None:
     add_callout_box(
         doc,
         "Nếu giám khảo hỏi: **'Làm sao hệ thống biết đây không phải giọng thật của bố/mẹ người dùng khi hệ thống chưa từng "
-        "nghe giọng bố/mẹ họ bao giờ?'**, hãy trả lời dứt khoát: *'Dạ thưa Thầy/Cô, ViTrueVoice giải quyết bài toán Speech "
+        "nghe giọng bố/mẹ họ bao giờ?'**, hãy trả lời dứt khoát: *'Dạ thưa Thầy/Cô, VieTrueVoice giải quyết bài toán Speech "
         "Anti-Spoofing (Countermeasure) chứ không phải bài toán định danh ASV. Con người dù giọng trầm hay bổng đều tạo âm "
         "thanh qua luồng hơi phổi làm rung dây thanh đới hữu cơ với biến thiên vi mô tự nhiên; trong khi mọi động cơ AI như "
         "F5-TTS, OmniVoice CFM hay VieNeu-TTS đều phải tái tạo sóng âm qua mạng nơ-ron và bộ giải mã Vocoder, để lại các bất "
         "thường vi cấu trúc phổ - thời gian. Nhờ đó, mô hình phát hiện trực tiếp dấu vết tổng hợp nhân tạo mà không cần lưu "
         "trữ trước sinh trắc học cá nhân của người dân, vừa tiện lợi tức thì vừa an toàn quyền riêng tư.'*",
-        title="BÍ QUYẾT PHẢN BIỆN CỐT LÕI: VÌ SAO VITRUEVOICE KHÔNG CẦN ĐĂNG KÝ GIỌNG TRƯỚC?",
+        title="BÍ QUYẾT PHẢN BIỆN CỐT LÕI: VÌ SAO VieTrueVoice KHÔNG CẦN ĐĂNG KÝ GIỌNG TRƯỚC?",
     )
 
     add_term_glossary(
@@ -266,13 +266,13 @@ def add_global_foundations(doc) -> None:
     )
 
     # =========================================================================
-    # G.2 BỐN TRỤ CỘT KIẾN TRÚC CỦA VITRUEVOICE v0.9.4
+    # G.2 BỐN TRỤ CỘT KIẾN TRÚC CỦA VieTrueVoice v0.9.4
     # =========================================================================
-    add_heading_section(doc, "G.2 Bốn Trụ Cột Kiến Trúc Cốt Lõi Của Hệ Thống ViTrueVoice v0.9.4")
+    add_heading_section(doc, "G.2 Bốn Trụ Cột Kiến Trúc Cốt Lõi Của Hệ Thống VieTrueVoice v0.9.4")
 
     add_foundation_primer(
         doc,
-        process_name="Kiến trúc 4 trụ cột khép kín của hệ thống phát hiện giọng giả ViTrueVoice v0.9.4",
+        process_name="Kiến trúc 4 trụ cột khép kín của hệ thống phát hiện giọng giả VieTrueVoice v0.9.4",
         why_needed=(
             "Một mô hình học sâu đơn lẻ không thể tự mình sống sót trong môi trường chống lừa đảo thực tế. Sinh viên cần "
             "nắm được cách 4 tầng kỹ thuật (Mô hình biểu diễn → Dữ liệu đa kênh nén → Gộp điểm đa cửa sổ → Hiệu chuẩn xác "
@@ -295,7 +295,7 @@ def add_global_foundations(doc) -> None:
 
     add_styled_paragraph(
         doc,
-        "Phiên bản phát hành chính thức **`ViTrueVoice v0.9.4`** được kiến tạo trên **4 trụ cột kỹ thuật xuyên suốt**, "
+        "Phiên bản phát hành chính thức **`VieTrueVoice v0.9.4`** được kiến tạo trên **4 trụ cột kỹ thuật xuyên suốt**, "
         "trong đó mỗi trụ cột giải quyết dứt điểm một điểm nghẽn thực tế của bài toán phát hiện Deepfake tiếng Việt:",
     )
 
@@ -506,7 +506,7 @@ def add_global_foundations(doc) -> None:
         doc,
         "Để tăng thêm 1–2% độ chính xác, nhiều bài báo học thuật ghép nối 5–10 mô hình khổng lồ (*Heavy Ensemble*), làm "
         "thời gian suy luận kéo dài 10–25 giây và tiêu tốn hàng chục GB VRAM — bất khả thi khi người dân cần kiểm tra "
-        "nhanh cuộc gọi khẩn cấp trên máy chủ tiết kiệm chi phí. `ViTrueVoice v0.9.4` giải quyết bằng kiến trúc đơn mô "
+        "nhanh cuộc gọi khẩn cấp trên máy chủ tiết kiệm chi phí. `VieTrueVoice v0.9.4` giải quyết bằng kiến trúc đơn mô "
         "hình tinh gọn chạy gom lô 5 cửa sổ song song, đạt trung vị độ trễ **`1,101 giây`** (benchmark 30 lượt chuẩn) và "
         "**`0,705 giây`** (trên 140 lượt log thực tế) — nhanh gấp ~3–4 lần ngưỡng mục tiêu `≤ 3,0 giây`.",
         "Đỉnh 3 — Tốc độ phản hồi thời gian thực trên phần cứng phổ thông (Real-Time Latency — NFR1 ≤ 3,0s)",
@@ -517,7 +517,7 @@ def add_global_foundations(doc) -> None:
         headers=[
             "Đỉnh Tam Giác Kỹ Thuật",
             "Hệ Lụy Nếu Tối Ưu Cực Đoan Một Chiều",
-            "Giải Pháp Cân Bằng Trong ViTrueVoice v0.9.4",
+            "Giải Pháp Cân Bằng Trong VieTrueVoice v0.9.4",
             "Mục Tiêu KPI",
             "Kết Quả Đạt Được (v0.9.4)",
         ],
@@ -590,7 +590,7 @@ def add_global_foundations(doc) -> None:
     add_styled_paragraph(
         doc,
         "Bảng tổng hợp dưới đây đóng vai trò như **tờ phao tra cứu nhanh (Cheat Sheet)** chứa các khái niệm, ký hiệu "
-        "và thông số khóa cứng quan trọng nhất xuyên suốt từ Chương 1 đến Chương 13 của hệ thống `ViTrueVoice v0.9.4`:",
+        "và thông số khóa cứng quan trọng nhất xuyên suốt từ Chương 1 đến Chương 13 của hệ thống `VieTrueVoice v0.9.4`:",
     )
 
     lexicon_rows = [
@@ -711,7 +711,7 @@ def add_global_foundations(doc) -> None:
         headers=[
             "Thuật Ngữ / Ký Hiệu",
             "Tên Tiếng Anh / Chuẩn Tham Chiếu",
-            "Bản Chất Kỹ Thuật & Con Số Mốc Trong ViTrueVoice v0.9.4",
+            "Bản Chất Kỹ Thuật & Con Số Mốc Trong VieTrueVoice v0.9.4",
         ],
         rows=lexicon_rows,
         col_widths=[1.55, 1.85, 3.30],

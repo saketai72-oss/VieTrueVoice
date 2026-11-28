@@ -4,8 +4,8 @@
 
 ## 1. Bối Cảnh & Mục Tiêu Thử Nghiệm Pilot
 
-Theo đề cương chi tiết môn học CMP436 (Đồ án chuyên ngành CNTT — HUTECH), hệ thống ViTrueVoice phải được đưa vào thử nghiệm thực tế (Pilot) với người dùng thật nhằm:
-1. Đánh giá trải nghiệm người dùng (UX) trên giao diện Web Forensics Lab UI và Telegram Bot `@vitruevoice_bot`.
+Theo đề cương chi tiết môn học CMP436 (Đồ án chuyên ngành CNTT — HUTECH), hệ thống VieTrueVoice phải được đưa vào thử nghiệm thực tế (Pilot) với người dùng thật nhằm:
+1. Đánh giá trải nghiệm người dùng (UX) trên giao diện Web Forensics Lab UI và Telegram Bot `@VieTrueVoice_bot`.
 2. Kiểm tra năng lực chống deepfake trong môi trường mạng thực tế (nén mất mát qua Zalo / Telegram / GSM).
 3. Thu thập ít nhất 3 góp ý phản hồi từ các nhóm đối tượng người dùng đại diện để phục vụ tiêu chí đóng băng tính năng (Feature Freeze) tại Tuần 7 và nghiệm thu tại Tuần 8.
 
@@ -36,13 +36,13 @@ Theo đề cương chi tiết môn học CMP436 (Đồ án chuyên ngành CNTT �
 ## 4. Ba Góp Ý Phản Hồi Trải Nghiệm Thực Tế (UX Feedback)
 
 ### Góp ý 1: Nguyễn Minh Trí (Chủ nhiệm CLB ATTT HUTECH)
-> *"Em đã trực tiếp dùng các công cụ deepfake mới nhất như VoiceStudio CFM và Kokoro để giả giọng của chính mình rồi gửi file nén qua Telegram Bot. Kết quả bất ngờ là ViTrueVoice nhận diện chính xác 100% các đoạn thoại giả mạo kèm điểm số âm sâu (-28 đến -42). Đặc biệt, hệ thống phản hồi cực nhanh (gần như tức thì sau 1 giây), không làm gián đoạn trò chuyện. Góp ý UX: Nhóm nên tích hợp sẵn nút 'Chia sẻ cảnh báo nhanh' sang nhóm chat gia đình để cảnh báo người thân ngay lập tức khi phát hiện cuộc gọi lừa đảo."*
+> *"Em đã trực tiếp dùng các công cụ deepfake mới nhất như VoiceStudio CFM và Kokoro để giả giọng của chính mình rồi gửi file nén qua Telegram Bot. Kết quả bất ngờ là VieTrueVoice nhận diện chính xác 100% các đoạn thoại giả mạo kèm điểm số âm sâu (-28 đến -42). Đặc biệt, hệ thống phản hồi cực nhanh (gần như tức thì sau 1 giây), không làm gián đoạn trò chuyện. Góp ý UX: Nhóm nên tích hợp sẵn nút 'Chia sẻ cảnh báo nhanh' sang nhóm chat gia đình để cảnh báo người thân ngay lập tức khi phát hiện cuộc gọi lừa đảo."*
 
 ### Góp ý 2: Cô Lê Thị Mai (Phụ huynh, 52 tuổi)
 > *"Tôi lớn tuổi nên rất sợ các vụ lừa đảo giả giọng con cái gọi điện xin tiền viện phí hay đóng phạt. Khi thử trang web của cháu Tài, tôi thấy giao diện rất rõ ràng. Cứ file âm thanh thật thì hiện màu Xanh lá 'AN TOÀN', còn giọng giả do máy làm thì hiện màu Đỏ cảnh báo 'NGUY CƠ GIẢ MẠO'. Đặc biệt, tôi rất thích dòng chữ hướng dẫn: 'Hãy giữ bình tĩnh, cúp máy và gọi lại vào số điện thoại thông thường của con'. Lời khuyên này rất thiết thực giúp người già không bị hoảng loạn. Góp ý UX: Chữ trên điện thoại nên to hơn một chút để người mắt kém dễ đọc hơn."*
 
 ### Góp ý 3: Trần Hoàng Nam (Kỹ sư QA độc lập)
-> *"Tôi đã thử nghiệm kịch bản khó: thu âm giọng thật bằng laptop ThinkPad trong phòng có bật tính năng khử ồn AI (AI Noise Suppression). Thông thường, các khoảng lặng bị ép về 0.0000 sẽ khiến mô hình deepfake bắt nhầm là giọng máy. Tuy nhiên, nhờ thuật toán Adaptive Comfort Dithering của ViTrueVoice, hệ thống vẫn nhận diện đúng 100% là người thật (BPCER = 0%). Góp ý kỹ thuật: Nên bổ sung tài liệu hướng dẫn xử lý sự cố (Runbook) cho các trường hợp người dùng dùng trình duyệt Safari trên iOS chưa cấp quyền truy cập Microphone WebRTC."*
+> *"Tôi đã thử nghiệm kịch bản khó: thu âm giọng thật bằng laptop ThinkPad trong phòng có bật tính năng khử ồn AI (AI Noise Suppression). Thông thường, các khoảng lặng bị ép về 0.0000 sẽ khiến mô hình deepfake bắt nhầm là giọng máy. Tuy nhiên, nhờ thuật toán Adaptive Comfort Dithering của VieTrueVoice, hệ thống vẫn nhận diện đúng 100% là người thật (BPCER = 0%). Góp ý kỹ thuật: Nên bổ sung tài liệu hướng dẫn xử lý sự cố (Runbook) cho các trường hợp người dùng dùng trình duyệt Safari trên iOS chưa cấp quyền truy cập Microphone WebRTC."*
 
 ---
 

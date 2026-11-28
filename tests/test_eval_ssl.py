@@ -6,7 +6,7 @@ import torch
 from transformers import Wav2Vec2Config
 
 from src.models.ssl_aasist import SSLAASIST
-from src.training.dataset import ViTrueVoiceDataset
+from src.training.dataset import VieTrueVoiceDataset
 from scripts.eval_ssl_aasist import filter_role, score_manifest, check_tts_labels
 
 SR = 16000
@@ -50,7 +50,7 @@ def test_filter_role_raises_when_empty(df):
 
 def test_score_manifest_schema_and_length(df):
     d, root = df
-    ds = ViTrueVoiceDataset(d, audio_root=root, mode="eval", target_len=8000)
+    ds = VieTrueVoiceDataset(d, audio_root=root, mode="eval", target_len=8000)
     out = score_manifest(tiny_model(), ds, "cpu", batch_size=4, num_workers=0)
     assert len(out) == len(d)
     assert {"score", "label", "speaker_id", "condition", "tts"} <= set(out.columns)

@@ -33,11 +33,11 @@ def test_eval_dev_notebook_structure(tmp_path: Path):
 
 
 def test_audio_resampling_parity(tmp_path):
-    """Kiểm tra tính nhất quán (parity) giữa load_wave và ViTrueVoiceDataset trên các sample rates khác nhau."""
+    """Kiểm tra tính nhất quán (parity) giữa load_wave và VieTrueVoiceDataset trên các sample rates khác nhau."""
     import numpy as np
     import soundfile as sf
     import pandas as pd
-    from src.training.dataset import load_wave, fit_length, ViTrueVoiceDataset
+    from src.training.dataset import load_wave, fit_length, VieTrueVoiceDataset
 
     # 1. Tạo các file audio mẫu ở các tần số khác nhau
     dur_s = 1.5
@@ -69,9 +69,9 @@ def test_audio_resampling_parity(tmp_path):
     manifest_csv = tmp_path / "manifest.csv"
     manifest_df.to_csv(manifest_csv, index=False)
 
-    ds = ViTrueVoiceDataset(manifest_csv, audio_root=tmp_path, mode="eval", train=False)
+    ds = VieTrueVoiceDataset(manifest_csv, audio_root=tmp_path, mode="eval", train=False)
 
-    # 2. Đối chiếu từng item giữa ViTrueVoiceDataset và loader chuẩn dùng load_wave
+    # 2. Đối chiếu từng item giữa VieTrueVoiceDataset và loader chuẩn dùng load_wave
     for idx, row in manifest_df.iterrows():
         item_ds = ds[idx]
         wav_direct = load_wave(tmp_path / row["audio_path"], sr=16000)
@@ -84,5 +84,5 @@ def test_audio_resampling_parity(tmp_path):
 
         # Kiểm tra parity tuyệt đối với dataset
         np.testing.assert_allclose(item_ds["wave"].numpy(), wav_fit, atol=1e-5,
-                                   err_msg=f"Không khớp tensor giữa ViTrueVoiceDataset và load_wave cho {row['audio_path']}")
+                                   err_msg=f"Không khớp tensor giữa VieTrueVoiceDataset và load_wave cho {row['audio_path']}")
 

@@ -1,4 +1,4 @@
-"""Shared decision and calibration logic for ViTrueVoice inference endpoints."""
+"""Shared decision and calibration logic for VieTrueVoice inference endpoints."""
 
 from __future__ import annotations
 from dataclasses import dataclass

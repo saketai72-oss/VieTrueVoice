@@ -42,7 +42,7 @@
 1. **Checkpoint B gốc (`best_model_B.pt`)**:
    - Kiểm tra `out/kaggle_ssl_out/best_model_B.pt` (hoặc tải trực tiếp 379 MB qua `ApiDownloadKernelOutputRequest` từ Kaggle `nguyenthanhtai1959/vietrue-ssl-training`).
    - Kiểm tra băm SHA-256 khớp: `a921c3397946335c9543528993eafde80ac0d42decf431101635806b5c56bd9f`.
-2. **Audio ZIP 3.26 GB (`vitruevoice_data_processed.zip`)**:
+2. **Audio ZIP 3.26 GB (`VieTrueVoice_data_processed.zip`)**:
    - Tải tệp ZIP trực tiếp qua `ApiDownloadKernelOutputRequest` từ Kaggle `nguyenthanhtai1959/vietrue-model-training` vào thư mục `data/raw_zip/`.
    - **Giải nén chọn lọc (Bijective Selective Unzip)**: Chỉ giải nén 6.786 tệp audio gốc cần thiết cho tập Train và Dev Zalo vào `data/local_cache/audio/` (~1.2 GB), tránh giải nén tràn lan 49.000 file làm chậm I/O ổ đĩa Windows.
 3. **Sinh Proxy Kênh Zalo**:

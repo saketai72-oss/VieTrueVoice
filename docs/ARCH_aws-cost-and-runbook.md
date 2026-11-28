@@ -4,7 +4,7 @@
 
 ## 1. Kiến Trúc Hạ Tầng AWS & Dự Toán Chi Phí (3 Quy Mô Người Dùng)
 
-Căn cứ chứng chỉ **AWS Academy Cloud Architecting (100% Complete)** và số đo thực nghiệm độ trễ $P_{50} = 66.3\text{ ms}$, hạ tầng ViTrueVoice được thiết kế tối ưu trên AWS Region Singapore (`ap-southeast-1`):
+Căn cứ chứng chỉ **AWS Academy Cloud Architecting (100% Complete)** và số đo thực nghiệm độ trễ $P_{50} = 66.3\text{ ms}$, hạ tầng VieTrueVoice được thiết kế tối ưu trên AWS Region Singapore (`ap-southeast-1`):
 
 | Hạng mục dịch vụ AWS | Quy mô 1: 100 User/ngày (~500 reqs/ngày) | Quy mô 2: 1.000 User/ngày (~10.000 reqs/ngày) | Quy mô 3: 10.000 User/ngày (~200.000 reqs/ngày) |
 |---|---|---|---|
@@ -25,7 +25,7 @@ Căn cứ chứng chỉ **AWS Academy Cloud Architecting (100% Complete)** và s
 
 | Mã sự cố | Triệu chứng | Nguyên nhân gốc rễ | Lệnh / Thao tác khắc phục tức thì | Biện pháp phòng ngừa lâu dài |
 |---|---|---|---|---|
-| **INC-01** | Tràn VRAM GPU (`CUDA Out of Memory`) | Nhiều tác vụ Live VoiceStudio CFM chạy song song trên GPU 4GB VRAM. | `docker restart vitruevoice-api` hoặc `torch.cuda.empty_cache()` | Cấu hình hàng đợi Celery/Redis giới hạn tối đa 2 luồng CFM đồng thời. |
+| **INC-01** | Tràn VRAM GPU (`CUDA Out of Memory`) | Nhiều tác vụ Live VoiceStudio CFM chạy song song trên GPU 4GB VRAM. | `docker restart VieTrueVoice-api` hoặc `torch.cuda.empty_cache()` | Cấu hình hàng đợi Celery/Redis giới hạn tối đa 2 luồng CFM đồng thời. |
 | **INC-02** | Âm thanh Micro bị im lặng / rè | Micro WebRTC 48kHz bị trôi lệch DC Offset và tiếng ù đất 50Hz. | Bật tự động: `librosa.effects.trim(top_db=25)` và chuẩn hóa đỉnh 95%. | Tái lấy mẫu Mono PCM_16 ngay trên luồng thu WebRTC của trình duyệt. |
 | **INC-03** | Khởi động lạnh trễ $> 3.0$s | CUDA Context và trọng số chưa được nạp sẵn khi container mới bật. | Gửi request khởi động mồi: `curl http://localhost:8000/health` kèm dummy tensor. | Tích hợp script warm-up tự động trong Dockerfile ENTRYPOINT. |
 | **INC-04** | Lỗi định dạng tệp âm thanh lạ | File tải lên bị hỏng header hoặc sai phần mở rộng MIME type. | Bộ nạp `audio_loader.py` nhận diện theo Magic Bytes và stream qua FFmpeg. | Chặn tệp không hợp lệ tại tầng Gateway trước khi nạp vào AI Core. |

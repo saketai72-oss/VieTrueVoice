@@ -29,7 +29,7 @@ from .styles import (
 
 
 def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
-    """Render Chapters 1, 2, and 3 for the ViTrueVoice v0.9.4 Defense & Study Handbook."""
+    """Render Chapters 1, 2, and 3 for the VieTrueVoice v0.9.4 Defense & Study Handbook."""
 
     # =========================================================================
     # CHƯƠNG 1: BÀI TOÁN DEEPFAKE TIẾNG VIỆT, GIẢ THUYẾT CH1/CH2 & HỆ ĐO LƯỜNG
@@ -168,7 +168,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
         "Để đảm bảo tính khách quan khoa học nghiêm ngặt (tránh ngụy biện sửa mục tiêu sau khi đã biết kết quả), đồ án "
         "thiết lập ngay từ đầu **2 Câu hỏi nghiên cứu (`CH1`, `CH2`)**, **2 Giả thuyết khoa học định lượng (`H1`, `H2`)** "
         "và **Yêu cầu phi chức năng cốt lõi về thời gian thực (`NFR1`)**, đối chiếu trực tiếp với kết quả thực nghiệm của "
-        "phiên bản phát hành **`ViTrueVoice v0.9.4`**:",
+        "phiên bản phát hành **`VieTrueVoice v0.9.4`**:",
     )
 
     add_bullet_item(
@@ -533,7 +533,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
         add_figure(
             doc,
             figs["fig1"],
-            "Hình 1.1: Minh họa trực quan cơ chế chấm điểm và đánh giá của ViTrueVoice v0.9.4. "
+            "Hình 1.1: Minh họa trực quan cơ chế chấm điểm và đánh giá của VieTrueVoice v0.9.4. "
             "Khung A (Trái): Mật độ phân phối điểm thô s = z_bonafide − z_spoof của lớp Giọng Giả (đỏ) và Giọng Thật (xanh lá) "
             "quanh vạch ngưỡng quyết định θ = 0,0, làm rõ phần diện tích đuôi chồng lấn gây lỗi lọt lưới giả mạo APCER (s ≥ 0) "
             "và lỗi báo nhầm người thật BPCER (s < 0). Khung B (Phải): Đường cong đánh đổi lỗi phát hiện DET cắt đường phân giác "
@@ -604,7 +604,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
     add_styled_paragraph(
         doc,
         "Trong học sâu hiện đại, chất lượng thiết kế tập dữ liệu quyết định trực tiếp tính trung thực của mọi con số thực "
-        "nghiệm. Chương 2 trình bày chi tiết kiến trúc dữ liệu đối xứng của **`ViTrueVoice v0.9.4`**: cách tổ chức 3 nguồn "
+        "nghiệm. Chương 2 trình bày chi tiết kiến trúc dữ liệu đối xứng của **`VieTrueVoice v0.9.4`**: cách tổ chức 3 nguồn "
         "giọng thật tiếng Việt, sự phân vai chiến lược giữa hai động cơ Seen TTS đối xứng (`F5-TTS` + `OmniVoice CFM`) và "
         "động cơ Unseen TTS (`VieNeu-TTS v3 Turbo`), các rào chắn toán học chống rò rỉ dữ liệu 100%, bộ lọc chất lượng tự "
         "động 4 cổng cùng hệ thống 5 tệp Manifest 19 cột và kho lưu trữ nghiệm thu `Voice_Final` (`103.189` tệp).",
@@ -619,7 +619,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
     # -------------------------------------------------------------------------
     add_heading_section(
         doc,
-        "2.1 Ba Nguồn Giọng Thật (Bonafide) & Phân Công Động Cơ TTS Đối Xứng Trong ViTrueVoice v0.9.4",
+        "2.1 Ba Nguồn Giọng Thật (Bonafide) & Phân Công Động Cơ TTS Đối Xứng Trong VieTrueVoice v0.9.4",
     )
 
     add_foundation_primer(
@@ -757,7 +757,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
 
     add_styled_paragraph(
         doc,
-        "Mọi tệp manifest trong `ViTrueVoice v0.9.4` bắt buộc vượt qua bài kiểm toán tự động bằng kịch bản kiểm thử đơn "
+        "Mọi tệp manifest trong `VieTrueVoice v0.9.4` bắt buộc vượt qua bài kiểm toán tự động bằng kịch bản kiểm thử đơn "
         "vị với **3 ràng buộc cô lập không khoan nhượng**:",
     )
 
@@ -994,7 +994,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
     add_styled_paragraph(
         doc,
         "Kế thừa khung siêu dữ liệu 18 cột ban đầu và bổ sung cột thứ 19 **`base_utt`** để khóa liên kết đối xứng qua 5 "
-        "kênh truyền, toàn bộ vòng đời huấn luyện và đánh giá của **`ViTrueVoice v0.9.4`** được quản lý minh bạch qua **5 "
+        "kênh truyền, toàn bộ vòng đời huấn luyện và đánh giá của **`VieTrueVoice v0.9.4`** được quản lý minh bạch qua **5 "
         "tệp Manifest chuẩn 19 cột** (`utt_id`, `audio_path`, `speaker_id`, `source`, `label`, `role`, `tts_generator`, "
         "`codec`, `pre_codec`, `split`, `duration_sec`, `transcript`, `raw_wer`, `raw_cer`, `ecapa_sim`, `wavlm_sim`, "
         "`derived_tier`, `seed`, `base_utt`):",
@@ -1006,7 +1006,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
             "Tên Tệp Manifest Chính Thức",
             "Quy Mô (Số Dòng)",
             "Thành Phần Nguồn & TTS",
-            "Vai Trò Khoa Học Trong ViTrueVoice v0.9.4",
+            "Vai Trò Khoa Học Trong VieTrueVoice v0.9.4",
         ],
         rows=[
             (
@@ -1088,7 +1088,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
         add_figure(
             doc,
             figs["fig2"],
-            "Hình 2.1: Sơ đồ kiến trúc dữ liệu đối xứng và luồng chống rò rỉ của ViTrueVoice v0.9.4. "
+            "Hình 2.1: Sơ đồ kiến trúc dữ liệu đối xứng và luồng chống rò rỉ của VieTrueVoice v0.9.4. "
             "Ba nguồn giọng thật đi qua màng lọc cô lập cứng (Speaker-Disjoint, Hard Text-Disjoint, cô lập 100% 5 tình nguyện "
             "viên nghiệm thu SPK_0003..0007), phân tách rạch ròi giữa 2 động cơ Seen TTS (F5-TTS 6.170 tệp & OmniVoice CFM "
             "6.445 tệp đối xứng) và động cơ Unseen TTS kiểm định H2 (VieNeu-TTS v3 Turbo), vượt qua bộ lọc 4 cổng và 5 cấu "
@@ -1129,7 +1129,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
         doc,
         "Trước khi bất kỳ mạng nơ-ron học sâu nào có thể phát huy sức mạnh, tín hiệu âm thanh thô phải đi qua chuỗi "
         "**Tiền xử lý tín hiệu số (*Digital Signal Processing — DSP*)** tại gói `src/preprocessing/`. Chương 3 giải mã "
-        "từng mắt xích vật lý và toán học giúp `ViTrueVoice v0.9.4` chuẩn hóa mọi định dạng hỗn tạp về tensor chuẩn "
+        "từng mắt xích vật lý và toán học giúp `VieTrueVoice v0.9.4` chuẩn hóa mọi định dạng hỗn tạp về tensor chuẩn "
         "`(1, 64000)` trực tiếp trên RAM, triệt tiêu hoàn toàn các đường tắt âm học và mô phỏng chính xác 5 kênh nén thực "
         "tế cùng nhiễu `RawBoost`.",
         font_size=10.5,
@@ -1297,7 +1297,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
         "(`WebRTC`) tự động bật 3 bộ lọc phần mềm: khử ồn (`noiseSuppression`), khử vọng (`echoCancellation`) và tự động "
         "kích biên (`autoGainControl`). Các bộ lọc này gây ra hiện tượng **cổng ngắt đột ngột (*Squelch Gating*)**: cứ mỗi "
         "khi người nói nghỉ lấy hơi `0,1 giây` giữa hai từ, trình duyệt ép biên độ đoạn nghỉ đó về con số `0,000000` phẳng "
-        "lì phi tự nhiên, làm mạng đồ thị `AASIST` lầm tưởng là vết cắt ghép nhân tạo. `ViTrueVoice v0.9.4` giải quyết triệt "
+        "lì phi tự nhiên, làm mạng đồ thị `AASIST` lầm tưởng là vết cắt ghép nhân tạo. `VieTrueVoice v0.9.4` giải quyết triệt "
         "để từ hai đầu: (1) Tắt hoàn toàn cả 3 cờ `noiseSuppression = false`, `echoCancellation = false`, "
         "`autoGainControl = false` ngay khi gọi micro trình duyệt; (2) Điều hòa luồng thu qua hàm cắt khoảng lặng rìa "
         "(`top_db = 25`) và chuẩn hóa biên độ đỉnh đạt **`95%`** (`−0,45 dBFS`) trước khi đưa vào chuỗi suy luận.",
@@ -1376,7 +1376,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
             (
                 "Zero-Padding",
                 "Đệm chèn số không",
-                "Cách điền đầy đuôi tín hiệu ngắn bằng các số 0 — bị nghiêm cấm trong ViTrueVoice vì gây vách nhảy phổ giả và rò rỉ độ dài.",
+                "Cách điền đầy đuôi tín hiệu ngắn bằng các số 0 — bị nghiêm cấm trong VieTrueVoice vì gây vách nhảy phổ giả và rò rỉ độ dài.",
             ),
         ],
     )
@@ -1500,7 +1500,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
 
     add_styled_paragraph(
         doc,
-        "Phiên bản **`ViTrueVoice v0.9.4`** chuẩn hóa ma trận **5 cấu hình kênh truyền thực tế** đại diện đầy đủ cho hạ "
+        "Phiên bản **`VieTrueVoice v0.9.4`** chuẩn hóa ma trận **5 cấu hình kênh truyền thực tế** đại diện đầy đủ cho hạ "
         "tầng nhắn tin mạng xã hội và mạng viễn thông tại Việt Nam:",
     )
 
@@ -1584,7 +1584,7 @@ def add_chapters_1_to_3(doc, figs: dict | None = None) -> None:
             "Hình 3.1: Minh họa trực quan hai quyết định tiền xử lý cốt lõi trong Chương 3. "
             "Khung A (Trái): So sánh dạng sóng 4,0 giây (64.000 mẫu @ 16kHz) giữa lỗi thiết kế Zero-Padding (tạo vách đứt "
             "gãy biên độ rơi thẳng về 0 tại 2,25s) và kỹ thuật chuẩn Repeat Padding (nối lặp tuần hoàn bảo toàn tính liên "
-            "tục sóng âm). Khung B (Phải): Đối chiếu dải băng thông tần số giữ lại được của 5 kênh truyền trong ViTrueVoice "
+            "tục sóng âm). Khung B (Phải): Đối chiếu dải băng thông tần số giữ lại được của 5 kênh truyền trong VieTrueVoice "
             "v0.9.4, cho thấy sự thu hẹp khắc nghiệt từ 50–8.000 Hz (Clean) xuống chỉ còn 300–3.400 Hz trên G.711 và AMR-NB.",
         )
 

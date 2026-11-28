@@ -8,7 +8,7 @@ from transformers import Wav2Vec2Config
 
 from src.models.ssl_aasist import SSLAASIST
 from src.training.dataset import (
-    ViTrueVoiceDataset, fit_length, check_unseen_excluded,
+    VieTrueVoiceDataset, fit_length, check_unseen_excluded,
 )
 from src.training.losses import loss_weights_from_counts
 from src.training.trainer import (
@@ -51,7 +51,7 @@ def manifest(tmp_path):
 
 def ds(manifest, **kw):
     df, root = manifest
-    return ViTrueVoiceDataset(df, audio_root=root, target_len=16000, **kw)
+    return VieTrueVoiceDataset(df, audio_root=root, target_len=16000, **kw)
 
 
 # ---------- fit_length ----------
@@ -93,7 +93,7 @@ def test_unknown_label_raises(manifest):
     df = df.copy()
     df.loc[0, "label"] = "???"
     with pytest.raises(ValueError):
-        ViTrueVoiceDataset(df, audio_root=root, target_len=16000, mode="eval")
+        VieTrueVoiceDataset(df, audio_root=root, target_len=16000, mode="eval")
 
 
 def test_transform_only_applied_in_augmented_train(manifest):

@@ -54,7 +54,7 @@ def main():
     b64_payload = base64.b64encode(zlib.compress(json.dumps(pkg).encode("utf-8"))).decode("ascii")
 
     cell2_source = [
-        "# 2. Khởi tạo package vitruevoice trên Kaggle container\n",
+        "# 2. Khởi tạo package VieTrueVoice trên Kaggle container\n",
         "import base64\n",
         "import zlib\n",
         "import json\n",
@@ -65,7 +65,7 @@ def main():
         "\n",
         "pkg_data = json.loads(zlib.decompress(base64.b64decode(PKG_B64.encode('ascii'))).decode('utf-8'))\n",
         "working_dir = Path('/kaggle/working') if Path('/kaggle/working').exists() else Path('./out')\n",
-        "pkg_root = working_dir / 'vitruevoice'\n",
+        "pkg_root = working_dir / 'VieTrueVoice'\n",
         "pkg_root.mkdir(parents=True, exist_ok=True)\n",
         "\n",
         "for rel_path, content in pkg_data.items():\n",
@@ -76,7 +76,7 @@ def main():
         "if str(working_dir) not in sys.path:\n",
         "    sys.path.insert(0, str(working_dir))\n",
         "\n",
-        "print(f'✅ Đã khởi tạo thành công package vitruevoice tại: {pkg_root} ({len(pkg_data)} files)')\n"
+        "print(f'✅ Đã khởi tạo thành công package VieTrueVoice tại: {pkg_root} ({len(pkg_data)} files)')\n"
     ]
     nb["cells"][2]["source"] = cell2_source
 
@@ -434,14 +434,14 @@ def main():
         "# 4. Sinh giọng Spoof qua Dual Pipeline (kèm MP3 round-trip cho Common Voice OOD & Checkpoints)\n",
         "import dataclasses\n",
         "from vitruevoice.batch_processor import BatchDatasetProcessor\n",
-        "from vitruevoice.pipeline import ViTrueVoiceDualPipeline, PipelineMode\n",
+        "from vitruevoice.pipeline import VieTrueVoiceDualPipeline, PipelineMode\n",
         "from vitruevoice.evaluator import MultiGateEvaluator\n",
         "\n",
         "device = 'cuda:0' if torch.cuda.is_available() else 'cpu'\n",
         "if 'processor' not in globals() or processor is None:\n",
         "    print(f'🚀 Đang khởi tạo Dual Pipeline và Evaluator trên thiết bị: {device}...')\n",
         "    evaluator = MultiGateEvaluator(device=device)\n",
-        "    pipeline = ViTrueVoiceDualPipeline(device=device, evaluator=evaluator)\n",
+        "    pipeline = VieTrueVoiceDualPipeline(device=device, evaluator=evaluator)\n",
         "    processor = BatchDatasetProcessor(pipeline=pipeline, evaluator=evaluator, device=device)\n",
         "else:\n",
         "    print(f'♻️ Tái sử dụng Pipeline & Evaluator đang có sẵn trên {device}.')\n",
@@ -694,7 +694,7 @@ def main():
         "for m in list(manifests_dir.glob('*.csv')) + list(manifests_dir.glob('*.json')):\n",
         "    shutil.copy(m, working_dir / m.name)\n",
         "\n",
-        "zip_out = working_dir / 'vitruevoice_data_processed.zip'\n",
+        "zip_out = working_dir / 'VieTrueVoice_data_processed.zip'\n",
         "print(f'📦 Đang nén thư mục data vào {zip_out.name}...')\n",
         "with zipfile.ZipFile(zip_out, 'w', zipfile.ZIP_DEFLATED) as zf:\n",
         "    for f in data_root.rglob('*'):\n",

@@ -63,7 +63,7 @@ def select_best_engine(
             reason = f"CẢNH BÁO: Cả hai đều trượt hard gates! Tạm chọn {name_b} do WER thấp hơn ({m_b.clean_wer*100:.1f}% vs {m_a.clean_wer*100:.1f}%)"
             return cand_vn, cand_f5, reason, "FAIL_BOTH_GATES"
 
-class ViTrueVoiceDualPipeline:
+class VieTrueVoiceDualPipeline:
     def __init__(self, device: Optional[str] = None, evaluator: Optional[MultiGateEvaluator] = None):
         import torch
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -96,7 +96,7 @@ class ViTrueVoiceDualPipeline:
         spk_threshold: Optional[float] = None
     ) -> Dict[str, Any]:
         """
-        Giao diện tổng hợp âm thanh thống nhất của ViTrueVoice với cơ chế xử lý lỗi an toàn,
+        Giao diện tổng hợp âm thanh thống nhất của VieTrueVoice với cơ chế xử lý lỗi an toàn,
         hỗ trợ multi-seed retry bù lỗi ngẫu nhiên và đo lường độ trễ chi tiết.
         """
         t_start_total = time.perf_counter()

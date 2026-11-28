@@ -1,5 +1,5 @@
 /**
- * ViTrueVoice v0.9.4 — Live Browser Microphone Recorder (16kHz Mono PCM WAV)
+ * VieTrueVoice v0.9.4 — Live Browser Microphone Recorder (16kHz Mono PCM WAV)
  * Requests raw un-gated microphone audio (echoCancellation/noiseSuppression/AGC OFF)
  * to preserve genuine acoustic room floor & harmonics for SSL-AASIST forensics.
  * Feeds real-time volume level into window.vieTrueVoice3D.setAudioLevel().
@@ -85,7 +85,7 @@
     return new Blob([buffer], { type: 'audio/wav' });
   }
 
-  class ViTrueVoiceRecorder {
+  class VieTrueVoiceRecorder {
     constructor(callbacks) {
       this.cb = callbacks || {};
       this.isRecording = false;
@@ -355,5 +355,5 @@
     }
   }
 
-  window.ViTrueVoiceRecorder = ViTrueVoiceRecorder;
+  window.VieTrueVoiceRecorder = VieTrueVoiceRecorder;
 })();

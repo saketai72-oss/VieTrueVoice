@@ -1,4 +1,4 @@
-"""Quick CLI & FastAPI Web UI demo runner for ViTrueVoice anti-spoofing detection.
+"""Quick CLI & FastAPI Web UI demo runner for VieTrueVoice anti-spoofing detection.
 
 Usage:
   python scripts/demo_predict.py                  # Demo tự động trên 3 mẫu đối chứng
@@ -79,7 +79,7 @@ def run_cli_demo(audio_path: str, model: Any, device: str, threshold: float = 0.
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="ViTrueVoice CLI & FastAPI Web UI Runner")
+    parser = argparse.ArgumentParser(description="VieTrueVoice CLI & FastAPI Web UI Runner")
     parser.add_argument("audio", nargs="?", default=None, help="Đường dẫn file âm thanh cần test")
     parser.add_argument("--web", action="store_true", help="Khởi động FastAPI + WebGL Forensics UI (uvicorn)")
     parser.add_argument("--server", action="store_true", help="Khởi động máy chủ FastAPI (uvicorn)")
@@ -92,7 +92,7 @@ def main() -> None:
     if args.web or args.server:
         import uvicorn
 
-        print(f"Đang khởi động ViTrueVoice FastAPI + WebGL Forensics UI trên cổng {args.port}...")
+        print(f"Đang khởi động VieTrueVoice FastAPI + WebGL Forensics UI trên cổng {args.port}...")
         print(f"Web UI       : http://localhost:{args.port}/")
         print(f"Swagger Docs : http://localhost:{args.port}/docs")
         app = create_app(

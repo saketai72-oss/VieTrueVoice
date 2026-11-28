@@ -3,7 +3,7 @@ r"""
 Script to generate the official Week 4 (W04) report document for:
 Course: CMP436 - Đồ án chuyên ngành CNTT (HUTECH)
 Student: Nguyễn Thành Tài - MSSV: 2380601959 - Lớp: 23DTHD5
-Topic: ViTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén)
+Topic: VieTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén)
 Target path: C:\Users\saket\Documents\Đồ án chuyên ngành\Content\DACN_2380601959_NguyenThanhTai_W04.docx
 """
 
@@ -148,7 +148,7 @@ def main():
         ("Họ và tên", "Nguyễn Thành Tài"),
         ("MSSV · Lớp", "2380601959 · 23DTHD5"),
         ("GVHD", "TS. Nguyễn Quang Trung"),
-        ("Đề tài", "Phát triển ViTrueVoice: hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (repo: VieTrueVoice)"),
+        ("Đề tài", "Phát triển VieTrueVoice: hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (repo: VieTrueVoice)"),
         ("Link repo GitHub", "https://github.com/saketai72-oss/VieTrueVoice"),
         ("Link video demo (1–2 phút quay liền)", "[DÁN LINK VIDEO TẠI ĐÂY - YOUTUBE HOẶC GOOGLE DRIVE CÔNG KHAI]"),
         ("Link Commit / PR Tính năng #1", "https://github.com/saketai72-oss/VieTrueVoice/commit/f0f155e (commits chuỗi [AI] tính năng Must #1)"),
@@ -254,7 +254,7 @@ def main():
 
     # 5. PHẦN I. PHIẾU NHẬT KÝ TUẦN W04
     add_heading_1(doc, "PHẦN I. PHIẾU NHẬT KÝ TUẦN W04 (02/11 – 08/11/2026)")
-    add_styled_paragraph(doc, "Họ tên: Nguyễn Thành Tài · MSSV: 2380601959 · Đề tài: ViTrueVoice · Repo: https://github.com/saketai72-oss/VieTrueVoice")
+    add_styled_paragraph(doc, "Họ tên: Nguyễn Thành Tài · MSSV: 2380601959 · Đề tài: VieTrueVoice · Repo: https://github.com/saketai72-oss/VieTrueVoice")
     
     # Bảng nhật ký tuần
     t_log = doc.add_table(rows=6, cols=2)
@@ -264,7 +264,7 @@ def main():
     log_data = [
         ("Mục", "Nội dung thực hiện chi tiết trong tuần W04"),
         ("Việc đã làm trong tuần (02/11 – 06/11/2026)",
-         "• 02/11 – Khởi động Tính năng Must #1: Thiết lập cấu trúc module tiền xử lý tín hiệu âm thanh src/vitruevoice/audio_loader.py; áp dụng quy trình TDD, tự viết unit test test_prepare_input_tensor_short_repeat_padding trước khi viết mã; cài đặt kỹ thuật nối lặp (repeat padding) thay cho zero-padding nhằm bảo toàn liên tục phổ.\n"
+         "• 02/11 – Khởi động Tính năng Must #1: Thiết lập cấu trúc module tiền xử lý tín hiệu âm thanh src/VieTrueVoice/audio_loader.py; áp dụng quy trình TDD, tự viết unit test test_prepare_input_tensor_short_repeat_padding trước khi viết mã; cài đặt kỹ thuật nối lặp (repeat padding) thay cho zero-padding nhằm bảo toàn liên tục phổ.\n"
          "• 03/11 – Xây dựng Dual Pipeline sinh dữ liệu giả mạo kết hợp hai công nghệ tiên tiến nhất hiện nay: Flow Matching (F5-TTS tiếng Việt) và Neural Audio Codec LLM (VieNeu-TTS v3 Turbo); xây dựng 4 cổng kiểm định chất lượng âm học không nhãn (Label-Free Prosody Gates: Gate 1 WER/CER qua Wav2Vec2-VN, Gate 2 F0 Pitch Correlation qua CREPE/YIN, Gate 3 HNR Spectral Flatness, Gate 4 Duration Ratio) để loại bỏ 100% các mẫu giả bị méo dạng hoặc rỗng ngữ điệu.\n"
          "• 04/11 – Xây dựng module suy giảm kênh thoại viễn thông TelephonyCompressor (G.711 A-law 64kbps, AMR-NB 12.2kbps, Zalo AAC-LC 76kbps mono, Zalo Opus 24kbps) và cơ chế Paired Triplets 1:1:1 bảo toàn tính đối chứng tuyệt đối giữa mẫu Clean và Codec; xây dựng bộ manifest chuẩn 18 cột, thiết lập ràng buộc Speaker-Disjoint và Hard Text-Disjoint; chạy kiểm thử tự động xác nhận 0% rò rỉ dữ liệu.\n"
          "• 05/11 – Nhập 20 bản ghi gốc của tình nguyện viên SPK_0003 từ thư mục download máy cá nhân để thay thế cho bộ SPK_0001; hoàn tất sinh mẫu F5-TTS và VieNeu-TTS cho đủ bộ 5 tình nguyện viên đối chứng độc lập (SPK_0003, SPK_0004, SPK_0005, SPK_0006, SPK_0007) gồm 84 clip bona fide và 150 clip spoof kép; chạy đánh giá baseline đầu–cuối trên mô hình SSL-AASIST V5 Local đạt AUC = 0.9343, EER = 11.33%; chạy pytest 227/227 unit tests pass 100%.\n"
@@ -585,7 +585,7 @@ def main():
         ("AC-3: Tăng cường suy giảm kênh thoại đa dạng", 
          "Hỗ trợ tối thiểu 3 codec viễn thông thực tế (G.711, AMR-NB, Opus/AAC Zalo).", 
          "ĐẠT: Đã triển khai module TelephonyCompressor hỗ trợ đồng bộ cả 4 codec: G.711 A-law, AMR-NB 12.2k, AAC-LC 76k mono và Opus 24k.", 
-         "Mã nguồn src/vitruevoice/telephony_compressor.py và bộ manifest ghép cặp base_utt."),
+         "Mã nguồn src/VieTrueVoice/telephony_compressor.py và bộ manifest ghép cặp base_utt."),
         ("AC-4: Không rò rỉ dữ liệu (Speaker & Text Disjoint)", 
          "Tập giao người nói và văn bản giữa Train, Dev và Test bắt buộc bằng rỗng (0%).", 
          "ĐẠT: Áp dụng Hard Text-Disjoint 3 tầng (Test -> Dev -> Train) và cô lập 100% tình nguyện viên SPK_xxxx thành bộ nghiệm thu riêng.", 
@@ -756,13 +756,13 @@ def main():
         "Tuy nhiên, thực nghiệm đối chứng trong đề cương nghiên cứu đã chỉ ra các hạn chế cố hữu của đặc trưng thủ công:\n"
         "• Mất mát hoàn toàn thông tin góc pha: Các phép biến đổi Fourier thời gian ngắn (STFT) trong MFCC/LFCC chỉ giữ lại biên độ phổ |X(t, f)| và loại bỏ góc pha phi(t, f), trong khi các mô hình TTS hiện đại thường bộc lộ dấu vết giả mạo rõ rệt nhất ở miền pha.\n"
         "• Kém bền vững trước nén codec: Khi âm thanh bị nén qua các bộ codec viễn thông phá hủy (Lossy Codecs), các dải tần số cao bị cắt lọc mạnh mẽ, khiến các hệ số MFCC bậc cao bị nhiễu loạn nghiêm trọng, dẫn đến tỷ lệ lỗi bằng nhau (EER) tăng vọt từ 3.28% lên hơn 40% [3].\n\n"
-        "Để vượt qua rào cản này, hệ thống ViTrueVoice ứng dụng mô hình Học biểu diễn tự giám sát (Self-Supervised Learning - SSL) wav2vec 2.0 [1], tiếp nhận trực tiếp sóng âm thô x in R^(T) với tần số 16 kHz mà không qua bất kỳ bước trích xuất phổ thủ công nào. "
+        "Để vượt qua rào cản này, hệ thống VieTrueVoice ứng dụng mô hình Học biểu diễn tự giám sát (Self-Supervised Learning - SSL) wav2vec 2.0 [1], tiếp nhận trực tiếp sóng âm thô x in R^(T) với tần số 16 kHz mà không qua bất kỳ bước trích xuất phổ thủ công nào. "
         "Kiến trúc wav2vec 2.0 bao gồm ba khối chức năng chính:\n"
         "1. Khối mã hóa đặc trưng cục bộ (Temporal Convolutional Feature Encoder): Bao gồm 7 tầng tích chập một chiều (1D Conv) với kernel size (10, 3, 3, 3, 3, 2, 2) và stride (5, 2, 2, 2, 2, 2, 2). Khối này nén tín hiệu âm thanh thô 16.000 mẫu/giây thành các vector biểu diễn đặc trưng tiềm ẩn z_t in R^(512) với độ trễ thời gian 20ms và độ dài bước nhảy 25ms.\n"
         "2. Khối biểu diễn ngữ cảnh toàn cục (Context Transformer Network): Gồm 12 tầng Transformer chuẩn (đối với bản Base) với cơ chế tự chú ý đa đầu (Multi-Head Self-Attention). Khối này tiếp nhận chuỗi vector z_t sau khi đã được che ngẫu nhiên (masking ~49% các bước thời gian) và trích xuất các biểu diễn ngữ cảnh phong phú c_t in R^(768) phản ánh cấu trúc âm học toàn cầu của câu nói.\n"
         "3. Khối lượng tử hóa vector Gumbel-Softmax (Quantization Module): Ánh xạ biểu diễn tiềm ẩn z_t thành các vector từ vựng âm học q_t thông qua hai bảng từ vựng (Codebooks), mỗi bảng chứa 320 mục từ vector (Entries). Quá trình huấn luyện tự giám sát tối ưu hóa hàm mất mát tương phản (Contrastive Loss L_m) kết hợp hàm mất mát đa dạng từ vựng (Diversity Loss L_d):\n"
         "    L_contrast = - log [ exp(sim(c_t, q_t) / tau) / sum_(q~ in Q_t) exp(sim(c_t, q~) / tau) ]\n"
-        "Trong dự án ViTrueVoice, chúng em sử dụng trọng số mô hình wav2vec 2.0 tiếng Việt được tiền huấn luyện tự giám sát trên hơn 250 giờ dữ liệu nói tiếng Việt chuẩn từ kho Mozilla Common Voice 8.0. "
+        "Trong dự án VieTrueVoice, chúng em sử dụng trọng số mô hình wav2vec 2.0 tiếng Việt được tiền huấn luyện tự giám sát trên hơn 250 giờ dữ liệu nói tiếng Việt chuẩn từ kho Mozilla Common Voice 8.0. "
         "Biểu diễn ẩn c_t trích xuất từ tầng thứ 12 của mô hình mang đặc tính 'bất biến với người nói' (Speaker-Invariant) nhưng lại 'nhạy cảm cao độ với tính liên tục âm học tự nhiên', tạo nền tảng vững chắc cho tầng phân loại phía sau."
     )
 
@@ -780,7 +780,7 @@ def main():
         "    alpha_(i, j) = exp( LeakyReLU( a^T [W h_i || W h_j] ) ) / sum_(k in N_i) exp( LeakyReLU( a^T [W h_i || W h_k] ) )\n"
         "Sau đó, thông tin được tổng hợp qua phép chiếu đồ thị tích hợp (Integrated Graph Module), cho phép dòng thông tin luân chuyển liên tục giữa miền phổ và miền thời gian mà không bị giới hạn bởi cấu trúc lưới tích chập cố định.\n\n"
         "3. Kiến trúc kết hợp SSL-AASIST:\n"
-        "Trong hệ thống ViTrueVoice, thay vì sử dụng khối SincNet thô sơ của AASIST nguyên bản, chúng em kết nối trực tiếp đầu ra chuỗi đặc trưng c_t in R^(B x 199 x 768) từ khối wav2vec 2.0 vào tầng chiếu tuyến tính (Linear Projection) của AASIST để hạ chiều xuống R^(B x 199 x 64). "
+        "Trong hệ thống VieTrueVoice, thay vì sử dụng khối SincNet thô sơ của AASIST nguyên bản, chúng em kết nối trực tiếp đầu ra chuỗi đặc trưng c_t in R^(B x 199 x 768) từ khối wav2vec 2.0 vào tầng chiếu tuyến tính (Linear Projection) của AASIST để hạ chiều xuống R^(B x 199 x 64). "
         "Sự kết hợp này tạo nên mô hình SSL-AASIST mạnh mẽ, tận dụng trọn vẹn tri thức âm học ngữ cảnh của 250 giờ tiếng Việt kết hợp cùng khả năng phân tích đồ thị phổ-thời gian tinh vi."
     )
 
@@ -790,7 +790,7 @@ def main():
         "Một thách thức nghiêm trọng khi huấn luyện mô hình phát hiện deepfake bằng hàm mất mát Cross-Entropy (CE) thông thường là hiện tượng 'sụp đổ ranh giới quyết định' (Decision Boundary Collapse). "
         "Hàm CE chỉ thúc đẩy mô hình tìm ra một siêu phẳng phân tách tuyến tính vừa đủ giữa hai lớp, khiến các mẫu trong cùng một lớp bị phân tán rộng (intra-class variance lớn) và khoảng cách giữa hai lớp bị thu hẹp (inter-class margin nhỏ). "
         "Khi đối mặt với các công cụ tổng hợp giọng nói chưa từng gặp (Unseen TTS), vector biểu diễn của mẫu giả dễ dàng trôi dạt vào vùng không gian của giọng thật, dẫn đến tỷ lệ chấp nhận nhầm (FAR) tăng vọt [3].\n\n"
-        "Để giải quyết triệt để vấn đề này, ViTrueVoice triển khai kỹ thuật Học không gian số đo (Metric Learning) thông qua Hàm mất mát Biên độ góc cộng thêm (Additive Margin Softmax - AM-Softmax) [2, 3]. "
+        "Để giải quyết triệt để vấn đề này, VieTrueVoice triển khai kỹ thuật Học không gian số đo (Metric Learning) thông qua Hàm mất mát Biên độ góc cộng thêm (Additive Margin Softmax - AM-Softmax) [2, 3]. "
         "Nguyên lý toán học của AM-Softmax hoạt động như sau:\n"
         "1. Chuẩn hóa vector: Cả vector trọng số lớp W_j và vector đặc trưng đầu ra x_i (tại tầng áp chót) đều được chuẩn hóa về độ dài đơn vị trên mặt cầu L2:\n"
         "    ||W_j||_2 = 1,  ||x_i||_2 = 1  ==>  W_j^T x_i = cos(theta_j)\n"
@@ -798,7 +798,7 @@ def main():
         "2. Đưa vào biên độ góc trừng phạt (Margin Penalty m) và hệ số co giãn (Scale s):\n"
         "Đối với lớp mục tiêu đúng y_i, giá trị cos(theta_(y_i)) bị trừ đi một lượng biên độ cố định m > 0, buộc mô hình phải ép góc theta_(y_i) nhỏ hơn nữa thì mới đạt điểm số tương đương:\n"
         "    L_AM = - (1 / N) sum_(i=1)^N log [ exp(s * (cos(theta_(y_i)) - m)) / ( exp(s * (cos(theta_(y_i)) - m)) + sum_(j != y_i) exp(s * cos(theta_j)) ) ]\n"
-        "Trong thực nghiệm ViTrueVoice, chúng em khóa hệ số co giãn s = 30.0 và biên độ góc m = 0.35. "
+        "Trong thực nghiệm VieTrueVoice, chúng em khóa hệ số co giãn s = 30.0 và biên độ góc m = 0.35. "
         "Cơ chế này ép toàn bộ các vector giọng thật (Bona fide) co cụm chặt chẽ quanh tâm cầu lớp 1, đồng thời đẩy toàn bộ các vector giọng giả (Spoof) về phía đối diện, tạo ra một vùng đệm an toàn tuyệt đối ở giữa.\n\n"
         "Bên cạnh đó, do tập dữ liệu sau khi loại bỏ 100% công cụ VieNeu-TTS khỏi tập Train có sự mất cân bằng nhãn lớn (mẫu Spoof chỉ chiếm khoảng 7.5% tổng số mẫu), chúng em áp dụng Hàm mất mát Weighted Cross-Entropy động (Dynamic Weighted CE) với trọng số lớp w_c tính theo nghịch đảo tần suất thực tế:\n"
         "    w_c = N / (2 * N_c)\n"
@@ -814,13 +814,13 @@ def main():
         "• Chuẩn ITU-T G.711 A-law: Chuẩn nén cổ điển trong mạng điện thoại cố định PSTN và VoIP. Sử dụng tần số lấy mẫu 8.000 Hz, lượng tử hóa phi tuyến logarit (A-law companding) với tốc độ bit cố định 64 kbps. G.711 cắt bỏ toàn bộ dải tần số trên 3.400 Hz, làm mất sạch thông tin âm sắc cao tần.\n"
         "• Chuẩn 3GPP AMR-NB (Adaptive Multi-Rate Narrowband): Chuẩn thoại di động 2G/3G sử dụng thuật toán mã hóa dự đoán tuyến tính kích thích mã đại số (ACELP) với tốc độ 12.2 kbps @ 8 kHz. Quá trình mô hình hóa âm thanh qua các bộ lọc tuyến tính (LPC filters) làm phẳng các đỉnh phổ và bóp nghẹt các dấu vết vocoder nhân tạo.\n\n"
         "2. Kênh thoại nén OTT Zalo (Cấu hình Dual Profile):\n"
-        "Dựa trên kết quả phân tích gói tin mạng và đảo ngược luồng dữ liệu thoại của ứng dụng Zalo, hệ thống ViTrueVoice đã khóa cấu hình Dual Profile mô phỏng kênh Zalo:\n"
+        "Dựa trên kết quả phân tích gói tin mạng và đảo ngược luồng dữ liệu thoại của ứng dụng Zalo, hệ thống VieTrueVoice đã khóa cấu hình Dual Profile mô phỏng kênh Zalo:\n"
         "• Profile A (aac_zalo_76k): Chuẩn mã hóa âm thanh nâng cao AAC-LC (Advanced Audio Coding - Low Complexity) với tốc độ 76 kbps, tần số lấy mẫu 48.000 Hz, đơn kênh (mono). Sử dụng phép biến đổi cosin rời rạc biến đổi (MDCT) với mô hình tâm lý âm học (Psychoacoustic Model) để loại bỏ các dải tần bị che tai người nghe.\n"
         "• Profile B (opus_zalo_24k): Chuẩn nén Opus (IETF RFC 6716 [8]) với tốc độ rất thấp 24 kbps đóng gói trong container OGG. Opus linh hoạt kết hợp giữa thuật toán SILK (tối ưu cho tiếng nói) và CELT (tối ưu cho âm nhạc), gây méo pha và suy giảm dải tần trên 12 kHz.\n\n"
         "3. Tác động của Codec đối với bộ phân loại Deepfake và Giải pháp Paired Triplets:\n"
         "Khi tín hiệu âm thanh bị nén, các hiện tượng suy giảm xảy ra đồng thời: (a) cắt gọt băng thông tần số cao, (b) méo pha cục bộ tại các khối biến đổi MDCT/ACELP, và (c) xuất hiện nhiễu lượng tử hóa nhân tạo. "
         "Hệ quả là các bộ phân loại huấn luyện trên âm thanh sạch (Clean) sẽ nhận nhầm nhiễu codec thành dấu vết deepfake (tăng báo động nhầm ở giọng thật), hoặc ngược lại, codec làm mờ các dấu vết của vocoder khiến mẫu giả lọt qua cửa kiểm soát. "
-        "Để khắc phục, ViTrueVoice thiết kế cấu trúc dữ liệu Bộ ba ghép cặp (Paired Triplets 1:1:1): Mỗi đoạn thoại gốc được lưu trữ đồng bộ 3 phiên bản (Clean, Profile A AAC, Profile B Opus) cùng trường khóa liên kết base_utt. "
+        "Để khắc phục, VieTrueVoice thiết kế cấu trúc dữ liệu Bộ ba ghép cặp (Paired Triplets 1:1:1): Mỗi đoạn thoại gốc được lưu trữ đồng bộ 3 phiên bản (Clean, Profile A AAC, Profile B Opus) cùng trường khóa liên kết base_utt. "
         "Trong quá trình huấn luyện, kỹ thuật tăng cường kênh truyền RawBoost và Codec Augmentation ngẫu nhiên giúp mạng nơ-ron học cách 'nhìn xuyên qua lớp vỏ codec' để nắm bắt bản chất sóng âm bên trong."
     )
 
@@ -828,7 +828,7 @@ def main():
     add_heading_2(doc, "2.6 Đạo đức thu thập dữ liệu sinh trắc học và An toàn thông tin giọng nói")
     p_26 = add_styled_paragraph(doc, 
         "Giọng nói của con người là một dạng dữ liệu sinh trắc học cá nhân cực kỳ nhạy cảm, có khả năng định danh duy nhất một cá thể và gắn liền với quyền riêng tư công dân. "
-        "Trong bối cảnh Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định số 356/2025/NĐ-CP của Chính phủ Việt Nam có hiệu lực thi hành, dự án ViTrueVoice đặt nguyên tắc đạo đức sinh trắc học và an toàn thông tin lên mức ưu tiên cao nhất, thể hiện qua 3 chính sách bắt buộc [4]:\n\n"
+        "Trong bối cảnh Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định số 356/2025/NĐ-CP của Chính phủ Việt Nam có hiệu lực thi hành, dự án VieTrueVoice đặt nguyên tắc đạo đức sinh trắc học và an toàn thông tin lên mức ưu tiên cao nhất, thể hiện qua 3 chính sách bắt buộc [4]:\n\n"
         "1. Quy trình Thu thập và Phiếu đồng thuận minh bạch (Informed Consent):\n"
         "100% dữ liệu giọng nói của các tình nguyện viên tham gia dự án (nhóm SPK_xxxx) đều được thu thập dựa trên Phiếu đồng ý xử lý dữ liệu sinh trắc học bằng văn bản. "
         "Người tham gia được thông báo rõ ràng về: (a) mục đích nghiên cứu học thuật phi lợi nhuận, (b) phạm vi sử dụng dữ liệu, (c) quyền yêu cầu hủy bỏ và xóa vĩnh viễn dữ liệu bất kỳ lúc nào, và (d) cam kết tuyệt đối không thương mại hóa hoặc chuyển giao dữ liệu cho bên thứ ba.\n\n"

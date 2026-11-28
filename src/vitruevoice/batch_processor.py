@@ -1,5 +1,5 @@
 """
-ViTrueVoice Batch Dataset Processor & Manifest Generator.
+VieTrueVoice Batch Dataset Processor & Manifest Generator.
 CMP436 - Synthetic Voice Detection in Compressed Telephony.
 
 Cung cấp tiện ích xử lý hàng loạt trên các tập dữ liệu lớn (VIVOS, Common Voice):
@@ -22,7 +22,7 @@ import torch
 from .base import ManifestRecord, QualityMetrics
 from .evaluator import MultiGateEvaluator
 from .speaker_profiler import SpeakerProfiler
-from .pipeline import ViTrueVoiceDualPipeline, PipelineMode
+from .pipeline import VieTrueVoiceDualPipeline, PipelineMode
 
 
 class DatasetPartitioner:
@@ -118,14 +118,14 @@ class BatchDatasetProcessor:
 
     def __init__(
         self,
-        pipeline: Optional[ViTrueVoiceDualPipeline] = None,
+        pipeline: Optional[VieTrueVoiceDualPipeline] = None,
         evaluator: Optional[MultiGateEvaluator] = None,
         device: str = "cuda" if torch.cuda.is_available() else "cpu"
     ):
         self.device = device
         self.evaluator = evaluator or MultiGateEvaluator(device=device)
         self.profiler = SpeakerProfiler(evaluator=self.evaluator)
-        self.pipeline = pipeline or ViTrueVoiceDualPipeline(evaluator=self.evaluator)
+        self.pipeline = pipeline or VieTrueVoiceDualPipeline(evaluator=self.evaluator)
 
     def process_speaker(
         self,

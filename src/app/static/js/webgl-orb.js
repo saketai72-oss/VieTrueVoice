@@ -1,5 +1,5 @@
 /**
- * ViTrueVoice v0.9.4 — WebGL 3D Liquid Obsidian Orb (Three.js r125)
+ * VieTrueVoice v0.9.4 — WebGL 3D Liquid Obsidian Orb (Three.js r125)
  * Simplex 3D Noise + Fresnel Rim GLSL Shader (Stitch ANIMATION_12 fidelity).
  *
  * Public API on window.vieTrueVoice3D:

@@ -1,4 +1,4 @@
-"""Fast in-memory acoustic & neural forensics extraction for ViTrueVoice API.
+"""Fast in-memory acoustic & neural forensics extraction for VieTrueVoice API.
 
 Zero disk writes; executes on CPU in < 20ms for standard 4-10s speech clips.
 """

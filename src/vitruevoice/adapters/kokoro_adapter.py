@@ -10,7 +10,7 @@ from ..base import BaseTTSAdapter, SynthesisRequest, SynthesisResult
 class KokoroAdapter(BaseTTSAdapter):
     """
     Adapter for Kokoro-Vietnamese (StyleTTS 2 + iSTFTNet).
-    Unseen TTS benchmark engine for ViTrueVoice generalization evaluation (Hypothesis H2).
+    Unseen TTS benchmark engine for VieTrueVoice generalization evaluation (Hypothesis H2).
     """
 
     DEFAULT_VOICE = "diem_trinh"

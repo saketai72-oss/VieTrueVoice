@@ -57,6 +57,16 @@ def test_health_reports_loaded_model_and_device(client):
     assert payload["version"] == "0.9.4"
 
 
+def test_favicon_and_logo_served(client):
+    fav = client.get("/favicon.ico")
+    assert fav.status_code == 200
+    assert len(fav.content) > 0
+
+    svg = client.get("/static/assets/logo.svg")
+    assert svg.status_code == 200
+    assert "<svg" in svg.text
+
+
 def test_predict_returns_contract_and_logs_only_audio_hash(client, tmp_path):
     audio_bytes = make_wav_bytes()
 
