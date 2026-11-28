@@ -6,7 +6,7 @@
 - **Tên dự án**: ViTrueVoice (Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
 - **Phiên bản**: 0.9.4 (Symmetric 6.445 OmniVoice_CFM Clone, 2-Run Retrain, Head-Calibration `head_blend_a0.75` & Clean Release Sync) — tuân thủ Semantic Versioning
 - **Trạng thái**: Đang hoạt động (Active)
-- **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Gradio, Python-Telegram-Bot, pytest
+- **Ngăn xếp công nghệ (Tech Stack)**: Python 3.12, PyTorch 2.6 (CUDA), torchaudio, librosa, soundfile, Transformers, FastAPI, Brutalist WebGL Forensics Web UI (Three.js, GSAP, Lenis, Canvas), Python-Telegram-Bot, pytest
 - **Điểm neo ngữ cảnh (Context Anchors)**: [PLAN.md](PLAN.md), [README.md](README.md), [howtorun.md](howtorun.md), [SPEC_deep-voice-generalization.md](docs/SPEC_deep-voice-generalization.md), [DESIGN.md](DESIGN.md)
 
 ## Thứ Tự Ưu Tiên Tài Liệu
@@ -21,7 +21,7 @@
 - **Sinh Mẫu Giả & Dữ Liệu**: `docs/LOGIC_data-generation.md` — sinh kép F5-TTS / VieNeu-TTS v3 Turbo, lọc 4 cổng, 5 manifests 18 cột, Common Voice 8.0, Paired Triplets, Hard Text-Disjoint, dò shortcut.
 - **Thuật toán Tiền xử lý**: `docs/LOGIC_preprocessing.md` — chuẩn hóa 16kHz mono, EBU R128 (-23 LUFS), Z-score, cắt khoảng lặng P20, repeat padding 64k, RawBoost, suy giảm Codec.
 - **Kiến trúc Mô hình & Huấn luyện**: `docs/LOGIC_models.md` — Baseline LFCC+GMM / AASIST, SSL-AASIST, Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$, thiết kế đối chứng CH1/CH2, huấn luyện 2 pha.
-- **Tiêu chuẩn API & Đánh giá**: `docs/STANDARDS_api-benchmarks.md` — endpoint FastAPI, Gradio/Bot UI, log ẩn danh SHA-256, chuẩn đo độ trễ, AI Eval $\ge 30$ ca.
+- **Tiêu chuẩn API & Đánh giá**: `docs/STANDARDS_api-benchmarks.md` — endpoint FastAPI, Brutalist WebGL Web UI (`/`), Bot UI, log ẩn danh SHA-256, chuẩn đo độ trễ, AI Eval $\ge 30$ ca.
 - **Quy tắc**: Tuyệt đối không hợp nhất các tệp này nếu không có chỉ định rõ ràng. Phân tách ranh giới để ngăn ngừa lỗi hồi quy.
 
 ## Các Quyết Định Có Chủ Đích (STUBBORN_FACTs)
@@ -76,7 +76,7 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 | Quên đăng ký tài liệu mới vào sổ quản trị | Đăng ký vào `docs/ARCH_documentation-governance.md` trước khi sử dụng |
 
 ## Giao Thức Trước Khi Commit & Push (Pre-Commit & Pre-Push Protocol)
-1. **Kiểm thử CI Bắt buộc**: Chạy `pytest tests/ -v`. Toàn bộ 392 bài test phải pass 100%. BẮT BUỘC kiểm tra các mock module (như `external/VoiceStudio`, `omnivoice`) đảm bảo không phụ thuộc tài nguyên local/git-ignored làm gãy CI trên môi trường GitHub Actions Ubuntu.
+1. **Kiểm thử CI Bắt buộc**: Chạy `pytest tests/ -v`. Toàn bộ bộ kiểm thử TDD phải pass 100%. BẮT BUỘC kiểm tra các mock module (như `external/VoiceStudio`, `omnivoice`) đảm bảo không phụ thuộc tài nguyên local/git-ignored làm gãy CI trên môi trường GitHub Actions Ubuntu.
 2. **Quy tắc Kiểm thử CI Trước Khi Push (Pre-Push CI Rule)**: TUYỆT ĐỐI không push lên remote khi chưa chạy kiểm thử toàn diện cục bộ; sau khi push, BẮT BUỘC theo dõi kết quả GitHub Actions CI (`gh run list` / `gh run watch`) để xác nhận pipeline xanh 100% (Success). Không bao giờ để commit trên remote bị lỗi đỏ CI.
 3. **Tài liệu**: BẮT BUỘC luôn tự động cập nhật các tệp tài liệu liên quan (`PLAN.md`, `README.md`, `howtorun.md`, `AGENTS.md`, `docs/LOGIC_*.md`, `docs/ARCH_*.md`) mỗi khi có bất kỳ thay đổi logic, sửa lỗi hay tiến độ thực thi mới; không để tài liệu bị lạc hậu so với mã nguồn thực tế.
 4. **Dọn dẹp**: Xóa lệnh in debug (print), xóa tệp nháp tạm.
@@ -118,10 +118,11 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
   (5) Handbook v2: Biên dịch tự động Sổ tay v2 sang Word (.docx) và PDF (.pdf) tại `SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx` (27.393 từ, 497 đoạn văn, 34 bảng, 27 Q&As) và `.pdf` (4.97 MB / 4.966.162 bytes); toàn bộ test suite đạt **382/382 unit tests pass 100% green**.
 - [x] v0.9.4: Symmetric 6.445 OmniVoice_CFM Clone, 2-Run Retraining, Head-Calibration (`head_blend_a0.75`), 15.980-Clip Benchmark & Voice_Final 1:1 Symmetry — Khôi phục toàn bộ kho `OmniVoice_CFM` đối xứng 1:1 với V7 `VieNeu-TTS` và chuẩn hóa mô hình chính thức theo phiên bản release `v0.9.4`:
   (1) **Dữ liệu `data/spoof_omnivoice_v8/` & `Voice_Final` 1:1**: Sinh đủ **6.445** tệp WAV (VIVOS **4.795** / 65 spk; CommonVoice **1.225** / 25 spk; SPK_Volunteers **425** = `SPK_0001` 50 + `SPK_0003..0007` 375); xuất bản lại toàn bộ `Voice_Final` đạt **103.189** files (`bonafide`: 70.174 | `spoof/v7`: 13.955 | `spoof/v8`: 19.060, khớp 100% `VOICE_FINAL_MANIFEST.csv` và SHA-256); xuất đủ 5 manifest chuẩn (`train_v8_f5_omni_no_spk1.csv`: **54.225**, `train_v8_f5_omni_with_spk1.csv`: **54.400**, `dev_v8_f5_omni.csv`: **12.405**, `test_indomain_v8_f5_omni.csv`: **15.980**, `unseen_vieneu_benchmark.csv`: **955**, 0% leakage);
-  (2) **Huấn luyện 2-Run & Hiệu chuẩn (`am_s=30.0, am_m=0.20, batch_size=8, accum_steps=2`)**: Tập đối chứng 54.225 dòng (Dev EER 6.32%) và tập Train chính thức 54.400 dòng (gồm 175 mẫu của tình nguyện viên dư `SPK_0001`, giữ cô lập 100% 5 SPK nghiệm thu `SPK_0003..0007`, Phase 2 Ep 1 Dev EER 5.95%); hiệu chuẩn đầu phân loại 1 epoch trên `train_v8_balanced_ft.csv` (5.100 dòng cân bằng) kết hợp nội suy `head_blend_a0.75 = 0.25*Run2_P2 + 0.75*P2_HeadOnly`; chuẩn hóa checkpoint chính thức tại `out/v0.9.4/best_model.pt` (`sha256: 30a383256458740e...`) và hợp nhất hàm `resolve_default_checkpoint()` trong `src/app/server.py` (UI/API/Playground dùng chung phiên bản `v0.9.4`);
+  (2) **Huấn luyện 2-Run & Hiệu chuẩn (`am_s=30.0, am_m=0.20, batch_size=8, accum_steps=2`)**: Tập đối chứng 54.225 dòng (Dev EER 6.32%) và tập Train chính thức 54.400 dòng (gồm 175 mẫu của tình nguyện viên dư `SPK_0001`, giữ cô lập 100% 5 SPK nghiệm thu `SPK_0003..0007`, Phase 2 Ep 1 Dev EER 5.95%); hiệu chuẩn đầu phân loại 1 epoch trên `train_v8_balanced_ft.csv` (5.100 dòng cân bằng) kết hợp nội suy `head_blend_a0.75 = 0.25*Run2_P2 + 0.75*P2_HeadOnly`; chuẩn hóa checkpoint chính thức tại `out/v0.9.4/best_model.pt` (`sha256: 30a383256458740e...`) và hợp nhất hàm `resolve_default_checkpoint()` trong `src/app/server.py` (Web UI/API/Bot dùng chung phiên bản `v0.9.4`);
   (3) **Đối chứng 4 Gates x 3 Pooling (`asymmetric_veto` | `max` | `mean`)**: Mô hình `v0.9.4` đạt G1 `SPK_0001` = **93.3% (14/15)** ở cả 3 mode; G2 5 SPK = **95.2% (80/84)** | **98.8% (83/84)** | `91.7% (77/84)` (`SPK_0004..0007` = **100% 64/64** ở `veto` & `max`); G3 Unseen VieNeu (955) = **12.05% (79.6% blk)** | `12.30% (76.8%)` | `12.90% (81.9%)` ($\le 15.0\%$ H2); G4 Omni Reversal (195) = **72.8% (142/195)** | `60.5%` | **74.4%**; Dev BPCER = `6.00%` | `4.85%` | `8.10%`; Seen Omni Dev (955) = **8.06% EER / 91.5% blk** (`veto`);
   (4) **Benchmark `test_indomain_v8_f5_omni.csv` (15.980 dòng, `eval_only=15.665`)**: Dưới `asymmetric_veto`, `v0.9.4` đạt **5.63% EER / 95.01% blk** (BPCER `6.73%`; F5 `2.81% / 98.49%`; OmniVoice **7.95% / 91.52%**) vượt trội V8.0 (`6.79% / 90.33%`, Omni `8.84% / 82.41%`) và V7 (`13.72% / 87.22%`, Omni `19.88% / 75.00%`), thắng toàn diện trên cả 5/5 codecs (`clean 5.52%`, `aac_76k 5.79%`, `opus_24k 6.02%`, `g711 6.11%`, `amr_nb 4.88%`);
-  (5) **QA, Clean Workspace, Docker & Handbook v2**: Gỡ script/JSON thử nghiệm dư thừa, giải phóng 25.69 GB cache/checkpoint cục bộ, giữ **100% unit tests xanh**, Docker `vitruevoice-api` `/health` HTTP 200 nạp `out/v0.9.4/best_model.pt` (`sha256: 30a383256458740e...`), đồng bộ Chương 13 & biên dịch lại Sổ tay v2.
+  (5) **QA, Clean Workspace, Docker & Handbook v2**: Gỡ script/JSON thử nghiệm dư thừa, giải phóng 25.69 GB cache/checkpoint cục bộ, giữ **100% unit tests xanh**, Docker `vitruevoice-api` `/health` HTTP 200 nạp `out/v0.9.4/best_model.pt` (`sha256: 30a383256458740e...`), đồng bộ Chương 13 & biên dịch lại Sổ tay v2;
+  (6) **Brutalist Editorial & WebGL Forensics Web UI (`/`)**: Gỡ bỏ hoàn toàn Gradio (`src/app/ui.py`, `gradio` trong `requirements.txt`) và `/playground` (`playground.html`, trả về `404`); thay thế bằng giao diện Web Forensics mới phục vụ trực tiếp tại `http://localhost:8000/` (`src/app/static/index.html`, `css/app.css`, `js/{webgl-orb,audio-recorder,charts,app}.js`, 3 ảnh phổ thực tế `assets/card_0*.png`), tích hợp module phân tích âm học in-memory `src/app/forensics.py`, endpoint `GET /api/v1/samples`, payload `forensics` & `delta_margin` trên `/api/v1/predict` và `/api/v1/clone-and-audit`, cùng bộ kiểm thử TDD mới (`tests/test_forensics.py`, `tests/test_web_ui.py`).
 - [ ] v1.0.0: Thử nghiệm Pilot & Nghiệm thu (W7-W8) — Đóng gói Docker AWS EC2, S3 Lifecycle, CI/CD, bảo mật nâng cao, Red Team Pilot CLB ATTT HUTECH.
 
 ## Lệnh Thường Dùng
@@ -142,8 +143,8 @@ Chuyển về câu đầy đủ trong các trường hợp: cảnh báo an mật
 - `python scripts/audit_v6_manifest.py`: Kiểm toán an ninh và tính toàn vẹn của Manifest Zalo V6.
 - `python scripts/eval_v5_gate.py`: Đánh giá 3 cổng kiểm định độc lập với `--pooling` (mặc định True).
 - `python scripts/benchmark_latency.py`: Đo kiểm thời gian đáp ứng thời gian thực với `--pooling` (30 lần lặp).
-- `uvicorn src.app.server:app --reload`: Khởi động máy chủ phát triển FastAPI.
-- `python -m src.app.ui`: Khởi động Gradio Web UI với Chế độ 1 (Thẩm định nhanh) và Chế độ 2 (Live VoiceStudio CFM Cloning & Forensics).
+- `uvicorn src.app.server:app --reload --port 8000`: Khởi động máy chủ FastAPI cùng Brutalist WebGL Forensics Web UI tại `http://localhost:8000/`.
+- `python scripts/demo_predict.py --web`: Khởi động máy chủ Web UI & API trên cổng `8000` (tích hợp Tab 01 Thẩm định giọng nói & Tab 02 Nhân bản và Kiểm chứng OmniVoice CFM).
 
 ---
 

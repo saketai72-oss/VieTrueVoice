@@ -13,7 +13,7 @@
 
 ### 0.2. Quy Tắc Phát Triển & Vận Hành Bắt Buộc Cho Agent
 
-1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ **392/392 unit tests** hiện tại phải vượt qua $100\%$ trước mỗi commit.
+1. **Quy tắc TDD (Test-Driven Development)**: Bắt buộc viết kịch bản kiểm thử (`pytest`) trước khi viết mã nguồn thực thi. Toàn bộ bộ kiểm thử TDD phải vượt qua $100\%$ trước mỗi commit.
 2. **Quy ước Git Commit**: Mọi bản commit có sự hỗ trợ của AI bắt buộc gắn tiền tố `[AI]` ở đầu thông điệp commit.
 3. **Quy trình Huấn luyện Cục bộ / Đám mây**:
    - Phát triển mã nguồn, viết unit tests, huấn luyện trên GPU cục bộ (`scripts/run_v8_1_phase_train.py`, `scripts/train.py`) và quản lý toàn bộ dự án tại Local; có thể sinh notebook Kaggle/Colab theo yêu cầu qua `scripts/build_*_notebook.py`.
@@ -50,7 +50,7 @@ VieTrueVoice/
 │   ├── models/                    # Baseline LFCC+GMM, AASIST SincConv, SSL-AASIST (wav2vec 2.0 + HS-GAL)
 │   ├── training/                  # Dataset, DataLoader, Dynamic Weighted CE Loss, Vòng lặp 2 pha
 │   ├── evaluation/                # Tính toán EER, minDCF, ROC-AUC, DET Curve, Confusion Matrix
-│   └── app/                       # FastAPI server (/api/v1/predict), Gradio UI (<=3 thao tác), Telegram Bot
+│   └── app/                       # FastAPI server (/api/v1/predict, /api/v1/clone-and-audit, /api/v1/samples), forensics.py, Brutalist WebGL Forensics Web UI (static/index.html tại /), Telegram Bot, Zalo Webhook
 ├── scripts/
 │   ├── generate_spoof.py          # Script sinh mẫu giả
 │   ├── filter_asr_wer.py          # Script lọc ASR WER
@@ -64,7 +64,7 @@ VieTrueVoice/
 │   ├── latency_log.json           # Log độ trễ ẩn danh băm SHA-256
 │   └── latency_benchmark.csv      # Bảng 30 lần bấm giờ lấy trung vị
 ├── out/                           # Trọng số best_model.pt và manifests tải từ Kaggle về
-└── tests/                         # Bộ kiểm thử TDD (392/392 tests xanh 100%)
+└── tests/                         # Bộ kiểm thử TDD (pass 100% green trên CI)
 ```
 
 ---
@@ -76,7 +76,7 @@ VieTrueVoice/
 | **1. Tạo & Chuẩn bị Dữ liệu (Must #1 - W3, W4)** | Dữ liệu khoa học VIVOS (65 spk) & Common Voice 8.0 (419 spk) + Bộ nghiệm thu độc lập 5 tình nguyện viên `SPK_xxxx` (cô lập 100% khỏi train/dev/test) + Văn bản kịch bản | Phân hoạch V12/V14/V20; clip đơn 3.5–7.5s (`allow_stitching=False`); sinh kép `DUAL_OUTPUT` (F5-TTS & VieNeu-TTS v3 Turbo $48\text{ kHz}$); lọc 4 cổng (Gate 1–4 Label-Free Prosody); Hard Text-Disjoint; TelephonyCompressor | $\ge 1.000$ mẫu Bona fide + $\ge 2.000$ mẫu Spoof (độc lập $\approx 2:1$) + Manifests 18 cột (`pre_codec`), Paired Triplets 1:1:1 cho Eval |
 | **2. Tiền xử lý & Augmentation (W4, W5)** | File âm thanh thô đa định dạng ($24\text{ kHz}$ / $48\text{ kHz}$ / $16\text{ kHz}$, Stereo/Mono) | Chuyển Mono, Resample $16\text{ kHz}$, chuẩn hóa EBU R128 (-23 LUFS) / Z-score, cắt khoảng lặng (20th percentile), Cắt/Đệm 4s (64.000 mẫu), RawBoost + Nén Opus/AMR-NB/G.711/lọc $8\text{ kHz}$ | Tensor Waveform chuẩn hóa $(1, 64000)$ mô phỏng lệch miền (domain shift) qua Zalo/PSTN/GSM |
 | **3. Huấn luyện & Đối chứng (Must #2 - W5)** | Batch Tensor Waveform $(1, 64000)$ + Nhãn (`0`: Spoof, `1`: Bona fide) | Fine-tune wav2vec 2.0 (có vs. không tăng cường nén kênh; Seen F5-TTS vs. Unseen VieNeu-TTS) & Baseline LFCC+GMM / AASIST với Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$ | Trọng số `best_model.pt` + Bảng so sánh EER & minDCF có/không tăng cường nén kênh |
-| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Web Gradio hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case (223/223 unit tests xanh), bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
+| **4. Đánh giá, Triển khai & Pilot (Must #2, #3 - W5–W8)** | Đoạn thoại nghi ngờ (5–10s) từ Brutalist WebGL Web UI (`/`) hoặc chuyển tiếp qua Bot Telegram | Suy luận qua FastAPI trên AWS EC2 + Log ẩn danh SHA-256; $\ge 10$ test case, bộ eval $\ge 30$ tình huống; Pilot với CLB ATTT HUTECH | Giảm $\ge 30\%$ EER tập nén (H1), EER Unseen TTS $\le 15\%$ (H2), Trung vị độ trễ $\le 3$ giây (30 lần đo) |
 
 ---
 
@@ -210,7 +210,7 @@ processor.run_batch(
 
 ## GIAI ĐOẠN 04: ĐÁNH GIÁ THỰC NGHIỆM, TRIỂN KHAI AWS/DOCKER, KIỂM THỬ & PILOT (GOALS & DELIVERABLES)
 
-*Thực hiện Must #2, #3 & CP6–CP10 (W5–W10): Kiểm định EER/minDCF, triển khai FastAPI + Gradio + Bot Telegram, bảo mật AWS và Pilot với CLB ATTT HUTECH.*
+*Thực hiện Must #2, #3 & CP6–CP10 (W5–W10): Kiểm định EER/minDCF, triển khai FastAPI + Brutalist WebGL Forensics Web UI (`/`) + Bot Telegram, bảo mật AWS và Pilot với CLB ATTT HUTECH.*
 
 ### [BƯỚC 4.1] Giao Thức Đo Lường Trước–Sau, Script Tái Lập & Bộ AI Eval $\ge 30$ Ca
 
@@ -226,7 +226,7 @@ processor.run_batch(
 
 - **Dịch vụ Suy luận Thời Gian Thực $\le 3$ Giây (Must #2, #3 – W5, W6)**:
   - **FastAPI (`/api/v1/predict`)**: Đọc file qua RAM stream, cắt cửa sổ 4s, suy luận song song `torch.inference_mode()`, xóa file tạm ngay.
-  - **Web Gradio (US4, NFR4)**: Giao diện tối giản $\le 3$ thao tác cho người lớn tuổi, hiển thị nhãn `THẬT` / `GIẢ MẠO` to rõ kèm thang độ tin cậy.
+  - **Brutalist Editorial & WebGL Forensics Web UI (`/` trên cổng 8000 — US4, NFR4)**: Thay thế hoàn toàn Gradio và `/playground` cũ bằng giao diện hợp nhất phục vụ trực tiếp trên FastAPI (`/`), tích hợp 2 tab thực tế (Tab 01 Thẩm định giọng nói `/api/v1/predict` kèm 4 biểu đồ Canvas từ `forensics` & Tab 02 Nhân bản và Kiểm chứng OmniVoice CFM `/api/v1/clone-and-audit`), hiển thị nhãn `BONA_FIDE` / `SPOOF` / `BORDERLINE` kèm xác suất Platt Scaling (`T=16.0`).
   - **Bot Telegram**: Tiếp nhận tin nhắn thoại chuyển tiếp, xử lý in-memory và phản hồi trực tiếp trong chat.
   - **Đo Độ Trễ 30 Lần**: Script `scripts/benchmark_latency.py` đo 30 lần liên tiếp lấy trung vị $\le 3,0$ giây lưu `benchmarks/latency_benchmark.csv`. Log ẩn danh SHA-256 ghi nhận vào `benchmarks/latency_log.json`.
 - **Hạ Tầng Đám Mây AWS & 2 Biện Pháp Bảo Mật (Gói khóa học A – Bảng 2.3 / CP7 – W7)**:
@@ -245,7 +245,7 @@ processor.run_batch(
 | **2. Độ bền trước công cụ TTS chưa thấy (CH2 / H2 / NFR2)** | Mô hình giảm chất lượng khi gặp công cụ tổng hợp giọng mới ngoài tập huấn luyện | Duy trì **$\text{EER} \le 15\%$** trên giọng giả sinh từ Unseen TTS (`VieNeu-TTS v3 Turbo` / công cụ thứ 3) kèm minDCF & DET curve | Báo cáo đánh giá chéo TTS (W6) và tệp kết quả `benchmarks/eval_metrics.csv` |
 | **3. Thời gian phản hồi (Latency - NFR1)** | Xác minh thủ công (gọi lại / hỏi câu bí mật): 2–5 phút (bấm giờ $\ge 3$ lần ở W2) | **Trung vị thời gian phản hồi $\le 3,0$ giây** cho đoạn thoại 5–10 giây (đo lặp 30 lần) | File log ẩn danh SHA-256 `benchmarks/latency_log.json` và bảng 30 lần đo `benchmarks/latency_benchmark.csv` |
 | **4. Bộ dữ liệu & Đạo đức Sinh trắc học (Must #1 - NFR3)** | Dữ liệu rời rạc, giọng nói sinh trắc học nhạy cảm cần bảo vệ theo Luật 91/2025/QH15 | $\ge 5$–$30$ người nói có Phiếu đồng ý (`SPK_XXXX`) + VIVOS 65 spk & Common Voice 8.0 419 spk ($\ge 1.000$ thật, $\ge 2.000$ giả đạt 4 cổng, tỷ lệ $\approx 2:1$); $100\%$ log ẩn danh; xóa dữ liệu sau bảo vệ | Mẫu Phiếu đồng ý (Phụ lục C.2), 5 file manifest 18 cột (W4), cấu hình S3 Lifecycle tự xóa file tạm |
-| **5. Sản phẩm MVP, Tái lập & Pilot (Must #2, #3 - NFR4, NFR5)** | Chưa có công cụ kiểm tra tự động tin nhắn thoại tiếng Việt qua kênh nén cho người cao tuổi | FastAPI + Web Gradio ($\le 3$ thao tác) + Bot Telegram; chạy 1 lệnh Docker; CI chạy 202/202 TDD tests xanh; AI Eval $\ge 30$ ca; Pilot CLB ATTT | Repo GitHub hoàn chỉnh, `Dockerfile`, GitHub Actions CI, Bảng chi phí AWS (100/1k/10k user) & Biên bản xác nhận Pilot (W8) |
+| **5. Sản phẩm MVP, Tái lập & Pilot (Must #2, #3 - NFR4, NFR5)** | Chưa có công cụ kiểm tra tự động tin nhắn thoại tiếng Việt qua kênh nén cho người cao tuổi | FastAPI + Brutalist WebGL Forensics Web UI (`/`) + Bot Telegram; chạy 1 lệnh Docker; CI chạy 100% TDD tests xanh; AI Eval $\ge 30$ ca; Pilot CLB ATTT | Repo GitHub hoàn chỉnh, `Dockerfile`, GitHub Actions CI, Bảng chi phí AWS (100/1k/10k user) & Biên bản xác nhận Pilot (W8) |
 
 ---
 
@@ -287,5 +287,6 @@ processor.run_batch(
   (2) **Huấn luyện 2-Run & Hiệu chuẩn (`am_s=30.0, am_m=0.20, batch_size=8, accum_steps=2`, init V5)**: Tập đối chứng 54.225 dòng (Dev EER 6.32%) và tập Train chính thức 54.400 dòng (gồm 175 mẫu từ 1 tình nguyện viên dư `SPK_0001`, giữ cô lập 100% 5 SPK nghiệm thu `SPK_0003..0007`, Phase 2 Ep 1 Dev EER 5.95%); Stage 3 hiệu chuẩn đầu phân loại 1 epoch trên `train_v8_balanced_ft.csv` (5.100 dòng cân bằng) + nội suy `head_blend_a0.75 = 0.25*Run2_P2 + 0.75*P2_HeadOnly`; chuẩn hóa checkpoint chính thức tại `out/v0.9.4/best_model.pt` (`sha256: 30a383256458740e...`) và hợp nhất `resolve_default_checkpoint()` trong `src/app/server.py`;
   (3) **Đối chứng 4 Gates x 3 Pooling (`asymmetric_veto` | `max` | `mean`)**: Mô hình `v0.9.4` đạt G1 `SPK_0001` = **93.3% (14/15)** cả 3 mode; G2 5 SPK = **95.2% (80/84)** | **98.8% (83/84)** | `91.7% (77/84)` (`SPK_0004..0007` = **100% 64/64** ở `veto` & `max`); G3 Unseen VieNeu (955) = **12.05% (79.6% blk)** | `12.30% (76.8%)` | `12.90% (81.9%)` ($\le 15.0\%$ H2); G4 Omni Reversal (195) = **72.8% (142/195)** | `60.5%` | **74.4%**; Dev BPCER (2.000) = `6.00%` | `4.85%` | `8.10%`; Seen Omni Dev (955) = **8.06% EER / 91.5% blk** (`veto`);
   (4) **Benchmark `test_indomain_v8_f5_omni.csv` (15.980 dòng, `eval_only=15.665`)**: `asymmetric_veto`: `v0.9.4` **5.63% EER / 95.01% blk** (BPCER `6.73%`; F5 `2.81% / 98.49%`; OmniVoice **7.95% / 91.52%**) vs V8.0 `6.79% / 90.33%` (Omni `8.84% / 82.41%`) vs V7 `13.72% / 87.22%` (Omni `19.88% / 75.00%`), thắng toàn diện cả 5/5 codecs (`clean 5.52%`, `aac_76k 5.79%`, `opus_24k 6.02%`, `g711 6.11%`, `amr_nb 4.88%`); `max`: `8.33% / 88.24% blk` vs V8.0 `9.31% / 84.37%` vs V7 `14.72% / 83.16%`; `mean`: `6.24% / 96.17% blk` vs V8.0 `5.54% / 92.92%` vs V7 `13.81% / 87.88%`;
-  (5) **QA, Clean Code, Docker & Handbook v2**: Xóa 11 script thử nghiệm một lần, 3 JSON trung gian và 25.69 GB cache/checkpoint cũ; giữ **100% unit tests pass green** (CI-safe), rebuild Docker `vitruevoice-api` (`GET /health` HTTP 200 nạp `out/v0.9.4/best_model.pt`), đồng bộ Chương 13 (chỉ 3 chứng chỉ AWS Gói A) và biên dịch lại Sổ tay v2.
+  (5) **QA, Clean Code, Docker & Handbook v2**: Xóa 11 script thử nghiệm một lần, 3 JSON trung gian và 25.69 GB cache/checkpoint cũ; giữ **100% unit tests pass green** (CI-safe), rebuild Docker `vitruevoice-api` (`GET /health` HTTP 200 nạp `out/v0.9.4/best_model.pt`), đồng bộ Chương 13 (chỉ 3 chứng chỉ AWS Gói A) và biên dịch lại Sổ tay v2;
+  (6) **Brutalist Editorial & WebGL Forensics Web UI (`/` cổng 8000)**: Gỡ bỏ hoàn toàn Gradio (`src/app/ui.py`, `gradio` trong `requirements.txt`) và `/playground` (`src/app/static/playground.html`, trả `404`); thay thế bằng giao diện Web Forensics mới phục vụ trực tiếp tại `http://localhost:8000/` (`src/app/static/index.html`, `css/app.css`, `js/{webgl-orb,audio-recorder,charts,app}.js`, 3 ảnh phổ thực tế `assets/card_0*.png`); bổ sung module phân tích âm học in-memory `src/app/forensics.py`, endpoint `GET /api/v1/samples`, payload `forensics` & `delta_margin` cho `/api/v1/predict` và `/api/v1/clone-and-audit`, cùng bộ test mới (`tests/test_forensics.py`, `tests/test_web_ui.py`) và kiểm thử đối xứng `FastAPI` + `classify_score` + `Telegram Bot`.
 - [ ] **Pilot & Nghiệm thu (W7–W8 / v1.0.0)**: Đóng gói Docker trên AWS EC2, S3 Lifecycle tự xóa, IAM least privilege, CloudWatch; đạt đích **In-domain EER <= 8%**, **H1: Giảm >= 30% EER trên tập nén nội bộ**, báo cáo trung thực hạn chế H2 Unseen TTS, và **Latency trung vị (30 lần) <= 3,0 giây**; ký biên bản xác nhận nghiệm thu Pilot cùng CLB An toàn thông tin HUTECH.
