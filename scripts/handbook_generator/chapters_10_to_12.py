@@ -1,5 +1,5 @@
 """
-Chương 10, 11, 12 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
+Chương 10, 11, 12 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng VieTrueVoice v0.9.4:
 - Chương 10: Tối ưu độ trễ suy luận thời gian thực (NFR1 ≤ 3.0 giây) & Hiệu suất phần cứng
 - Chương 11: Cẩm nang 22 câu hỏi phản biện trọng tâm trước Hội đồng bảo vệ (Chuẩn hóa v0.9.4)
 - Chương 12: Hệ thống hóa từ khóa khoa học (7 trục Taxonomy) & Cẩm nang đọc bài báo quốc tế
@@ -70,7 +70,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
     add_styled_paragraph(
         doc,
-        "Để tối ưu tốc độ một cách khoa học thay vì chỉnh sửa cảm tính, ViTrueVoice bóc tách tổng thời gian phản hồi "
+        "Để tối ưu tốc độ một cách khoa học thay vì chỉnh sửa cảm tính, VieTrueVoice bóc tách tổng thời gian phản hồi "
         "từ lúc máy chủ FastAPI hoặc Telegram Bot nhận gói tin âm thanh cho tới lúc trả về kết quả JSON thành 4 thành phần độc lập:",
     )
 
@@ -136,11 +136,11 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
 
     add_heading_section(
         doc,
-        "10.2 Bốn (04) Kỹ Thuật Tối Ưu Hóa Độ Trễ Cốt Lõi Trong ViTrueVoice v0.9.4",
+        "10.2 Bốn (04) Kỹ Thuật Tối Ưu Hóa Độ Trễ Cốt Lõi Trong VieTrueVoice v0.9.4",
     )
     add_styled_paragraph(
         doc,
-        "Hệ thống sản xuất của ViTrueVoice (`src/app/server.py`, `src/preprocessing/audio_loader.py` và `src/preprocessing/pooling.py`) "
+        "Hệ thống sản xuất của VieTrueVoice (`src/app/server.py`, `src/preprocessing/audio_loader.py` và `src/preprocessing/pooling.py`) "
         "triển khai đồng bộ 4 kỹ thuật tối ưu hóa phần cứng và phần mềm để ép tổng độ trễ xuống dưới 1 giây:",
     )
 
@@ -252,7 +252,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
     add_styled_paragraph(
         doc,
-        "Bảng 10.1 tổng hợp đầy đủ các mốc đo độ trễ thực nghiệm của ViTrueVoice `v0.9.4` từ bước nghe thủ công ban đầu đến "
+        "Bảng 10.1 tổng hợp đầy đủ các mốc đo độ trễ thực nghiệm của VieTrueVoice `v0.9.4` từ bước nghe thủ công ban đầu đến "
         "các kịch bản kiểm định API, nhật ký vận hành thực tế và tốc độ thuần của mô hình trên phần cứng GPU:",
     )
 
@@ -370,9 +370,9 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
         1,
         "Bài toán chống giả mạo giọng nói (Anti-spoofing CM) của đề tài khác gì so với nhận dạng / xác thực người nói (ASV)?",
         "Kiểm tra xem sinh viên có phân biệt rành mạch bài toán phát hiện giọng nói nhân tạo độc lập với bài toán so khớp danh tính vân giọng hay không.",
-        "Dạ thưa Thầy/Cô, ViTrueVoice giải quyết bài toán **Phát hiện giả mạo tiếng nói độc lập (`Stand-alone Anti-spoofing Countermeasure - CM`)**, hoàn toàn khác mục tiêu với hệ thống Xác thực người nói (`Automatic Speaker Verification - ASV`).",
+        "Dạ thưa Thầy/Cô, VieTrueVoice giải quyết bài toán **Phát hiện giả mạo tiếng nói độc lập (`Stand-alone Anti-spoofing Countermeasure - CM`)**, hoàn toàn khác mục tiêu với hệ thống Xác thực người nói (`Automatic Speaker Verification - ASV`).",
         "Hệ thống `ASV` trả lời câu hỏi *\"Người đang nói có đúng là anh Nguyễn Văn A đã đăng ký vân giọng từ trước hay không?\"* thông qua khoảng cách cosine giữa hai vector đặc trưng người nói (`Speaker Embedding`). Ngược lại, khối `CM` của chúng em trả lời câu hỏi *\"Sóng âm này phát ra từ dây thanh quản sinh học của con người thật hay do thuật toán AI tổng hợp ra?\"* dựa trên các vi nhiễu pha và hài âm mà hoàn toàn không cần biết người nói tên là gì hay phải thu thập mẫu giọng đăng ký trước.",
-        "Nhờ kiến trúc `CM` độc lập người nói, ViTrueVoice `v0.9.4` bảo vệ tức thì bất kỳ người dân nào nhận tin nhắn thoại lạ trên Zalo/Telegram mà không cần kho vân giọng quốc gia, đạt **5.63% EER** trên `15.980` mẫu kiểm thử của những người nói chưa từng xuất hiện trong tập huấn luyện.",
+        "Nhờ kiến trúc `CM` độc lập người nói, VieTrueVoice `v0.9.4` bảo vệ tức thì bất kỳ người dân nào nhận tin nhắn thoại lạ trên Zalo/Telegram mà không cần kho vân giọng quốc gia, đạt **5.63% EER** trên `15.980` mẫu kiểm thử của những người nói chưa từng xuất hiện trong tập huấn luyện.",
     )
 
     # Q2: Vietnamese Wav2Vec2-250h vs English XLSR or MFCC/LFCC
@@ -520,7 +520,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
         "Kiểm tra nhận thức về quản trị rủi ro an ninh (Security Cost Trade-off) và tính liêm chính khi chọn ngưỡng vận hành.",
         "Dạ thưa Thầy/Cô, chúng em khóa cứng ngưỡng vận hành tiên nghiệm tại **`θ = 0.0`** (`s ≥ 0.0` là Giọng thật, `s < 0.0` là Giọng giả) để đảm bảo ưu tiên chặn lừa đảo mà tuyệt đối không gian lận tinh chỉnh ngưỡng trên tập Test.",
         "Trong bối cảnh phòng chống tội phạm tài chính, hậu quả của lỗi **Bỏ sót giọng giả (`APCER`)** là nạn nhân mất trắng tài sản, nghiêm trọng hơn rất nhiều so với lỗi **Báo nhầm giọng thật (`BPCER`)** — vốn chỉ yêu cầu người dùng gọi xác minh lại qua kênh khác. Điểm thô `s = z_bonafide − z_spoof` có tâm đối xứng toán học tự nhiên tại `θ = 0.0`. Thay vì dịch ngưỡng sau khi nhìn tập kiểm thử, chúng em đưa sự cân bằng về đúng tâm `0.0` ngay từ khâu hiệu chuẩn đầu phân loại `head_blend_a0.75` kết hợp `Consensus Asymmetric Veto`.",
-        "Tại đúng ngưỡng cứng `θ = 0.0`, ViTrueVoice `v0.9.4` chặn đứng **95.01%** mẫu giả mạo (`APCER = 4.99%`) trong khi vẫn giữ tỷ lệ báo nhầm người thật ở mức thấp **BPCER = 6.73%** trên `15.980` mẫu Test (và chỉ **5.24% BPCER** trên `420` tệp giọng thật của 5 tình nguyện viên độc lập).",
+        "Tại đúng ngưỡng cứng `θ = 0.0`, VieTrueVoice `v0.9.4` chặn đứng **95.01%** mẫu giả mạo (`APCER = 4.99%`) trong khi vẫn giữ tỷ lệ báo nhầm người thật ở mức thấp **BPCER = 6.73%** trên `15.980` mẫu Test (và chỉ **5.24% BPCER** trên `420` tệp giọng thật của 5 tình nguyện viên độc lập).",
     )
 
     # Q11: Platt Scaling (T=16.0) & NIST [0.1%, 99.9%] clamp + OMML
@@ -619,7 +619,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
         "Nhóm đã vận dụng 3 khóa học AWS Academy Gói A vào dự án như thế nào trong khi vẫn duy trì chi phí vận hành thực tế 0 VNĐ?",
         "Kiểm tra khả năng liên kết kiến thức học phần đám mây AWS với bài toán tối ưu chi phí thực tế của sinh viên.",
         "Dạ thưa Thầy/Cô, hệ thống trực tiếp của đồ án hiện vận hành **100% cục bộ trên cụm Docker Compose với chi phí thực tế 0 VNĐ**, đồng thời áp dụng trọn vẹn nguyên lý kiến trúc và bảo mật từ **3 khóa học AWS Academy Gói A** kèm bộ đặc tả sẵn sàng lên mây (`Cloud-Ready`) tại thư mục `deploy/aws/`.",
-        "Cụ thể cách vận dụng từng khóa học trong Gói A: (1) Từ khóa **`AWS Academy Cloud Foundations`**, chúng em chuẩn hóa kiến trúc vi dịch vụ đóng gói 2 container độc lập (`vitruevoice-api` và `vitruevoice-bot`) và lập bảng dự toán tổng chi phí sở hữu (`TCO`); (2) Từ khóa **`AWS Academy Cloud Security Foundations`**, chúng em thực thi nguyên tắc đặc quyền tối thiểu (`non-root appuser`, gắn kết thư mục trọng số `out/v0.9.4` ở chế độ chỉ đọc `:ro`, tách biến bí mật qua `.env`) và viết chính sách `IAM Least Privilege` (`deploy/aws/iam_policy.json`) cùng quy tắc `S3 Lifecycle` tự hủy dữ liệu tạm sau 24 giờ (`s3_lifecycle_policy.json`); (3) Từ khóa **`AWS Academy Cloud Architecting`**, chúng em thiết kế cơ chế tự kiểm tra sức khỏe `HEALTHCHECK /health` mỗi 30 giây, tự khởi động lại khi sự cố và kịch bản triển khai `EC2 Spot / Auto-Scaling` (`scripts/aws_deploy_ec2.sh`).",
+        "Cụ thể cách vận dụng từng khóa học trong Gói A: (1) Từ khóa **`AWS Academy Cloud Foundations`**, chúng em chuẩn hóa kiến trúc vi dịch vụ đóng gói 2 container độc lập (`VieTrueVoice-api` và `VieTrueVoice-bot`) và lập bảng dự toán tổng chi phí sở hữu (`TCO`); (2) Từ khóa **`AWS Academy Cloud Security Foundations`**, chúng em thực thi nguyên tắc đặc quyền tối thiểu (`non-root appuser`, gắn kết thư mục trọng số `out/v0.9.4` ở chế độ chỉ đọc `:ro`, tách biến bí mật qua `.env`) và viết chính sách `IAM Least Privilege` (`deploy/aws/iam_policy.json`) cùng quy tắc `S3 Lifecycle` tự hủy dữ liệu tạm sau 24 giờ (`s3_lifecycle_policy.json`); (3) Từ khóa **`AWS Academy Cloud Architecting`**, chúng em thiết kế cơ chế tự kiểm tra sức khỏe `HEALTHCHECK /health` mỗi 30 giây, tự khởi động lại khi sự cố và kịch bản triển khai `EC2 Spot / Auto-Scaling` (`scripts/aws_deploy_ec2.sh`).",
         "Cách tiếp cận kép này giúp đồ án chạy demo thực nghiệm bền bỉ **24/7 với chi phí 0 VNĐ** trên phần cứng cục bộ, nhưng khi doanh nghiệp cần mở rộng lên đám mây AWS Singapore thì đã có sẵn toàn bộ cấu hình chuẩn mực với chi phí lý thuyết ước tính chỉ khoảng **~73 VNĐ / lượt quét** ở quy mô thử nghiệm.",
     )
 
@@ -685,7 +685,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
         21,
         "Quy trình phát triển hướng kiểm thử (TDD) và đường ống GitHub Actions CI xác minh độ tin cậy mã nguồn của dự án như thế nào?",
         "Kiểm tra kỹ năng công nghệ phần mềm hiện đại (Software Engineering & MLOps Quality Assurance).",
-        "Dạ thưa Thầy/Cô, mọi mô-đun cốt lõi của ViTrueVoice đều được phát triển theo quy trình **Viết kiểm thử trước – Viết mã thực thi sau (`TDD`)** và được bảo vệ tự động bởi **`392/392 bài kiểm thử đơn vị (unit tests)`** chạy xanh 100% trên máy chủ sạch `GitHub Actions Ubuntu`.",
+        "Dạ thưa Thầy/Cô, mọi mô-đun cốt lõi của VieTrueVoice đều được phát triển theo quy trình **Viết kiểm thử trước – Viết mã thực thi sau (`TDD`)** và được bảo vệ tự động bởi **`392/392 bài kiểm thử đơn vị (unit tests)`** chạy xanh 100% trên máy chủ sạch `GitHub Actions Ubuntu`.",
         "Trong các dự án AI nghiên cứu, lỗi phổ biến nhất là sửa một hàm tiền xử lý hoặc đổi đường dẫn checkpoint làm hỏng ngầm kết quả đánh giá cũ. Bộ `392` bài kiểm thử của chúng em khóa chặt tất cả các bất biến sống còn: nối lặp `Repeat Padding 64.000 mẫu`, trọng số mất mát động, ranh giới `0%` rò rỉ manifest, toán tử `Consensus Asymmetric Veto`, hiệu chuẩn `Platt Scaling`, ẩn danh `SHA-256` trên API/Bot và cô lập giả lập (`mock`) các thư viện ngoài nằm trong `.gitignore` để không bao giờ gãy trên máy chủ đám mây Ubuntu sạch.",
         "Trước mỗi lần cập nhật phiên bản `v0.9.4`, toàn bộ **`392/392 bài kiểm thử đơn vị (unit tests)`** đều đạt trạng thái **100% PASS** cả ở môi trường cục bộ lẫn trên đường ống `GitHub Actions CI`.",
     )
@@ -750,7 +750,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
     add_styled_paragraph(
         doc,
-        "Bảng 12.1 hệ thống hóa toàn bộ không gian thuật ngữ quốc tế gắn liền với kiến trúc ViTrueVoice `v0.9.4` thành **7 trục chuyên môn**, "
+        "Bảng 12.1 hệ thống hóa toàn bộ không gian thuật ngữ quốc tế gắn liền với kiến trúc VieTrueVoice `v0.9.4` thành **7 trục chuyên môn**, "
         "giúp sinh viên dùng làm bản đồ tra cứu nhanh khi viết khóa luận hoặc mở rộng nghiên cứu lên bậc sau đại học:",
     )
 
@@ -759,7 +759,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
         headers=[
             "Trục Phân Loại Khoa Học",
             "Các Từ Khóa Quốc Tế Cốt Lõi (English Research Keywords)",
-            "Ánh Xạ Trực Tiếp Trong Hệ Thống ViTrueVoice v0.9.4",
+            "Ánh Xạ Trực Tiếp Trong Hệ Thống VieTrueVoice v0.9.4",
         ],
         rows=[
             (
@@ -807,7 +807,7 @@ def add_chapters_10_to_12(doc, figs: dict | None = None) -> None:
     )
     add_styled_paragraph(
         doc,
-        "Để nắm vững nền tảng lý thuyết đứng sau từng mô-đun trong kho mã nguồn ViTrueVoice, sinh viên nên đọc theo đúng thứ tự "
+        "Để nắm vững nền tảng lý thuyết đứng sau từng mô-đun trong kho mã nguồn VieTrueVoice, sinh viên nên đọc theo đúng thứ tự "
         "7 cụm công trình kinh điển dưới đây (từ biểu diễn tiếng nói cơ sở đến mô hình tạo sinh và hiệu chuẩn trọng số hiện đại):",
     )
 

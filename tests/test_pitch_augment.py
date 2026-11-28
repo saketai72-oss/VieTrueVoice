@@ -72,7 +72,7 @@ def test_rawboost_transform_with_custom_semitones():
 def test_dataset_transforms_only_bonafide():
     import pandas as pd
     import soundfile as sf
-    from src.training.dataset import ViTrueVoiceDataset
+    from src.training.dataset import VieTrueVoiceDataset
 
     rng = np.random.default_rng(123)
     # Mock dataframe with 1 spoof (0) and 1 bonafide (1)
@@ -94,7 +94,7 @@ def test_dataset_transforms_only_bonafide():
         sf.write(os.path.join(tmp_dir, "u0.wav"), np.ones(1000, dtype=np.float32), 16000)
         sf.write(os.path.join(tmp_dir, "u1.wav"), np.ones(1000, dtype=np.float32), 16000)
 
-        ds = ViTrueVoiceDataset(df, audio_root=tmp_dir, target_len=1000, mode="augmented", train=True, transform=mock_tf)
+        ds = VieTrueVoiceDataset(df, audio_root=tmp_dir, target_len=1000, mode="augmented", train=True, transform=mock_tf)
         item0 = ds[0] # spoof
         item1 = ds[1] # bonafide
 

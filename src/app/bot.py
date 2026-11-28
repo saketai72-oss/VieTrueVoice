@@ -1,4 +1,4 @@
-"""Telegram bot for ViTrueVoice anti-spoofing voice verification."""
+"""Telegram bot for VieTrueVoice anti-spoofing voice verification."""
 
 from __future__ import annotations
 import hashlib
@@ -22,7 +22,7 @@ from src.preprocessing.pooling import extract_window_batch, pool_scores
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message:
         await update.message.reply_text(
-            "🛡️ *Chào mừng bạn đến với ViTrueVoice Bot!*\n\n"
+            "🛡️ *Chào mừng bạn đến với VieTrueVoice Bot!*\n\n"
             "Hãy chuyển tiếp (forward) hoặc gửi một *tin nhắn thoại* hoặc *file âm thanh* nghi ngờ vào đây. "
             "Hệ thống AI sẽ phân tích trực tiếp trên RAM và phản hồi kết quả trong vòng 1-2 giây.\n\n"
             "🔒 *Bảo mật*: Mọi âm thanh được xóa hủy ngay sau khi suy luận, tuân thủ Luật 91/2025/QH15.",
@@ -193,7 +193,7 @@ def main() -> None:
     except ImportError:
         pass
 
-    parser = argparse.ArgumentParser(description="Khởi chạy ViTrueVoice Telegram Bot")
+    parser = argparse.ArgumentParser(description="Khởi chạy VieTrueVoice Telegram Bot")
     parser.add_argument("--token", default=os.getenv("TELEGRAM_BOT_TOKEN"),
                         help="Telegram Bot Token từ @BotFather (hoặc đặt biến môi trường TELEGRAM_BOT_TOKEN)")
     parser.add_argument("--checkpoint", default=str(DEFAULT_CHECKPOINT),
@@ -206,7 +206,7 @@ def main() -> None:
 
     token = args.token
     if not token:
-        print("⏸️ [ViTrueVoice Bot Daemon] Chưa có Telegram Bot Token. Đang tạm dừng chờ cấu hình...")
+        print("⏸️ [VieTrueVoice Bot Daemon] Chưa có Telegram Bot Token. Đang tạm dừng chờ cấu hình...")
         print("👉 Hướng dẫn lấy token:")
         print("   1. Mở Telegram, tìm kiếm bot @BotFather (https://t.me/BotFather) và gửi lệnh /newbot")
         print("   2. Sao chép API Token nhận được (dạng: 123456789:ABCdefGhI...)")
@@ -219,7 +219,7 @@ def main() -> None:
             return
 
     print("=" * 60)
-    print("🛡️ KHỞI ĐỘNG VITRUEVOICE TELEGRAM BOT")
+    print("🛡️ KHỞI ĐỘNG VieTrueVoice TELEGRAM BOT")
     print("=" * 60)
     print(f"📦 Checkpoint: {args.checkpoint}")
     print(f"⚙️ Thiết bị:   {args.device}")

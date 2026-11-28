@@ -1,6 +1,6 @@
-# ViTrueVoice — Hướng Dẫn Chạy, Huấn Luyện & Triển Khai
+# VieTrueVoice — Hướng Dẫn Chạy, Huấn Luyện & Triển Khai
 
-Dự án hỗ trợ huấn luyện trực tiếp trên GPU cục bộ (`scripts/run_v8_1_phase_train.py`, `scripts/train.py`), kiểm thử CI (`pytest`) và triển khai qua FastAPI / Gradio / Docker. Các trình sinh notebook Colab/Kaggle nằm trong `scripts/build_*_notebook.py` (tạo tự động khi cần).
+Dự án hỗ trợ huấn luyện trực tiếp trên GPU cục bộ (`scripts/run_v8_1_phase_train.py`, `scripts/train.py`), kiểm thử CI (`pytest`) và triển khai qua FastAPI / Brutalist WebGL Forensics Web UI (`/`) / Docker. Các trình sinh notebook Colab/Kaggle nằm trong `scripts/build_*_notebook.py` (tạo tự động khi cần).
 
 ---
 
@@ -38,7 +38,7 @@ python scripts/train_local_zalo.py
 ```bash
 pytest tests/ -v
 ```
-*(Yêu cầu: Toàn bộ 392 unit tests pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
+*(Yêu cầu: Toàn bộ bộ kiểm thử TDD pass 100% trước khi commit hoặc đẩy lên Kaggle/Colab/CI)*
 
 ### Kiểm Toán An Ninh Manifest V6
 ```bash
@@ -92,7 +92,7 @@ python scripts/train.py --branch A --manifest-dir data/manifests --audio-root . 
 # Nhánh B0 (Chỉ nén Codec, không RawBoost)
 python scripts/train.py --branch B0 --manifest-dir data/manifests --audio-root . --out-dir out/run_B0
 
-# Nhánh B (ViTrueVoice: Codec + RawBoost Online)
+# Nhánh B (VieTrueVoice: Codec + RawBoost Online)
 python scripts/train.py --branch B --manifest-dir data/manifests --audio-root . --out-dir out/run_B
 ```
 
@@ -117,19 +117,20 @@ python scripts/compare_h1.py --a out/eval_metrics_B0.csv --b out/eval_metrics_B.
 ### Chạy Batch Dataset Processor (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo)
 ```bash
 python -c "
-from src.vitruevoice.pipeline import ViTrueVoiceDualPipeline, PipelineMode
-from src.vitruevoice.batch_processor import BatchDatasetProcessor
+from src.VieTrueVoice.pipeline import VieTrueVoiceDualPipeline, PipelineMode
+from src.VieTrueVoice.batch_processor import BatchDatasetProcessor
 
-pipeline = ViTrueVoiceDualPipeline()
+pipeline = VieTrueVoiceDualPipeline()
 processor = BatchDatasetProcessor(pipeline=pipeline, mode=PipelineMode.DUAL_OUTPUT, only_pass=True, min_dur=3.5, max_dur=7.5, allow_stitching=False)
 processor.run_batch(speakers=['SPK_0001', 'SPK_0004', 'SPK_0005', 'SPK_0006', 'SPK_0007'], seeds=[100, 200, 300], codecs=['clean_16khz', 'g711_alaw', 'amr_nb'])
 "
 ```
 
-### Chạy Máy Chủ API Phát Triển (FastAPI với Checkpoint V6 Local)
+### Chạy Máy Chủ API & Brutalist WebGL Forensics Web UI (FastAPI cổng 8000)
 ```bash
-# Biến môi trường checkpoint mặc định: out/zalo_b_zalo_v6_local/best_model.pt
+# Checkpoint mặc định tự động nạp: out/v0.9.4/best_model.pt
 uvicorn src.app.server:app --reload --port 8000
+# Giao diện Web UI: http://localhost:8000/ | Swagger API: http://localhost:8000/docs
 ```
 
 ### Chạy Telegram Bot Phát Hiện Giọng Giả (Multi-window Max-Pooling V6)
@@ -168,43 +169,27 @@ python scripts/benchmark_latency.py --no-pooling
 
 Hệ thống cung cấp 4 phương thức demo linh hoạt:
 
-### Cách 1: Giao diện Web Trực Quan (Gradio Web UI — Khuyên Dùng Cho Người Dùng & Thuyết Trình)
-Giao diện Dark Forensics Lab đạt chuẩn thiết kế Stitch v2.4, tối giản $\le 3$ thao tác cho người cao tuổi, tích hợp toàn diện 2 chế độ chuyên sâu:
+### Cách 1: Giao diện Web Trực Quan (Brutalist Editorial & WebGL Forensics Web UI tại `/`)
+Giao diện Dark Obsidian Forensics phục vụ trực tiếp trên FastAPI tại cổng `8000` (thay thế hoàn toàn Gradio `src/app/ui.py` và `/playground` cũ — `/playground` hiện trả về `404`), tích hợp WebGL 3D Liquid Obsidian Orb (có nút bật/tắt 3D), 3 thẻ bối cảnh với ảnh phổ thực tế và 2 chế độ thẩm định thời gian thực:
 ```bash
 python scripts/demo_predict.py --web
-# hoặc: python -m src.app.ui
+# hoặc: uvicorn src.app.server:app --port 8000
 ```
-- Mở trình duyệt tại: `http://localhost:7860` (hoặc `http://localhost:8000/` khi chạy bằng Docker).
-- **Google Labs Playground Standalone (Web Client hiện đại)**: `http://localhost:8000/playground` (Giao diện Cyber-Retro-Futuristic với Audio Visualizer Oscilloscope, Platt Radial Gauge, và Chế độ Live VoiceStudio CFM Cloning Audit nói nguyên văn câu chuẩn đối soát).
-- **Chuyển đổi giao diện Sáng / Tối (Light/Dark Theme Switcher)**: 1-click nút `☀️`/`🌙` trên góc phải thanh tiêu đề.
+- Mở trình duyệt tại: `http://localhost:8000/` (cả chạy trực tiếp lẫn Docker đều dùng chung cổng `8000`).
 
-#### 🛡️ Chế Độ 1: Thẩm Định Nhanh Đơn Mẫu (Single-File Analysis)
-- **Tải lên hoặc Ghi âm nhanh**: Hỗ trợ mọi định dạng âm thanh (.wav, .mp3, .m4a, .opus, .ogg).
-- **Thử nghiệm nhanh**: 3 nút Preset mẫu đối chứng 1-click (Spoof F5-TTS, Giọng thật SPK_0004, Spoof Zalo Opus nén).
-- **Kết quả trực quan**: Thẻ cảnh báo nổi bật (Xanh: Giọng thật / Đỏ: Cảnh báo Deepfake kèm khuyến cáo khẩn cấp chống chuyển tiền và bảo vệ mã OTP).
-- **Thanh đo độ tin cậy**: Thang đo phần trăm xác suất đã hiệu chuẩn Platt Scaling (0% - 100%).
-- **Chỉ số kỹ thuật**: Điểm Raw Score, Thời gian suy luận (latency ~66ms), Cửa sổ phân tích Multi-window Max-Pooling, Tỷ lệ năng lượng cao tần >4kHz phát hiện vết vocoder.
-- **Biểu đồ khoa học trực quan**:
-  1. *Mel-Spectrogram (80 Mels, log dBFS)*: Thể hiện dải tần 0 - 8kHz kèm đường ranh giới cắt cao tần 4.0kHz của vocoder HiFi-GAN.
-  2. *Biểu đồ sóng âm đồng bộ (Raw Time-Domain Waveform)*: Hiển thị dạng sóng thời gian thực.
-  3. *Bản đồ chú ý nơ-ron (Grad-CAM Temporal Saliency)*: Trọng số kích hoạt phát hiện chính xác vùng thời gian phát sinh tín hiệu giả mạo.
+#### 🛡️ Tab 01 (`01 // THẨM ĐỊNH GIỌNG NÓI` — `POST /api/v1/predict`)
+- **Tải lên hoặc Ghi âm trực tiếp**: Hỗ trợ kéo-thả/chọn tệp (`.wav, .mp3, .m4a, .ogg, .opus, .flac, .webm`), thu âm trực tiếp qua Microphone trình duyệt (tắt `echoCancellation`/`noiseSuppression`/`autoGainControl`, mã hóa 16kHz PCM WAV ngay trên trình duyệt) và 5 mẫu đối chứng thực tế nạp qua `GET /api/v1/samples`.
+- **Kết quả trực quan**: Nhãn kết luận `BONA_FIDE` (Xanh lục) / `SPOOF` (Đỏ thẫm) / cảnh báo `BORDERLINE` (Hổ phách khi $|s - \theta| \le 8.0$), xác suất hiệu chuẩn Platt Scaling (`prob_bona_pct%` / `prob_spoof_pct%`), Raw Logit `s`, độ trễ suy luận, mã băm `SHA-256` (Zero-Persistence), `Bandwidth Profile`, `F0`, `HF Ratio > 4kHz`.
+- **4 Biểu đồ Canvas HD trích xuất thực từ `response.forensics` (`src/app/forensics.py`)**:
+  1. *Mel-Spectrogram Heatmap (48 Mels, 0–8 kHz)* kèm đường ranh giới `3.4 kHz AMR-NB` và `4.0 kHz Vocoder`.
+  2. *Waveform Oscilloscope* đồng bộ theo nhãn kết luận.
+  3. *Multi-Window Consensus Asymmetric Veto Chart* (`W1..W5` kèm đường ngưỡng $\theta=0.0$, `+6.0` rescue, `-12.0` veto và diễn giải nhánh pooling).
+  4. *Platt Calibration Curve (`T=16.0`)* & biểu đồ năng lượng 3 dải tần (`<300Hz`, `300–3400Hz`, `3400–8000Hz`).
 
-#### 🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp 4 Chiều (Quad-Forensics Live Cloning)
-- **Ghi âm trực tiếp qua Microphone**: Người dùng thu âm một đoạn thoại ngắn 3 - 5 giây làm giọng tham chiếu (Reference Voice).
-- **Tự động nhân bản 3 bản clone Zero-Shot**: Hệ thống lấy đặc trưng âm sắc của người dùng để tự động sinh 3 bản clone nói câu thoại chuẩn 10 từ thuần Việt:
-  > *"Alo bạn ơi, tôi đang bận chút nữa gọi lại nhé."*
-  qua 3 mô hình TTS Zero-Shot của dự án:
-  1. `F5-TTS` (Flow Matching Non-Autoregressive)
-  2. `VieNeu-TTS v3 Turbo` (Fast DiT 48kHz)
-  3. `VoiceStudio CFM` (OmniVoice Continuous Flow Matching)
-- **Cơ chế Progressive Real-Time Streaming (`yield`)**:
-  - Trả kết quả bản Người Thật (Bona Fide) ngay lập tức (~66ms) kèm audio player để người dùng nghe lại giọng mình.
-  - Ba ô kết quả clone hiển thị trạng thái `Loading` (animated spinner quay vòng).
-  - Từng bản clone khi sinh xong sẽ tự động cập nhật kết quả thẩm định và nạp audio player tương ứng để người dùng bấm nghe trực tiếp.
-- **Tùy chọn tiết kiệm VRAM**: Hỗ trợ checkbox *"Chế độ tiết kiệm VRAM"* cho phép bỏ qua F5-TTS và VieNeu-TTS, chỉ chạy VoiceStudio CFM nhằm đảm bảo an toàn bộ nhớ trên GPU < 4GB.
-- **Bảng đối soát toàn diện 4 chiều (Quad-Forensics Benchmark Matrix)**:
-  Bảng tổng kết so sánh trực quan Ground Truth vs Kết luận AI ViTrueVoice, độ tin cậy %, điểm Raw Score và độ trễ suy luận trên cả 4 mẫu âm thanh.
-- **Tuân thủ Quyền riêng tư (Luật 91/2025/QH15)**: Âm thanh xử lý in-memory trên RAM, dọn dẹp file tạm ngay lập tức sau khi suy luận.
+#### 🧪 Tab 02 (`02 // CLONE & KIỂM CHỨNG OMNIVOICE CFM` — `POST /api/v1/clone-and-audit`)
+- **Đầu vào linh hoạt**: Tải tệp, thu âm trực tiếp qua Microphone trình duyệt, hoặc 1-click mẫu chuẩn `SPK_0004`, kèm hộp nhập văn bản mục tiêu tiếng Việt (`target_text`) và tùy chọn `custom_ref_text` (tự động nhận diện ASR Wav2Vec2 nếu để trống).
+- **Ma trận đối soát 2 chiều**: Hiển thị banner chênh lệch **`Δ MARGIN GAP` (`delta_margin`)**, văn bản ASR đã dùng, trạng thái `LIVE OMNIVOICE CFM` / `CFM PRESET FALLBACK`, 2 thẻ so sánh trực tiếp **Bản Gốc (Bona Fide)** vs **Bản Nhân Bản (OmniVoice CFM Clone)** kèm trình phát âm thanh, nút tải `.wav` clone và biểu đồ phổ/sóng âm/cửa sổ thời gian thực từ `bonafide.forensics` và `clone.forensics`.
+- **Tuân thủ Quyền riêng tư (Luật 91/2025/QH15)**: Âm thanh xử lý in-memory trên RAM, dọn dẹp file tạm ngay lập tức sau khi suy luận và chỉ lưu log mã băm SHA-256.
 
 ### Cách 2: Thử Nghiệm Nhanh Trên Dòng Lệnh (CLI Demo)
 Thực hiện phân loại tức thời trên terminal:
@@ -234,25 +219,25 @@ In bảng tổng kết toàn diện trên 5 người nói đối chứng (SPK_00
 
 ## 6. Hướng Dẫn Đóng Gói Docker & Triển Khai Trên AWS
 
-Hệ thống ViTrueVoice được đóng gói container hóa theo chuẩn bảo mật điện toán đám mây (AWS Security / CIS Docker Benchmark):
+Hệ thống VieTrueVoice được đóng gói container hóa theo chuẩn bảo mật điện toán đám mây (AWS Security / CIS Docker Benchmark):
 
 ### 6.1 Khởi chạy bằng Docker
 1. **Xây dựng Docker Image**:
    ```bash
-   docker build -t vitruevoice:latest .
+   docker build -t VieTrueVoice:latest .
    ```
-2. **Khởi chạy container độc lập (FastAPI Server + Gradio Web UI)**:
+2. **Khởi chạy container độc lập (FastAPI Server + Brutalist WebGL Forensics Web UI)**:
    ```bash
    docker run -d \
-     --name vitruevoice-api \
+     --name VieTrueVoice-api \
      -p 8000:8000 \
      -v ${PWD}/out:/app/out:ro \
      -v ${PWD}/data/bonafide_ref:/app/data/bonafide_ref:ro \
      -v ${PWD}/external:/app/external:ro \
-     vitruevoice:latest
+     VieTrueVoice:latest
    ```
 3. **Truy cập các giao diện trực tiếp tại cổng 8000**:
-   - **Gradio Web UI**: Mở trình duyệt tại `http://localhost:8000/` (Giao diện web trực quan kiểm tra giọng nói thật/giả kèm Platt Scaling confidence).
+   - **Brutalist WebGL Forensics Web UI**: Mở trình duyệt tại `http://localhost:8000/` (Tích hợp Tab 01 Thẩm định giọng nói `/api/v1/predict` & Tab 02 Nhân bản và Kiểm chứng OmniVoice CFM `/api/v1/clone-and-audit`).
    - **Swagger API Docs**: `http://localhost:8000/docs`
    - **Kiểm tra trạng thái sức khỏe container**:
      ```bash
@@ -289,7 +274,7 @@ Sau khi khởi chạy:
 
 ## 7. Hướng Dẫn Tích Hợp & Mô Phỏng Nền Tảng Zalo Official Account (OA)
 
-Hệ thống ViTrueVoice tích hợp đầy đủ module tiếp nhận tin nhắn thoại Zalo Webhook chuẩn OpenAPI v3.0 của Zalo for Developers:
+Hệ thống VieTrueVoice tích hợp đầy đủ module tiếp nhận tin nhắn thoại Zalo Webhook chuẩn OpenAPI v3.0 của Zalo for Developers:
 
 ### 7.1 Kiểm thử nhanh bằng Bộ mô phỏng (Zalo Webhook Simulator)
 Khởi chạy kiểm thử mô phỏng gửi voice note Zalo kèm chữ ký số HMAC-SHA256:
@@ -303,7 +288,7 @@ python scripts/simulate_zalo_webhook.py --audio data/spoof_f5tts/CV_08110ec9e6/C
 
 ### 7.2 Cấu hình triển khai Zalo Official Account thật trong sản xuất
 1. Mở trang quản trị [Zalo for Developers](https://developers.zalo.me/) và tạo Zalo App liên kết Zalo OA.
-2. Thiết lập Webhook URL trỏ về máy chủ ViTrueVoice:
+2. Thiết lập Webhook URL trỏ về máy chủ VieTrueVoice:
    ```text
    https://<ten-mien-cua-ban>/api/v1/zalo/webhook
    ```
@@ -346,7 +331,7 @@ Kết quả chi tiết và báo cáo phân tích lưu tự động tại: `bench
 ### 8.4 Kiểm định 2 Nền tảng Thử nghiệm (Dual-Platform Verification)
 Hệ thống tự động kích hoạt **Adaptive Comfort Dithering** ($\sigma = 0.0035$) theo chuẩn RFC 3389 / AES-17 để xử lý đồng thời hai nguồn dữ liệu âm thanh:
 1. **Nền tảng 1 (File âm thanh viễn thông tải lên)**: Hỗ trợ kéo thả trực tiếp tệp `.wav`, `.m4a`, `.opus`, `.ogg`, `.mp3` qua Web UI hoặc Zalo/Telegram Bot.
-2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút Micro trên giao diện Gradio Web. Thuật toán bù đắp dither tự động khôi phục tính liên tục âm học tự nhiên cho các vùng khoảng lặng bị trình duyệt cắt cụt bởi bộ lọc tiếng ồn (noise suppression / AGC), ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
+2. **Nền tảng 2 (Ghi âm trực tiếp qua Micro trình duyệt)**: Bấm trực tiếp nút ghi âm Micro trên giao diện Web UI (`http://localhost:8000/`). Trình duyệt tắt noise suppression/AEC/AGC và mã hóa 16kHz PCM WAV ngay tại client, kết hợp DSP phía máy chủ bảo toàn tính liên tục âm học và ngăn ngừa triệt để hiện tượng báo nhầm giọng thật thành giả mạo.
 
 ### 8.5 Xuất bản Sổ tay Kỹ thuật Chuyên sâu Toàn diện & Cẩm nang Phản biện Hội đồng (Phiên bản 2.0 — Chuẩn `v0.9.4`)
 Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện V2 (đồng bộ 100% mô hình chính thức `v0.9.4` xuyên suốt 13 chương, tích hợp hộp kiến thức nền tảng trước mỗi quy trình, công thức toán học gốc Word OMML, sơ đồ trực quan 300 DPI, từ điển giải nghĩa thuật ngữ ngay bên dưới mỗi mục và 27 câu hỏi phản biện hội đồng) sang cả hai định dạng `.docx` và `.pdf`:
@@ -354,23 +339,21 @@ Tự động biên dịch cuốn Sổ tay Kỹ thuật Chuyên sâu Toàn diện
 python scripts/build_defense_handbook_v2_docx.py
 ```
 Tài liệu được xuất bản và đồng bộ tự động tại:
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.docx`
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VITRUEVOICE_V2.pdf`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.docx`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\SO_TAY_TOAN_DIEN_KY_THUAT_CHUYEN_SAU_VieTrueVoice_V2.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
-### 8.6 Khởi chạy Phòng Thí Nghiệm Nhân Bản Trực Tiếp VoiceStudio CFM (Gradio Web Chế Độ 2)
-Chạy ứng dụng Gradio Web UI với Chế độ 2 (Live VoiceStudio CFM Cloning & Forensics):
+### 8.6 Khởi chạy Phòng Thí Nghiệm Nhân Bản Trực Tiếp OmniVoice CFM (Web UI Tab 02 tại `/`)
+Tính năng nhân bản trực tiếp VoiceStudio (OmniVoice CFM) đã được hợp nhất trực tiếp vào **Brutalist WebGL Forensics Web UI** tại `http://localhost:8000/` (thay thế hoàn toàn Gradio `src/app/ui.py` cổng `7860` và `/playground` cũ):
 ```bash
-python -m src.app.ui
+python scripts/demo_predict.py --web
+# hoặc: uvicorn src.app.server:app --port 8000
 ```
-Truy cập trình duyệt tại `http://localhost:7860`:
-1. Chuyển sang Tab: **"🧪 Chế Độ 2: Thử Thách Nhân Bản Giọng Trực Tiếp VoiceStudio CFM (Zero-Shot CFM Cloning)"**.
-2. **Lựa chọn 1 (1-Click Test tức thì)**: Bấm nút **"⚡ 1-Click: Nạp Giọng Mẫu Chuẩn SPK_0004 (Voice_Final)"** để nạp giọng tình nguyện viên đối chứng.
-3. **Lựa chọn 2 (Ghi âm Micro cá nhân)**: Bấm biểu tượng Microphone và đọc theo câu chuẩn: *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."* (khuyến nghị 3 – 5 giây).
-4. Bấm nút **"2. BẮT ĐẦU NHÂN BẢN & ĐỐI CHỨNG VOICESTUDIO CFM"**:
-   - Thẩm định ngay lập tức bản gốc của bạn (~66ms, hiển thị thẻ Người Thật màu xanh).
-   - VoiceStudio CFM thực thi đúng 100% pipeline gốc từ tập `Voice_Final` (`num_step=16`, `guidance_scale=2.0`), sinh nguyên văn câu thoại đối soát (*"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."*), xuất 16kHz PCM to rõ, vang, tự nhiên 100%.
-   - Thẩm định bản clone qua ViTrueVoice và hiển thị kết quả phân định Thật / Giả mạo cùng Bảng đối soát 2 chiều.
+Truy cập trình duyệt tại `http://localhost:8000/`:
+1. Chọn `[ ⚡ CLONE OMNIVOICE ]` hoặc chuyển sang **Tab 02 (`02 // CLONE & KIỂM CHỨNG OMNIVOICE CFM`)**.
+2. **Chọn nguồn giọng thật**: Tải file âm thanh, thu âm trực tiếp qua Microphone trình duyệt (3–5 giây), hoặc bấm 1-click nạp mẫu chuẩn `SPK_0004`.
+3. Nhập hoặc chọn nhanh câu thoại tiếng Việt mục tiêu (`target_text`) và bấm **`[ ⚡ NHÂN BẢN OMNIVOICE & THẨM ĐỊNH ]`** (`POST /api/v1/clone-and-audit`):
+   - Thẩm định đồng thời bản gốc (Bona Fide) và bản clone OmniVoice CFM, xuất **`Δ MARGIN GAP` (`delta_margin`)**, trình phát 2 chiều, nút tải `.wav` clone và bộ biểu đồ Mel-Spectrogram / Waveform / Multi-Window Scores thực từ `bonafide.forensics` & `clone.forensics`.
 
 ### 8.7 Xuất bản Bộ Tài liệu Thử nghiệm Pilot & Dự toán Chi phí AWS Runbook (W07 & W08)
 Tự động biên dịch Phiếu khảo sát UX Pilot, Biên bản nghiệm thu có chữ ký, Bảng dự toán chi phí đám mây AWS (100 / 1.000 / 10.000 users) và Sổ tay xử lý sự cố (Troubleshooting Runbook) 1 trang sang cả hai định dạng `.docx` và `.pdf`:
@@ -378,23 +361,23 @@ Tự động biên dịch Phiếu khảo sát UX Pilot, Biên bản nghiệm thu
 python scripts/build_pilot_and_w08_docs.py
 ```
 Tài liệu được xuất bản và đồng bộ tự động tại:
-- `C:\Users\saket\Documents\Đồ án chuyên ngành\Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_ViTrueVoice.docx` & `.pdf`
+- `C:\Users\saket\Documents\Đồ án chuyên ngành\Bien_Ban_Nghiem_Thu_Va_Khao_Sat_Pilot_VieTrueVoice.docx` & `.pdf`
 - `C:\Users\saket\Documents\Đồ án chuyên ngành\Bang_Chi_Phi_AWS_Va_So_Tay_Su_Co_Runbook.docx` & `.pdf`
 - Và bản sao tại thư mục `C:\Users\saket\Documents\Đồ án chuyên ngành\Content\`.
 
-### 8.8 Trải nghiệm Google Labs Playground Web Client (v0.5.8)
-Hệ thống cung cấp giao diện Web độc lập hiện đại theo phong cách Google Labs Playground tại endpoint `/playground`:
+### 8.8 Trải nghiệm Brutalist Editorial & WebGL Forensics Web UI tại `/` (Thay thế Gradio & `/playground`)
+Giao diện Web Forensics hợp nhất được phục vụ trực tiếp tại đường dẫn gốc `/` trên cổng `8000` (Gradio và `/playground` đã bị gỡ bỏ hoàn toàn; `/playground` trả về HTTP `404`):
 ```bash
-# Khởi động máy chủ phát triển cục bộ
-python -m uvicorn src.app.server:app --port 8001
+# Khởi động máy chủ phát triển cục bộ (cổng 8000)
+python -m uvicorn src.app.server:app --port 8000
 
-# Hoặc khởi động cụm Docker Compose (port 8000)
+# Hoặc khởi động cụm Docker Compose (cổng 8000)
 docker compose up -d --build
 ```
 Truy cập trình duyệt:
-- URL Playground: `http://localhost:8001/playground` (hoặc `http://localhost:8000/playground` với Docker).
-- Chế độ 1: **SINGLE-FILE ANALYSIS** — Tải file hoặc thu âm nhanh, trực quan hóa sóng âm Oscilloscope, Platt radial gauge và **Forensics Spectral Studio** thời gian thực (STFT Spectrogram Radix-2 FFT 512 phân giải 31.25Hz hiển thị dải formant và đường ngắt băng thông vật lý AMR-NB 3.4kHz, Sóng âm đa cửa sổ trượt Window Slices 4.0s/64k kèm chỉ báo Asymmetric Veto, Bản đồ Attention Saliency mạng đồ thị AASIST, Thẻ kiểm toán băng thông thoại Codec Audit tự động phân tách Narrowband vs Wideband). Hỗ trợ nạp nhanh qua 4 chip Presets 1-click: F5-TTS Spoof, SPK_0004 Clean Voice, Zalo Opus 24k Spoof và AMR-NB 3.4kHz Telephony.
-- Chế độ 2: **LIVE CFM CLONING AUDIT** — Ghi âm Micro hoặc nạp 1-Click SPK_0004, hệ thống nhân bản theo thời gian thực qua VoiceStudio CFM (OmniVoice Zero-Shot Flow Matching) nói nguyên văn câu đối soát *"Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."*, xuất Ma trận đối soát đối chứng (Comparative Benchmark Matrix) đạt phân tách $\Delta s > 40.0$, BPCER $0.0\%$, APCER $0.0\%$. Đã chuẩn hóa thu âm mộc WebRTC (tắt noise suppression/AEC/AGC) và pipeline DSP tự động cắt tỉa khoảng lặng thừa (`top_db=25`) + peak-normalize 95% ngăn ngừa hiện tượng nhận nhầm giọng người thật thành Spoof.
+- **URL chính thức**: `http://localhost:8000/` (API docs: `http://localhost:8000/docs`, danh sách mẫu thật: `GET /api/v1/samples`).
+- **Tab 01 (`01 // THẨM ĐỊNH GIỌNG NÓI`)**: Tải file, thu âm Mic 16kHz PCM trực tiếp hoặc chọn 1 trong 5 mẫu đối chứng thực (`/static/samples/*.wav`); kết nối thật `POST /api/v1/predict` kèm 4 biểu đồ Canvas HD từ `response.forensics` (Mel-Spectrogram 48 Mels kèm vạch 3.4kHz/4.0kHz, Waveform Oscilloscope, Multi-Window Consensus Asymmetric Veto, Platt Calibration Curve `T=16.0` & 3-Band Energy).
+- **Tab 02 (`02 // CLONE & KIỂM CHỨNG OMNIVOICE CFM`)**: Ghi âm Micro / tải file / 1-click `SPK_0004`, nhập văn bản mục tiêu và chạy `POST /api/v1/clone-and-audit`, xuất Ma trận đối soát 2 chiều kèm `delta_margin`, bản tải `.wav` và biểu đồ thực từ `bonafide.forensics` & `clone.forensics`.
 
 ### 8.9 Đánh Giá Mở Rộng Unseen TTS VoiceStudio CFM Trên 15 Người Nói Held-out (W07)
 Quy trình sinh và đánh giá suy giảm (Degradation Analysis) trên 15 người nói held-out độc lập (10.175 bona fide, 1.915 seen TTS, 965 unseen VoiceStudio CFM clips):

@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-11-24 23:57:13",
-  "model_version": "ViTrueVoice B_zalo V8.1 Inverted Dual-Seen (Full 6,445 OmniVoice)",
+  "model_version": "VieTrueVoice B_zalo V8.1 Inverted Dual-Seen (Full 6,445 OmniVoice)",
   "seen_tts": [
     "F5-TTS",
     "OmniVoice CFM (VoiceStudio)"
@@ -8952,7 +8952,7 @@
     }
   },
   "v8_0_legacy_report": {
-    "model_version": "ViTrueVoice B_zalo V8 Inverted Dual-Seen",
+    "model_version": "VieTrueVoice B_zalo V8 Inverted Dual-Seen",
     "seen_tts": [
       "F5-TTS",
       "OmniVoice CFM (VoiceStudio)"

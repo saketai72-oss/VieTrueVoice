@@ -1,4 +1,4 @@
-"""Kịch bản kiểm toán an ninh độc lập cho Manifest V6 (ViTrueVoice v0.4.4).
+"""Kịch bản kiểm toán an ninh độc lập cho Manifest V6 (VieTrueVoice v0.4.4).
 
 Thực hiện 4 kiểm định an ninh nghiêm ngặt:
 1. Zero-leakage check: 5 tình nguyện viên nghiệm thu (SPK_0003..0007) tuyệt đối 0% trong Train & Dev.

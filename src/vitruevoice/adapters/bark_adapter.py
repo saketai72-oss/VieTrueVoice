@@ -10,7 +10,7 @@ from src.vitruevoice.base import BaseTTSAdapter, SynthesisRequest, SynthesisResu
 
 
 class BarkAdapter(BaseTTSAdapter):
-    """Adapter tích hợp mô hình Suno Bark vào ViTrueVoice."""
+    """Adapter tích hợp mô hình Suno Bark vào VieTrueVoice."""
 
     def __init__(
         self,

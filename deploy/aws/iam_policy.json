@@ -9,7 +9,7 @@
         "ecr:BatchGetImage",
         "ecr:BatchCheckLayerAvailability"
       ],
-      "Resource": "arn:aws:ecr:*:*:repository/vitruevoice"
+      "Resource": "arn:aws:ecr:*:*:repository/vietruevoice"
     },
     {
       "Sid": "AllowECRAuthToken",
@@ -27,7 +27,7 @@
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:*:*:log-group:/aws/ec2/vitruevoice:*"
+      "Resource": "arn:aws:logs:*:*:log-group:/aws/ec2/vietruevoice:*"
     },
     {
       "Sid": "AllowS3TempAudioAccess",
@@ -37,7 +37,7 @@
         "s3:GetObject",
         "s3:DeleteObject"
       ],
-      "Resource": "arn:aws:s3:::vitruevoice-biometric-temp/biometric-temp/*"
+      "Resource": "arn:aws:s3:::vietruevoice-biometric-temp/biometric-temp/*"
     }
   ]
 }

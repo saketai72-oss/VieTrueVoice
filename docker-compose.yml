@@ -1,5 +1,5 @@
 # =====================================================================
-# ViTrueVoice Docker Compose Orchestration
+# VieTrueVoice Docker Compose Orchestration
 # Services:
 #   1. api: FastAPI inference server + Web UI (port 8000)
 #   2. bot: Telegram voice note anti-spoofing bot daemon
@@ -10,7 +10,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: vitruevoice-api
+    container_name: vietruevoice-api
     ports:
       - "8000:8000"
     environment:
@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: vitruevoice-bot
+    container_name: vietruevoice-bot
     command: ["python", "scripts/run_bot.py"]
     healthcheck:
       disable: true

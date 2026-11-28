@@ -1,5 +1,5 @@
 """
-Module trích xuất hồ sơ người nói (Speaker Profiler & Reference Selector) cho ViTrueVoice.
+Module trích xuất hồ sơ người nói (Speaker Profiler & Reference Selector) cho VieTrueVoice.
 Triển khai:
 1. Tính ngưỡng nhận dạng sinh trắc học riêng cho từng Speaker (Per-Speaker Calibrated Threshold)
    có loại trừ reference clip và áp dụng empirical shrinkage cho phương sai mẫu nhỏ.

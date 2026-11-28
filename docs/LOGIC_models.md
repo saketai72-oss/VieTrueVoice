@@ -36,7 +36,7 @@ Nhằm trả lời câu hỏi nghiên cứu CH1 (Độ bền nén kênh thoại)
 | :---: | :--- | :--- | :--- | :---: | :--- |
 | **Nhánh A** | Baseline Không tăng cường | `mode="clean"` (~9.971 mẫu) | `None` | Phase 1: 4 ep<br>Phase 2: 60 ep | Mốc so sánh cơ sở (CH1/H1). Nhân 3 epoch Phase 2 để cân bằng tổng optimizer steps. |
 | **Nhánh B0** | Chỉ nén Codec, không RawBoost | `mode="augmented"` (~29.143 mẫu) | `None` (Đã nén G.711, AMR-NB) | Phase 1: 4 ep<br>Phase 2: 20 ep | Bóc tách chính xác đóng góp riêng biệt của nén kênh thoại so với RawBoost. |
-| **Nhánh B** | **ViTrueVoice Đầy đủ** | `mode="augmented"` (~29.143 mẫu) | `make_rawboost()` online | Phase 1: 4 ep<br>Phase 2: 20 ep | Mô hình hoàn chỉnh (Codec + RawBoost: LnL, ISD, SSI). |
+| **Nhánh B** | **VieTrueVoice Đầy đủ** | `mode="augmented"` (~29.143 mẫu) | `make_rawboost()` online | Phase 1: 4 ep<br>Phase 2: 20 ep | Mô hình hoàn chỉnh (Codec + RawBoost: LnL, ISD, SSI). |
 
 ### Ràng Buộc Phân Định Seen vs Unseen TTS & Bảo Vệ Giả Thuyết H2
 > STUBBORN_FACT: Hai công cụ Seen TTS cốt lõi tham gia vào quá trình huấn luyện (tập Train và Dev) là `F5-TTS` (Flow Matching) và `VieNeu-TTS v3 Turbo` (Autoregressive Qwen LLM + NeuCodec), tạo nên kiến trúc phòng thủ kép Dual-Seen. Công cụ Unseen TTS thực thụ chuẩn Zero-Shot Voice Cloning phục vụ kiểm định Giả thuyết H2 (OOD Generalization) là `VoiceStudio (OmniVoice CFM)` — được cô lập 100% khỏi quá trình huấn luyện.
@@ -123,7 +123,7 @@ graph TD
 Đánh giá thực nghiệm hoàn tất trên 3 checkpoint thu được từ Kaggle GPU (Version 3 & 4) trên tập kiểm thử nội bộ (`test_indomain.csv`, 9.399 mẫu `role == 'eval'`) và ngoại vùng (`test_ood.csv`, 813 mẫu):
 - **Mô hình A (Clean Baseline)**: Dừng sớm tại Epoch 10 (patience=6), checkpoint tốt nhất tại Phase 1 Epoch 4 (`dev_eer = 20.66%`).
 - **Mô hình B0 (Chỉ Codec, không RawBoost)**: Hoàn thành 24/24 epoch, checkpoint tốt nhất tại Phase 2 Epoch 24 (`dev_eer = 1.93%`).
-- **Mô hình B (ViTrueVoice: Codec + RawBoost)**: Đạt 20/24 epoch trước giới hạn 12h, checkpoint tốt nhất tại Phase 2 Epoch 20 (`dev_eer = 2.95%`).
+- **Mô hình B (VieTrueVoice: Codec + RawBoost)**: Đạt 20/24 epoch trước giới hạn 12h, checkpoint tốt nhất tại Phase 2 Epoch 20 (`dev_eer = 2.95%`).
 
 ### 6.1. Bảng Đối Chứng Giả Thuyết H1 (Độ Bền Nén Kênh Thoại — CH1)
 > Quy ước dấu: Độ giảm EER tương đối $\Delta\text{EER}_{\text{rel}} = \frac{\text{EER}_A - \text{EER}_B}{\text{EER}_A} \times 100\%$. Giá trị dương ($> 0$) biểu thị tỷ lệ cải thiện (EER của B thấp hơn A).
@@ -233,7 +233,7 @@ graph TD
   - `dev_zalo.csv`: `730937e8fe982b51c899753cd2a9aff198ff545d8d0b9fd41a9511025884f77e` (11.450 dòng)
   - HuggingFace Revision: `69e9000591623e5a4fc2f502407860bcdc0de0b2`
 - **Cơ chế nạp & sinh dữ liệu trên Kaggle**:
-  - Trích xuất chọn lọc từ `vitruevoice_data_processed.zip` vào `/tmp/vitrue_audio`.
+  - Trích xuất chọn lọc từ `VieTrueVoice_data_processed.zip` vào `/tmp/vitrue_audio`.
   - Sinh proxy đa luồng bằng `ThreadPoolExecutor(max_workers=4)` cho kênh AAC 76k và Opus 24k trực tiếp vào `/tmp/vitrue_audio`.
   - Thực thi huấn luyện fine-tuning qua `scripts/train.py` (Phase 1 = 5 epochs, Phase 2 = 0).
   - Đánh giá kiểm định chống thoái lui (Anti-Regression) trên 11.450 mẫu Dev Zalo độc lập ngay sau huấn luyện:

@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VieTrueVoice v0.9.4 - Hệ Thống Xác Thực Giọng Nói Tiếng Việt</title>
+  <meta name="description" content="Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát SSL-AASIST v0.9.4 &amp; Consensus Asymmetric Veto." />
+  <meta name="theme-color" content="#0e0e10" />
+
+  <!-- VieTrueVoice Custom Brand Logo & Multi-Resolution Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/static/assets/logo.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/assets/favicon-32x32.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/assets/apple-touch-icon.png" />
+
+  <!-- Fonts: Be Vietnam Pro + JetBrains Mono + Material Symbols Outlined -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" rel="stylesheet" />
+
+  <!-- Tailwind CDN with Exact Stitch Obsidian Forensics Design Tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            background: '#131316',
+            'surface-container-lowest': '#0e0e10',
+            'surface-container-low': '#1c1b1e',
+            'surface-container': '#201f22',
+            'surface-container-high': '#2a2a2c',
+            'on-surface': '#e5e1e5',
+            'on-surface-variant': '#bacbbe',
+            primary: '#6dffba',
+            'primary-strong': '#00e599',
+            secondary: '#df0042',
+            'secondary-soft': '#ffb3b6',
+            tertiary: '#ffbd5d',
+            'tertiary-soft': '#ffe0bc'
+          },
+          fontFamily: {
+            sans: ['Be Vietnam Pro', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Core Motion & 3D Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r125/three.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
+
+  <!-- VieTrueVoice Brutalist Forensics CSS -->
+  <link rel="stylesheet" href="/static/css/app.css" />
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-[#00e599] selection:text-[#0e0e10]">
+
+  <!-- =======================================================================
+       1. CINEMATIC PRELOADER (00 -> 100 Wipe Reveal)
+       ======================================================================= -->
+  <div id="vtv-preloader" aria-label="Đang khởi tạo hệ thống thẩm định giọng nói">
+    <div class="flex items-center justify-between border-b border-on-surface-variant/15 pb-4">
+      <span class="inline-flex items-center gap-2.5 font-mono text-xs tracking-[0.22em] text-primary font-bold">
+        <img src="/static/assets/logo.svg" alt="VieTrueVoice" width="20" height="20" class="w-5 h-5 shrink-0" />
+        VIETRUEVOICE // FORENSIC ENGINE
+      </span>
+      <span class="font-mono text-xs tracking-[0.18em] text-on-surface-variant">CORE_v0.9.4 // SSL-AASIST</span>
+    </div>
+
+    <div class="my-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div class="max-w-2xl">
+        <p class="font-mono text-[11px] uppercase tracking-[0.26em] text-on-surface-variant mb-3">
+          HỆ THỐNG PHÁT HIỆN GIỌNG NÓI GIẢ TIẾNG VIỆT QUA KÊNH THOẠI NÉN
+        </p>
+        <p class="text-lg sm:text-xl text-on-surface/80 font-medium">
+          Zero-Persistence In-Memory Audio Forensics &amp; Consensus Asymmetric Veto
+        </p>
+      </div>
+      <div class="font-mono text-7xl sm:text-8xl md:text-9xl font-bold leading-none tracking-tighter text-on-surface">
+        <span id="vtv-preloader-count">00</span><span class="text-primary text-3xl align-top">%</span>
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <div class="vtv-preloader-bar-track">
+        <div id="vtv-preloader-bar" class="vtv-preloader-bar-fill"></div>
+      </div>
+      <div class="flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-on-surface-variant/75 uppercase">
+        <span>16KHZ • 64.000 MẪU • 5 SLIDING WINDOWS</span>
+        <span>HEAD_BLEND_A0.75 • TEST EER 5.63%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       2. CUSTOM DESKTOP BRUTALIST CURSOR
+       ======================================================================= -->
+  <div id="vtv-cursor" aria-hidden="true">
+    <div class="vtv-cursor-dot">
+      <span id="vtv-cursor-label" class="vtv-cursor-label">QUÉT</span>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       3. FIXED TOP NAVIGATION BAR
+       ======================================================================= -->
+  <header class="fixed top-0 inset-x-0 z-50 border-b border-on-surface-variant/15 bg-surface-container-lowest/80 backdrop-blur-md">
+    <div class="max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <a href="#hero-section" class="flex items-center gap-3 group" data-cursor="QUÉT">
+        <img
+          src="/static/assets/logo.svg"
+          alt="VieTrueVoice Logo"
+          width="28"
+          height="28"
+          class="w-7 h-7 shrink-0 transition-transform duration-200 group-hover:scale-105"
+        />
+        <span class="font-mono text-xs sm:text-sm font-bold tracking-[0.2em] text-on-surface group-hover:text-primary transition-colors">
+          VIETRUEVOICE
+        </span>
+        <span class="hidden sm:inline-block font-mono text-[10px] px-2 py-0.5 border border-on-surface-variant/20 text-on-surface-variant tracking-widest">
+          v0.9.4
+        </span>
+      </a>
+
+      <div class="hidden lg:flex items-center gap-2 font-mono text-[11px] tracking-[0.16em] text-on-surface-variant">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary-strong animate-pulse"></span>
+        <span id="vtv-health-pill">CORE_v0.9.4 // SSL-AASIST • θ=0.0</span>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button
+          id="btn-nav-studio"
+          type="button"
+          data-cursor="QUÉT"
+          class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 font-mono text-[11px] font-bold tracking-[0.16em] uppercase vtv-btn-emerald"
+        >
+          <span class="material-symbols-outlined text-sm">graphic_eq</span>
+          PHÒNG LAB
+        </button>
+
+        <button
+          id="btn-toggle-webgl"
+          type="button"
+          aria-pressed="true"
+          data-cursor="3D"
+          class="px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.16em] uppercase border border-[#6dffba]/40 bg-surface-container-low/90 text-[#6dffba] hover:border-primary transition-colors"
+        >
+          WEBGL 3D // BẬT
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- =====================================================================
+         4. SECTION 1 — HERO 100VH FULL-BLEED + WEBGL 3D LIQUID OBSIDIAN ORB
+         ===================================================================== -->
+    <section id="hero-section" class="relative flex flex-col justify-between pt-24 pb-8 px-4 sm:px-6 lg:px-10">
+      <!-- Radial Obsidian Brutalist Grid Fallback (cleanly visible when WebGL 3D is OFF) -->
+      <div id="vtv-obsidian-fallback" aria-hidden="true">
+        <div class="vtv-obsidian-rings"></div>
+      </div>
+
+      <!-- Three.js Liquid Obsidian Sphere Canvas -->
+      <canvas id="vtv-webgl-canvas" aria-label="Quả cầu hắc diện thạch 3D phản ứng tín hiệu âm thanh"></canvas>
+
+      <!-- Subtle Editorial Vignette -->
+      <div class="vtv-hero-vignette" aria-hidden="true"></div>
+
+      <!-- Top Telemetry Strip -->
+      <div class="relative z-10 max-w-[1480px] w-full mx-auto flex flex-wrap items-center justify-between gap-2 font-mono text-[10px] sm:text-[11px] tracking-[0.2em] uppercase text-on-surface-variant vtv-hero-reveal">
+        <span>ANTI-SPOOFING LAB // VIETNAMESE TELEPHONY</span>
+        <span class="text-primary">ZERO-PERSISTENCE • LUẬT 91/2025/QH15</span>
+      </div>
+
+      <!-- Center Focal Hero Display + Floating Pill Dock -->
+      <div class="relative z-10 max-w-[1480px] w-full mx-auto my-auto flex flex-col items-center text-center py-8">
+        <p class="vtv-hero-reveal font-mono text-[11px] sm:text-xs uppercase tracking-[0.3em] text-on-surface-variant mb-4">
+          HỌC BIỂU DIỄN TỰ GIÁM SÁT • PHÒNG THỦ GIẢ MẠO GIỌNG NÓI AI
+        </p>
+
+        <h1 class="vtv-hero-title vtv-hero-reveal text-on-surface select-none">
+          XÁC THỰC GIỌNG NÓI
+        </h1>
+
+        <p class="vtv-hero-reveal mt-4 max-w-2xl text-sm sm:text-base text-on-surface-variant/90 leading-relaxed">
+          Phát hiện giọng nhân bản <span class="text-on-surface font-semibold">F5-TTS</span>,
+          <span class="text-on-surface font-semibold">OmniVoice CFM</span> &amp;
+          <span class="text-on-surface font-semibold">Unseen VieNeu-TTS</span> qua 5 kênh thoại nén
+          (Clean, Zalo AAC-LC 76k, Zalo Opus 24k, G.711, AMR-NB 8kHz).
+        </p>
+
+        <!-- Center Floating Pill Dock (2 Core Features + Quick Spoof Audio Preview) -->
+        <div class="vtv-hero-reveal vtv-pill-dock mt-9 p-2 sm:p-2.5 flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-full">
+          <button
+            id="btn-hero-predict"
+            type="button"
+            data-cursor="QUÉT"
+            class="vtv-btn-emerald px-5 sm:px-6 py-3 font-mono text-xs font-bold tracking-[0.14em] uppercase flex items-center gap-2"
+          >
+            <span>KIỂM TRA GIỌNG NÓI</span>
+          </button>
+
+          <button
+            id="btn-hero-clone"
+            type="button"
+            data-cursor="CLONE"
+            data-cursor-tone="danger"
+            class="vtv-btn-crimson px-5 sm:px-6 py-3 font-mono text-xs font-bold tracking-[0.14em] uppercase flex items-center gap-2"
+          >
+            <span>CLONE OMNIVOICE</span>
+          </button>
+
+          <button
+            id="btn-hero-sample"
+            type="button"
+            data-cursor="NGHE"
+            data-cursor-tone="amber"
+            class="vtv-btn-ghost px-4 sm:px-5 py-3 font-mono text-xs font-semibold tracking-[0.14em] uppercase flex items-center gap-2"
+          >
+            NGHE MẪU GIẢ
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Corner Telemetry -->
+      <div class="relative z-10 max-w-[1480px] w-full mx-auto flex flex-wrap items-end justify-between gap-4 border-t border-on-surface-variant/15 pt-4 vtv-hero-reveal">
+        <div class="font-mono text-[11px] tracking-[0.18em] uppercase text-on-surface-variant">
+          16KHZ / 64.000 MẪU • SSL-AASIST v0.9.4
+        </div>
+        <button
+          id="btn-scroll-down"
+          type="button"
+          data-cursor="QUÉT"
+          class="font-mono text-[11px] tracking-[0.2em] uppercase text-primary hover:text-on-surface transition-colors flex items-center gap-1.5"
+        >
+          CUỘN XUỐNG ↓
+        </button>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         5. SECTION 2 — CLIP-PATH CINEMA REVEAL + GIANT MARQUEE (REAL v0.9.4 DATA)
+         ===================================================================== -->
+    <section id="cinema-section" class="relative min-h-screen flex flex-col justify-center pt-24 pb-16 overflow-hidden">
+      <!-- Single Giant Background Marquee -->
+      <div class="vtv-marquee-band absolute inset-x-0 top-1/2 -translate-y-1/2 z-0 opacity-90" aria-hidden="true">
+        <div class="vtv-marquee-track">
+          <span class="vtv-marquee-item">SSL-AASIST v0.9.4 // CONSENSUS ASYMMETRIC VETO // EER 5.63% // 5 CODECS // </span>
+          <span class="vtv-marquee-item">SSL-AASIST v0.9.4 // CONSENSUS ASYMMETRIC VETO // EER 5.63% // 5 CODECS // </span>
+        </div>
+      </div>
+
+      <!-- Pinned Clip-Path Expanding Frame -->
+      <div class="relative z-10 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div id="cinema-frame" class="vtv-cinema-frame relative p-6 sm:p-10 lg:p-14">
+          <!-- Centered Aperture Prompt (visible while frame is shrunk over marquee) -->
+          <div id="cinema-aperture-hint" class="vtv-cinema-hint pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
+            <span class="font-mono text-[10px] tracking-[0.26em] uppercase text-primary mb-1">01 // QUANG PHỔ &amp; KÊNH NÉN</span>
+            <span class="font-mono text-xs tracking-[0.18em] uppercase text-on-surface font-semibold">CUỘN ĐỂ MỞ KHUNG ↓</span>
+          </div>
+
+          <div id="cinema-inner" class="vtv-cinema-inner">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-on-surface-variant/15 pb-5 mb-8">
+            <div>
+              <p class="font-mono text-[11px] tracking-[0.24em] uppercase text-primary mb-2">
+                01 // BẢN CHẤT ÂM HỌC &amp; PHỔ TẦN
+              </p>
+              <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-on-surface">
+                DẤU VẾT PHỔ &amp; NÉN KÊNH THOẠI
+              </h2>
+            </div>
+            <div class="font-mono text-[11px] tracking-[0.16em] uppercase px-3 py-1.5 border border-primary/30 bg-primary/10 text-primary">
+              HEAD_BLEND_A0.75 // v0.9.4
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            <!-- Left Panel: Real Bonafide Voice -->
+            <article class="bg-surface-container-lowest border border-primary/30 p-6 sm:p-8 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-5">
+                  <span class="font-mono text-[11px] font-bold tracking-[0.18em] uppercase text-primary">
+                    BONA_FIDE // 16KHZ FULLBAND
+                  </span>
+                  <span class="w-2.5 h-2.5 bg-primary-strong"></span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-on-surface mb-3">
+                  Giọng Người Thật (Bonafide — 16kHz Fullband)
+                </h3>
+                <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                  Bảo toàn cấu trúc hòa âm thanh đới hữu cơ, nhiễu nền không gian tự nhiên và biến thiên
+                  <strong class="text-on-surface">6 thanh điệu tiếng Việt liên tục</strong> xuyên suốt dải tần rộng đến 8,0 kHz.
+                  Cơ chế <span class="font-mono text-primary">Consensus Asymmetric Veto</span> bảo vệ tối đa giọng thật trước lỗi báo nhầm.
+                </p>
+              </div>
+
+              <div class="mt-8 pt-5 border-t border-on-surface-variant/15 grid grid-cols-2 gap-4">
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">5 SPK NGHIỆM THU (5 CODECS)</p>
+                  <p class="font-mono text-2xl sm:text-3xl font-bold text-primary mt-1">94,76%</p>
+                </div>
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">BẢN GỐC ĐỘC LẬP</p>
+                  <p class="font-mono text-2xl sm:text-3xl font-bold text-on-surface mt-1">95,24%</p>
+                </div>
+              </div>
+            </article>
+
+            <!-- Right Panel: AI Spoof & Compressed Telephony -->
+            <article class="bg-surface-container-lowest border border-secondary/45 p-6 sm:p-8 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-5">
+                  <span class="font-mono text-[11px] font-bold tracking-[0.18em] uppercase text-secondary-soft">
+                    SPOOF // F5-TTS • OMNIVOICE CFM • AMR-NB
+                  </span>
+                  <span class="w-2.5 h-2.5 bg-secondary"></span>
+                </div>
+                <h3 class="text-xl sm:text-2xl font-bold text-on-surface mb-3">
+                  Giọng AI &amp; Kênh Nén (F5-TTS / OmniVoice CFM / AMR-NB 3,4 kHz)
+                </h3>
+                <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                  Kênh điện thoại PSTN/GSM cắt băng thông sắc nét tại ngưỡng
+                  <strong class="text-tertiary">3,4 kHz</strong>, trong khi các bộ tổng hợp Vocoder/CFM để lại dấu vết tái tạo pha bất thường quanh vùng
+                  <strong class="text-secondary-soft">4,0 kHz</strong>. Kiến trúc SSL-AASIST <span class="font-mono text-on-surface">v0.9.4</span> khai thác biểu diễn Wav2Vec2 đa tầng trên 5 cửa sổ trượt để khóa chặt tín hiệu giả.
+                </p>
+              </div>
+
+              <div class="mt-8 pt-5 border-t border-on-surface-variant/15 grid grid-cols-3 gap-3">
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.14em] text-on-surface-variant">TEST EER (5 CODECS)</p>
+                  <p class="font-mono text-xl sm:text-2xl font-bold text-secondary-soft mt-1">5,63%</p>
+                </div>
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.14em] text-on-surface-variant">TỶ LỆ CHẶN GIẢ</p>
+                  <p class="font-mono text-xl sm:text-2xl font-bold text-primary mt-1">95,01%</p>
+                </div>
+                <div>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.14em] text-on-surface-variant">UNSEEN VIENEU H2</p>
+                  <p class="font-mono text-xl sm:text-2xl font-bold text-tertiary mt-1">12,05%</p>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Footer Telemetry Strip -->
+          <div class="mt-8 pt-5 border-t border-on-surface-variant/15 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] tracking-[0.18em] uppercase text-on-surface-variant">
+            <span>HEAD_BLEND_A0.75 // 5 WINDOWS</span>
+            <span class="text-on-surface font-semibold">TEST EER // 5.63% (15.980 MẪU)</span>
+          </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         6. SECTION 3 — 3 STICKY STACKING FORENSIC SCENARIO CARDS
+         ===================================================================== -->
+    <section id="scenarios-section" class="relative py-20 sm:py-28 px-4 sm:px-6 lg:px-8 border-t border-on-surface-variant/15">
+      <div class="max-w-[1360px] mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+          <div>
+            <p class="font-mono text-[11px] tracking-[0.24em] uppercase text-primary mb-2">
+              02 // KỊCH BẢN TẤN CÔNG THỰC TẾ TẠI VIỆT NAM
+            </p>
+            <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-on-surface">
+              KIỂM CHỨNG TRÊN MẪU THẬT
+            </h2>
+          </div>
+          <p class="max-w-md text-sm text-on-surface-variant leading-relaxed">
+            Mọi tệp âm thanh và biểu đồ phổ dưới đây đều trích xuất trực tiếp từ tập nghiệm thu
+            <span class="font-mono text-on-surface">VieTrueVoice v0.9.4</span> — nghe thử hoặc quét trực tiếp qua API suy luận thực.
+          </p>
+        </div>
+
+        <div class="vtv-stack-wrapper space-y-10 sm:space-y-14">
+
+          <!-- CARD 01: Zalo Opus 24kbps / OmniVoice CFM -->
+          <article class="vtv-stack-card p-6 sm:p-8 lg:p-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div class="lg:col-span-5 space-y-5">
+                <div class="flex items-center gap-3 font-mono text-[11px] tracking-[0.2em] uppercase">
+                  <span class="px-2 py-0.5 bg-secondary/20 border border-secondary/50 text-secondary-soft font-bold">CASE 01</span>
+                  <span class="text-on-surface-variant">ZALO VOIP • OPUS 24KBPS</span>
+                </div>
+
+                <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface leading-snug">
+                  Giả giọng người thân qua Zalo (Opus 24kbps / OmniVoice CFM)
+                </h3>
+
+                <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                  Kẻ gian thu mẫu giọng ngắn từ video mạng xã hội, nhân bản bằng mô hình Zero-Shot Flow Matching
+                  (<span class="font-mono text-on-surface">OmniVoice CFM</span>) rồi gọi điện qua Zalo nén thấp
+                  <span class="font-mono text-secondary-soft">Opus 24kbps</span> để che giấu dấu vết tổng hợp AI.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    data-play-sample="/static/samples/sample_spoof_zalo_opus.wav"
+                    data-play-tone="spoof"
+                    data-cursor="NGHE"
+                    data-cursor-tone="amber"
+                    class="vtv-btn-ghost px-4 py-2.5 font-mono text-xs font-semibold tracking-[0.14em] uppercase"
+                  >
+                    NGHE MẪU GIẢ
+                  </button>
+                  <button
+                    type="button"
+                    data-scan-sample="/static/samples/sample_spoof_zalo_opus.wav"
+                    data-scan-label="ZALO OPUS 24K"
+                    data-cursor="QUÉT"
+                    class="vtv-btn-emerald px-5 py-2.5 font-mono text-xs font-bold tracking-[0.14em] uppercase"
+                  >
+                    QUÉT NGAY →
+                  </button>
+                </div>
+              </div>
+
+              <div class="lg:col-span-7">
+                <div class="vtv-card-media-box">
+                  <img
+                    src="/static/assets/card_01_zalo_opus.png"
+                    alt="Biểu đồ Mel-Spectrogram và Waveform thực tế của mẫu giọng giả nén Zalo Opus 24kbps"
+                    loading="lazy"
+                    onerror="this.style.opacity='0'"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 pt-4 border-t border-on-surface-variant/15 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.18em] uppercase text-on-surface-variant">
+              <span>SCENARIO // ZALO_OPUS_24K</span>
+              <span class="text-primary">EER // 6.02% • LATENCY ~0.7S</span>
+            </div>
+          </article>
+
+          <!-- CARD 02: Telephony Narrowband AMR-NB 8kHz / F5-TTS -->
+          <article class="vtv-stack-card p-6 sm:p-8 lg:p-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div class="lg:col-span-5 space-y-5">
+                <div class="flex items-center gap-3 font-mono text-[11px] tracking-[0.2em] uppercase">
+                  <span class="px-2 py-0.5 bg-tertiary/20 border border-tertiary/50 text-tertiary-soft font-bold">CASE 02</span>
+                  <span class="text-on-surface-variant">PSTN / GSM • AMR-NB 8KHZ</span>
+                </div>
+
+                <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface leading-snug">
+                  Giả giọng cán bộ / ngân hàng qua điện thoại băng hẹp (AMR-NB 8kHz / F5-TTS)
+                </h3>
+
+                <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                  Cuộc gọi mạo danh cơ quan chức năng hoặc ngân hàng đi qua tổng đài di động băng hẹp
+                  <span class="font-mono text-tertiary">AMR-NB 8kHz</span> cắt cụt toàn bộ dải phổ trên
+                  <span class="font-mono text-tertiary">3,4 kHz</span>. SSL-AASIST v0.9.4 vẫn bóc tách chính xác tín hiệu
+                  <span class="font-mono text-on-surface">F5-TTS</span> với tỷ lệ chặn 98,49%.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    data-play-sample="/static/samples/sample_telephony_amrnb.wav"
+                    data-play-tone="spoof"
+                    data-cursor="NGHE"
+                    data-cursor-tone="amber"
+                    class="vtv-btn-ghost px-4 py-2.5 font-mono text-xs font-semibold tracking-[0.14em] uppercase"
+                  >
+                    NGHE MẪU GIẢ
+                  </button>
+                  <button
+                    type="button"
+                    data-scan-sample="/static/samples/sample_telephony_amrnb.wav"
+                    data-scan-label="AMR-NB 8KHZ"
+                    data-cursor="QUÉT"
+                    class="vtv-btn-emerald px-5 py-2.5 font-mono text-xs font-bold tracking-[0.14em] uppercase"
+                  >
+                    QUÉT NGAY →
+                  </button>
+                </div>
+              </div>
+
+              <div class="lg:col-span-7">
+                <div class="vtv-card-media-box">
+                  <img
+                    src="/static/assets/card_02_amrnb_cutoff.png"
+                    alt="Biểu đồ Mel-Spectrogram thực tế hiển thị ranh giới cắt băng thông 3.4 kHz của kênh điện thoại AMR-NB 8kHz"
+                    loading="lazy"
+                    onerror="this.style.opacity='0'"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 pt-4 border-t border-on-surface-variant/15 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.18em] uppercase text-on-surface-variant">
+              <span>SCENARIO // PSTN_AMR_NB_8KHZ</span>
+              <span class="text-tertiary">EER // 4.88% • F5 BLOCK 98.49%</span>
+            </div>
+          </article>
+
+          <!-- CARD 03: Live Zero-Shot OmniVoice CFM Clone & Comparative Audit -->
+          <article class="vtv-stack-card p-6 sm:p-8 lg:p-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div class="lg:col-span-5 space-y-5">
+                <div class="flex items-center gap-3 font-mono text-[11px] tracking-[0.2em] uppercase">
+                  <span class="px-2 py-0.5 bg-primary/15 border border-primary/50 text-primary font-bold">CASE 03</span>
+                  <span class="text-on-surface-variant">LIVE ZERO-SHOT CLONING</span>
+                </div>
+
+                <h3 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-on-surface leading-snug">
+                  Thử nghiệm Nhân bản Zero-Shot OmniVoice CFM trực tiếp (Bắc - Trung - Nam)
+                </h3>
+
+                <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                  Tải lên hoặc thu trực tiếp 3–8 giây giọng nói thật để mô hình
+                  <span class="font-mono text-on-surface">OmniVoice CFM</span> tự động nhận dạng lời thoại qua
+                  <span class="font-mono text-primary">Wav2Vec2 ASR</span>, sinh kịch bản giả mạo và đối chiếu song song
+                  bản gốc — bản nhân bản ngay trong phòng Lab.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    data-play-sample="/static/samples/sample_bonafide_spk0004.wav"
+                    data-play-tone="bonafide"
+                    data-cursor="NGHE"
+                    class="vtv-btn-ghost px-4 py-2.5 font-mono text-xs font-semibold tracking-[0.14em] uppercase"
+                  >
+                    NGHE MẪU THẬT
+                  </button>
+                  <button
+                    type="button"
+                    data-open-clone-preset
+                    data-cursor="CLONE"
+                    data-cursor-tone="danger"
+                    class="vtv-btn-crimson px-5 py-2.5 font-mono text-xs font-bold tracking-[0.14em] uppercase"
+                  >
+                    CLONE &amp; KIỂM CHỨNG →
+                  </button>
+                </div>
+              </div>
+
+              <div class="lg:col-span-7">
+                <div class="vtv-card-media-box">
+                  <img
+                    src="/static/assets/card_03_cfm_comparison.png"
+                    alt="So sánh trực quan phổ Mel-Spectrogram giữa giọng người thật SPK_0004 và bản nhân bản OmniVoice CFM"
+                    loading="lazy"
+                    onerror="this.style.opacity='0'"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-7 pt-4 border-t border-on-surface-variant/15 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] tracking-[0.18em] uppercase text-on-surface-variant">
+              <span>ENGINE // OMNIVOICE_CFM + WAV2VEC2_VN</span>
+              <span class="text-secondary-soft">UNSEEN H2 EER // 12.05%</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =======================================================================
+       7. BRUTALIST EDITORIAL FOOTER (ZERO-PERSISTENCE & LEGAL COMPLIANCE)
+       ======================================================================= -->
+  <footer class="border-t border-on-surface-variant/15 bg-surface-container-lowest py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1360px] mx-auto flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
+      <div class="space-y-2 max-w-2xl">
+        <p class="font-mono text-xs font-bold tracking-[0.22em] uppercase text-primary">
+          VieTrueVoice v0.9.4 // ZERO-PERSISTENCE ARCHITECTURE
+        </p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">
+          Toàn bộ luồng âm thanh được giải mã và suy luận trực tiếp trên RAM (in-memory) và hủy tức thì sau khi trả kết quả.
+          Nhật ký chỉ lưu mã băm ẩn danh <span class="font-mono text-on-surface">SHA-256</span>, tuân thủ Luật Bảo vệ dữ liệu cá nhân
+          <span class="font-mono text-on-surface">91/2025/QH15</span> và Nghị định <span class="font-mono text-on-surface">356/2025/NĐ-CP</span>.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em]">
+        <button
+          type="button"
+          data-open-predict
+          data-cursor="QUÉT"
+          class="vtv-btn-emerald px-4 py-2 font-bold"
+        >
+          MỞ THẨM ĐỊNH
+        </button>
+        <button
+          type="button"
+          data-open-clone-preset
+          data-cursor="CLONE"
+          data-cursor-tone="danger"
+          class="vtv-btn-crimson px-4 py-2 font-bold"
+        >
+          MỞ CLONE CFM
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =======================================================================
+       8. FULL-SCREEN FORENSIC STUDIO OVERLAY (SCROLLABLE, 2 REAL TABS)
+       ======================================================================= -->
+  <div
+    id="forensic-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    data-lenis-prevent
+    data-lenis-prevent-wheel
+    data-lenis-prevent-touch
+    aria-label="Phòng Lab Thẩm Định & Nhân Bản Giọng Nói VieTrueVoice"
+  >
+    <div class="min-h-screen flex flex-col">
+      <!-- Sticky Studio Header + 2-Tab Switcher -->
+      <div class="sticky top-0 z-30 bg-surface-container-lowest/95 backdrop-blur-md border-b border-on-surface-variant/20">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <img src="/static/assets/logo.svg" alt="VieTrueVoice Logo" width="24" height="24" class="w-6 h-6 shrink-0" />
+              <span class="font-mono text-xs sm:text-sm font-bold tracking-[0.2em] uppercase text-on-surface">
+                FORENSIC STUDIO // v0.9.4
+              </span>
+              <span class="hidden md:inline-block font-mono text-[10px] tracking-[0.16em] text-on-surface-variant border border-on-surface-variant/20 px-2 py-0.5">
+                SSL-AASIST • IN-MEMORY ZERO-PERSISTENCE
+              </span>
+            </div>
+
+            <button
+              id="btn-close-overlay"
+              type="button"
+              data-cursor="ĐÓNG"
+              class="vtv-btn-ghost px-4 py-2 font-mono text-xs font-bold tracking-[0.18em] uppercase flex items-center gap-1.5"
+            >
+              <span>ĐÓNG</span>
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+
+          <!-- 2-Tab Navigation Bar -->
+          <div role="tablist" class="grid grid-cols-2 border-t border-on-surface-variant/15">
+            <button
+              id="tab-btn-predict"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="tab-panel-predict"
+              data-cursor="QUÉT"
+              class="vtv-tab-btn is-active py-3.5 px-3 sm:px-5 font-mono text-[11px] sm:text-xs font-bold tracking-[0.14em] uppercase text-left flex items-center justify-between gap-2"
+            >
+              <span>01 // THẨM ĐỊNH GIỌNG NÓI</span>
+              <span class="hidden md:inline text-[10px] opacity-70">POST /api/v1/predict</span>
+            </button>
+
+            <button
+              id="tab-btn-clone"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="tab-panel-clone"
+              data-cursor="CLONE"
+              data-cursor-tone="danger"
+              class="vtv-tab-btn py-3.5 px-3 sm:px-5 font-mono text-[11px] sm:text-xs font-bold tracking-[0.14em] uppercase text-left border-l border-on-surface-variant/15 flex items-center justify-between gap-2"
+            >
+              <span>02 // CLONE &amp; KIỂM CHỨNG OMNIVOICE CFM</span>
+              <span class="hidden md:inline text-[10px] opacity-70">POST /api/v1/clone-and-audit</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Studio Body -->
+      <div class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20">
+
+        <!-- =================================================================
+             TAB 01: 01 // THẨM ĐỊNH GIỌNG NÓI (REAL /api/v1/predict)
+             ================================================================= -->
+        <section
+          id="tab-panel-predict"
+          role="tabpanel"
+          data-endpoint="/api/v1/predict"
+          class="space-y-8"
+        >
+          <!-- Top Input Row: Dropzone + Live Mic + 5 Real Quick Samples -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- 1. Drag & Drop File Picker -->
+            <div class="lg:col-span-5">
+              <div
+                id="predict-dropzone"
+                tabindex="0"
+                role="button"
+                data-cursor="TẢI"
+                class="vtv-dropzone h-full min-h-[170px] p-6 flex flex-col items-center justify-center text-center cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-3xl text-primary mb-2">upload_file</span>
+                <p class="font-mono text-xs font-bold tracking-[0.16em] uppercase text-on-surface">
+                  KÉO THẢ HOẶC CHỌN TỆP ÂM THANH
+                </p>
+                <p class="text-xs text-on-surface-variant mt-1.5">
+                  Hỗ trợ: <span class="font-mono text-on-surface">.wav .mp3 .m4a .ogg .opus .flac .webm</span>
+                </p>
+                <p class="font-mono text-[10px] text-primary/80 tracking-widest uppercase mt-3">
+                  GIẢI MÃ MAGIC-BYTES IN-MEMORY • KHÔNG LƯU ĐĨA
+                </p>
+                <input
+                  id="predict-file-input"
+                  type="file"
+                  accept=".wav,.mp3,.m4a,.ogg,.opus,.flac,.webm,audio/*"
+                  class="hidden"
+                />
+              </div>
+            </div>
+
+            <!-- 2. Live Browser Mic Recorder (16kHz Mono PCM WAV) -->
+            <div class="lg:col-span-3 bg-surface-container-low border border-on-surface-variant/15 p-5 flex flex-col justify-between gap-4">
+              <div>
+                <div class="flex items-center justify-between font-mono text-[10px] tracking-[0.18em] uppercase text-on-surface-variant mb-2">
+                  <span>LIVE MIC (RAW PCM)</span>
+                  <span id="predict-mic-timer" class="text-on-surface font-bold">00:00</span>
+                </div>
+                <p class="text-xs text-on-surface-variant leading-relaxed">
+                  Tắt AEC/ANS trình duyệt để giữ nguyên đặc trưng âm học thật. Tự động thẩm định ngay khi dừng.
+                </p>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between font-mono text-[10px] text-on-surface-variant">
+                  <span>MỨC TÍN HIỆU</span>
+                  <span id="predict-mic-db">-60 dB</span>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container-lowest overflow-hidden">
+                  <div id="predict-mic-meter-fill" class="h-full w-0 bg-primary-strong transition-[width] duration-75"></div>
+                </div>
+              </div>
+
+              <button
+                id="btn-predict-mic"
+                type="button"
+                data-cursor="THU"
+                data-cursor-tone="danger"
+                class="vtv-btn-ghost w-full py-3 px-4 font-mono text-xs font-bold tracking-[0.14em] uppercase flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-base">mic</span>
+                THU ÂM TRỰC TIẾP (16KHZ)
+              </button>
+            </div>
+
+            <!-- 3. 5 Real Quick Samples -->
+            <div class="lg:col-span-4 bg-surface-container-low border border-on-surface-variant/15 p-5 flex flex-col justify-between">
+              <div class="flex items-center justify-between font-mono text-[10px] tracking-[0.18em] uppercase text-on-surface-variant mb-3">
+                <span>5 MẪU KIỂM ĐỊNH THỰC TẾ</span>
+                <span class="text-primary">/static/samples/</span>
+              </div>
+
+              <div id="predict-samples-grid" class="grid grid-cols-1 gap-2">
+                <button
+                  type="button"
+                  data-cursor="QUÉT"
+                  data-predict-sample="/static/samples/sample_bonafide_spk0004.wav"
+                  class="vtv-sample-pill px-3 py-2 text-left text-[11px] font-mono uppercase tracking-wider flex items-center justify-between"
+                >
+                  <span>01 // GIỌNG THẬT (SPK_0004)</span>
+                  <span class="text-primary text-[10px]">BONA</span>
+                </button>
+                <button
+                  type="button"
+                  data-cursor="QUÉT"
+                  data-predict-sample="/static/samples/sample_spoof_f5tts.wav"
+                  class="vtv-sample-pill px-3 py-2 text-left text-[11px] font-mono uppercase tracking-wider flex items-center justify-between"
+                >
+                  <span>02 // F5-TTS (GIẢ)</span>
+                  <span class="text-secondary-soft text-[10px]">SPOOF</span>
+                </button>
+                <button
+                  type="button"
+                  data-cursor="QUÉT"
+                  data-predict-sample="/static/samples/sample_spoof_voicestudio_cfm.wav"
+                  class="vtv-sample-pill px-3 py-2 text-left text-[11px] font-mono uppercase tracking-wider flex items-center justify-between"
+                >
+                  <span>03 // OMNIVOICE CFM (GIẢ)</span>
+                  <span class="text-secondary-soft text-[10px]">SPOOF</span>
+                </button>
+                <button
+                  type="button"
+                  data-cursor="QUÉT"
+                  data-predict-sample="/static/samples/sample_spoof_zalo_opus.wav"
+                  class="vtv-sample-pill px-3 py-2 text-left text-[11px] font-mono uppercase tracking-wider flex items-center justify-between"
+                >
+                  <span>04 // ZALO OPUS 24K (GIẢ)</span>
+                  <span class="text-secondary-soft text-[10px]">OPUS</span>
+                </button>
+                <button
+                  type="button"
+                  data-cursor="QUÉT"
+                  data-predict-sample="/static/samples/sample_telephony_amrnb.wav"
+                  class="vtv-sample-pill px-3 py-2 text-left text-[11px] font-mono uppercase tracking-wider flex items-center justify-between"
+                >
+                  <span>05 // AMR-NB 8KHZ (GIẢ)</span>
+                  <span class="text-tertiary text-[10px]">8KHZ</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading / Error Banners -->
+          <div id="predict-loading" class="hidden bg-surface-container-low border border-primary/40 p-5 space-y-3">
+            <div class="flex items-center justify-between font-mono text-xs uppercase tracking-[0.16em] text-primary">
+              <span id="predict-loading-text">ĐANG SUY LUẬN ĐA CỬA SỔ SSL-AASIST v0.9.4...</span>
+              <span>POST /api/v1/predict</span>
+            </div>
+            <div class="vtv-scan-bar"></div>
+          </div>
+
+          <div id="predict-error" class="hidden bg-secondary/15 border border-secondary/60 px-4 py-3 font-mono text-xs text-secondary-soft"></div>
+
+          <!-- Empty State Hint -->
+          <div id="predict-empty-hint" class="border border-on-surface-variant/15 bg-surface-container-low/50 p-10 text-center space-y-2">
+            <p class="font-mono text-xs tracking-[0.2em] uppercase text-on-surface-variant">
+              SẴN SÀNG PHÂN TÍCH PHỔ &amp; ĐA CỬA SỔ THỜI GIAN
+            </p>
+            <p class="text-sm text-on-surface-variant/80">
+              Chọn 1 trong 5 mẫu kiểm định thực tế phía trên, tải file âm thanh hoặc thu trực tiếp từ micro để hiển thị đầy đủ 4 biểu đồ pháp chứng âm thanh.
+            </p>
+          </div>
+
+          <!-- Real Prediction Results + 4 Interactive HD Canvas Charts -->
+          <div id="predict-results" class="hidden space-y-6">
+            <!-- Verdict Headline & Key Forensics Telemetry -->
+            <div id="predict-verdict-card" class="border border-on-surface-variant/25 bg-surface-container-low p-6 sm:p-8 space-y-6">
+              <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                <div class="space-y-2 max-w-2xl">
+                  <div id="predict-verdict-badge" class="inline-flex items-center gap-2 px-3 py-1 text-[11px] font-mono uppercase tracking-widest border border-primary/50 text-primary">
+                    CHỜ KẾT QUẢ
+                  </div>
+                  <h2 id="predict-verdict-title" class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter">
+                    —
+                  </h2>
+                  <p id="predict-verdict-sub" class="text-sm text-on-surface-variant leading-relaxed"></p>
+                </div>
+
+                <!-- Calibrated Platt Probability Gauge -->
+                <div class="lg:w-[380px] bg-surface-container-lowest border border-on-surface-variant/15 p-5 space-y-3">
+                  <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">
+                    <span>PLATT CALIBRATION (T=16.0)</span>
+                    <span id="predict-n-windows" class="text-on-surface">5 WINDOWS</span>
+                  </div>
+                  <div class="flex items-end justify-between">
+                    <div>
+                      <span class="font-mono text-[10px] text-primary block">P(BONA FIDE)</span>
+                      <span id="predict-prob-bona" class="font-mono text-2xl font-bold text-primary">50.0%</span>
+                    </div>
+                    <div class="text-right">
+                      <span class="font-mono text-[10px] text-secondary-soft block">P(SPOOF)</span>
+                      <span id="predict-prob-spoof" class="font-mono text-2xl font-bold text-secondary-soft">50.0%</span>
+                    </div>
+                  </div>
+                  <div class="h-2.5 w-full bg-secondary/70 overflow-hidden">
+                    <div id="predict-prob-bar-bona" class="h-full bg-primary-strong transition-[width] duration-500" style="width: 50%"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Borderline Warning Banner (Visible ONLY when is_borderline === true) -->
+              <div id="predict-borderline-banner" class="hidden border border-tertiary/70 bg-tertiary/15 px-4 py-3 flex items-start gap-3">
+                <span class="material-symbols-outlined text-tertiary text-xl mt-0.5">warning</span>
+                <div class="text-xs sm:text-sm text-tertiary-soft leading-relaxed">
+                  <strong class="font-mono uppercase tracking-wider text-tertiary block">CẢNH BÁO BORDERLINE (|s - θ| ≤ 8.0)</strong>
+                  Mẫu âm thanh rơi vào vùng ranh giới rủi ro cao do nhiễu nền mạnh, nén kênh thoại quá sâu hoặc đoạn thoại ngắn. Đề nghị xác minh bổ sung bằng kênh độc lập.
+                </div>
+              </div>
+
+              <!-- Telemetry Metrics Bar -->
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block">RAW LOGIT (s)</span>
+                  <span id="predict-raw-score" class="text-xl font-bold font-mono text-on-surface">0.00</span>
+                </div>
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block">ĐỘ TRỄ (LATENCY)</span>
+                  <span id="predict-latency" class="text-xl font-bold font-mono text-on-surface">—</span>
+                </div>
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block">BANDWIDTH PROFILE</span>
+                  <span id="predict-bandwidth" class="text-xs font-bold font-mono text-tertiary mt-1 block">—</span>
+                </div>
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block">TẦN SỐ CƠ BẢN (F0)</span>
+                  <span id="predict-f0" class="text-lg font-bold font-mono text-on-surface">—</span>
+                </div>
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block">HF RATIO &gt; 4KHZ</span>
+                  <span id="predict-hf-ratio" class="text-lg font-bold font-mono text-on-surface">—</span>
+                </div>
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-primary block whitespace-nowrap">SHA-256 (ZERO-DISK)</span>
+                  <span id="predict-sha256" class="text-xs font-mono text-on-surface-variant mt-1 block truncate">—</span>
+                </div>
+              </div>
+
+              <!-- Audio Playback Bar for Submitted Clip -->
+              <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="min-w-0 sm:w-56">
+                  <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-on-surface-variant block">TÍN HIỆU ĐẦU VÀO</span>
+                  <span id="predict-source-filename" class="font-mono text-xs text-on-surface truncate block">audio_input.wav</span>
+                </div>
+                <audio id="predict-audio-player" controls class="vtv-audio-player flex-1"></audio>
+              </div>
+            </div>
+
+            <!-- 4 REAL INTERACTIVE HD CANVAS CHARTS (2x2 Matrix) -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+              <!-- Chart 1: Mel-Spectrogram Heatmap -->
+              <div class="vtv-chart-card p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-primary block">BIỂU ĐỒ 01 // SPECTRAL HEATMAP</span>
+                    <h3 class="text-sm font-bold text-on-surface">Mel-Spectrogram (48 Mels • 0 – 8 kHz)</h3>
+                  </div>
+                  <span class="font-mono text-[10px] text-on-surface-variant">3.4kHz AMR-NB &amp; 4.0kHz VOCODER</span>
+                </div>
+                <canvas id="chart-predict-mel" data-height="230" class="vtv-canvas-hd"></canvas>
+              </div>
+
+              <!-- Chart 2: Waveform Oscilloscope -->
+              <div class="vtv-chart-card p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-primary block">BIỂU ĐỒ 02 // TIME DOMAIN</span>
+                    <h3 class="text-sm font-bold text-on-surface">Dao Động Ký Dạng Sóng (Waveform Oscilloscope)</h3>
+                  </div>
+                  <span class="font-mono text-[10px] text-on-surface-variant">16KHZ MONO NORMALIZED</span>
+                </div>
+                <canvas id="chart-predict-wave" data-height="230" class="vtv-canvas-hd"></canvas>
+              </div>
+
+              <!-- Chart 3: Multi-Window Consensus Asymmetric Veto -->
+              <div class="vtv-chart-card p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-primary block">BIỂU ĐỒ 03 // MULTI-WINDOW POOLING</span>
+                    <h3 class="text-sm font-bold text-on-surface">Consensus Asymmetric Veto &amp; Anomaly Risk Heatbar</h3>
+                  </div>
+                  <span id="predict-pooling-branch" class="text-[11px] font-mono px-2 py-0.5 border border-primary/40 text-primary">MAX_DEFAULT</span>
+                </div>
+                <canvas id="chart-predict-windows" data-height="230" class="vtv-canvas-hd"></canvas>
+                <p id="predict-pooling-explanation" class="text-xs text-on-surface-variant leading-relaxed border-t border-on-surface-variant/15 pt-2.5"></p>
+              </div>
+
+              <!-- Chart 4: Platt Calibration Curve & 3-Band Energy -->
+              <div class="vtv-chart-card p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <span class="font-mono text-[10px] tracking-[0.2em] uppercase text-primary block">BIỂU ĐỒ 04 // CALIBRATION &amp; BANDS</span>
+                    <h3 class="text-sm font-bold text-on-surface">Đường Cong Platt (T=16.0) &amp; Phân Bố Năng Lượng 3 Dải Tần</h3>
+                  </div>
+                  <span class="font-mono text-[10px] text-tertiary">BORDERLINE [-8, +8]</span>
+                </div>
+                <canvas id="chart-predict-platt" data-height="230" class="vtv-canvas-hd"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =================================================================
+             TAB 02: 02 // CLONE & KIỂM CHỨNG OMNIVOICE CFM (/api/v1/clone-and-audit)
+             ================================================================= -->
+        <section
+          id="tab-panel-clone"
+          role="tabpanel"
+          data-endpoint="/api/v1/clone-and-audit"
+          class="hidden space-y-8"
+        >
+          <!-- Top Clone Setup Matrix -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Left: Reference Voice Input (Upload / Mic / Preset SPK_0004) -->
+            <div class="lg:col-span-5 bg-surface-container-low border border-on-surface-variant/15 p-5 space-y-4">
+              <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
+                <span>BƯỚC 1 // NẠP GIỌNG MẪU GỐC (3–8S)</span>
+                <span class="text-primary">REFERENCE AUDIO</span>
+              </div>
+
+              <div
+                id="clone-dropzone"
+                tabindex="0"
+                role="button"
+                data-cursor="TẢI"
+                class="vtv-dropzone p-5 text-center cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-2xl text-primary mb-1">audio_file</span>
+                <p class="font-mono text-xs font-bold tracking-[0.14em] uppercase text-on-surface">
+                  KÉO THẢ HOẶC CHỌN FILE GIỌNG THẬT
+                </p>
+                <p class="text-[11px] text-on-surface-variant mt-1">.wav .mp3 .m4a .ogg .opus .webm</p>
+                <input
+                  id="clone-file-input"
+                  type="file"
+                  accept=".wav,.mp3,.m4a,.ogg,.opus,.flac,.webm,audio/*"
+                  class="hidden"
+                />
+              </div>
+
+              <!-- Mic Recorder + 1-click SPK_0004 Preset -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  id="btn-clone-mic"
+                  type="button"
+                  data-cursor="THU"
+                  data-cursor-tone="danger"
+                  class="vtv-btn-ghost py-2.5 px-3 font-mono text-[11px] font-bold tracking-[0.12em] uppercase flex items-center justify-center gap-1.5"
+                >
+                  <span class="material-symbols-outlined text-base">mic</span>
+                  THU GIỌNG MẪU (3–8S)
+                </button>
+
+                <button
+                  id="btn-clone-load-spk0004"
+                  type="button"
+                  data-cursor="TẢI"
+                  class="vtv-btn-ghost py-2.5 px-3 font-mono text-[11px] font-bold tracking-[0.12em] uppercase text-primary border-primary/40 hover:bg-primary/10"
+                >
+                  Dùng mẫu giọng thật SPK_0004
+                </button>
+              </div>
+
+              <!-- Live Mic Meter for Tab 02 -->
+              <div class="flex items-center gap-3 font-mono text-[10px] text-on-surface-variant">
+                <span id="clone-mic-timer" class="text-on-surface font-bold">00:00</span>
+                <div class="h-1.5 flex-1 bg-surface-container-lowest overflow-hidden">
+                  <div id="clone-mic-meter-fill" class="h-full w-0 bg-secondary transition-[width] duration-75"></div>
+                </div>
+                <span id="clone-mic-db">-60 dB</span>
+              </div>
+
+              <!-- Reference Audio Preview -->
+              <div id="clone-ref-preview-box" class="hidden bg-surface-container-lowest border border-primary/35 p-3.5 space-y-2">
+                <div class="flex items-center justify-between font-mono text-[10px] uppercase">
+                  <span class="text-primary font-bold">GIỌNG MẪU ĐÃ NẠP</span>
+                  <span id="clone-ref-filename" class="text-on-surface-variant truncate max-w-[200px]">sample.wav</span>
+                </div>
+                <audio id="clone-ref-audio" controls class="vtv-audio-player"></audio>
+              </div>
+            </div>
+
+            <!-- Right: Target Script + Optional Ref Transcript + Big Run CTA -->
+            <div class="lg:col-span-7 bg-surface-container-low border border-on-surface-variant/15 p-5 flex flex-col justify-between gap-4">
+              <div class="space-y-4">
+                <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">
+                  <span>BƯỚC 2 // KỊCH BẢN GIẢ MẠO OMNIVOICE CFM</span>
+                  <span class="text-secondary-soft">POST /api/v1/clone-and-audit</span>
+                </div>
+
+                <div>
+                  <label for="clone-target-text" class="block font-mono text-[11px] uppercase tracking-wider text-on-surface mb-2">
+                    Văn bản mục tiêu cần OmniVoice CFM đọc giả mạo (target_text)
+                  </label>
+                  <textarea
+                    id="clone-target-text"
+                    rows="3"
+                    class="w-full bg-surface-container-lowest border border-on-surface-variant/25 px-3.5 py-2.5 text-sm text-on-surface focus:outline-none focus:border-secondary"
+                  >Mẹ ơi con đang cấp cứu, chuyển gấp cho con hai mươi triệu nhé.</textarea>
+                </div>
+
+                <!-- 3 Quick Vietnamese Scam Script Pills -->
+                <div class="space-y-1.5">
+                  <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block">
+                    CHỌN NHANH KỊCH BẢN THỬ NGHIỆM:
+                  </span>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      data-cursor="CLONE"
+                      data-scam-script="Mẹ ơi con đang cấp cứu, chuyển gấp cho con hai mươi triệu nhé."
+                      class="vtv-sample-pill px-2.5 py-1.5 text-[11px] font-sans text-left"
+                    >
+                      “Mẹ ơi con đang cấp cứu, chuyển gấp 20 triệu...”
+                    </button>
+                    <button
+                      type="button"
+                      data-cursor="CLONE"
+                      data-scam-script="Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ."
+                      class="vtv-sample-pill px-2.5 py-1.5 text-[11px] font-sans text-left"
+                    >
+                      “Xin chào quý khách, cuộc gọi này được ghi âm...”
+                    </button>
+                    <button
+                      type="button"
+                      data-cursor="CLONE"
+                      data-scam-script="Tôi là cán bộ ngân hàng, tài khoản của anh chị đang có giao dịch bất thường."
+                      class="vtv-sample-pill px-2.5 py-1.5 text-[11px] font-sans text-left"
+                    >
+                      “Tôi là cán bộ ngân hàng, tài khoản bất thường...”
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Optional custom_ref_text -->
+                <div>
+                  <label for="clone-custom-ref-text" class="block font-mono text-[10px] uppercase tracking-wider text-on-surface-variant mb-1.5">
+                    Lời thoại gốc (custom_ref_text — tùy chọn)
+                  </label>
+                  <input
+                    id="clone-custom-ref-text"
+                    type="text"
+                    placeholder="Để trống sẽ tự động chạy ASR Wav2Vec2 tiếng Việt"
+                    class="w-full bg-surface-container-lowest border border-on-surface-variant/20 px-3.5 py-2 text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
+
+              <!-- Big CTA Button -->
+              <button
+                id="btn-run-clone-audit"
+                type="button"
+                data-cursor="CLONE"
+                data-cursor-tone="danger"
+                class="vtv-btn-crimson w-full py-4 px-6 font-mono text-xs sm:text-sm font-bold tracking-[0.16em] uppercase flex items-center justify-center gap-2"
+              >
+                <span>NHÂN BẢN OMNIVOICE &amp; THẨM ĐỊNH</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Clone Loading & Error -->
+          <div id="clone-loading" class="hidden bg-surface-container-low border border-secondary/50 p-5 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs uppercase tracking-[0.16em] text-secondary-soft">
+              <span>ĐANG NHÂN BẢN ZERO-SHOT OMNIVOICE CFM &amp; KIỂM CHỨNG ĐỐI XỨNG SSL-AASIST...</span>
+              <span>ASR WAV2VEC2 → CFM → VETO AUDIT</span>
+            </div>
+            <div class="vtv-scan-bar vtv-scan-bar-crimson"></div>
+          </div>
+
+          <div id="clone-error" class="hidden bg-secondary/15 border border-secondary/60 px-4 py-3 font-mono text-xs text-secondary-soft"></div>
+
+          <!-- Comparative Side-by-Side Output Matrix -->
+          <div id="clone-results" class="hidden space-y-6">
+            <!-- Top Delta Summary Banner -->
+            <div class="bg-surface-container-low border border-on-surface-variant/25 p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+              <div class="space-y-2">
+                <div id="clone-engine-status-badge" class="inline-flex items-center gap-2 px-3 py-1 text-[11px] font-mono uppercase tracking-widest border border-primary/50 text-primary">
+                  LIVE OMNIVOICE CFM
+                </div>
+                <p class="text-xs sm:text-sm text-on-surface-variant">
+                  <span class="font-mono uppercase text-[10px] tracking-widest text-on-surface-variant mr-2">ASR TRANSCRIPT USED:</span>
+                  <span id="clone-transcript-used" class="text-on-surface font-medium">—</span>
+                </p>
+                <p class="text-xs text-on-surface-variant/85">
+                  <span class="font-mono uppercase text-[10px] tracking-widest mr-2">TARGET SCRIPT:</span>
+                  <span id="clone-target-text-echo">—</span>
+                </p>
+              </div>
+
+              <div class="bg-surface-container-lowest border border-primary/40 px-6 py-4 text-left lg:text-right shrink-0">
+                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-on-surface-variant block">Δ MARGIN GAP (BONA − CLONE)</span>
+                <span id="clone-delta-margin" class="font-mono text-3xl sm:text-4xl font-black text-primary">+0.00</span>
+              </div>
+            </div>
+
+            <!-- Side-by-Side Matrix: Original (Left) vs OmniVoice CFM Clone (Right) -->
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+              <!-- LEFT CARD: BẢN GỐC (BONA FIDE) -->
+              <article id="clone-bona-card" class="border border-primary/40 bg-surface-container-low p-5 sm:p-6 flex flex-col gap-5">
+                <div class="flex items-start justify-between gap-3 border-b border-on-surface-variant/15 pb-4">
+                  <div>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-primary block">01 // BẢN GỐC (REFERENCE)</span>
+                    <h3 class="text-xl font-extrabold text-on-surface mt-1">BẢN GỐC — BONA FIDE</h3>
+                  </div>
+                  <span id="clone-bona-badge" class="px-2.5 py-1 text-xs font-bold font-mono border border-primary/60 text-primary">BONA_FIDE</span>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3 font-mono">
+                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                    <span class="text-[9px] text-on-surface-variant block">RAW LOGIT</span>
+                    <span id="clone-bona-score" class="text-lg font-bold text-primary">+0.00</span>
+                  </div>
+                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                    <span class="text-[9px] text-on-surface-variant block">LATENCY</span>
+                    <span id="clone-bona-latency" class="text-lg font-bold text-on-surface">—</span>
+                  </div>
+                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                    <span class="text-[9px] text-on-surface-variant block">SHA-256</span>
+                    <span id="clone-bona-sha" class="text-[11px] text-on-surface-variant truncate block mt-1">—</span>
+                  </div>
+                </div>
+
+                <p id="clone-bona-prob" class="font-mono text-xs text-primary tracking-wider min-h-[1rem]"></p>
+
+                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                  <audio id="clone-bona-audio" controls class="vtv-audio-player"></audio>
+                </div>
+
+                <!-- Compact Forensics Charts (Original) -->
+                <div class="space-y-3">
+                  <div>
+                    <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WAVEFORM // BẢN GỐC</span>
+                    <canvas id="chart-clone-bona-wave" data-height="110" class="vtv-canvas-hd"></canvas>
+                  </div>
+                  <div>
+                    <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">MEL-SPECTROGRAM // BẢN GỐC</span>
+                    <canvas id="chart-clone-bona-mel" data-height="150" class="vtv-canvas-hd"></canvas>
+                  </div>
+                  <div>
+                    <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WINDOW SCORES // BẢN GỐC</span>
+                    <canvas id="chart-clone-bona-windows" data-height="150" class="vtv-canvas-hd"></canvas>
+                  </div>
+                </div>
+              </article>
+
+              <!-- RIGHT CARD: BẢN NHÂN BẢN (OMNIVOICE CFM CLONE) -->
+              <article id="clone-fake-card" class="border border-secondary/50 bg-surface-container-low p-5 sm:p-6 flex flex-col gap-5">
+                <div class="flex items-start justify-between gap-3 border-b border-on-surface-variant/15 pb-4">
+                  <div>
+                    <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary-soft block">02 // BẢN NHÂN BẢN AI (ZERO-SHOT)</span>
+                    <h3 class="text-xl font-extrabold text-on-surface mt-1">OMNIVOICE CFM CLONE</h3>
+                  </div>
+                  <span id="clone-fake-badge" class="px-2.5 py-1 text-xs font-bold font-mono border border-secondary/70 text-secondary-soft">SPOOF</span>
+                </div>
+
+                <!-- Live Cloning Skeleton & Motion Loader (visible while Stage 2 runs) -->
+                <div id="clone-fake-loading" class="hidden flex-1 flex flex-col justify-between gap-5" aria-live="polite">
+                  <div class="bg-surface-container-lowest border border-secondary/40 p-5 space-y-4">
+                    <div class="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.16em]">
+                      <span class="inline-flex items-center gap-2 text-secondary-soft font-bold">
+                        <span class="w-2 h-2 bg-secondary animate-ping"></span>
+                        ĐANG NHÂN BẢN GIỌNG NÓI OMNIVOICE CFM...
+                      </span>
+                      <span id="clone-elapsed-timer" class="text-tertiary font-bold tabular-nums">0.0 s</span>
+                    </div>
+
+                    <div class="vtv-scan-bar vtv-scan-bar-crimson"></div>
+
+                    <!-- Animated Acoustic Synthesis Equalizer -->
+                    <div class="vtv-clone-eq py-4" aria-hidden="true">
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-[10px] uppercase tracking-[0.14em]">
+                      <div id="clone-step-1" class="border border-on-surface-variant/20 bg-surface-container-low/70 px-3 py-2 text-on-surface-variant">
+                        01 // PHÂN TÍCH BẢN GỐC (SSL-AASIST)
+                      </div>
+                      <div id="clone-step-2" class="border border-secondary/45 bg-secondary/10 px-3 py-2 text-secondary-soft">
+                        02 // ASR WAV2VEC2 → CFM → VETO AUDIT
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Visual Skeleton Matching Left Card's 3 Charts -->
+                  <div class="space-y-3 flex-1 flex flex-col justify-end">
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/70 block mb-1">WAVEFORM // ĐANG TỔNG HỢP...</span>
+                      <div class="vtv-skeleton-shimmer h-[110px]"></div>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/70 block mb-1">MEL-SPECTROGRAM // ĐANG TỔNG HỢP...</span>
+                      <div class="vtv-skeleton-shimmer h-[150px]"></div>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/70 block mb-1">WINDOW SCORES // ĐANG CHỜ SUY LUẬN...</span>
+                      <div class="vtv-skeleton-shimmer h-[150px]"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Completed Clone Result Content (mirrors Left Card structure 1:1) -->
+                <div id="clone-fake-content" class="flex flex-col gap-5">
+                  <div class="grid grid-cols-3 gap-3 font-mono">
+                    <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                      <span class="text-[9px] text-on-surface-variant block">RAW LOGIT</span>
+                      <span id="clone-fake-score" class="text-lg font-bold text-secondary-soft">-0.00</span>
+                    </div>
+                    <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                      <span class="text-[9px] text-on-surface-variant block">CLONE + AUDIT</span>
+                      <span id="clone-fake-latency" class="text-lg font-bold text-on-surface">—</span>
+                    </div>
+                    <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                      <span class="text-[9px] text-on-surface-variant block">SHA-256</span>
+                      <span id="clone-fake-sha" class="text-[11px] text-on-surface-variant truncate block mt-1">—</span>
+                    </div>
+                  </div>
+
+                  <p id="clone-fake-prob" class="font-mono text-xs text-secondary-soft tracking-wider min-h-[1rem]"></p>
+
+                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                    <audio id="clone-fake-audio" controls class="vtv-audio-player"></audio>
+                  </div>
+
+                  <!-- Compact Forensics Charts (Clone) -->
+                  <div class="space-y-3">
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WAVEFORM // OMNIVOICE CLONE</span>
+                      <canvas id="chart-clone-fake-wave" data-height="110" class="vtv-canvas-hd"></canvas>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">MEL-SPECTROGRAM // OMNIVOICE CLONE</span>
+                      <canvas id="chart-clone-fake-mel" data-height="150" class="vtv-canvas-hd"></canvas>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WINDOW SCORES // OMNIVOICE CLONE</span>
+                      <canvas id="chart-clone-fake-windows" data-height="150" class="vtv-canvas-hd"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- VieTrueVoice Modular Forensics Scripts -->
+  <script src="/static/js/webgl-orb.js" defer></script>
+  <script src="/static/js/audio-recorder.js" defer></script>
+  <script src="/static/js/charts.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>

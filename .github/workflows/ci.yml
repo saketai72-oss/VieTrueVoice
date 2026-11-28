@@ -1,4 +1,4 @@
-name: ViTrueVoice CI
+name: VieTrueVoice CI
 
 on:
   push:

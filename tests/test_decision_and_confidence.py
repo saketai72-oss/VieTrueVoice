@@ -4,13 +4,11 @@ Ensures:
 1. Decision threshold is configurable and defaults to 0.0.
 2. Boundary conditions: score > thr is BONA_FIDE, score < thr is SPOOF, score == thr is BONA_FIDE.
 3. No fake 100% confidence from sigmoid(abs(raw_score)) without calibration.
-4. API, UI, and Bot share identical decision logic.
+4. FastAPI (/api/v1/predict), classify_score, and Telegram Bot share identical decision logic.
 5. Diagnostic path matching requires full path / hash integrity, preventing basename collisions.
 """
 
-import hashlib
 import io
-import json
 import wave
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
@@ -20,9 +18,9 @@ import pytest
 import torch
 from fastapi.testclient import TestClient
 
-from src.app.server import create_app
-from src.app.ui import make_predict_fn
 from src.app.bot import handle_voice_message
+from src.app.decision import classify_score
+from src.app.server import create_app
 
 
 class ParametricStubModel:
@@ -111,7 +109,7 @@ def test_api_configurable_threshold(tmp_path, threshold, score_val, expected_lab
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. Uncalibrated Confidence Tests (No fake 100%)
+# 2. Uncalibrated Confidence & Platt Scaling Tests (No fake 100%)
 # ─────────────────────────────────────────────────────────────────────────────
 
 def test_api_does_not_return_fake_100_percent_confidence(tmp_path):
@@ -139,31 +137,24 @@ def test_api_does_not_return_fake_100_percent_confidence(tmp_path):
     assert data["raw_score"] == pytest.approx(-11.9034, abs=1e-4)
 
 
-def test_ui_predict_fn_does_not_display_100_percent_uncalibrated():
-    """Gradio UI must state that probabilities are uncalibrated and not print '100.0%'."""
-    model = ParametricStubModel(score_val=-11.9034)
-    predict_fn = make_predict_fn(model=model, device="cpu", threshold=0.0, calibrator=None)
-    audio_tuple = (16000, np.zeros(16000, dtype=np.float32))
-
-    verdict, conf_text, detail_text = predict_fn(audio_tuple)
-
-    assert "100.0%" not in conf_text
-    assert "100%" not in conf_text
-    assert "Chưa hiệu chuẩn" in conf_text or "Điểm thô" in conf_text or "Score" in conf_text
-    assert "-11.9" in detail_text or "-11.9" in conf_text
+def test_classify_score_uncalibrated_returns_none_confidence():
+    """Without a calibrator, classify_score must return confidence=None (never fake 100%)."""
+    decision = classify_score(-11.9034, threshold=0.0, calibrator=None)
+    assert decision.prediction == "SPOOF"
+    assert decision.label == 0
+    assert decision.confidence is None
+    assert decision.confidence_calibrated is False
 
 
-def test_ui_predict_fn_displays_calibrated_platt_scaling():
-    """Gradio UI displays calibrated probability when calibrator is provided."""
-    model = ParametricStubModel(score_val=3.5409)
-    predict_fn = make_predict_fn(model=model, device="cpu", threshold=0.0)
-    audio_tuple = (16000, np.zeros(16000, dtype=np.float32))
-
-    verdict, conf_text, detail_text = predict_fn(audio_tuple)
-
-    assert "THẬT" in verdict
-    assert "55.5%" in conf_text
-    assert "Platt Scaling" in conf_text
+def test_classify_score_displays_calibrated_platt_scaling():
+    """Default Platt calibrator (T=16.0) maps score=3.5409 to ~0.5551 without saturation."""
+    decision = classify_score(3.5409, threshold=0.0)
+    assert decision.prediction == "BONA_FIDE"
+    assert decision.label == 1
+    assert decision.confidence_calibrated is True
+    assert decision.confidence == pytest.approx(0.5551, abs=1e-3)
+    assert decision.is_borderline is True
+    assert decision.risk_level == "BORDERLINE"
 
 
 @pytest.mark.anyio
@@ -224,17 +215,17 @@ async def test_bot_handle_voice_displays_calibrated_platt_scaling():
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. Decision Parity Across API, UI, and Bot
+# 3. Decision Parity Across FastAPI (/api/v1/predict), classify_score, and Bot
 # ─────────────────────────────────────────────────────────────────────────────
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("score_val", [-15.0, -5.0, -0.01, 0.0, 0.01, 5.0, 15.0])
-async def test_parity_across_api_ui_bot(tmp_path, score_val):
-    """For any given raw score and threshold, API, UI, and Bot produce identical verdicts."""
+async def test_parity_across_api_decision_and_bot(tmp_path, score_val):
+    """For any raw score and threshold, FastAPI, classify_score, and Bot match identically."""
     model = ParametricStubModel(score_val=score_val)
     thr = 0.0
 
-    # 1. API
+    # 1. FastAPI (/api/v1/predict)
     app = create_app(
         checkpoint_path=tmp_path / "stub.pt",
         device="cpu",
@@ -245,14 +236,13 @@ async def test_parity_across_api_ui_bot(tmp_path, score_val):
     client = TestClient(app)
     raw_bytes = make_synthetic_wav_bytes()
     api_res = client.post("/api/v1/predict", files={"file": ("v.wav", raw_bytes, "audio/wav")}).json()
-    is_bona_api = (api_res["prediction"] == "BONA_FIDE")
+    is_bona_api = api_res["prediction"] == "BONA_FIDE"
 
-    # 2. UI
-    ui_predict = make_predict_fn(model=model, device="cpu", threshold=thr)
-    verdict, _, _ = ui_predict((16000, np.zeros(16000, dtype=np.float32)))
-    is_bona_ui = ("THẬT" in verdict or "BONAFIDE" in verdict)
+    # 2. Core decision function (classify_score)
+    core_decision = classify_score(score_val, threshold=thr, window_scores=[score_val])
+    is_bona_core = core_decision.is_bonafide
 
-    # 3. Bot
+    # 3. Telegram Bot
     update = MagicMock()
     context = MagicMock()
     file_mock = AsyncMock()
@@ -265,7 +255,10 @@ async def test_parity_across_api_ui_bot(tmp_path, score_val):
     bot_reply = update.message.reply_text.call_args[0][0]
     is_bona_bot = ("THẬT" in bot_reply or "BONAFIDE" in bot_reply)
 
-    assert is_bona_api == is_bona_ui == is_bona_bot, f"Mismatch at score={score_val}"
+    assert is_bona_api == is_bona_core == is_bona_bot, f"Mismatch at score={score_val}"
+    assert api_res["label"] == core_decision.label
+    assert api_res["is_borderline"] == core_decision.is_borderline
+    assert api_res["risk_level"] == core_decision.risk_level
 
 
 # ─────────────────────────────────────────────────────────────────────────────

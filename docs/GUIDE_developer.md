@@ -1,4 +1,4 @@
-# GUIDE_developer — Tiêu Chuẩn Thực Thi & Lập Trình Cho ViTrueVoice
+# GUIDE_developer — Tiêu Chuẩn Thực Thi & Lập Trình Cho VieTrueVoice
 
 ---
 
@@ -73,10 +73,10 @@
 ## 4. Các Mặc Định Về Kiến Trúc
 
 ### Phân Tách 3 Lớp (3-Layer Separation) & Khung Sinh Kép
-- **Lớp Tín Hiệu & Sinh Mẫu Giả**: `src/vitruevoice/` (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo, SpeakerProfiler, MultiGateEvaluator 4 cổng, DialectEvaluator, TelephonyCompressor) và `src/preprocessing/` (chuẩn hóa 16kHz mono 64.000 mẫu, EBU R128, Z-score, RawBoost).
+- **Lớp Tín Hiệu & Sinh Mẫu Giả**: `src/VieTrueVoice/` (Dual Pipeline F5-TTS + VieNeu-TTS v3 Turbo, SpeakerProfiler, MultiGateEvaluator 4 cổng, DialectEvaluator, TelephonyCompressor) và `src/preprocessing/` (chuẩn hóa 16kHz mono 64.000 mẫu, EBU R128, Z-score, RawBoost).
 - **Lớp Biểu Diễn & Mô Hình**: `src/models/` và `src/training/` (trích xuất đặc trưng tự giám sát wav2vec 2.0 + đồ thị chú ý HS-GAL, Dynamic Weighted CE $w_c = \frac{N}{2 \cdot N_c}$).
 - **Lớp Dịch Vụ & Trình Diễn**: `src/app/` (API FastAPI, giao diện Gradio $\le 3$ thao tác, Bot Telegram).
-- **Đồng bộ SSOT**: Toàn bộ logic lõi của `src/vitruevoice/` phải được đồng bộ chính xác sang `out/vitruevoice` và notebook `train.ipynb`.
+- **Đồng bộ SSOT**: Toàn bộ logic lõi của `src/VieTrueVoice/` phải được đồng bộ chính xác sang `out/VieTrueVoice` và notebook `train.ipynb`.
 
 ### Không Gian Tên & Định Danh (Namespace Governance)
 - **Manifests 18 Cột Chuẩn**: Lưu tại `data/manifests/` và `data/manifests_zalo/`.

@@ -1,5 +1,5 @@
-# TÀI LIỆU KỸ THUẬT THỰC THI ĐỀ TÀI: VITRUEVOICE (SV: NGUYỄN THÀNH TÀI - 2380601959)
-## PHÁT TRIỂN VITRUEVOICE: HỆ THỐNG PHÁT HIỆN GIỌNG NÓI GIẢ TIẾNG VIỆT QUA KÊNH THOẠI NÉN DỰA TRÊN HỌC BIỂU DIỄN TỰ GIÁM SÁT
+# TÀI LIỆU KỸ THUẬT THỰC THI ĐỀ TÀI: VieTrueVoice (SV: NGUYỄN THÀNH TÀI - 2380601959)
+## PHÁT TRIỂN VieTrueVoice: HỆ THỐNG PHÁT HIỆN GIỌNG NÓI GIẢ TIẾNG VIỆT QUA KÊNH THOẠI NÉN DỰA TRÊN HỌC BIỂU DIỄN TỰ GIÁM SÁT
 
 > **Định vị & Giả thuyết:** Phân loại thật/giả đoạn thoại 5–10s qua kênh nén (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$) cho phụ huynh và người lớn tuổi. Kiểm chứng **H1** (giảm $\ge 30\%$ EER tương đối trên tập nén nhờ tăng cường nén kênh), **H2** ($\text{EER} \le 15\%$ trên công cụ TTS chưa thấy: Seen F5-TTS vs. Unseen VieNeu-TTS) và thời gian phản hồi trung vị $\le 3$ giây.
 
@@ -18,13 +18,13 @@
 
 ## GIAI ĐOẠN 01: CHUẨN BỊ DỮ LIỆU GỐC & QUY TRÌNH SINH MẪU GIỌNG GIẢ (DATA & SPOOF GENERATION – FROZEN PIPELINE v0.2.3 / KAGGLE V14)
 
-*Thực hiện Must #1 (W3–W4): Xây dựng bộ dữ liệu tiếng Việt chuẩn hóa $\ge 1.000$ mẫu thật, $\ge 2.000$ mẫu giả qua kiến trúc Hai Engine Song Song (`src/vitruevoice/`), kiểm định 4 cổng (Multi-Gate Label-Free Prosody) và tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP.*
+*Thực hiện Must #1 (W3–W4): Xây dựng bộ dữ liệu tiếng Việt chuẩn hóa $\ge 1.000$ mẫu thật, $\ge 2.000$ mẫu giả qua kiến trúc Hai Engine Song Song (`src/VieTrueVoice/`), kiểm định 4 cổng (Multi-Gate Label-Free Prosody) và tuân thủ Luật 91/2025/QH15 & Nghị định 356/2025/NĐ-CP.*
 
 ### [BƯỚC 1.1] Thu thập Giọng thật (Bona fide), Phân hoạch Chuẩn V12/V14 & Đạo đức Dữ liệu Sinh trắc học
 
 * **Thu thập trực tiếp có Phiếu đồng ý (Consent Form – Phụ lục C.2):** Thực hiện thu âm từ các tình nguyện viên có ký Phiếu đồng ý hợp lệ (theo hướng dẫn của GVHD ngày 23/10/2026 cho phép thu từ $\ge 5$ người trở lên kết hợp dữ liệu mở; hiện đã hoàn tất chuẩn hóa **5 tình nguyện viên chính thức**: `SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007` với 79 câu thoại gốc/mô hình, đã loại bỏ hoàn toàn `SPK_0003` và chuyển đổi `SPK_0005` gồm 20 câu từ định dạng `.m4a` sang chuẩn PCM 16-bit $48\text{ kHz}$ Mono WAV; hướng tới mở rộng $\ge 30$ người nói). Mã hóa ẩn danh toàn bộ người nói thành `SPK_XXXX` (tuyệt đối không lưu tên thật lên repo công khai). Phiếu đồng ý tuân thủ Luật Bảo vệ dữ liệu cá nhân số 91/2025/QH15 và Nghị định 356/2025/NĐ-CP, tách biệt rõ 3 mục đích:
   1. Thu âm làm mẫu giọng thật (bona fide).
-  2. Dùng làm mẫu tham chiếu để sinh giọng nhân bản (spoof) bằng F5-TTS và VieNeu-TTS cho đồ án ViTrueVoice.
+  2. Dùng làm mẫu tham chiếu để sinh giọng nhân bản (spoof) bằng F5-TTS và VieNeu-TTS cho đồ án VieTrueVoice.
   3. Trích xuất chỉ số EER, minDCF, ECAPA Similarity ẩn danh trong báo cáo.
   *Cam kết xóa hủy vĩnh viễn toàn bộ dữ liệu sinh trắc nguyên bản sau khi bảo vệ đồ án (tháng 12/2026).*
 * **Nguồn dữ liệu mở tiếng Việt đúng giấy phép (Clean Speech Corpora):** Sử dụng bộ dữ liệu **VIVOS** (15 giờ, 65 người nói, môi trường thu âm yên tĩnh, giấy phép CC BY-NC 4.0) và **Mozilla Common Voice** tiếng Việt (~6–50 giờ, đa vùng miền Bắc – Trung – Nam, giấy phép CC0 1.0 Public Domain) tích hợp qua `BatchDatasetProcessor` kết hợp cùng tập mẫu tình nguyện viên có phiếu đồng ý để đạt quy mô $\ge 1.000$ mẫu giọng thật và $\ge 2.000$ mẫu giọng giả.
@@ -35,12 +35,12 @@
   3. **Tập kiểm thử $\mathcal{D}_{\text{eval}}$:** Gồm các câu held-out còn lại. Việc giữ cố định cơ chế phân tập chuẩn của Version 12/14 ngăn chặn hiện tượng dịch chuyển trọng tâm LOO sang các câu chào kịch bản tổng đài viên formal (như `SPK_0004_01.wav` ở Version 13), bảo toàn $100\%$ câu mẫu hội thoại tự nhiên `SPK_0004_02.wav` ($4.76\text{s}$).
 * **Quy tắc loại trừ dữ liệu nhiễu nền cao & Chống học lệch (Anti-Shortcut):** Không dùng các bộ dữ liệu thu thập từ mạng xã hội chứa nhiều tạp âm hoặc nhạc nền (như Vietnam-Celeb) làm đầu vào cho công cụ TTS/Voice Cloning; đồng thời chuẩn hóa độ to âm lượng theo chuẩn **EBU R128** (cùng mức target LUFS như $-23\text{ LUFS}$ cho cả tập bona fide và tập spoof) và tắt đóng dấu âm học ngầm (`apply_watermark=False`) để ngăn mô hình phân loại học lệch (shortcut learning) dựa vào biên độ hoặc watermark.
 
-### [BƯỚC 1.2] Tuyển chọn Clip đơn Dải vàng ($3.5\text{s}$–$7.5\text{s}$) & Sinh Giọng giả Kép (`ViTrueVoiceDualPipeline`)
+### [BƯỚC 1.2] Tuyển chọn Clip đơn Dải vàng ($3.5\text{s}$–$7.5\text{s}$) & Sinh Giọng giả Kép (`VieTrueVoiceDualPipeline`)
 
 * **Tuyển chọn mẫu tham chiếu 2 tầng trên Dải vàng $3.5\text{s}$–$7.5\text{s}$ (`allow_stitching=False`):** Trong `SpeakerProfiler` và `BatchDatasetProcessor`, hệ thống chốt cố định dải thời lượng vàng `min_dur=3.5s`, `max_dur=7.5s` và tắt hoàn toàn chế độ ghép nối nhân tạo (`allow_stitching=False`). Thực nghiệm ở Version 11–12 chứng minh việc ghép nối câu ngắn (stitching) chèn $0.2\text{s}$ khoảng lặng chết làm gãy chuỗi token âm học của NeuCodec + Qwen LLM và làm mất khóa tra cứu `ref_text`. Toàn bộ 5 tình nguyện viên đều sở hữu các clip câu đơn tự nhiên dài $3.6\text{s}$–$6.8\text{s}$, được tuyển chọn qua 2 tầng:
   1. **LOO Centroid Proximity:** Lọc top-3 clip điển hình nhất trong `ref_pool`.
   2. **Output Probe Ranking:** Sinh thử đầu ra thực tế để chọn `best_ref` (loại bỏ các clip rớt ngưỡng như `SPK_0001_04.wav` có $\text{Sim} = 0.4815 < 0.4905$). Nếu mẫu nguồn có nhiễu nền, lọc nhiễu ồn ít bằng Adobe Podcast Enhance / Facebook Demucs, ồn nhiều bằng UVR5.
-* **Chế độ Sinh Kép Toàn Diện (`PipelineMode.DUAL_OUTPUT`) & Đồng bộ SSOT:** Khung mã nguồn chuẩn hóa tại `src/vitruevoice/` (đồng bộ Nguồn Chân Lý Duy Nhất SSOT sang `out/vitruevoice` và `train.ipynb`) hỗ trợ 3 chế độ: `BEST_QUALITY` (thang quyết định 4 bậc), `ADAPTIVE` (định tuyến thông minh cho GPU 4GB VRAM như RTX 3050 để giữ VRAM $< 2.5\text{ GB}$), và `DUAL_OUTPUT`. Trên Kaggle Tesla T4 GPU (16GB VRAM), chế độ `DUAL_OUTPUT` kích hoạt đồng thời cả F5-TTS và VieNeu-TTS cho toàn bộ các speaker, lưu tách biệt vào `data/spoof_f5tts/SPK_xxxx/` và `data/spoof_vieneu/SPK_xxxx/` (tại Kaggle Version 8–14 đã sinh thành công **200 mẫu spoof gốc** chất lượng cao từ 5 tình nguyện viên: 106 mẫu F5-TTS và 94 mẫu VieNeu-TTS).
+* **Chế độ Sinh Kép Toàn Diện (`PipelineMode.DUAL_OUTPUT`) & Đồng bộ SSOT:** Khung mã nguồn chuẩn hóa tại `src/VieTrueVoice/` (đồng bộ Nguồn Chân Lý Duy Nhất SSOT sang `out/VieTrueVoice` và `train.ipynb`) hỗ trợ 3 chế độ: `BEST_QUALITY` (thang quyết định 4 bậc), `ADAPTIVE` (định tuyến thông minh cho GPU 4GB VRAM như RTX 3050 để giữ VRAM $< 2.5\text{ GB}$), và `DUAL_OUTPUT`. Trên Kaggle Tesla T4 GPU (16GB VRAM), chế độ `DUAL_OUTPUT` kích hoạt đồng thời cả F5-TTS và VieNeu-TTS cho toàn bộ các speaker, lưu tách biệt vào `data/spoof_f5tts/SPK_xxxx/` và `data/spoof_vieneu/SPK_xxxx/` (tại Kaggle Version 8–14 đã sinh thành công **200 mẫu spoof gốc** chất lượng cao từ 5 tình nguyện viên: 106 mẫu F5-TTS và 94 mẫu VieNeu-TTS).
 * **Đặc tả Công cụ TTS #1 – `F5-TTS-Vietnamese` (Non-Autoregressive Flow Matching + ASR Auto-Fallback):** Sử dụng kho mã `nguyenthienhy/F5-TTS-Vietnamese` (checkpoint `F5-TTS-Vietnamese-ViVoice` hoặc `danhtran2mind/Vi-F5-TTS`) kết hợp vocoder **Vocos** và đầu vào tách sạch qua **Demucs $24\text{ kHz}$ Mono**. Văn bản đầu vào chuẩn hóa chữ thường (`lowercase`), bảo tồn trọn vẹn dấu câu tiếng Việt (`.`, `,`, `!`, `?`), mô phỏng kịch bản lừa đảo mạo danh người thân giục chuyển tiền gấp (tai nạn giao thông, cấp cứu viện phí, phong tỏa tài sản) với thời lượng mục tiêu 5–10 giây (lọc cứng loại bỏ file $< 1$ giây hoặc $> 30$ giây). Để chống hiện tượng vỡ căn chỉnh (*alignment collapse*) của Flow Matching, `f5_adapter.py` xóa bỏ hoàn toàn câu fallback cứng và nhận cặp `(ref_audio, ref_text)` động từ transcript thật của `best_ref`; nếu chạy trên tập dữ liệu mở lớn không có nhãn transcript, hàm `transcribe_audio` trong `evaluator.py` tự động nhận diện văn bản từ sóng âm bằng ASR trong $0.2\text{s}$ (**Label-Free ASR Auto-Fallback**). Kết hợp **Peak Headroom Scaling ($\le 0.95$)**, F5-TTS đạt **5/5 speaker hoàn hảo $100\%$** chất giọng và phương ngữ gốc ($\text{Mean WER} = 6.26\%$, `SPK_0005` đạt WER $2.84\%$ và $0.0\%$ ở các câu khẩn cấp, $\text{Mean Sim} = 0.8008$, $\text{Gate 3 Pass} = 100\%$).
 * **Đặc tả Công cụ TTS #2 – `VieNeu-TTS v3 Turbo` (Autoregressive Qwen LLM + `MOSS_48kHz` / `NeuCodec`):** Chốt cố định `pnnbao-ump/VieNeu-TTS-v3-Turbo` (kiến trúc Qwen kết hợp `MOSS_48kHz` xuất chuẩn $48\text{ kHz}$ High-Fidelity PCM và bộ phiên âm `sea-g2p` bằng Rust engine); **KHÔNG** chuyển sang bản v2 GPU ($24\text{ kHz}$) do thực nghiệm đối đầu trên 5 speaker chứng minh v3 Turbo có độ giống giọng cao hơn ($0.7231$ vs. $0.6556$ trên Ref; $0.5795$ vs. $0.5505$ trên Held-out) và nhanh hơn $6.7$ lần ($2.7\text{s}$/câu vs. $18.1\text{s}$/câu). Thực hiện Instant Voice Cloning với mẫu tham chiếu $3.5$–$7.5$ giây, giới hạn văn bản $\le 250$ ký tự mỗi lượt gọi để loại trừ ảo giác ngữ âm (*hallucination*). Cấu hình tối ưu tại `vieneu_adapter.py`: truyền trực tiếp Raw $48\text{ kHz}$ PCM, Preset A (`use_ref_codes=True`), `denoise=False` (bảo toàn dải hài âm thanh quản, tránh mất $\sim 0.07$ Cosine Similarity), `apply_watermark=False`, `temperature=0.60`, `top_p=0.90` và Peak Headroom Scaling $\le 0.95$, đạt **4/5 speaker hoàn hảo $100\%$** chất giọng gốc.
 * **Thiết lập nguồn sinh cho đánh giá khả năng tổng quát hóa (Seen vs. Unseen TTS – CH2 / H2 & ADR-3):** Để kiểm chứng giả thuyết H2 ($\text{EER} \le 15\%$ trên công cụ TTS chưa thấy) và câu hỏi nghiên cứu CH2 theo ADR-3, bộ dữ liệu phân tách rõ:
@@ -49,11 +49,11 @@
 
 ```python
 # Thực thi Pipeline Sinh Kép (DUAL_OUTPUT) Chuẩn Version 14 (v0.2.3) trên Kaggle GPU
-from src.vitruevoice.pipeline import ViTrueVoiceDualPipeline, PipelineMode
-from src.vitruevoice.batch_processor import BatchDatasetProcessor
+from src.VieTrueVoice.pipeline import VieTrueVoiceDualPipeline, PipelineMode
+from src.VieTrueVoice.batch_processor import BatchDatasetProcessor
 
 # 1. Khởi tạo Dual Pipeline (F5-TTS 24kHz Vocos + VieNeu-TTS v3 Turbo 48kHz Label-Free)
-pipeline = ViTrueVoiceDualPipeline(
+pipeline = VieTrueVoiceDualPipeline(
     f5_config={"vocoder": "vocos", "sample_rate": 24000, "headroom_limit": 0.95},
     vieneu_config={
         "model_id": "pnnbao-ump/VieNeu-TTS-v3-Turbo", "sample_rate": 48000,
@@ -96,7 +96,7 @@ processor.run_batch(
   * **Tập Test In-Domain:** `SPK_0007` (người nói chưa từng xuất hiện khi huấn luyện).
   Kết hợp duy trì tỷ lệ $70\%$ Train / $15\%$ Dev / $15\%$ Test khi mở rộng cùng VIVOS và Common Voice. Toàn bộ **31/31 unit tests** (`pytest tests/ -v`) đều vượt qua $100\%$.
 
-| Hạng mục Kiểm định (Đến Kaggle V14 / v0.2.3) | Thông số / Kết quả Thực nghiệm Đạt được | Ý nghĩa Kỹ thuật trong Pipeline ViTrueVoice |
+| Hạng mục Kiểm định (Đến Kaggle V14 / v0.2.3) | Thông số / Kết quả Thực nghiệm Đạt được | Ý nghĩa Kỹ thuật trong Pipeline VieTrueVoice |
 | :--- | :--- | :--- |
 | **1. Hiệu năng F5-TTS (`F5TTSAdapter` + ASR Fallback)** | Đạt **5/5 speaker hoàn hảo $100\%$** chất giọng gốc $\cdot$ Mean WER: **$6.26\%$** $\cdot$ Mean CER: **$2.26\%$** $\cdot$ Mean Sim: **$0.8008$** $\cdot$ Gate 3 Pass: **$100\%$ (79/79)** $\cdot$ Overall Pass: **$89.9\%$** (`SPK_0005` đạt WER $2.84\%$, câu khẩn cấp WER $0.0\%$) | Truyền `ref_text` động + Label-Free ASR Auto-Fallback ($0.2\text{s}$) + Peak Headroom Scaling ($\le 0.95$) triệt tiêu hoàn toàn lỗi lệch pha cross-attention. |
 | **2. Hiệu năng VieNeu-TTS v3 Turbo (`VieNeuAdapter`)** | Đạt **4/5 speaker hoàn hảo $100\%$** chất giọng gốc $\cdot$ Mean WER: **$8.47\%$** $\cdot$ Mean Sim: **$0.7108$** $\cdot$ Độ trễ: **$2.7\text{s}$/câu** (nhanh hơn v2 GPU **$6.7$ lần**, Sim Ref đạt **$0.7231$** vs. $0.6556$ của v2) | Giữ cố định v3 Turbo ($48\text{ kHz}$ PCM, `denoise=False`, `temperature=0.60`, `top_p=0.90`) làm động cơ sinh song hành và nguồn Unseen TTS đối chứng. |
@@ -174,7 +174,7 @@ def preprocess_audio(file_path, target_sr=16000, max_len=64000):
 
 * **Mô hình Baseline đơn giản (Bảng 2.2) – LFCC + GMM & AASIST gốc:** Triển khai baseline truyền thống sử dụng đặc trưng cepstral tần số tuyến tính thủ công (LFCC) kết hợp mô hình hỗn hợp Gauss (GMM) chạy trên CPU (kèm tham chiếu AASIST gốc dùng SincConv) để làm mốc cơ sở chứng minh ưu thế bắt dấu vết giọng tổng hợp của học tự giám sát (ADR-1).
 * **Mô hình Đối chứng chính cho CH1 – wav2vec 2.0 (Không tăng cường nén kênh):** Sử dụng kiến trúc wav2vec 2.0 fine-tune kết hợp lớp phân loại / mạng chú ý đồ thị phổ-thời gian (SSL-AASIST theo Tak et al. [3]), huấn luyện chỉ trên âm thanh sạch (`clean_16khz`, không tăng cường nén Opus/AMR-NB/G.711/$8\text{ kHz}$) với cùng tập kiểm thử và cùng số bước huấn luyện.
-* **Mô hình Chủ lực của ViTrueVoice – wav2vec 2.0 (Có tăng cường nén kênh – ADR-2):** Giữ cố định cùng kiến trúc wav2vec 2.0 (HuggingFace `transformers`: `nguyenvulebinh/wav2vec2-base-vietnamese-250h` hoặc `Wav2Vec2-XLS-R` kết hợp đồ thị HS-GAL của AASIST) và cùng số bước huấn luyện như mô hình đối chứng, nhưng bật tăng cường nén kênh thoại (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$ + RawBoost) để kiểm chứng giả thuyết **H1** (giảm $\ge 30\%$ EER tương đối) và đánh giá tổng quát hóa từ **Seen TTS (F5-TTS)** sang **Unseen TTS (VieNeu-TTS)** theo **H2**.
+* **Mô hình Chủ lực của VieTrueVoice – wav2vec 2.0 (Có tăng cường nén kênh – ADR-2):** Giữ cố định cùng kiến trúc wav2vec 2.0 (HuggingFace `transformers`: `nguyenvulebinh/wav2vec2-base-vietnamese-250h` hoặc `Wav2Vec2-XLS-R` kết hợp đồ thị HS-GAL của AASIST) và cùng số bước huấn luyện như mô hình đối chứng, nhưng bật tăng cường nén kênh thoại (Opus, AMR-NB, G.711 A-law, lọc $8\text{ kHz}$ + RawBoost) để kiểm chứng giả thuyết **H1** (giảm $\ge 30\%$ EER tương đối) và đánh giá tổng quát hóa từ **Seen TTS (F5-TTS)** sang **Unseen TTS (VieNeu-TTS)** theo **H2**.
 
 ### [BƯỚC 3.2] Thiết lập Hàm mất mát, Bộ tối ưu hóa, Biến kiểm soát và Siêu tham số
 
@@ -233,7 +233,7 @@ for epoch in range(1, num_epochs + 1):
 * **Chạy Script tái lập EER, minDCF và đường DET (`scripts/eval_eer.py` – US8):** Quét ngưỡng quyết định $\theta$ nơi tỉ lệ chấp nhận nhầm (FAR) bằng tỉ lệ từ chối nhầm (FRR) để xuất EER ($\%$), minDCF và đường cong DET ra tệp `benchmarks/eval_metrics.csv` cho cả 2 kịch bản:
   1. Đánh giá có vs. không tăng cường nén trên tập âm thanh nén Opus/AMR-NB/G.711/$8\text{ kHz}$ (CH1/H1).
   2. Đánh giá từ Seen TTS (F5-TTS) sang Unseen TTS (VieNeu-TTS) chưa thấy khi huấn luyện (CH2/H2).
-* **Xây dựng bộ AI Eval $\ge 30$ tình huống & Hệ thống Kiểm thử TDD (31/31 Unit Tests – W6 / CP6):** Thiết lập bộ đánh giá hệ thống AI gồm $\ge 30$ tình huống kiểm thử (trong đó bắt buộc có $\ge 10$ tình huống lấy từ các lần hệ thống từng nhận diện sai, báo cáo tỉ lệ đạt trước và sau khi sửa), kết hợp duy trì bộ kiểm thử tự động TDD (hiện đã đạt **31/31 unit tests xanh $100\%$** trong `tests/test_vitruevoice_pipeline.py`, `test_speaker_profiler.py`, `test_dialect_filter.py`, `test_split_dataset.py` chạy qua `pytest` và GitHub Actions CI ở mỗi lần push).
+* **Xây dựng bộ AI Eval $\ge 30$ tình huống & Hệ thống Kiểm thử TDD (31/31 Unit Tests – W6 / CP6):** Thiết lập bộ đánh giá hệ thống AI gồm $\ge 30$ tình huống kiểm thử (trong đó bắt buộc có $\ge 10$ tình huống lấy từ các lần hệ thống từng nhận diện sai, báo cáo tỉ lệ đạt trước và sau khi sửa), kết hợp duy trì bộ kiểm thử tự động TDD (hiện đã đạt **31/31 unit tests xanh $100\%$** trong `tests/test_VieTrueVoice_pipeline.py`, `test_speaker_profiler.py`, `test_dialect_filter.py`, `test_split_dataset.py` chạy qua `pytest` và GitHub Actions CI ở mỗi lần push).
 
 ### [BƯỚC 4.2] Triển khai Dịch vụ (FastAPI / Gradio / Bot Telegram), Hạ tầng AWS & Bảo mật
 

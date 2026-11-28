@@ -1,5 +1,5 @@
 # =====================================================================
-# ViTrueVoice Dockerfile - High-Performance Audio Anti-Spoofing Container
+# VieTrueVoice Dockerfile - High-Performance Audio Anti-Spoofing Container
 # Tech Stack: Python 3.12, PyTorch 2.6, torchaudio, FFmpeg (in-memory)
 # =====================================================================
 
@@ -7,7 +7,7 @@ FROM python:3.12-slim
 
 # Labels & Metadata
 LABEL maintainer="Nguyen Thanh Tai <2380601959@hutech.edu.vn>"
-LABEL project="ViTrueVoice"
+LABEL project="VieTrueVoice"
 LABEL description="Vietnamese compressed telephony voice anti-spoofing detection system"
 
 # Set environment variables

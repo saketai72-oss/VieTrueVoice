@@ -1,4 +1,4 @@
-"""Speaker-disjoint dataset splitting script for ViTrueVoice.
+"""Speaker-disjoint dataset splitting script for VieTrueVoice.
 
 Ensures zero speaker overlap between Train (70%), Dev (15%), and Test (15%) manifests.
 Complies with STUBBORN_FACTs and biometrics privacy (SPK_XXXX).
@@ -251,14 +251,14 @@ def scan_audio_directory(data_dir: str | Path) -> Tuple[pd.DataFrame, pd.DataFra
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Split ViTrueVoice dataset into speaker-disjoint sets.")
+    parser = argparse.ArgumentParser(description="Split VieTrueVoice dataset into speaker-disjoint sets.")
     parser.add_argument("--data_dir", type=str, default="data", help="Root data directory")
     parser.add_argument("--output_dir", type=str, default="data/manifests", help="Output manifests directory")
     parser.add_argument("--train_ratio", type=float, default=0.70)
     parser.add_argument("--dev_ratio", type=float, default=0.15)
     parser.add_argument("--test_ratio", type=float, default=0.15)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--use_fixed_split", action="store_true", default=True, help="Use fixed speaker split for ViTrueVoice")
+    parser.add_argument("--use_fixed_split", action="store_true", default=True, help="Use fixed speaker split for VieTrueVoice")
 
     args = parser.parse_args()
     in_df, unseen_df = scan_audio_directory(args.data_dir)

@@ -3,7 +3,7 @@ r"""
 Script to generate the official Week 7 (W07) report document strictly adhering to LMS HUTECH rubric:
 Course: CMP436 - Đồ án chuyên ngành CNTT (HUTECH)
 Student: Nguyễn Thành Tài - MSSV: 2380601959 - Lớp: 23DTHD5
-Topic: ViTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
+Topic: VieTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát)
 Target path: C:\Users\saket\Documents\Đồ án chuyên ngành\Content\DACN_2380601959_NguyenThanhTai_W07.docx (.pdf)
 """
 
@@ -144,7 +144,7 @@ def main():
     footer = section.footer
     f_p = footer.paragraphs[0]
     f_p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    f_run = f_p.add_run("DACN W07 · Nguyễn Thành Tài – 2380601959 · ViTrueVoice (v0.9.4)")
+    f_run = f_p.add_run("DACN W07 · Nguyễn Thành Tài – 2380601959 · VieTrueVoice (v0.9.4)")
     f_run.font.name = "Times New Roman"
     f_run.font.size = Pt(8.5)
     f_run.font.italic = True
@@ -170,11 +170,11 @@ def main():
         ("Họ và tên sinh viên", "Nguyễn Thành Tài"),
         ("MSSV · Lớp chuyên ngành", "2380601959 · 23DTHD5 (Chuyên ngành Máy học và Ứng dụng)"),
         ("Giảng viên hướng dẫn (GVHD)", "TS. Nguyễn Quang Trung (và Thầy Nguyễn Trọng Minh Hồng Phước)"),
-        ("Tên đề tài đồ án", "Phát triển ViTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát"),
+        ("Tên đề tài đồ án", "Phát triển VieTrueVoice: Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát"),
         ("Cụm đề tài áp dụng", "AI/ML kết hợp Web/App (Trọng tâm: DevSecOps, Lọc PII sinh trắc học, Chống tấn công giả mạo Webhook)"),
         ("Link Repository GitHub (dán LMS)", "https://github.com/saketai72-oss/VieTrueVoice"),
-        ("Link Web Demo & API (dán LMS)", "Web Client Google Labs Playground: http://localhost:8000/playground\nGradio Web UI Forensics: http://localhost:8000 · Telegram Bot: https://t.me/vitruevoice_bot (@vitruevoice_bot)"),
-        ("Link Git Release Tag v0.9.4 (Đóng băng)", "https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9.4 (Nhánh main · Đính kèm trọng số vitruevoice_v0.9.4.zip)"),
+        ("Link Web Demo & API (dán LMS)", "Web Client Google Labs Playground: http://localhost:8000/playground\nGradio Web UI Forensics: http://localhost:8000 · Telegram Bot: https://t.me/VieTrueVoice_bot (@VieTrueVoice_bot)"),
+        ("Link Git Release Tag v0.9.4 (Đóng băng)", "https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9.4 (Nhánh main · Đính kèm trọng số VieTrueVoice_v0.9.4.zip)"),
         ("Link CI Run xanh gần nhất (GitHub Actions)", "https://github.com/saketai72-oss/VieTrueVoice/actions/runs/45468850621 (Run ID: 45468850621 · 392/392 tests passed 100% green · Thời gian: 2m59s)"),
         ("Hạn nộp & Lịch vấn đáp LMS", "Hạn nộp: Trước 12:00 thứ Sáu 27/11/2026 · Vấn đáp: ==13:30–16:30 chiều thứ Sáu 27/11/2026 (có vấn đáp xác minh)=="),
         ("Cấu trúc nộp bài (chuẩn LMS HUTECH)", "(1) Bổ sung tuần trước → (2) Phiếu nhật ký tuần W07 → (3) Nhật ký AI → (4) Minh chứng Checkpoint W07 (Bảo mật, UX 3 người dùng, Docker/CI, 5 NFR, Đóng băng v0.9.4, Tự học OWASP/Docker/CI, Vấn đáp mẫu, 3 Chứng chỉ AWS Gói A) → (5) Chương 3 nháp bổ sung.")
@@ -203,7 +203,7 @@ def main():
     # =========================================================================
     add_heading_1(doc, "1. BỔ SUNG TUẦN TRƯỚC (THEO GÓP Ý CỦA GVHD TẠI CHECKPOINT W06)")
     add_styled_paragraph(doc, 
-        "Tại đợt đánh giá Checkpoint Tuần 6 (W06 ngày 20/11/2026), đề tài ViTrueVoice đã được GVHD đánh giá **ĐẠT 100% các tiêu chí** "
+        "Tại đợt đánh giá Checkpoint Tuần 6 (W06 ngày 20/11/2026), đề tài VieTrueVoice đã được GVHD đánh giá **ĐẠT 100% các tiêu chí** "
         "(Đủ 3 tính năng Must chạy đầu-cuối; Bảng kiểm thử chi tiết 12 test cases có kết quả thật; Bộ AI Eval 30 ca độc lập; "
         "Bản nháp Chương 3 hoàn chỉnh 6 trang; 100% chứng chỉ AWS Cloud Architecting). "
         "Trong tuần W07, sinh viên đã tiếp thu và hoàn thiện 3 nội dung bổ sung nâng cao chất lượng sản phẩm như sau:"
@@ -229,7 +229,7 @@ def main():
          "Đã khóa cứng pipeline nhân bản VoiceStudio CFM (OmniVoice Zero-Shot Flow Matching) với câu thoại nguyên văn đối soát (*'Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ.'*), tích hợp bảng đối soát Comparative Benchmark Matrix phân tách rõ ràng.",
          "Mục 4.2 (Hình 4.2)"),
         ("3. Đưa bảo mật DevSecOps và quy trình CI tự động vào sản phẩm",
-         "Đã hoàn thành đóng gói Docker Compose 2 container (`vitruevoice-api` và `vitruevoice-bot`) vận hành 0 VNĐ cục bộ, thiết lập pipeline GitHub Actions tự động kiểm thử 392/392 tests mỗi lần push/PR, đóng băng tính năng và phát hành Release `v0.9.4` kèm trọng số `vitruevoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`).",
+         "Đã hoàn thành đóng gói Docker Compose 2 container (`VieTrueVoice-api` và `VieTrueVoice-bot`) vận hành 0 VNĐ cục bộ, thiết lập pipeline GitHub Actions tự động kiểm thử 392/392 tests mỗi lần push/PR, đóng băng tính năng và phát hành Release `v0.9.4` kèm trọng số `VieTrueVoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`).",
          "Mục 4.1, 4.3, 4.5")
     ]
 
@@ -262,14 +262,14 @@ def main():
 
     diary_rows = [
         ("Họ tên · MSSV · Đề tài", 
-         "Nguyễn Thành Tài · MSSV: 2380601959 · Đề tài: ViTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát) · Repo: https://github.com/saketai72-oss/VieTrueVoice"),
+         "Nguyễn Thành Tài · MSSV: 2380601959 · Đề tài: VieTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát) · Repo: https://github.com/saketai72-oss/VieTrueVoice"),
         ("Việc đã làm trong tuần W07\n(Theo ngày; mỗi việc gắn commit / ảnh / tài liệu)",
          "• Thứ Bảy 21/11: Khởi tạo nhánh `feature/playground-ui`, thiết kế giao diện web độc lập `src/app/static/playground.html` theo chuẩn Google Labs (nền đen sâu, kính mờ, neon lime #81FF00, cyan #00E5FF, Web Audio API oscilloscope, Platt radial gauge). Commit: `ecb451f`.\n"
          "• Chủ Nhật 22/11: Tích hợp Chế độ 2 Live CFM Voice Cloning qua VoiceStudio CFM (OmniVoice), chuẩn hóa câu thoại nguyên văn đối soát (*'Xin chào quý khách, cuộc gọi này được ghi âm để đảm bảo chất lượng dịch vụ.'*); giải quyết circular import và cập nhật dynamic audio stream. Commits: `6630a1c`, `d3dc6fd`, `974a0b1`.\n"
          "• Thứ Hai 23/11: Phát hiện hiện tượng Chrome/Edge WebRTC squelch gating (-25.39 điểm); bóc tách nguyên nhân và khắc phục triệt để bằng hook WebRTC mộc (`noiseSuppression: false`, `echoCancellation: false`, `autoGainControl: false`) kết hợp pipeline tiền xử lý DSP `_condition_audio_for_inference` (trim silence top_db=25, peak norm 95%). Đưa giọng mic thật về `BONA FIDE` (+22.74 điểm, 99.9% tin cậy). Commit: `0c9c59f`.\n"
          "• Thứ Ba 24/11: Thu thập phản hồi UX từ 3 người dùng thật (CLB ATTT HUTECH, phụ huynh cao tuổi, kỹ sư QA); tinh chỉnh giao diện, sửa nhãn xác suất `prob_spoof_pct`, thêm cảnh báo hổ phách `MISSED SPOOF` minh bạch. Đo lường 5 NFRs. Commits: `24c0ade`, `752aa33`.\n"
          "• Thứ Tư 25/11: Hoàn thiện tập `OmniVoice_CFM` đối xứng 1:1 (6.445 tệp: VIVOS 4.795 + CommonVoice 1.225 + SPK_Volunteers 425), tái tổ chức kho `Voice_Final` (103.189 tệp), huấn luyện và hiệu chuẩn mô hình chính thức `v0.9.4` (`head_blend_a0.75`, `Consensus Asymmetric Veto`, `out/v0.9.4/best_model.pt`), dọn sạch mã nguồn & thư mục gốc. Commits: `7d7eed0`, `f40da26`, `7048073`.\n"
-         "• Thứ Năm 26/11: Giám sát pipeline CI GitHub Actions đạt 100% Green (Run ID: `45468850621`, 392/392 passed · 2m59s); đóng băng tính năng và phát hành Release `v0.9.4` (đính kèm `vitruevoice_v0.9.4.zip`); hoàn thiện bảng bằng chứng `README.md`, đồng bộ Sổ tay v2 và Chương 3 nháp. Commits: `0a5f766`, `ae5b6b7`.\n"
+         "• Thứ Năm 26/11: Giám sát pipeline CI GitHub Actions đạt 100% Green (Run ID: `45468850621`, 392/392 passed · 2m59s); đóng băng tính năng và phát hành Release `v0.9.4` (đính kèm `VieTrueVoice_v0.9.4.zip`); hoàn thiện bảng bằng chứng `README.md`, đồng bộ Sổ tay v2 và Chương 3 nháp. Commits: `0a5f766`, `ae5b6b7`.\n"
          "• Thứ Sáu 27/11: Rà soát bài tập tự học OWASP/Docker/CI, trả lời 4 câu hỏi vấn đáp mẫu; tự động biên dịch Báo cáo W07 sang Word (.docx) và PDF; nộp bài lên LMS HUTECH."),
         ("Minh chứng / Link",
          "• Commit mới nhất trên main (CI xanh): https://github.com/saketai72-oss/VieTrueVoice/commit/7048073\n"
@@ -283,7 +283,7 @@ def main():
         ("Kế hoạch tuần sau (W08 - Checkpoint 8)\n(3–5 việc kiểm chứng được)",
          "1. Bàn giao phiên bản v0.9.4 cho CLB An toàn thông tin HUTECH chạy thử nghiệm độc lập Pilot đợt 2 (thu thập thêm mẫu tấn công đa dạng để hoàn tất Bảng Trước - Sau chính thức).\n"
          "2. Hoàn thiện toàn văn báo cáo Đồ án tốt nghiệp: Bổ sung Chương 4 (Thực nghiệm & Kết quả đánh giá) và Chương 5 (Kết luận & Hướng phát triển).\n"
-         "3. Thiết kế Poster khổ A0 báo cáo nghiệm thu và biên tập video demo 3 phút giới thiệu hệ thống ViTrueVoice.\n"
+         "3. Thiết kế Poster khổ A0 báo cáo nghiệm thu và biên tập video demo 3 phút giới thiệu hệ thống VieTrueVoice.\n"
          "4. Rà soát chuẩn bị bảo vệ trước Hội đồng chấm Đồ án chuyên ngành HUTECH."),
         ("% Tiến độ khóa học đang học\n(Tên khóa · % tiến độ)",
          "• AWS Academy Cloud Foundations (Gói A): **100% Hoàn thành** (Đã cấp chứng chỉ ngày 13/11/2026)\n"
@@ -378,7 +378,7 @@ def main():
     # 4.1 >=2 Biện pháp bảo mật từ khóa học
     add_heading_2(doc, "4.1 Tối thiểu 2 biện pháp bảo mật từ khóa học (kèm minh chứng hoạt động)")
     add_styled_paragraph(doc, 
-        "Hệ thống ViTrueVoice được thiết kế theo tư duy DevSecOps (Bảo mật ngay từ khâu thiết kế). "
+        "Hệ thống VieTrueVoice được thiết kế theo tư duy DevSecOps (Bảo mật ngay từ khâu thiết kế). "
         "Sinh viên đã chắt lọc và hiện thực hóa thành công **2 biện pháp bảo mật chuyên sâu** từ các khóa học chính thức của AWS (Gói A) và chuẩn an toàn thông tin OWASP, "
         "có minh chứng cấu hình, mã nguồn và kịch bản thử nghiệm chặn đứng các mối đe dọa thực tế:"
     )
@@ -441,7 +441,7 @@ def main():
     add_styled_paragraph(doc, 
         "• *Minh chứng hoạt động thực tế (Thử nghiệm chặn tấn công)*:\n"
         "  - Kịch bản 1 (Tấn công định dạng file độc hại / Polyglot): Kẻ tấn công gửi file shell script thực thi nhưng đổi tên thành `audio.wav` -> Hệ thống đọc magic bytes phát hiện header không hợp lệ (`#!/bin/sh` thay vì `RIFF`/`OggS`) và từ chối xử lý ngay lập tức với mã lỗi **HTTP 400 Bad Request** (`detail: 'Unsupported audio format'`).\n"
-        "  - Kịch bản 2 (Kiểm toán đặc quyền container): Lệnh `docker exec vitruevoice-api whoami` trả về người dùng không đặc quyền `appuser` (UID 10001), ngăn chặn triệt để nguy cơ chiếm quyền root máy chủ nếu phát sinh lỗ hổng thư viện giải mã."
+        "  - Kịch bản 2 (Kiểm toán đặc quyền container): Lệnh `docker exec VieTrueVoice-api whoami` trả về người dùng không đặc quyền `appuser` (UID 10001), ngăn chặn triệt để nguy cơ chiếm quyền root máy chủ nếu phát sinh lỗ hổng thư viện giải mã."
     )
 
     # 4.2 Cải thiện UX dựa trên >= 3 góp ý người dùng thật
@@ -525,14 +525,14 @@ def main():
     # 4.3 Dockerfile & CI GitHub Actions
     add_heading_2(doc, "4.3 Đóng gói Docker Compose & Pipeline CI GitHub Actions tự động")
     add_styled_paragraph(doc, 
-        "Hệ thống ViTrueVoice được đóng gói hoàn chỉnh bằng Docker và Docker Compose (vận hành 100% cục bộ với chi phí **0 VNĐ**, kiến trúc Cloud-Ready theo 3 khóa AWS Academy Gói A). "
+        "Hệ thống VieTrueVoice được đóng gói hoàn chỉnh bằng Docker và Docker Compose (vận hành 100% cục bộ với chi phí **0 VNĐ**, kiến trúc Cloud-Ready theo 3 khóa AWS Academy Gói A). "
         "Người dùng chỉ cần thực thi duy nhất **1 câu lệnh** để khởi động toàn bộ cụm dịch vụ:\n"
         "```bash\n"
         "docker compose up -d --build\n"
         "```\n"
         "• *Cấu trúc dịch vụ trong docker-compose.yml*:\n"
-        "  1. `vitruevoice-api` (Port 8000): Chạy máy chủ ASGI Uvicorn nạp checkpoint chính thức `out/v0.9.4/best_model.pt`, phục vụ API FastAPI và giao diện Google Labs Playground `/playground`, tự động kiểm tra sức khỏe container qua `/health` mỗi 30s.\n"
-        "  2. `vitruevoice-bot`: Chạy ngầm daemon Telegram Bot (@vitruevoice_bot) giao tiếp với API qua mạng nội bộ Docker bridge (`http://vitruevoice-api:8000`).\n"
+        "  1. `VieTrueVoice-api` (Port 8000): Chạy máy chủ ASGI Uvicorn nạp checkpoint chính thức `out/v0.9.4/best_model.pt`, phục vụ API FastAPI và giao diện Google Labs Playground `/playground`, tự động kiểm tra sức khỏe container qua `/health` mỗi 30s.\n"
+        "  2. `VieTrueVoice-bot`: Chạy ngầm daemon Telegram Bot (@VieTrueVoice_bot) giao tiếp với API qua mạng nội bộ Docker bridge (`http://VieTrueVoice-api:8000`).\n"
         "  3. *Áp dụng chuẩn bảo mật & kiến trúc AWS Gói A (0 VNĐ)*: Phân quyền container non-root `appuser`, gắn volume read-only (`:ro`), tách bí mật `.env`, kèm bộ cấu hình Cloud-Ready (`deploy/aws/iam_policy.json`, `s3_lifecycle_policy.json`, `scripts/aws_deploy_ec2.sh`)."
     )
 
@@ -542,7 +542,7 @@ def main():
     if img_docker.exists():
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(img_docker), width=Inches(6.0))
-        add_styled_paragraph(doc, "Hình 4.3: Minh chứng container Docker vitruevoice-api vận hành ổn định tại cổng 8000, trạng thái healthy và giao diện Playground phản hồi 200 OK.", font_size=8.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình 4.3: Minh chứng container Docker VieTrueVoice-api vận hành ổn định tại cổng 8000, trạng thái healthy và giao diện Playground phản hồi 200 OK.", font_size=8.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 
     add_styled_paragraph(doc, 
         "• *Pipeline Tích hợp Liên tục (CI - GitHub Actions)*:\n"
@@ -556,7 +556,7 @@ def main():
     add_heading_2(doc, "4.4 5 Yêu cầu Phi Chức năng (NFR) với con số mục tiêu, cách đo và kết quả thực tế")
     add_styled_paragraph(doc, 
         "Theo đúng Rubric Tuần 7 ('5 NFR, mỗi NFR có con số mục tiêu và cách đo; đã đo thực tế >=2; tránh dấu hiệu NFR không có con số'), "
-        "bảng dưới đây công bố đầy đủ **5 yêu cầu phi chức năng cốt lõi** của đồ án ViTrueVoice với con số mục tiêu định lượng chuẩn xác và kết quả đo đạc thực tế:"
+        "bảng dưới đây công bố đầy đủ **5 yêu cầu phi chức năng cốt lõi** của đồ án VieTrueVoice với con số mục tiêu định lượng chuẩn xác và kết quả đo đạc thực tế:"
     )
 
     t_nfr = doc.add_table(rows=6, cols=5)
@@ -618,7 +618,7 @@ def main():
     add_heading_2(doc, "4.5 Đóng băng tính năng (Scope Freeze) và Release Tag v0.9.4")
     add_styled_paragraph(doc, 
         "Tuân thủ nghiêm ngặt quy chế Đồ án tốt nghiệp tại Tuần 7 ('Đóng băng tính năng: danh sách tính năng chốt + tag/release; từ tuần này không thêm tính năng mới'), "
-        "nhóm tác giả chính thức **khóa cứng phạm vi chức năng của hệ thống ViTrueVoice tại phiên bản v0.9.4**. "
+        "nhóm tác giả chính thức **khóa cứng phạm vi chức năng của hệ thống VieTrueVoice tại phiên bản v0.9.4**. "
         "Toàn bộ nỗ lực kỹ thuật từ Tuần 7 đến ngày nghiệm thu bảo vệ sẽ tập trung 100% vào việc kiểm thử độc lập cùng CLB An toàn thông tin HUTECH, "
         "tối ưu hóa độ bền vận hành và biên soạn tài liệu thuyết minh đồ án:"
     )
@@ -640,7 +640,7 @@ def main():
         ("2", "Multi-window Consensus Asymmetric Veto Core", "Trích xuất tối đa 5 cửa sổ trượt (window 4.0s, hop 1.0s) gộp thành 1 forward pass duy nhất qua SSL-AASIST v0.9.4 (head_blend_a0.75, out/v0.9.4/best_model.pt); Consensus Asymmetric Veto cân bằng bảo vệ giọng thật (95.24% Clean) và chặn spoof (95.01% test).", "ĐÃ KHÓA CỨNG (Frozen)"),
         ("3", "Google Labs Web Playground UI", "Giao diện độc lập `/playground` (v0.9.4): Web Audio Oscilloscope, Platt radial gauge %, 4 thẻ chẩn đoán và Forensics Spectral Studio canvas.", "ĐÃ KHÓA CỨNG (Frozen)"),
         ("4", "Live CFM Cloning Audit (Mode 2)", "Ghi âm mic thật hoặc nạp mẫu 1-click SPK_0004, nhân bản thời gian thực qua VoiceStudio CFM (OmniVoice Flow Matching) nói nguyên văn câu đối soát, xuất bảng so sánh 2 chiều.", "ĐÃ KHÓA CỨNG (Frozen)"),
-        ("5", "Telegram Voice Bot Daemon", "Bot `@vitruevoice_bot` tiếp nhận voice note chuyển tiếp, xử lý luồng in-memory trên RAM và phản hồi kết quả trong < 3s.", "ĐÃ KHÓA CỨNG (Frozen)")
+        ("5", "Telegram Voice Bot Daemon", "Bot `@VieTrueVoice_bot` tiếp nhận voice note chuyển tiếp, xử lý luồng in-memory trên RAM và phản hồi kết quả trong < 3s.", "ĐÃ KHÓA CỨNG (Frozen)")
     ]
 
     for r_idx, row_data in enumerate(freeze_data):
@@ -659,7 +659,7 @@ def main():
     add_styled_paragraph(doc, 
         "• **Ghi chú về phân hệ Zalo OTT Webhook**: Được quy hoạch làm phân hệ kiến trúc mở rộng trong tương lai dành cho doanh nghiệp (Future Enterprise Architecture). "
         "Tính năng này được chủ động loại bỏ khỏi phạm vi nghiệm thu cốt lõi v0.9.4 của đồ án sinh viên do chính sách của Zalo yêu cầu giấy phép kinh doanh doanh nghiệp (Zalo Official Account Enterprise Authentication) để kích hoạt webhook chính thức trên production.\n"
-        "• **Minh chứng Git Release Tag v0.9.4**: Đã gắn tag và phát hành release chính thức trên nhánh `main` kèm tệp trọng số nén `vitruevoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`):\n"
+        "• **Minh chứng Git Release Tag v0.9.4**: Đã gắn tag và phát hành release chính thức trên nhánh `main` kèm tệp trọng số nén `VieTrueVoice_v0.9.4.zip` (`out/v0.9.4/best_model.pt`):\n"
         "  Link kiểm chứng: **https://github.com/saketai72-oss/VieTrueVoice/releases/tag/v0.9.4**",
         space_after=6
     )
@@ -667,10 +667,10 @@ def main():
     # 4.6 Bài tập tự học bắt buộc (OWASP & Docker/CI)
     add_heading_2(doc, "4.6 Bài tập tự học bắt buộc (OWASP Top 10, Docker & GitHub Actions Quickstart)")
     add_styled_paragraph(doc, 
-        "**4.6.1 Nghiên cứu OWASP Top 10 (3 mục liên quan nhất và cách áp dụng vào ViTrueVoice)**:\n"
-        "1. *A01:2021 – Broken Access Control (Lỗ hổng kiểm soát truy cập)*: Áp dụng vào ViTrueVoice bằng cách bắt buộc xác thực chữ ký số HMAC-SHA256 cho toàn bộ request gửi tới Webhook viễn thông Zalo, đồng thời cấu hình phân quyền non-root `appuser` trong Docker container nhằm triệt tiêu nguy cơ leo thang đặc quyền.\n"
-        "2. *A03:2021 – Injection (Lỗ hổng tiêm nhiễm lệnh)*: Áp dụng vào ViTrueVoice bằng cách khử hoàn toàn nguy cơ Command Injection qua việc xử lý âm thanh trực tiếp trên luồng bộ nhớ RAM bằng thư viện chuyên dụng (`soundfile`, `io.BytesIO`) thay vì gọi lệnh shell command `os.system('ffmpeg ...')` với tham số đường dẫn do người dùng tải lên.\n"
-        "3. *A09:2021 – Security Logging and Monitoring Failures (Lỗ hổng giám sát và ghi nhật ký)*: Áp dụng vào ViTrueVoice bằng cách thiết lập ghi log ẩn danh tự động mọi yêu cầu suy luận qua mã băm SHA-256 kèm thời gian đáp ứng và số cửa sổ trượt vào `benchmarks/latency_log.json`, tuyệt đối không ghi dữ liệu giọng nói thô nhằm cân bằng giữa an ninh điều tra và quyền riêng tư cá nhân.\n\n"
+        "**4.6.1 Nghiên cứu OWASP Top 10 (3 mục liên quan nhất và cách áp dụng vào VieTrueVoice)**:\n"
+        "1. *A01:2021 – Broken Access Control (Lỗ hổng kiểm soát truy cập)*: Áp dụng vào VieTrueVoice bằng cách bắt buộc xác thực chữ ký số HMAC-SHA256 cho toàn bộ request gửi tới Webhook viễn thông Zalo, đồng thời cấu hình phân quyền non-root `appuser` trong Docker container nhằm triệt tiêu nguy cơ leo thang đặc quyền.\n"
+        "2. *A03:2021 – Injection (Lỗ hổng tiêm nhiễm lệnh)*: Áp dụng vào VieTrueVoice bằng cách khử hoàn toàn nguy cơ Command Injection qua việc xử lý âm thanh trực tiếp trên luồng bộ nhớ RAM bằng thư viện chuyên dụng (`soundfile`, `io.BytesIO`) thay vì gọi lệnh shell command `os.system('ffmpeg ...')` với tham số đường dẫn do người dùng tải lên.\n"
+        "3. *A09:2021 – Security Logging and Monitoring Failures (Lỗ hổng giám sát và ghi nhật ký)*: Áp dụng vào VieTrueVoice bằng cách thiết lập ghi log ẩn danh tự động mọi yêu cầu suy luận qua mã băm SHA-256 kèm thời gian đáp ứng và số cửa sổ trượt vào `benchmarks/latency_log.json`, tuyệt đối không ghi dữ liệu giọng nói thô nhằm cân bằng giữa an ninh điều tra và quyền riêng tư cá nhân.\n\n"
         "**4.6.2 Docker 'Get Started' & GitHub Actions Quickstart**:\n"
         "• *Kiến thức Docker thu hoạch*: Hiểu rõ vòng đời container, nguyên lý phân tầng image (multi-stage builds), kỹ thuật tối ưu hóa dung lượng (loại bỏ cache pip, apt-clean), cơ chế gắn kết khối lưu trữ read-only (`:ro`) và cấu hình kiểm tra sức khỏe tự động (`HEALTHCHECK CMD curl -f http://localhost:8000/health`).\n"
         "• *Kiến thức GitHub Actions thu hoạch*: Hiểu rõ cấu trúc file YAML workflow, cơ chế runner cô lập, quản trị secrets và caching dependencies (`actions/setup-python` cache pip), và phương pháp điều khiển luồng kiểm thử tự động với mã thoát (exit code)."
@@ -735,7 +735,7 @@ def main():
     add_heading_2(doc, "3.4 Thiết kế An toàn và Bảo mật hệ thống (DevSecOps)")
     add_styled_paragraph(doc, 
         "**3.4.1 Mô hình Phân tích Hiểm họa (Threat Modeling theo chuẩn STRIDE)**:\n"
-        "Nhóm tác giả đã áp dụng mô hình STRIDE để nhận diện và phòng vệ các nguy cơ an ninh xuyên suốt kiến trúc ViTrueVoice:\n"
+        "Nhóm tác giả đã áp dụng mô hình STRIDE để nhận diện và phòng vệ các nguy cơ an ninh xuyên suốt kiến trúc VieTrueVoice:\n"
         "• *Spoofing (Giả mạo danh tính)*: Kẻ tấn công sử dụng công cụ TTS nhân bản giọng nói của người thân nạn nhân để lừa đảo qua Zalo/Telegram. Phòng vệ: Khối suy luận sâu SSL-AASIST phân tích vi cấu trúc âm học và méo hài phase, phát hiện giả mạo với độ tin cậy Platt-scaling 99.9%.\n"
         "• *Tampering (Can thiệp sửa đổi dữ liệu)*: Kẻ tấn công chặn bắt và chỉnh sửa gói tin webhook trên đường truyền. Phòng vệ: Áp dụng chữ ký mật mã HMAC-SHA256 trên toàn bộ body payload, bắt buộc truyền qua kênh mã hóa HTTPS/TLS 1.3.\n"
         "• *Repudiation (Chối bỏ trách nhiệm)*: Người dùng hoặc ứng dụng chối bỏ việc đã thực hiện một yêu cầu suy luận. Phòng vệ: Ghi log kiểm toán SHA-256 ẩn danh kèm timestamp UTC vào `benchmarks/latency_log.json`.\n"
@@ -749,15 +749,15 @@ def main():
     if c4_img.exists():
         p_img = doc.add_paragraph(); p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(c4_img), width=Inches(6.2))
-        add_styled_paragraph(doc, "Hình 3.1: Sơ đồ Kiến trúc Hệ thống ViTrueVoice (C4 Model Level 2 Container Diagram) — Minh họa luồng bảo mật in-memory giữa Web Client, Telegram Bot, FastAPI Engine và Hàng rào xác thực Webhook.", font_size=8.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình 3.1: Sơ đồ Kiến trúc Hệ thống VieTrueVoice (C4 Model Level 2 Container Diagram) — Minh họa luồng bảo mật in-memory giữa Web Client, Telegram Bot, FastAPI Engine và Hàng rào xác thực Webhook.", font_size=8.0, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
 
     # 3.5 Triển khai hệ thống
     add_heading_2(doc, "3.5 Triển khai hệ thống và Quy trình CI/CD")
     add_styled_paragraph(doc, 
         "**3.5.1 Cấu trúc Đóng gói Đa Container (Docker Compose)**:\n"
         "Hệ thống phân tách rạch ròi giữa tầng phục vụ suy luận API và tầng tiếp nhận tin nhắn viễn thông:\n"
-        "• *Container 1 (`vitruevoice-api`)*: Đóng gói môi trường Python 3.12, PyTorch CPU/CUDA, FastAPI và Uvicorn. Container nạp sẵn mô hình SSL-AASIST `v0.9.4` (`out/v0.9.4/best_model.pt`) vào RAM khi khởi động (Pre-warming) giúp triệt tiêu độ trễ Cold-Start. Cung cấp endpoint RESTful `/api/v1/predict` và giao diện Web Playground `/playground`.\n"
-        "• *Container 2 (`vitruevoice-bot`)*: Đóng gói daemon xử lý bất đồng bộ (`asyncio`) kết nối với Telegram Bot API. Tiếp nhận các đoạn tin nhắn thoại (OGG/Opus), giải mã in-memory và gửi luồng byte sang engine suy luận qua mạng nội bộ Docker bridge (`http://vitruevoice-api:8000`), bảo đảm cô lập hoàn toàn theo mô hình Private Subnet của AWS VPC (vận hành cục bộ 0 VNĐ, sẵn sàng Cloud-Ready).\n\n"
+        "• *Container 1 (`VieTrueVoice-api`)*: Đóng gói môi trường Python 3.12, PyTorch CPU/CUDA, FastAPI và Uvicorn. Container nạp sẵn mô hình SSL-AASIST `v0.9.4` (`out/v0.9.4/best_model.pt`) vào RAM khi khởi động (Pre-warming) giúp triệt tiêu độ trễ Cold-Start. Cung cấp endpoint RESTful `/api/v1/predict` và giao diện Web Playground `/playground`.\n"
+        "• *Container 2 (`VieTrueVoice-bot`)*: Đóng gói daemon xử lý bất đồng bộ (`asyncio`) kết nối với Telegram Bot API. Tiếp nhận các đoạn tin nhắn thoại (OGG/Opus), giải mã in-memory và gửi luồng byte sang engine suy luận qua mạng nội bộ Docker bridge (`http://VieTrueVoice-api:8000`), bảo đảm cô lập hoàn toàn theo mô hình Private Subnet của AWS VPC (vận hành cục bộ 0 VNĐ, sẵn sàng Cloud-Ready).\n\n"
         "**3.5.2 Quy trình Tích hợp Liên tục (Continuous Integration - CI)**:\n"
         "Áp dụng nguyên tắc kiểm thử nghiêm ngặt trước khi hợp nhất (Pre-Merge Quality Gate):\n"
         "• Mọi mã nguồn do sinh viên và AI đồng tác giả bắt buộc vượt qua 100% bộ kiểm thử tự động cục bộ trước khi push.\n"

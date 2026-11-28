@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quy trình huấn luyện kép (Dual-Seen Re-training) ViTrueVoice.
+"""Quy trình huấn luyện kép (Dual-Seen Re-training) VieTrueVoice.
 
 Bao gồm 2 pha huấn luyện theo yêu cầu người dùng:
 1. RUN 1: Huấn luyện với tập Dual-Seen (VIVOS + Common Voice + F5-TTS + VieNeu-TTS) KHÔNG CÓ SPK_0001 (0% SPK_0001..0007).

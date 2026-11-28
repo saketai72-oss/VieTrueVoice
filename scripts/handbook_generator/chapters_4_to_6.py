@@ -1,5 +1,5 @@
 """
-Chương 4, 5, 6 của Sổ tay Bảo vệ & Nghiên cứu Chuyên sâu ViTrueVoice v0.9.4:
+Chương 4, 5, 6 của Sổ tay Bảo vệ & Nghiên cứu Chuyên sâu VieTrueVoice v0.9.4:
 - Chương 4: Kiến trúc mạng lai SSL-AASIST, Huấn luyện 2 pha & Hiệu chuẩn đầu phân loại head_blend_a0.75
 - Chương 5: Thuật toán gộp đa cửa sổ đồng thuận bất đối xứng (Multi-Window Consensus Asymmetric Veto)
 - Chương 6: Hiệu chuẩn xác suất Platt Scaling, Vùng cảnh báo biên & Hàng rào giám định số chuẩn NIST
@@ -32,7 +32,7 @@ from .styles import (
 
 
 def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
-    """Biên soạn Chương 4, 5 và 6 cho Sổ tay Bảo vệ ViTrueVoice v0.9.4."""
+    """Biên soạn Chương 4, 5 và 6 cho Sổ tay Bảo vệ VieTrueVoice v0.9.4."""
 
     add_heading_part(
         doc,
@@ -50,7 +50,7 @@ def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
 
     add_styled_paragraph(
         doc,
-        "Trái tim nhận thức của **ViTrueVoice v0.9.4** là kiến trúc lai ghép giữa bộ mã hóa biểu diễn tự giám sát tiếng Việt "
+        "Trái tim nhận thức của **VieTrueVoice v0.9.4** là kiến trúc lai ghép giữa bộ mã hóa biểu diễn tự giám sát tiếng Việt "
         "(`nguyenvulebinh/wav2vec2-base-vietnamese-250h`) và mạng đồ thị chú ý không đồng nhất thời gian - tần số (`Compact AASIST`). "
         "Chương này giải thích tường minh từ trực giác nền tảng đến từng tầng toán học trong mã nguồn `src/models/ssl_aasist.py`, "
         "`src/training/losses.py` và cơ chế hiệu chuẩn đầu phân loại `head_blend_a0.75` giúp hệ thống đạt `5.63% EER` trên `15.980` mẫu kiểm thử.",
@@ -104,7 +104,7 @@ def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
             "Tiêu Chí Kỹ Thuật",
             "Baseline 1: LFCC + GMM",
             "Baseline 2: Raw AASIST (Từ đầu)",
-            "ViTrueVoice v0.9.4: SSL-AASIST",
+            "VieTrueVoice v0.9.4: SSL-AASIST",
         ],
         rows=[
             (
@@ -218,7 +218,7 @@ def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
         add_figure(
             doc,
             figs["fig4"],
-            "Hình 4.1: Sơ đồ kiến trúc mạng lai SSL-AASIST kết hợp quy trình huấn luyện 2 pha và hiệu chuẩn đầu phân loại head_blend_a0.75 trên ViTrueVoice v0.9.4.",
+            "Hình 4.1: Sơ đồ kiến trúc mạng lai SSL-AASIST kết hợp quy trình huấn luyện 2 pha và hiệu chuẩn đầu phân loại head_blend_a0.75 trên VieTrueVoice v0.9.4.",
         )
 
     add_term_glossary(
@@ -653,7 +653,7 @@ def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
 
     add_styled_paragraph(
         doc,
-        "Bảng dưới đây trình bày kết quả thực nghiệm đối chứng (Ablation Study) giữa 3 cơ chế gộp điểm của mô hình chính thức **ViTrueVoice v0.9.4 (`head_blend_a0.75`)** "
+        "Bảng dưới đây trình bày kết quả thực nghiệm đối chứng (Ablation Study) giữa 3 cơ chế gộp điểm của mô hình chính thức **VieTrueVoice v0.9.4 (`head_blend_a0.75`)** "
         "trên toàn bộ tập kiểm thử độc lập `test_indomain_v8_f5_omni.csv` (`15.980` mẫu), tập ngoại lai `Unseen VieNeu-TTS` (`955` mẫu), "
         "tập ca khó `Gate 4 OmniVoice Reversal` (`195` mẫu) và bộ nghiệm thu sạch `5` tình nguyện viên (`84` mẫu):",
     )
@@ -717,7 +717,7 @@ def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
             ("Max-Pooling", "Phép gộp cực đại", "Chọn điểm số cao nhất trong các cửa sổ làm điểm chung cuộc; rất ưu ái giọng người thật nhưng dễ bị lọt lưới nếu tệp giả mạo có 1 đoạn lặng cuối câu."),
             ("Mean-Pooling", "Phép gộp trung bình cộng", "Lấy trung bình số học của tất cả cửa sổ; bắt giả mạo gắt nhưng dễ báo nhầm oan khi người thật ngập ngừng hoặc lấy hơi đầu câu."),
             ("Trimmed Mean", "Trung bình cắt ngọn", "Phép tính trung bình sau khi đã loại bỏ giá trị cực đoan ở đầu mút (`s_(K)`), giúp khử nhiễu ngoại lai vô thanh một cách vững chắc."),
-            ("Consensus Asymmetric Veto", "Đồng thuận Phủ quyết Bất đối xứng", "Thuật toán gộp điểm chính thức của `ViTrueVoice v0.9.4`: kết hợp kiểm tra đồng thuận ít nhất 2 cửa sổ giọng thật (`s_(K−1) ≥ +6.0`) với phép phủ quyết cắt ngọn khi có cửa sổ nghi giả sâu (`s_(1) < −12.0`)."),
+            ("Consensus Asymmetric Veto", "Đồng thuận Phủ quyết Bất đối xứng", "Thuật toán gộp điểm chính thức của `VieTrueVoice v0.9.4`: kết hợp kiểm tra đồng thuận ít nhất 2 cửa sổ giọng thật (`s_(K−1) ≥ +6.0`) với phép phủ quyết cắt ngọn khi có cửa sổ nghi giả sâu (`s_(1) < −12.0`)."),
             ("Outlier", "Điểm ngoại lai", "Một cửa sổ có điểm số lệch hẳn khỏi xu hướng chung của cả đoạn thoại (ví dụ tiếng hắng giọng đầu câu của người thật hoặc khoảng lặng cuối câu của giọng giả)."),
         ],
     )
@@ -916,7 +916,7 @@ def add_chapters_4_to_6(doc, figs: dict | None = None) -> None:
         "Ngoài ra, hệ thống còn cung cấp hàm hiệu chỉnh ngưỡng cá nhân hóa `calibrate_by_enrollment` dành cho kịch bản người dùng đăng ký trước tối thiểu "
         "`3` mẫu giọng thật (`enroll_scores`). Một nguy cơ bảo mật nghiêm trọng ở đây là **tấn công đầu độc mẫu đăng ký (`Enrollment Poisoning`)** "
         "hoặc tệp ghi âm đăng ký bị hỏng nặng: nếu kẻ tấn công chèn mẫu nhiễu làm điểm trung vị đăng ký tụt sâu xuống `-45.0`, việc tự động dời ngưỡng xuống theo "
-        "sẽ mở toang cánh cửa cho mọi tệp deepfake lọt qua! Để khóa chặt lỗ hổng này, ViTrueVoice thiết lập **Hàng rào ngoại lai khoảng tứ phân vị (`IQR Outlier Guardrail`)**:",
+        "sẽ mở toang cánh cửa cho mọi tệp deepfake lọt qua! Để khóa chặt lỗ hổng này, VieTrueVoice thiết lập **Hàng rào ngoại lai khoảng tứ phân vị (`IQR Outlier Guardrail`)**:",
     )
 
     eq_iqr = (

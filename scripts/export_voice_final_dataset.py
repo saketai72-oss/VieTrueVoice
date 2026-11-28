@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Kịch bản tổ chức & xuất bản toàn bộ dữ liệu âm thanh ViTrueVoice: Voice_Final.
+"""Kịch bản tổ chức & xuất bản toàn bộ dữ liệu âm thanh VieTrueVoice: Voice_Final.
 
 Địa chỉ đích: C:\\Users\\saket\\Documents\\Đồ án chuyên ngành\\Voice_Final
 
@@ -460,7 +460,7 @@ def main(root: Path = _ROOT, dest_root: Path = DEST_ROOT):
 
     readme_md = dest_root / "README_NGHIEM_THU.md"
     readme_md.write_text(
-        f"""# BỘ DỮ LIỆU ĐẦY ĐỦ VITRUEVOICE (`VOICE_FINAL`)
+        f"""# BỘ DỮ LIỆU ĐẦY ĐỦ VieTrueVoice (`VOICE_FINAL`)
 
 > **Sinh viên thực hiện**: Nguyễn Thành Tài (MSSV: 2380601959) — HUTECH  
 > **Cập nhật lúc**: {time.strftime('%Y-%m-%d %H:%M:%S')}  

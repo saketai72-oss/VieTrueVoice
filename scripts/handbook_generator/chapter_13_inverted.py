@@ -1,5 +1,5 @@
 """
-Chương 13 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng ViTrueVoice v0.9.4:
+Chương 13 của Sổ Tay Kỹ Thuật & Phản Biện Hội Đồng VieTrueVoice v0.9.4:
 Thực Nghiệm Đối Chứng Hoán Đổi Hai Chiều (Inverted Generalization Experiment: V7 vs V8.0 vs v0.9.4)
 & Cơ Chế Triệt Tiêu Lỗ Hổng Continuous Flow Matching
 """
@@ -71,7 +71,7 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "Giả thuyết H2 trên tập chuẩn nhưng vẫn để lộ một khe hở đáng chú ý trên các mẫu giọng cực sạch trùng âm sắc (tỷ lệ lọt lưới trên tập kiểm thử lớn "
         "`test_indomain` lên tới `25.00%`, EER của riêng nhánh OmniVoice là `19.88%`, và trên một số lát cắt 5 tình nguyện viên khắt khe tỷ lệ lọt lưới "
         "từng chạm ngưỡng `~89.9%` ở nhóm ca đảo chiều). Ở phiên bản thử nghiệm trung gian `V8.0 Legacy`, nhóm mới sinh bán phần `1.885` tệp OmniVoice nên chưa "
-        "đối xứng hoàn toàn với `V7`. Sang phiên bản chính thức **`ViTrueVoice v0.9.4`**, toàn bộ kho dữ liệu và 5 tệp manifest 19 cột đã được chuẩn hóa đối xứng 1:1 tuyệt đối:",
+        "đối xứng hoàn toàn với `V7`. Sang phiên bản chính thức **`VieTrueVoice v0.9.4`**, toàn bộ kho dữ liệu và 5 tệp manifest 19 cột đã được chuẩn hóa đối xứng 1:1 tuyệt đối:",
     )
 
     add_styled_table(
@@ -690,7 +690,7 @@ def add_chapter_13_inverted(doc, figs: dict | None = None) -> None:
         "Kiểm tra khả năng đúc kết quy luật khái quát tầm kiến trúc sư hệ thống an ninh AI.",
         "Dạ thưa Thầy/Cô, bài học cốt lõi nhất là: **muốn phòng thủ vững chắc trước các công cụ nhân bản giọng nói chưa từng biết (`Zero-Day TTS`), tập dữ liệu huấn luyện bắt buộc phải bao phủ đại diện của cả những trường phái tạo sinh có quỹ đạo pha trơn mượt nhất (như `Continuous Flow Matching`), kết hợp cơ chế suy luận gộp điểm kiểm tra đồng thuận đa cửa sổ**.",
         "Về mặt toán học, mọi hệ thống tổng hợp giọng nói hiện tại và sắp ra mắt trên thế giới đều quy về hai cơ chế tái tạo tín hiệu chính: giải phương trình vi phân liên tục (`ODE / SDE Flow & Diffusion`) hoặc giải mã chuỗi lượng tử rời rạc (`Discrete Neural Audio Codec`). Thực nghiệm đối xứng hai chiều của chúng em đã chứng minh khi mô hình làm chủ được biên phân cách tinh vi của họ dòng chảy liên tục (`CFM`), nó đồng thời tạo được hàng rào miễn dịch chéo sang họ mã hóa rời rạc (`RVQ`), miễn là ở tầng suy luận không để một cửa sổ khoảng lặng đơn lẻ làm lọt lưới (`nhờ Consensus Asymmetric Veto`).",
-        "Định hướng kiến trúc này giúp `ViTrueVoice v0.9.4` đạt chuẩn sẵn sàng triển khai thực tế: **EER nội bộ 5.63% (≤ 8.0%)**, **EER ngoại lai Unseen TTS 12.05% (≤ 15.0%)**, **trung vị độ trễ 0.705s – 1.101s (≤ 3.0s)**, vận hành Docker cục bộ **0 VNĐ** và bảo vệ bởi **392/392 bài kiểm thử tự động**.",
+        "Định hướng kiến trúc này giúp `VieTrueVoice v0.9.4` đạt chuẩn sẵn sàng triển khai thực tế: **EER nội bộ 5.63% (≤ 8.0%)**, **EER ngoại lai Unseen TTS 12.05% (≤ 15.0%)**, **trung vị độ trễ 0.705s – 1.101s (≤ 3.0s)**, vận hành Docker cục bộ **0 VNĐ** và bảo vệ bởi **392/392 bài kiểm thử tự động**.",
     )
 
     add_term_glossary(

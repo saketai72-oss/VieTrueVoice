@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =====================================================================
-# ViTrueVoice Automated AWS EC2 Deployment Script
+# VieTrueVoice Automated AWS EC2 Deployment Script
 # Supports: Amazon Linux 2023 / Ubuntu 22.04 LTS (x86_64)
 # Tech: Docker, Docker Compose, AWS ECR, NVIDIA Container Toolkit (GPU)
 # =====================================================================
@@ -10,11 +10,11 @@ set -euo pipefail
 # Configuration parameters
 AWS_REGION="${AWS_REGION:-ap-southeast-1}"
 ECR_REGISTRY="${ECR_REGISTRY:-123456789012.dkr.ecr.ap-southeast-1.amazonaws.com}"
-IMAGE_NAME="${IMAGE_NAME:-vitruevoice:latest}"
-APP_DIR="${APP_DIR:-/opt/vitruevoice}"
+IMAGE_NAME="${IMAGE_NAME:-vietruevoice:latest}"
+APP_DIR="${APP_DIR:-/opt/vietruevoice}"
 
 echo "====================================================================="
-echo " Starting ViTrueVoice AWS EC2 Deployment"
+echo " Starting VieTrueVoice AWS EC2 Deployment"
 echo " Region:    ${AWS_REGION}"
 echo " Registry:  ${ECR_REGISTRY}"
 echo " App Dir:   ${APP_DIR}"
@@ -75,10 +75,10 @@ if [ -f "docker-compose.yml" ]; then
     docker compose up -d
 else
     echo "Starting standalone Docker container..."
-    docker stop vitruevoice-api 2>/dev/null || true
-    docker rm vitruevoice-api 2>/dev/null || true
+    docker stop vietruevoice-api 2>/dev/null || true
+    docker rm vietruevoice-api 2>/dev/null || true
     docker run -d \
-        --name vitruevoice-api \
+        --name vietruevoice-api \
         --restart unless-stopped \
         -p 8000:8000 \
         -v "${APP_DIR}/out:/app/out:ro" \
@@ -91,7 +91,7 @@ echo "[6/6] Verifying health status..."
 sleep 5
 for i in {1..10}; do
     if curl -s -f http://localhost:8000/health > /dev/null; then
-        echo "SUCCESS: ViTrueVoice API is HEALTHY on port 8000!"
+        echo "SUCCESS: VieTrueVoice API is HEALTHY on port 8000!"
         curl -s http://localhost:8000/health | python3 -m json.tool || true
         exit 0
     fi

@@ -4,7 +4,7 @@
 **Nguyễn Thành Tài · MSSV 2380601959 · 23DTHD5 · GVHD: TS. Nguyễn Quang Trung · 14/10/2026**
 
 > **NHỚ 5 ĐIỀU**
-> 1. Đây là đồ án nghiên cứu có sản phẩm. ViTrueVoice là công cụ để trả lời câu hỏi nghiên cứu, không phải đích đến.
+> 1. Đây là đồ án nghiên cứu có sản phẩm. VieTrueVoice là công cụ để trả lời câu hỏi nghiên cứu, không phải đích đến.
 > 2. Mọi quyết định thiết kế phải có nguyên lý đứng sau. Khi vấn đáp, câu “vì sao” phải dẫn được về một dòng ở mục C.
 > 3. Đo có đối chứng. So sánh mô hình huấn luyện có và không có tăng cường nén kênh trên cùng tập kiểm thử đã nén; đo thêm trên công cụ TTS chưa thấy.
 > 4. Thứ Sáu 12:00 nộp 1 PDF; 13:30 báo cáo; vấn đáp: W5, W7, W9 (W9 là phần hỏi đáp sau thuyết trình thử).
@@ -16,15 +16,15 @@
 
 | Mục | Nội dung |
 | :--- | :--- |
-| **Tên đề tài (VN)** | Phát triển ViTrueVoice: hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát |
-| **Tên đề tài (EN)** | Developing ViTrueVoice: Detecting Vietnamese Deepfake Speech over Compressed Voice Channels Based on Self-supervised Speech Representations |
-| **Tên sản phẩm** | ViTrueVoice (kiểm trùng tên trên Google và kho ứng dụng trước 16/10) |
+| **Tên đề tài (VN)** | Phát triển VieTrueVoice: hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát |
+| **Tên đề tài (EN)** | Developing VieTrueVoice: Detecting Vietnamese Deepfake Speech over Compressed Voice Channels Based on Self-supervised Speech Representations |
+| **Tên sản phẩm** | VieTrueVoice (kiểm trùng tên trên Google và kho ứng dụng trước 16/10) |
 | **Vấn đề nghiên cứu** | Kẻ lừa đảo dùng giọng nói nhân bản của người thân để đòi chuyển tiền; tai người khó phân biệt, nhất là khi âm thanh đã bị nén qua Zalo, Messenger hay cuộc gọi. Đồ án xem việc phát hiện là bài toán phân loại âm thanh thật/giả bằng biểu diễn học tự giám sát, và kiểm tra độ bền khi âm thanh bị nén. |
 | **Câu hỏi nghiên cứu** | **CH1.** Huấn luyện có tăng cường nén kênh thoại (Opus, AMR, lọc băng tần 8 kHz) có giảm EER trên âm thanh đã nén so với huấn luyện không tăng cường không?<br>**CH2.** Mô hình giữ được EER bao nhiêu trên giọng giả từ công cụ TTS chưa thấy khi huấn luyện? |
 | **Giả thuyết** | **H1:** EER trên tập nén giảm ít nhất 30% (tương đối) nhờ tăng cường nén.<br>**H2:** EER trên công cụ TTS chưa thấy ≤ 15%. |
 | **Đóng góp** | (1) Bộ dữ liệu giọng thật/giả tiếng Việt có phiếu đồng ý, có phiên bản nén kênh; (2) đánh giá chéo công cụ sinh giọng; (3) dịch vụ kiểm tra đoạn thoại ≤3 giây. |
 
-*Về tên đề tài: theo công thức của Khoa; “Phát triển” vì em giữ tên ViTrueVoice; phần học thuật là học biểu diễn tự giám sát (wav2vec 2.0) và độ bền khi nén kênh. Sản phẩm của em khác Kiên (văn bản) và Lê Minh Đình Tiến (đường link).*
+*Về tên đề tài: theo công thức của Khoa; “Phát triển” vì em giữ tên VieTrueVoice; phần học thuật là học biểu diễn tự giám sát (wav2vec 2.0) và độ bền khi nén kênh. Sản phẩm của em khác Kiên (văn bản) và Lê Minh Đình Tiến (đường link).*
 
 ---
 

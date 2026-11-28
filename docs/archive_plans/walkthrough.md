@@ -1,11 +1,11 @@
-# Báo Cáo Toàn Diện Kết Quả Thực Nghiệm ViTrueVoice (Version 17 - Đã thay SPK_0005)
+# Báo Cáo Toàn Diện Kết Quả Thực Nghiệm VieTrueVoice (Version 17 - Đã thay SPK_0005)
 
 Thực nghiệm đã hoàn tất xử lý và đánh giá trên **toàn bộ 5 tình nguyện viên chính thức** (`SPK_0001`, `SPK_0004`, `SPK_0005`, `SPK_0006`, `SPK_0007`) với tổng cộng **158 file âm thanh tổng hợp** (79 câu/mô hình).
 
 - Tình nguyện viên `SPK_0003` đã được loại bỏ hoàn toàn khỏi bộ dữ liệu.
 - Tình nguyện viên `SPK_0005` (20 câu) đã được chuyển đổi từ định dạng gốc `.m4a` sang chuẩn **PCM 16-bit 48kHz Mono WAV** và tích hợp vào pipeline.
-- Báo cáo dữ liệu gốc có tại: [evaluation_summary.csv](file:///c:/Codes/SPK_test/tests/v17_results/output_vitruevoice/reports/evaluation_summary.csv).
-- Gói kết quả hoàn chỉnh có tại: [vitruevoice_complete_results.zip](file:///c:/Codes/SPK_test/tests/v17_results/vitruevoice_complete_results.zip) (187.48 MB).
+- Báo cáo dữ liệu gốc có tại: [evaluation_summary.csv](file:///c:/Codes/SPK_test/tests/v17_results/output_VieTrueVoice/reports/evaluation_summary.csv).
+- Gói kết quả hoàn chỉnh có tại: [VieTrueVoice_complete_results.zip](file:///c:/Codes/SPK_test/tests/v17_results/VieTrueVoice_complete_results.zip) (187.48 MB).
 
 ---
 
@@ -138,21 +138,21 @@ Dữ liệu chi tiết 60 lượt chạy được lưu tại: [v19_detailed_metr
 
 ## 7. Kiến Trúc Hai Engine Song Song (Parallel Dual-Engine Architecture)
 
-Khung mã nguồn chuẩn hóa đã được cài đặt hoàn chỉnh tại gói [`src/vitruevoice/`](file:///c:/Codes/SPK_test/src/vitruevoice):
+Khung mã nguồn chuẩn hóa đã được cài đặt hoàn chỉnh tại gói [`src/VieTrueVoice/`](file:///c:/Codes/SPK_test/src/VieTrueVoice):
 
 ### 7.1. Cấu Trúc Thành Phần
 
 ```
-src/vitruevoice/
+src/VieTrueVoice/
 ├── base.py                   # Interface: SynthesisRequest, SynthesisResult, QualityMetrics, BaseTTSAdapter
 ├── evaluator.py              # Shared Multi-Gate Evaluator (ASR Clean WER/CER, ECAPA Sim, Sanity, Band 2-4k)
 ├── adapters/
 │   ├── f5_adapter.py         # F5TTSAdapter: Demucs 24kHz Mono, vocos, Peak Headroom Scaling
 │   └── vieneu_adapter.py     # VieNeuAdapter: Raw 48kHz PCM, denoise=False, presets VieNeu-A & VieNeu-F
-└── pipeline.py               # ViTrueVoiceDualPipeline: Triển khai 3 chế độ vận hành
+└── pipeline.py               # VieTrueVoiceDualPipeline: Triển khai 3 chế độ vận hành
 ```
 
-### 7.2. Ba Chế Độ Vận Hành Đã Triển Khai ([`PipelineMode`](file:///c:/Codes/SPK_test/src/vitruevoice/pipeline.py#L14-L17))
+### 7.2. Ba Chế Độ Vận Hành Đã Triển Khai ([`PipelineMode`](file:///c:/Codes/SPK_test/src/VieTrueVoice/pipeline.py#L14-L17))
 
 1. **`PipelineMode.BEST_QUALITY` (Thang quyết định phân cấp - Hierarchical Decision Ladder)**:
    - Thay vì so sánh điểm trung bình cộng dễ bị một metric chi phối, cơ chế tuyển chọn tuân thủ 4 bậc nghiêm ngặt:
@@ -168,8 +168,8 @@ src/vitruevoice/
 
 ### 7.3. Trạng Thái Kiểm Thử Đơn Vị & Tích Hợp Mở Rộng
 
-Bộ kiểm thử mở rộng [`tests/test_vitruevoice_pipeline.py`](file:///c:/Codes/SPK_test/tests/test_vitruevoice_pipeline.py) đã vượt qua **100% (15/15 tests passed)**:
-1. **Adapter Contract**: Khởi tạo [`SynthesisRequest`](file:///c:/Codes/SPK_test/src/vitruevoice/base.py#L7-L14) và kiểm tra schema đầy đủ của [`SynthesisResult`](file:///c:/Codes/SPK_test/src/vitruevoice/base.py#L16-L30) (1D float32, mono, `duration_s`, `latency_s`).
+Bộ kiểm thử mở rộng [`tests/test_VieTrueVoice_pipeline.py`](file:///c:/Codes/SPK_test/tests/test_VieTrueVoice_pipeline.py) đã vượt qua **100% (15/15 tests passed)**:
+1. **Adapter Contract**: Khởi tạo [`SynthesisRequest`](file:///c:/Codes/SPK_test/src/VieTrueVoice/base.py#L7-L14) và kiểm tra schema đầy đủ của [`SynthesisResult`](file:///c:/Codes/SPK_test/src/VieTrueVoice/base.py#L16-L30) (1D float32, mono, `duration_s`, `latency_s`).
 2. **Hard Sanity Pre-check**: Bắt lỗi an toàn khi audio rỗng, audio chứa NaN/Inf, hoặc audio gần như câm hoàn toàn (`rms < 1e-4`), gán cờ `is_valid=False`.
 3. **Phân tích hài âm & Chuẩn hóa ASR**: Kiểm tra bộ chuẩn hóa loại bỏ dấu câu và hàm tính tỷ lệ dải tần 2–4 kHz, 4–8 kHz.
 4. **Cô Lập Cấu Hình (Preset Isolation)**: Bảo đảm gọi liên tiếp xen kẽ `VieNeu-A` $\rightarrow$ `VieNeu-F` $\rightarrow$ `VieNeu-A` không bị rò rỉ cờ trạng thái hay seed.
@@ -250,7 +250,7 @@ Thực nghiệm được thực thi tự động qua script [`compare_vieneu_v3_
    - v2 GPU chỉ xuất chuẩn **24 kHz**.
 4. **Quyết định chuyển đổi**:
    - v2 GPU **KHÔNG** cao hơn rõ rệt; ngược lại kém hơn về độ giống giọng tổng thể và chậm hơn 6.7 lần.
-   - **Khuyến nghị dứt khoát**: **KHÔNG chuyển sang v2 để sinh hàng loạt**. Tiếp tục giữ VieNeu-TTS v3 Turbo làm engine đồng hành cùng F5-TTS trong ViTrueVoice.
+   - **Khuyến nghị dứt khoát**: **KHÔNG chuyển sang v2 để sinh hàng loạt**. Tiếp tục giữ VieNeu-TTS v3 Turbo làm engine đồng hành cùng F5-TTS trong VieTrueVoice.
 
 ---
 
@@ -368,7 +368,7 @@ Toàn bộ 79 file bona fide và các file synthetic clone được cho đi qua 
 
 ## 12. Đóng Băng Kiến Trúc Pipeline (Frozen Architecture) & Sẵn Sàng Mở Rộng Quy Mô
 
-Quyết định kiến trúc chính thức: **Giữ nguyên toàn bộ pipeline zero-shot TTS hiện tại**, không chuyển sang Voice Conversion hay LoRA nhằm giữ đúng mô hình hiểm họa (Threat Model) thực tế của bài toán phát hiện cuộc gọi lừa đảo viễn thông. Toàn bộ kiến trúc và quy trình xử lý đã được đóng băng và đóng gói trong package [`src/vitruevoice/`](file:///c:/Codes/SPK_test/src/vitruevoice/):
+Quyết định kiến trúc chính thức: **Giữ nguyên toàn bộ pipeline zero-shot TTS hiện tại**, không chuyển sang Voice Conversion hay LoRA nhằm giữ đúng mô hình hiểm họa (Threat Model) thực tế của bài toán phát hiện cuộc gọi lừa đảo viễn thông. Toàn bộ kiến trúc và quy trình xử lý đã được đóng băng và đóng gói trong package [`src/VieTrueVoice/`](file:///c:/Codes/SPK_test/src/VieTrueVoice/):
 
 ### 12.1. Bản Đồ Các Thành Phần Cốt Lõi Đã Đóng Băng
 
@@ -377,7 +377,7 @@ graph TD
     A["Raw Audio Dataset (VIVOS / Common Voice)"] --> B["DatasetPartitioner<br/>(3 tập rời rạc: Ref, Enroll, Test)"]
     B --> C["SpeakerProfiler<br/>(Lọc 4-8s, LOO Centroid, Output Probe)"]
     B --> D["MultiGateEvaluator<br/>(Centroid K=4 Enrollment Profile)"]
-    C --> E["ViTrueVoiceDualPipeline<br/>(F5-TTS & VieNeu v3 Turbo)"]
+    C --> E["VieTrueVoiceDualPipeline<br/>(F5-TTS & VieNeu v3 Turbo)"]
     E --> F["Multi-Seed Retry Loop<br/>(Kiểm tra đồng thời Gate 1, 2, 3)"]
     F --> G["Master 48kHz Audio Output"]
     G --> H["TelephonyCompressor<br/>(G.711 A-law 8kHz & AMR-NB 8kHz)"]
@@ -385,19 +385,19 @@ graph TD
 ```
 
 1. **Adapter Lớp Động Cơ (Engines)**:
-   - [`VieNeuAdapter`](file:///c:/Codes/SPK_test/src/vitruevoice/adapters/vieneu_adapter.py): VieNeu-TTS v3 Turbo (`pnnbao-ump/VieNeu-TTS-v3-Turbo`), 48 kHz PCM, Preset A (`use_ref_codes=True`), `denoise=False`, Peak Headroom Scaling $\le 0.95$.
-   - [`F5TTSAdapter`](file:///c:/Codes/SPK_test/src/vitruevoice/adapters/f5_adapter.py): F5-TTS Vietnamese, Demucs 24 kHz Mono, Peak Headroom Scaling $\le 0.999$.
+   - [`VieNeuAdapter`](file:///c:/Codes/SPK_test/src/VieTrueVoice/adapters/vieneu_adapter.py): VieNeu-TTS v3 Turbo (`pnnbao-ump/VieNeu-TTS-v3-Turbo`), 48 kHz PCM, Preset A (`use_ref_codes=True`), `denoise=False`, Peak Headroom Scaling $\le 0.95$.
+   - [`F5TTSAdapter`](file:///c:/Codes/SPK_test/src/VieTrueVoice/adapters/f5_adapter.py): F5-TTS Vietnamese, Demucs 24 kHz Mono, Peak Headroom Scaling $\le 0.999$.
 2. **Bộ Điều Phối & Lọc Lỗi (Orchestration & Retry)**:
-   - [`ViTrueVoiceDualPipeline`](file:///c:/Codes/SPK_test/src/vitruevoice/pipeline.py): Tuyển chọn phân cấp, Adaptive routing, Fallback tự động, Multi-Seed Retry loop chặn cả 3 cổng (Gate 1: WER $\le 15\%$, Gate 2: Sim $\ge T_{\text{spk}}$, Gate 3: Sanity).
+   - [`VieTrueVoiceDualPipeline`](file:///c:/Codes/SPK_test/src/VieTrueVoice/pipeline.py): Tuyển chọn phân cấp, Adaptive routing, Fallback tự động, Multi-Seed Retry loop chặn cả 3 cổng (Gate 1: WER $\le 15\%$, Gate 2: Sim $\ge T_{\text{spk}}$, Gate 3: Sanity).
 3. **Bộ Đánh Giá & Sinh Trắc (Evaluator & Profiler)**:
-   - [`MultiGateEvaluator`](file:///c:/Codes/SPK_test/src/vitruevoice/evaluator.py): ASR Wav2Vec2-250h tiếng Việt, SpeechBrain ECAPA-TDNN, Giao thức chuẩn hóa Centroid $K=4$ câu thật (`compute_enrollment_centroid`).
-   - [`SpeakerProfiler`](file:///c:/Codes/SPK_test/src/vitruevoice/speaker_profiler.py): Lọc clip 4–8s, LOO centroid proximity ranking, Probe output ranking, Ngưỡng hiệu chuẩn riêng với empirical shrinkage ($\sigma_{\text{pooled}} = 0.08$), `allow_stitching=False`.
+   - [`MultiGateEvaluator`](file:///c:/Codes/SPK_test/src/VieTrueVoice/evaluator.py): ASR Wav2Vec2-250h tiếng Việt, SpeechBrain ECAPA-TDNN, Giao thức chuẩn hóa Centroid $K=4$ câu thật (`compute_enrollment_centroid`).
+   - [`SpeakerProfiler`](file:///c:/Codes/SPK_test/src/VieTrueVoice/speaker_profiler.py): Lọc clip 4–8s, LOO centroid proximity ranking, Probe output ranking, Ngưỡng hiệu chuẩn riêng với empirical shrinkage ($\sigma_{\text{pooled}} = 0.08$), `allow_stitching=False`.
 4. **Bộ Xử Lý Dữ Liệu Lớn & Chuỗi Viễn Thông (Batch & Telephony)**:
-   - [`BatchDatasetProcessor`](file:///c:/Codes/SPK_test/src/vitruevoice/batch_processor.py): Tự động hóa phân hoạch 3 tập rời rạc chống rò rỉ dữ liệu (`DatasetPartitioner`), nén thoại G.711 A-law / AMR-NB (`TelephonyCompressor`), và xuất manifest CSV (`export_manifest_csv`).
-   - [`ManifestRecord`](file:///c:/Codes/SPK_test/src/vitruevoice/base.py): Tách biệt hai trục độc lập `ecapa_sim: float` và `raw_wer: float`, suy ra tầng tấn công hậu nghiệm `derive_attack_tier()`.
+   - [`BatchDatasetProcessor`](file:///c:/Codes/SPK_test/src/VieTrueVoice/batch_processor.py): Tự động hóa phân hoạch 3 tập rời rạc chống rò rỉ dữ liệu (`DatasetPartitioner`), nén thoại G.711 A-law / AMR-NB (`TelephonyCompressor`), và xuất manifest CSV (`export_manifest_csv`).
+   - [`ManifestRecord`](file:///c:/Codes/SPK_test/src/VieTrueVoice/base.py): Tách biệt hai trục độc lập `ecapa_sim: float` và `raw_wer: float`, suy ra tầng tấn công hậu nghiệm `derive_attack_tier()`.
 
 ### 12.2. Kiểm Thử Hệ Thống
-Toàn bộ 21 kiểm thử đơn vị và tích hợp trong [`tests/test_vitruevoice_pipeline.py`](file:///c:/Codes/SPK_test/tests/test_vitruevoice_pipeline.py) và [`tests/test_speaker_profiler.py`](file:///c:/Codes/SPK_test/tests/test_speaker_profiler.py) đều vượt qua 100% (Green). Pipeline sẵn sàng tiếp nhận các tập dữ liệu quy mô lớn (VIVOS / Common Voice).
+Toàn bộ 21 kiểm thử đơn vị và tích hợp trong [`tests/test_VieTrueVoice_pipeline.py`](file:///c:/Codes/SPK_test/tests/test_VieTrueVoice_pipeline.py) và [`tests/test_speaker_profiler.py`](file:///c:/Codes/SPK_test/tests/test_speaker_profiler.py) đều vượt qua 100% (Green). Pipeline sẵn sàng tiếp nhận các tập dữ liệu quy mô lớn (VIVOS / Common Voice).
 
 ---
 
@@ -409,16 +409,16 @@ Toàn bộ 21 kiểm thử đơn vị và tích hợp trong [`tests/test_vitruev
 
 1. **Chuẩn hóa Căn Chỉnh Âm Học F5-TTS bằng `ref_text` Động**:
    - *Vấn đề phát hiện*: F5-TTS là kiến trúc Flow Matching Text-to-Speech phụ thuộc chặt chẽ vào cặp điều kiện `(ref_audio, ref_text)`. Trước đây pipeline không truyền `ref_text` của clip tham chiếu được chọn (`best_ref`), dẫn đến việc F5-TTS dùng câu dự phòng cố định `"Cả hai bên hãy cố gắng giữ bình tĩnh."`. Khi clip âm thanh của speaker nói câu khác (ví dụ: *"Công dân có quyền yêu cầu..."* của SPK_0005), hiện tượng lệch pha cross-attention giữa token chữ và phổ âm thanh khiến âm sinh ra bị rè, ngọng, nuốt âm và biến dạng timbre người nói.
-   - *Giải pháp*: [batch_processor.py](file:///c:/Codes/VieTrueVoice/out/vitruevoice/batch_processor.py) tự động trích xuất bản phiên âm chính xác của clip tham chiếu từ `AUDIO_METADATA` (`ref_transcript_map`) và truyền trực tiếp vào [f5_adapter.py](file:///c:/Codes/VieTrueVoice/out/vitruevoice/adapters/f5_adapter.py).
+   - *Giải pháp*: [batch_processor.py](file:///c:/Codes/VieTrueVoice/out/VieTrueVoice/batch_processor.py) tự động trích xuất bản phiên âm chính xác của clip tham chiếu từ `AUDIO_METADATA` (`ref_transcript_map`) và truyền trực tiếp vào [f5_adapter.py](file:///c:/Codes/VieTrueVoice/out/VieTrueVoice/adapters/f5_adapter.py).
    - *Kết quả*: F5-TTS phát âm rõ ràng, tròn vành rõ chữ; WER của `SPK_0005` đạt mức kỷ lục **0.0%** tuyệt đối, Speaker Similarity đạt tới **0.8673**.
 
 2. **Khắc Phục Lỗi Định Kiểu `QualityMetrics` (Hotfix Dataclass Subscripting)**:
-   - *Vấn đề phát hiện*: Đối tượng `metrics` trả về từ [MultiGateEvaluator](file:///c:/Codes/VieTrueVoice/out/vitruevoice/evaluator.py) là một dataclass, khi code truy xuất dạng từ điển `metrics["clean_wer"]` gây lỗi `TypeError: 'QualityMetrics' object is not subscriptable`.
-   - *Giải pháp*: Cung cấp phương thức `__getitem__` và `get()` trực tiếp trong lớp [QualityMetrics](file:///c:/Codes/VieTrueVoice/out/vitruevoice/base.py), hỗ trợ phân giải alias đa dạng (`clean_wer`, `wer`, `raw_wer`, `clean_cer`, `cer`, `raw_cer`, `speaker_sim`, `ecapa_sim`).
+   - *Vấn đề phát hiện*: Đối tượng `metrics` trả về từ [MultiGateEvaluator](file:///c:/Codes/VieTrueVoice/out/VieTrueVoice/evaluator.py) là một dataclass, khi code truy xuất dạng từ điển `metrics["clean_wer"]` gây lỗi `TypeError: 'QualityMetrics' object is not subscriptable`.
+   - *Giải pháp*: Cung cấp phương thức `__getitem__` và `get()` trực tiếp trong lớp [QualityMetrics](file:///c:/Codes/VieTrueVoice/out/VieTrueVoice/base.py), hỗ trợ phân giải alias đa dạng (`clean_wer`, `wer`, `raw_wer`, `clean_cer`, `cer`, `raw_cer`, `speaker_sim`, `ecapa_sim`).
 
 3. **Chuyển Đổi Sang Chế Độ Sinh Kép Toàn Diện (`PipelineMode.DUAL_OUTPUT`)**:
    - *Vấn đề phát hiện*: Khi chạy ở chế độ `PipelineMode.ADAPTIVE`, bảng định tuyến tự động chia rẽ dữ liệu (`SPK_0006` chỉ sinh VieNeu; `SPK_0001, 0004, 0005, 0007` chỉ sinh F5), dẫn đến việc mỗi mô hình TTS đều bị khuyết thiếu speaker.
-   - *Giải pháp*: Nâng cấp [BatchDatasetProcessor](file:///c:/Codes/VieTrueVoice/out/vitruevoice/batch_processor.py) để kích hoạt cả hai mô hình TTS độc lập cho **toàn bộ 5 speaker** (`SPK_0001`, `0004`, `0005`, `0006`, `0007`). Tách bạch đích lưu trữ:
+   - *Giải pháp*: Nâng cấp [BatchDatasetProcessor](file:///c:/Codes/VieTrueVoice/out/VieTrueVoice/batch_processor.py) để kích hoạt cả hai mô hình TTS độc lập cho **toàn bộ 5 speaker** (`SPK_0001`, `0004`, `0005`, `0006`, `0007`). Tách bạch đích lưu trữ:
      - `data/spoof_f5tts/SPK_xxxx/`: Toàn bộ các mẫu F5-TTS vượt qua kiểm định.
      - `data/spoof_vieneu/SPK_xxxx/`: Toàn bộ các mẫu VieNeu-TTS vượt qua kiểm định.
 
@@ -550,7 +550,7 @@ Hiện tượng này bắt nguồn từ 3 tầng kỹ thuật trong kiến trúc
 
 ### 14.3. Kiến Trúc Cổng 4 Kiểm Tra Phương Ngữ Tự Động (Gate 4: Dialect & Prosody Consistency)
 
-Nhằm loại bỏ hoàn toàn việc phải nghe thử bằng tai khi mở rộng quy mô dữ liệu, module [dialect_evaluator.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/dialect_evaluator.py) đã được thiết kế và tích hợp vào [MultiGateEvaluator](file:///c:/Codes/VieTrueVoice/src/vitruevoice/evaluator.py):
+Nhằm loại bỏ hoàn toàn việc phải nghe thử bằng tai khi mở rộng quy mô dữ liệu, module [dialect_evaluator.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/dialect_evaluator.py) đã được thiết kế và tích hợp vào [MultiGateEvaluator](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/evaluator.py):
 
 1. **Phân tích động học cao độ ($F_0$ Dynamics)**:
    - Trích xuất $F_0$ qua thuật toán YIN trong dải tần số tiếng nói người $[65\text{Hz} - 400\text{Hz}]$.
@@ -598,7 +598,7 @@ Khi kiểm tra kết quả Version 9, người dùng phản hồi: *"không có 
 │    (Phonetic G2P Bias)  │    (Permissive Thresholds)    │    (Packaging Discrepancy)   │
 ├─────────────────────────┼───────────────────────────────┼──────────────────────────────┤
 │ VieNeu-TTS dùng sea-g2p │ Ngưỡng delta F0 và jump rate  │ build_train_nb.py đọc từ     │
-│ cố định hệ âm vị Bắc    │ chỉ bắt được câu có nhảy âm   │ thư mục out/vitruevoice cũ   │
+│ cố định hệ âm vị Bắc    │ chỉ bắt được câu có nhảy âm   │ thư mục out/VieTrueVoice cũ   │
 │ (d/gi/r -> /z/, ngã có  │ vực mạnh; câu đọc đều đều     │ (thiếu Cổng 4). Kernel V9    │
 │ ngắt thanh hầu). LLM    │ (monotone) vẫn tính score     │ chạy trên Kaggle thực chất   │
 │ Qwen ép đường cao độ về │ >= 0.65 -> Lọt lưới bộ lọc    │ là mã cũ của V8 -> Kết quả  │
@@ -621,8 +621,8 @@ Khi kiểm tra kết quả Version 9, người dùng phản hồi: *"không có 
    - Tuy nhiên, trong âm thanh tổng hợp VieNeu, các câu đọc ngắn hoặc đều đều không tạo ra bước nhảy tức thời đủ lớn ở từng frame, khiến `dialect_score` vẫn tính ra $> 0.65 \rightarrow \text{Gate 4 Pass}$.
 
 3. **Lỗi đóng gói mã nguồn (Packaging Discrepancy)**:
-   - Script `scratch/build_train_nb.py` trước đó đọc gói mã nguồn từ `out/vitruevoice` thay vì `src/vitruevoice` (Nguồn Chân Lý Duy Nhất - SSOT).
-   - Thư mục `out/vitruevoice/evaluator.py` là phiên bản cũ chỉ có 183 dòng (chưa hề chứa Cổng 4).
+   - Script `scratch/build_train_nb.py` trước đó đọc gói mã nguồn từ `out/VieTrueVoice` thay vì `src/VieTrueVoice` (Nguồn Chân Lý Duy Nhất - SSOT).
+   - Thư mục `out/VieTrueVoice/evaluator.py` là phiên bản cũ chỉ có 183 dòng (chưa hề chứa Cổng 4).
    - Hậu quả: Kernel Kaggle Version 9 khi thực thi thực chất chạy mã nguồn cũ của Version 8, sinh ra 200 mẫu giống hệt nhau.
 
 ---
@@ -630,7 +630,7 @@ Khi kiểm tra kết quả Version 9, người dùng phản hồi: *"không có 
 ### 15.2. Các Biện Pháp Khắc Phục Triệt Để Ở Version 10
 
 1. **Quy tắc cấm tuyệt đối VieNeu trên giọng Nam (Hard-Reject Rule)**:
-   - Trong [dialect_evaluator.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/dialect_evaluator.py), thiết lập điều kiện chặn cứng:
+   - Trong [dialect_evaluator.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/dialect_evaluator.py), thiết lập điều kiện chặn cứng:
      ```python
      if expected_dialect == "southern":
          is_vieneu = "vieneu" in engine_name.lower()
@@ -641,14 +641,14 @@ Khi kiểm tra kết quả Version 9, người dùng phản hồi: *"không có 
    - Đảm bảo VieNeu-TTS khi gặp speaker miền Nam sẽ nhận: `dialect_score = 0.0`, `dialect_match = False`, `gate4_pass = False`, `overall_pass = False`.
 
 2. **Bắt buộc áp dụng Cổng 4 trong MultiGateEvaluator**:
-   - Trong [evaluator.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/evaluator.py), loại bỏ nhánh bypass: bất kỳ khi nào có `expected_dialect`, Cổng 4 bắt buộc phải đạt thì `overall_pass` mới bằng `True`.
+   - Trong [evaluator.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/evaluator.py), loại bỏ nhánh bypass: bất kỳ khi nào có `expected_dialect`, Cổng 4 bắt buộc phải đạt thì `overall_pass` mới bằng `True`.
 
 3. **Tối ưu hóa Pipeline tiết kiệm tài nguyên GPU**:
-   - Trong [pipeline.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/pipeline.py), khi `expected_dialect == "southern"`, hệ thống tự động bỏ qua bước gọi `vieneu_engine.synthesize()` trên GPU Tesla T4 (tiết kiệm ~2 phút thời gian thực thi trên Kaggle) và trả về kết quả rớt Cổng 4 trực tiếp kèm mã lỗi `DIALECT_INCOMPATIBLE`.
+   - Trong [pipeline.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/pipeline.py), khi `expected_dialect == "southern"`, hệ thống tự động bỏ qua bước gọi `vieneu_engine.synthesize()` trên GPU Tesla T4 (tiết kiệm ~2 phút thời gian thực thi trên Kaggle) và trả về kết quả rớt Cổng 4 trực tiếp kèm mã lỗi `DIALECT_INCOMPATIBLE`.
    - Đối với speaker miền Bắc (`SPK_0006`), cả F5-TTS và VieNeu-TTS đều hoạt động bình thường và vượt qua toàn bộ 4 cổng.
 
 4. **Đồng bộ hóa Nguồn Chân Lý (SSOT)**:
-   - Script `scratch/build_train_nb.py` được cấu hình lại để lấy trực tiếp từ `src/vitruevoice`, đồng thời tự động đồng bộ sang `out/vitruevoice`.
+   - Script `scratch/build_train_nb.py` được cấu hình lại để lấy trực tiếp từ `src/VieTrueVoice`, đồng thời tự động đồng bộ sang `out/VieTrueVoice`.
    - Tái biên dịch `train.ipynb` và xác minh tính toàn vẹn của mã nhúng base64.
 
 ---
@@ -685,16 +685,16 @@ Nhằm chuẩn hóa hệ thống cho các tập dữ liệu lớn không có si�
 ```
 
 1. **Chuẩn hóa clip tham chiếu $\ge 5.0$ giây qua Stitching tự động**:
-   - Trong [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/batch_processor.py), kích hoạt `min_dur=5.0`, `max_dur=8.5` kèm `allow_stitching=True`.
+   - Trong [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/batch_processor.py), kích hoạt `min_dur=5.0`, `max_dur=8.5` kèm `allow_stitching=True`.
    - Với speaker có clip câu đơn ngắn ($< 4$ giây như `SPK_0007`), hệ thống tự động ghép 2 câu sạch liên tiếp (chèn 0.2s pause) thành 1 clip tham chiếu hoàn hảo 5.5s – 7.0s.
    - Nhờ đó, VieNeu-TTS nhận đủ acoustic tokens để học trọn vẹn chất giọng tự nhiên của mọi speaker (kể cả SPK 1, 4, 5, 7) giống hệt như đã làm xuất sắc với `SPK_0006`.
 2. **Cổng 4 thẩm định dựa trên khoảng cách tín hiệu sóng âm**:
-   - Module [dialect_evaluator.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/dialect_evaluator.py) được cấu hình lại thành `evaluate_prosodic_consistency`:
+   - Module [dialect_evaluator.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/dialect_evaluator.py) được cấu hình lại thành `evaluate_prosodic_consistency`:
      - So khớp trực tiếp $F_0$ mean, $CV_{F0}$, và Jump Rate giữa file tổng hợp và clip tham chiếu gốc.
      - Hoàn toàn độc lập với ngôn ngữ, vùng miền hay tên engine.
      - Bất kỳ file nào giữ đúng chất giọng, độ cao và nhịp điệu của người nói đều đạt chuẩn.
 3. **VieNeu-TTS chạy toàn diện cho tất cả speaker**:
-   - Gỡ bỏ hoàn toàn logic chặn cứng trong [pipeline.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/pipeline.py).
+   - Gỡ bỏ hoàn toàn logic chặn cứng trong [pipeline.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/pipeline.py).
    - Thiết lập `temperature=0.60`, `top_p=0.90`, `use_ref_codes=True` để tối đa hóa tính ổn định và bám sát mẫu tham chiếu.
 
 ### 16.2. Kiểm Thử Hệ Thống & Triển Khai Kaggle Version 11
@@ -725,12 +725,12 @@ Nhằm chuẩn hóa hệ thống cho các tập dữ liệu lớn không có si�
 ### 17.2. Giải Pháp Chuẩn Hóa Triệt Để
 
 1. **Khôi phục ưu tiên Clip đơn tự nhiên trong dải vàng $3.5\text{s} - 7.5\text{s}$**:
-   - Trong [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/batch_processor.py) và [speaker_profiler.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/speaker_profiler.py): Đặt lại `min_dur=3.5s, max_dur=7.5s, allow_stitching=False`.
+   - Trong [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/batch_processor.py) và [speaker_profiler.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/speaker_profiler.py): Đặt lại `min_dur=3.5s, max_dur=7.5s, allow_stitching=False`.
    - Toàn bộ 5 speaker đều sở hữu các clip đơn tự nhiên trong khoảng $3.6\text{s} - 5.5\text{s}$ $\rightarrow$ khôi phục câu mẫu hoàn hảo `SPK_0004_02` và các clip mộc cho SPK 1, 7.
 2. **Cơ chế Label-Free ASR Fallback tự động**:
-   - Trong [evaluator.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/evaluator.py): Bổ sung hàm `transcribe_audio` tận dụng pipeline ASR có sẵn.
-   - Trong [pipeline.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/pipeline.py) và [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/batch_processor.py): Nếu `ref_text` bị thiếu (trong các dataset lớn không nhãn), tự động nhận diện nội dung từ sóng âm trong $0.2\text{s}$.
-   - Trong [f5_adapter.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/adapters/f5_adapter.py): Xóa bỏ hoàn toàn câu fallback cứng gây vỡ gióng hàng.
+   - Trong [evaluator.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/evaluator.py): Bổ sung hàm `transcribe_audio` tận dụng pipeline ASR có sẵn.
+   - Trong [pipeline.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/pipeline.py) và [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/batch_processor.py): Nếu `ref_text` bị thiếu (trong các dataset lớn không nhãn), tự động nhận diện nội dung từ sóng âm trong $0.2\text{s}$.
+   - Trong [f5_adapter.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/adapters/f5_adapter.py): Xóa bỏ hoàn toàn câu fallback cứng gây vỡ gióng hàng.
 
 ### 17.3. Kiểm Thử & Triển Khai Version 12
 
@@ -753,7 +753,7 @@ Nhằm chuẩn hóa hệ thống cho các tập dữ liệu lớn không có si�
 ### 18.2. Hành Động Khắc Phục: Hoàn Nguyên 100% Version 12 Nguyên Bản
 
 1. **Khôi phục cấu trúc phân hoạch nguyên bản**:
-   - Trong [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/vitruevoice/batch_processor.py): Hoàn nguyên `DatasetPartitioner.partition_speaker_files` về chính xác cơ chế phân tập của Version 12 (`ref_pool = files[:3]`, `enroll_pool = files[3:7]`).
+   - Trong [batch_processor.py](file:///c:/Codes/VieTrueVoice/src/VieTrueVoice/batch_processor.py): Hoàn nguyên `DatasetPartitioner.partition_speaker_files` về chính xác cơ chế phân tập của Version 12 (`ref_pool = files[:3]`, `enroll_pool = files[3:7]`).
    - Khôi phục câu tham chiếu vàng [SPK_0004_02.wav](file:///c:/Codes/VieTrueVoice/out/data/raw/SPK_0004/SPK_0004_02.wav) ($4.76\text{s}$), đưa F5-TTS và VieNeu-TTS của `SPK_0004` lập tức trở lại trạng thái hoàn hảo 100% giọng Nam.
    - Giữ nguyên toàn bộ các cải tiến chuẩn xác của Version 12: ASR auto-fallback cho `ref_text`, loại bỏ hoàn toàn fallback cứng sai lệch của F5-TTS, duy trì `min_dur=3.5s, max_dur=7.5s, allow_stitching=False`.
 

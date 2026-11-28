@@ -3,7 +3,7 @@ r"""
 Script to generate the official Week 5 (W05) report document for:
 Course: CMP436 - Đồ án chuyên ngành CNTT (HUTECH)
 Student: Nguyễn Thành Tài - MSSV: 2380601959 - Lớp: 23DTHD5
-Topic: ViTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén)
+Topic: VieTrueVoice (Phát hiện giọng nói giả tiếng Việt qua kênh thoại nén)
 Target path: C:\Users\saket\Documents\Đồ án chuyên ngành\Content\DACN_2380601959_NguyenThanhTai_W05.docx
 """
 
@@ -137,9 +137,9 @@ def main():
         ("Họ và tên", "Nguyễn Thành Tài"),
         ("MSSV · Lớp", "2380601959 · 23DTHD5"),
         ("GVHD", "TS. Nguyễn Quang Trung"),
-        ("Đề tài", "Phát triển ViTrueVoice: hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (repo: VieTrueVoice)"),
+        ("Đề tài", "Phát triển VieTrueVoice: hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén dựa trên học biểu diễn tự giám sát (repo: VieTrueVoice)"),
         ("Link repo GitHub", "https://github.com/saketai72-oss/VieTrueVoice"),
-        ("Link video demo / Bot", "https://t.me/vitruevoice_bot (Kênh kiểm định trực tiếp @vitruevoice_bot)"),
+        ("Link video demo / Bot", "https://t.me/VieTrueVoice_bot (Kênh kiểm định trực tiếp @VieTrueVoice_bot)"),
         ("Link Commit / PR W05", "https://github.com/saketai72-oss/VieTrueVoice/tree/main (Chuỗi commit [AI] hoàn tất trọn bộ Tính năng #2, mô hình V6, Telegram Bot và bộ AI Eval)"),
         ("Hạn nộp & Báo cáo W05", "Trước 12:00 thứ Sáu 13/11/2026 · Báo cáo & vấn đáp xác minh: 13:30–16:30 cùng ngày"),
         ("Tên file nộp", "DACN_2380601959_NguyenThanhTai_W05.pdf (xuất trực tiếp từ file Word này)"),
@@ -236,7 +236,7 @@ def main():
 
     # 5. PHẦN I. PHIẾU NHẬT KÝ TUẦN W05
     add_heading_1(doc, "PHẦN I. PHIẾU NHẬT KÝ TUẦN W05 (09/11 – 15/11/2026)")
-    add_styled_paragraph(doc, "Họ tên: Nguyễn Thành Tài · MSSV: 2380601959 · Đề tài: ViTrueVoice · Repo: https://github.com/saketai72-oss/VieTrueVoice")
+    add_styled_paragraph(doc, "Họ tên: Nguyễn Thành Tài · MSSV: 2380601959 · Đề tài: VieTrueVoice · Repo: https://github.com/saketai72-oss/VieTrueVoice")
     
     t_log = doc.add_table(rows=6, cols=2)
     set_table_borders(t_log, color="CCCCCC")
@@ -417,17 +417,17 @@ def main():
     # 3.1 Tính năng #2 chạy đầu-cuối
     add_heading_2(doc, "3.1 Tính năng #2 chạy đầu-cuối với dữ liệu mẫu giống thật (không 'test1', 'abc')")
     add_styled_paragraph(doc, 
-        "Căn cứ theo yêu cầu Checkpoint W05, Tính năng #2 của ViTrueVoice là: 'Phát hiện giọng nói giả mạo tiếng Việt qua kênh thoại nén OTT Zalo (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps) dựa trên mô hình SSL-AASIST AM-Softmax Regularization'.\n"
+        "Căn cứ theo yêu cầu Checkpoint W05, Tính năng #2 của VieTrueVoice là: 'Phát hiện giọng nói giả mạo tiếng Việt qua kênh thoại nén OTT Zalo (Profile A: AAC-LC 76kbps, Profile B: Opus 24kbps) dựa trên mô hình SSL-AASIST AM-Softmax Regularization'.\n"
         "• Dữ liệu kiểm thử giống thật 100%: Hệ thống được đánh giá trực tiếp trên 84 tệp giọng thật của 5 tình nguyện viên đối chứng thu bằng điện thoại di động trong phòng bình thường và 30 tệp âm thanh giả mạo được sinh từ các kịch bản lừa đảo thực tế tại Việt Nam (nội dung: mượn tiền gấp viện phí, con bị tai nạn cấp cứu, xác thực mã OTP ngân hàng, thông báo khóa tài khoản viễn thông).\n"
         "• Kết quả chạy đầu-cuối thực tế: Hệ thống áp dụng trích xuất Đa cửa sổ trượt (Multi-window Sliding Inference, cửa sổ 4.0s = 64.000 mẫu, bước nhảy 1.0s, tối đa 5 cửa sổ) gộp thành mini-batch suy luận song song trong một forward pass duy nhất kèm Max-Pooling. Kết hợp với mô hình B_zalo V6 Local (checkpoint out/zalo_b_zalo_v6_local/best_model.pt): Gate 2 trên 4 người nói đối chứng (SPK_0004..0007, 64 tệp) đạt 100.0% (64/64) PASS tuyệt đối; trên toàn bộ 5 người nói thuộc Bộ nghiệm thu độc lập (SPK_0003..0007, 84 tệp) đạt 96.4% (81/84) PASS; Gate 3 trên các kênh nén Zalo đạt EER 1.56%–1.73%; thời gian phản hồi toàn trình chỉ 0.066s (P90: 0.068s), nhanh gấp ~45 lần trần chuẩn NFR-1 <= 3.0s."
     )
 
     # Bảng 3.1 & 3.2
-    add_styled_paragraph(doc, "Bảng 3.1. So sánh đối chứng năng lực nhận diện giữa Nhánh A (Clean only) và Nhánh B (ViTrueVoice) trên tập kiểm thử nội bộ (In-domain):", font_size=10, bold=True)
+    add_styled_paragraph(doc, "Bảng 3.1. So sánh đối chứng năng lực nhận diện giữa Nhánh A (Clean only) và Nhánh B (VieTrueVoice) trên tập kiểm thử nội bộ (In-domain):", font_size=10, bold=True)
     t_b1 = doc.add_table(rows=13, cols=6)
     set_table_borders(t_b1, color="CCCCCC")
     t_b1.alignment = WD_TABLE_ALIGNMENT.CENTER
-    b1_headers = ["Kịch bản kiểm thử", "Công cụ TTS", "EER Nhánh A (Clean)", "EER Nhánh B (ViTrueVoice)", "Mức giảm tương đối (ΔEER)", "Kiểm chứng Giả thuyết"]
+    b1_headers = ["Kịch bản kiểm thử", "Công cụ TTS", "EER Nhánh A (Clean)", "EER Nhánh B (VieTrueVoice)", "Mức giảm tương đối (ΔEER)", "Kiểm chứng Giả thuyết"]
     for i, h in enumerate(b1_headers):
         cell = t_b1.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
@@ -485,7 +485,7 @@ def main():
     add_heading_2(doc, "3.2 Tích hợp hệ thống người dùng đang dùng (Telegram Bot & Kênh thoại OTT Zalo)")
     add_styled_paragraph(doc, 
         "Nhóm đã đưa sản phẩm trực tiếp vào kênh người dùng đang sử dụng hàng ngày:\n"
-        "• Kênh tích hợp chính: **Bot Telegram (@vitruevoice_bot)** được xây dựng bằng thư viện python-telegram-bot (src/app/bot.py). Người dùng chỉ cần chuyển tiếp (forward) tin nhắn thoại từ Telegram hoặc gửi tệp âm thanh trích xuất từ Zalo (.aac, .opus, .m4a, .mp3, .wav) vào bot.\n"
+        "• Kênh tích hợp chính: **Bot Telegram (@VieTrueVoice_bot)** được xây dựng bằng thư viện python-telegram-bot (src/app/bot.py). Người dùng chỉ cần chuyển tiếp (forward) tin nhắn thoại từ Telegram hoặc gửi tệp âm thanh trích xuất từ Zalo (.aac, .opus, .m4a, .mp3, .wav) vào bot.\n"
         "• Cơ chế xử lý in-memory: Bot nhận stream nhị phân trực tiếp từ Telegram Bot API, đẩy vào bộ nhớ RAM qua FFmpeg stream để chuẩn hóa 16kHz mono và tính toán suy luận. File âm thanh tự động giải phóng khỏi RAM ngay khi trả lời, không lưu bất kỳ dấu vết nào trên ổ đĩa máy chủ (tuân thủ Luật 91/2025/QH15).\n"
         "• Minh chứng dữ liệu đi qua thật: Ảnh chụp màn hình hai phía Client Telegram và Server Log ẩn danh SHA-256."
     )
@@ -497,12 +497,12 @@ def main():
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(real_screenshot_path), width=Inches(6.0))
-        add_styled_paragraph(doc, "Hình III.1: Minh chứng kiểm định thực tế trên ứng dụng Telegram Desktop (@ViTrueVoice Verification) — Hệ thống nhận diện chính xác Giọng thật (Raw score: +3.5409 > 0.0000, thời gian xử lý: 2.69s <= 3.0s, mã băm ẩn danh SHA-256 de4e26e0ca1003b2...)", font_size=9, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình III.1: Minh chứng kiểm định thực tế trên ứng dụng Telegram Desktop (@VieTrueVoice Verification) — Hệ thống nhận diện chính xác Giọng thật (Raw score: +3.5409 > 0.0000, thời gian xử lý: 2.69s <= 3.0s, mã băm ẩn danh SHA-256 de4e26e0ca1003b2...)", font_size=9, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
     elif evidence_img_path.exists():
         p_img = doc.add_paragraph()
         p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_img.add_run().add_picture(str(evidence_img_path), width=Inches(6.2))
-        add_styled_paragraph(doc, "Hình III.1: Minh chứng tích hợp hệ thống ViTrueVoice Bot hai phía (Client Telegram Desktop và Server Console Log in-memory stream)", font_size=9, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
+        add_styled_paragraph(doc, "Hình III.1: Minh chứng tích hợp hệ thống VieTrueVoice Bot hai phía (Client Telegram Desktop và Server Console Log in-memory stream)", font_size=9, italic=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=6)
     else:
         add_placeholder_callout(doc, "Minh chứng tích hợp Telegram Bot (Client gửi voice note - Server trả kết quả < 0.35s)", "[CHÈN ẢNH HAI PHÍA: CLIENT TELEGRAM VÀ SERVER LOG ẨN DANH SHA-256]")
         t_box_bot = doc.add_table(1, 1); set_table_borders(t_box_bot, color="1F497D", sz="8")
@@ -513,7 +513,7 @@ def main():
     # 3.3 Sơ đồ quy trình trước/sau tích hợp (Hitachi CRM/ERP)
     add_heading_2(doc, "3.3 Sơ đồ quy trình trước/sau tích hợp và Đo lường thời gian (Bài tập tự học Hitachi)")
     add_styled_paragraph(doc, 
-        "Theo tài liệu tự học Hitachi 'CRM · ERP · Excel · Email' và phân tích kiến trúc nghiệp vụ, hệ thống ViTrueVoice đã tối ưu hóa triệt để quy trình xác minh tính xác thực của cuộc gọi/tin nhắn thoại:\n\n"
+        "Theo tài liệu tự học Hitachi 'CRM · ERP · Excel · Email' và phân tích kiến trúc nghiệp vụ, hệ thống VieTrueVoice đã tối ưu hóa triệt để quy trình xác minh tính xác thực của cuộc gọi/tin nhắn thoại:\n\n"
         "1. Quy trình TRƯỚC tích hợp (Quy trình làm tay truyền thống — 5 bước):\n"
         "   Bước 1: Nhận cuộc gọi hoặc tin nhắn thoại đáng ngờ qua Zalo/Điện thoại (~15 giây).\n"
         "   Bước 2: Tải tệp âm thanh về máy tính hoặc điện thoại (~30 giây).\n"
@@ -521,8 +521,8 @@ def main():
         "   Bước 4: Người dùng nghe đi nghe lại và cố gắng phán đoán cảm tính dựa trên ngữ điệu (~45 giây).\n"
         "   Bước 5: Ra quyết định chuyển tiền hay từ chối (~10 giây).\n"
         "   👉 TỔNG THỜI GIAN TRƯỚC TÍCH HỢP: 280 giây (~4.7 phút) — Phụ thuộc hoàn toàn vào cảm tính và rất dễ bị lừa nếu tâm lý hoảng loạn.\n\n"
-        "2. Quy trình SAU tích hợp (Quy trình tự động hóa qua ViTrueVoice Bot — 2 bước):\n"
-        "   Bước 1: Người dùng bấm 'Chuyển tiếp' (Forward) trực tiếp tin nhắn thoại từ Zalo/ứng dụng sang Telegram Bot @vitruevoice_bot (~3 giây).\n"
+        "2. Quy trình SAU tích hợp (Quy trình tự động hóa qua VieTrueVoice Bot — 2 bước):\n"
+        "   Bước 1: Người dùng bấm 'Chuyển tiếp' (Forward) trực tiếp tin nhắn thoại từ Zalo/ứng dụng sang Telegram Bot @VieTrueVoice_bot (~3 giây).\n"
         "   Bước 2: Hệ thống tự động phân tích và trả về Thẻ kết quả 3 mức khuyến nghị (Xanh: An toàn, Vàng: Cần xác thực thêm, Đỏ: Cảnh báo lừa đảo) kèm điểm số tin cậy trong 0.35 giây (~0.35 giây).\n"
         "   👉 TỔNG THỜI GIAN SAU TÍCH HỢP: ~3.5 giây — BỚT ĐƯỢC 3 BƯỚC LÀM TAY, TIẾT KIỆM 98.7% THỜI GIAN VẬN HÀNH."
     )
@@ -530,7 +530,7 @@ def main():
     t_flow = doc.add_table(rows=7, cols=4)
     set_table_borders(t_flow, color="CCCCCC")
     t_flow.alignment = WD_TABLE_ALIGNMENT.CENTER
-    flow_headers = ["Giai đoạn nghiệp vụ", "Quy trình trước tích hợp (Làm tay)", "Quy trình sau tích hợp (ViTrueVoice Bot)", "Hiệu quả cải tiến"]
+    flow_headers = ["Giai đoạn nghiệp vụ", "Quy trình trước tích hợp (Làm tay)", "Quy trình sau tích hợp (VieTrueVoice Bot)", "Hiệu quả cải tiến"]
     for i, h in enumerate(flow_headers):
         cell = t_flow.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
@@ -577,7 +577,7 @@ def main():
     t_eval = doc.add_table(rows=11, cols=6)
     set_table_borders(t_eval, color="CCCCCC")
     t_eval.alignment = WD_TABLE_ALIGNMENT.CENTER
-    eval_headers = ["Mã ca", "Nội dung cuộc gọi / Voice note", "Nhãn gốc", "Kênh nén / Công cụ", "Điểm số ViTrueVoice", "Kết luận hệ thống"]
+    eval_headers = ["Mã ca", "Nội dung cuộc gọi / Voice note", "Nhãn gốc", "Kênh nén / Công cụ", "Điểm số VieTrueVoice", "Kết luận hệ thống"]
     for i, h in enumerate(eval_headers):
         cell = t_eval.rows[0].cells[i]
         set_cell_background(cell, "1F497D")
@@ -662,7 +662,7 @@ def main():
         "(1) Mất mát hoàn toàn thông tin góc pha: STFT loại bỏ góc pha phi(t, f), trong khi các công cụ tổng hợp giọng nói AI hiện đại bộc lộ dấu vết nhân tạo rõ nhất ở miền pha.\n"
         "(2) Kém bền vững trước nén codec: Khi âm thanh bị nén qua AMR-NB hay G.711, các dải tần số cao bị cắt bỏ hoàn toàn (>3.4 kHz), khiến các hệ số MFCC bậc cao bị biến dạng nghiêm trọng. Thực nghiệm của chúng em chỉ ra rằng mô hình baseline LFCC+GMM sụp đổ hoàn toàn khi gặp âm thanh nén (EER vọt lên > 40%).\n\n"
         "2.2.2 Kiến trúc Học tự giám sát wav2vec 2.0 trên sóng âm thô\n"
-        "Hệ thống ViTrueVoice sử dụng mô hình học tự giám sát wav2vec 2.0 tiếng Việt [1], tiếp nhận trực tiếp sóng âm 16kHz mà không cần trích xuất phổ thủ công:\n"
+        "Hệ thống VieTrueVoice sử dụng mô hình học tự giám sát wav2vec 2.0 tiếng Việt [1], tiếp nhận trực tiếp sóng âm 16kHz mà không cần trích xuất phổ thủ công:\n"
         "• Bộ mã hóa đặc trưng thời gian (Feature Encoder): Gồm 7 khối tích chập 1D Conv nén sóng âm thô thành các biểu diễn tiềm ẩn z_t in R^(512) với độ trễ 20ms.\n"
         "• Bộ chuyển đổi ngữ cảnh (Context Transformer): Gồm 12 tầng Transformer với cơ chế Multi-Head Self-Attention, trích xuất biểu diễn ngữ cảnh toàn cục c_t in R^(768) từ chuỗi z_t sau khi đã che ngẫu nhiên ~49% khung thời gian.\n"
         "• Bộ lượng tử hóa vector Gumbel-Softmax: Rời rạc hóa z_t thành các mục từ q_t thông qua 2 codebooks (mỗi codebook 320 entries) để tối ưu hàm mất mát tương phản Contrastive Loss L_m.\n"
@@ -687,7 +687,7 @@ def main():
         "(1) Cắt gọt dải tần cao: ITU-T G.711 cắt dải tần > 3.4 kHz; AMR-NB nén bằng ACELP ở 12.2 kbps cắt lọc và làm phẳng các đỉnh formant; Zalo AAC-LC (76 kbps) cắt lọc > 14 kHz; Zalo Opus (24 kbps) làm biến dạng pha dải tần trung cao.\n"
         "(2) Méo pha cục bộ: Các phép biến đổi MDCT/STFT trong codec làm thay đổi cấu trúc góc pha vi mô.\n"
         "(3) Nhiễu lượng tử hóa nhân tạo: Tạo ra các vệt năng lượng giả mạo khiến mô hình không học nén kênh nhận nhầm giọng thật thành giả.\n"
-        "Để chống lệch miền, ViTrueVoice xây dựng cấu trúc Paired Triplets 1:1:1 và tăng cường RawBoost Online, buộc mô hình học cách 'nhìn xuyên lớp vỏ nén codec' để bắt đúng bản chất sóng âm."
+        "Để chống lệch miền, VieTrueVoice xây dựng cấu trúc Paired Triplets 1:1:1 và tăng cường RawBoost Online, buộc mô hình học cách 'nhìn xuyên lớp vỏ nén codec' để bắt đúng bản chất sóng âm."
     )
 
     # 2.4 - NỘI DUNG MỚI ĐÃ HIỆU ĐÍNH VỀ CHẨN ĐOÁN LỖI BÁO ĐỘNG NHẦM
@@ -741,7 +741,7 @@ def main():
     # 2.5
     add_heading_2(doc, "2.5 Nền tảng kỹ thuật và Áp dụng 3 chứng chỉ AWS Academy trong Kiến trúc hệ thống")
     add_styled_paragraph(doc, 
-        "Hệ thống ViTrueVoice được xây dựng dựa trên ngăn xếp công nghệ mở hiện đại (Python 3.12, PyTorch 2.6 CUDA, torchaudio, Transformers, FastAPI, Gradio, Docker, GitHub Actions CI). "
+        "Hệ thống VieTrueVoice được xây dựng dựa trên ngăn xếp công nghệ mở hiện đại (Python 3.12, PyTorch 2.6 CUDA, torchaudio, Transformers, FastAPI, Gradio, Docker, GitHub Actions CI). "
         "Đặc biệt, sinh viên đã hoàn thành 100% cả 3 chứng chỉ chuyên môn trong Gói A của chương trình AWS Academy và tích hợp trực tiếp kiến thức vào kiến trúc hệ thống:\n\n"
         "1. AWS Academy Cloud Foundations (100% Hoàn thành):\n"
         "Cung cấp kiến thức nền tảng về điện toán đám mây, mô hình trách nhiệm chia sẻ (Shared Responsibility Model), cơ chế dự phòng đa vùng khả dụng (Multi-AZ) và nguyên lý tối ưu hóa chi phí vận hành (AWS Well-Architected Framework). "
@@ -752,7 +752,7 @@ def main():
         "• Biện pháp 2 (Quản trị quyền tối thiểu & Giới hạn truy cập): Thiết lập chính sách IAM Least Privilege chỉ cho phép dịch vụ suy luận quyền đọc tạm thời trong bộ nhớ đệm, kết hợp Rate Limiting và tường lửa WAF ngăn chặn tấn công từ chối dịch vụ (DDoS) vào API suy luận.\n\n"
         "3. AWS Academy Cloud Architecting (100% Hoàn thành):\n"
         "Cung cấp kỹ năng thiết kế kiến trúc vi dịch vụ (Microservices Architecture), cân bằng tải đàn hồi (Elastic Load Balancing - ALB), vùng mạng ảo VPC biệt lập và đóng gói container qua Docker. "
-        "Được áp dụng để thiết kế kịch bản đóng gói một lệnh (Single-command Docker Deployment) đưa toàn bộ hệ thống ViTrueVoice lên máy chủ đám mây AWS EC2 phục vụ đợt Red Team Pilot với CLB An toàn thông tin HUTECH."
+        "Được áp dụng để thiết kế kịch bản đóng gói một lệnh (Single-command Docker Deployment) đưa toàn bộ hệ thống VieTrueVoice lên máy chủ đám mây AWS EC2 phục vụ đợt Red Team Pilot với CLB An toàn thông tin HUTECH."
     )
 
     # 2.6
@@ -761,11 +761,11 @@ def main():
         "2.6.1 Các hệ sinh thái nghiên cứu ASVspoof quốc tế\n"
         "Chiến dịch ASVspoof (2019, 2021) [4] đã định hình chuẩn mực nghiên cứu quốc tế trong phát hiện tấn công giả mạo âm thanh (Logical Access - LA, Physical Access - PA, Deepfake - DF). "
         "Tuy nhiên, các bộ dữ liệu của ASVspoof chủ yếu dựa trên tiếng Anh, thu âm trong điều kiện lý tưởng và chưa phản ánh các ngôn ngữ có thanh điệu phức tạp như tiếng Việt. "
-        "ViTrueVoice kế thừa giao thức chuẩn mực của ASVspoof (độ đo EER, minDCF, phân chia Speaker-Disjoint) nhưng mở rộng tiên phong cho tiếng Việt qua kênh thoại OTT Zalo.\n\n"
+        "VieTrueVoice kế thừa giao thức chuẩn mực của ASVspoof (độ đo EER, minDCF, phân chia Speaker-Disjoint) nhưng mở rộng tiên phong cho tiếng Việt qua kênh thoại OTT Zalo.\n\n"
         "2.6.2 Các giải pháp thương mại và Phương pháp xác minh truyền thống\n"
         "Hiện nay, một số công cụ thương mại quốc tế (như Resemble AI, Pindrop, Nuance Gatekeeper) cung cấp API phát hiện deepfake, nhưng gặp phải các rào cản lớn khi áp dụng tại Việt Nam: (1) chi phí bản quyền cực kỳ đắt đỏ; (2) không tối ưu cho ngữ âm tiếng Việt và kênh nén đặc thù Zalo; (3) nguy cơ vi phạm an ninh dữ liệu khi phải gửi giọng nói của công dân ra máy chủ nước ngoài.\n"
         "Trong khi đó, phương thức xác minh thủ công truyền thống (như gọi điện thoại lại qua kênh khác hoặc hỏi câu hỏi bí mật) mất từ 2 đến 5 phút (trung bình ~180 giây), gây gián đoạn và phụ thuộc hoàn toàn vào sự tỉnh táo của người lớn tuổi. "
-        "ViTrueVoice cung cấp một giải pháp tự động, xử lý in-memory trực tiếp tại Việt Nam, phản hồi trong vòng 0.35 giây với độ chính xác cao, tạo lá chắn an ninh thiết thực cho cộng đồng."
+        "VieTrueVoice cung cấp một giải pháp tự động, xử lý in-memory trực tiếp tại Việt Nam, phản hồi trong vòng 0.35 giây với độ chính xác cao, tạo lá chắn an ninh thiết thực cho cộng đồng."
     )
 
     # Danh mục tài liệu tham khảo Chương 2
@@ -990,16 +990,16 @@ def main():
          "  4. Người dùng nghe đi nghe lại và tự phán đoán cảm tính (45s);\n"
          "  5. Ra quyết định chuyển tiền hay không (10s).\n"
          "• SAU TÍCH HỢP (Chỉ còn 2 bước, mất 3.5 giây):\n"
-         "  1. Người dùng bấm Forward trực tiếp tin nhắn thoại từ Zalo sang Telegram Bot @vitruevoice_bot (~3s);\n"
+         "  1. Người dùng bấm Forward trực tiếp tin nhắn thoại từ Zalo sang Telegram Bot @VieTrueVoice_bot (~3s);\n"
          "  2. Nhận Thẻ kết quả phân tích tức thì sau 0.35s với 3 mức khuyến nghị Xanh / Vàng / Đỏ rõ ràng.\n"
          "👉 Kết quả: Bớt được 3 bước làm tay, tiết kiệm 98.7% thời gian xác minh (giảm từ 280 giây xuống 3.5 giây)."),
          
         ("Câu hỏi 4 (LMS): Giải thích một khái niệm trong Chương 2 bằng ví dụ ngay trong sản phẩm của em.",
          "Trả lời:\n"
          "• Khái niệm chọn: **Hiện tượng lệch miền do nén kênh thoại (Codec Domain Shift)** và **Hàm mất mát phạt góc biên Additive Margin Softmax (AM-Softmax)** (Mục 2.3 & 2.4 Chương 2).\n"
-         "• Ví dụ thực tế trong ViTrueVoice:\n"
+         "• Ví dụ thực tế trong VieTrueVoice:\n"
          "  Khi người dùng gửi một tin nhắn thoại qua Zalo, ứng dụng Zalo nén âm thanh bằng thuật toán Opus ở bitrate rất thấp 24kbps hoặc AAC-LC 76kbps. Thuật toán nén này cắt bỏ các dải tần số cao và làm méo các góc pha của sóng âm (Domain Shift). Nếu sử dụng mô hình học máy thông thường huấn luyện trên âm thanh phòng thu sạch (Nhánh A), mô hình sẽ nhận nhầm các vết méo do nén này là giọng giả và báo động nhầm người thật (EER vọt lên 28.95%).\n"
-         "  Trong ViTrueVoice, chúng em áp dụng **AM-Softmax Regularization**: thay vì tối ưu khoảng cách Euclid thông thường, AM-Softmax trừ trực tiếp một biên độ góc m = 0.35 vào cosin góc giữa vector đặc trưng giọng nói và tâm cụm nhãn thật: L = -log( e^(s*(cos(theta_1) - m)) / (e^(s*(cos(theta_1) - m)) + sum e^(s*cos(theta_j))) ). Điều này buộc các biểu diễn của giọng nói thật nén qua Zalo phải co cụm cực kỳ chặt chẽ trong không gian góc, đẩy ranh giới phân tách ra xa các mẫu giả mạo. Kết quả cụ thể: trên 11.450 mẫu Zalo của tập Dev, tỷ lệ báo động nhầm tại theta=0 giảm mạnh từ 7.81% xuống còn 3.65% và EER duy trì ở mức tối ưu 1.56%–1.73%."),
+         "  Trong VieTrueVoice, chúng em áp dụng **AM-Softmax Regularization**: thay vì tối ưu khoảng cách Euclid thông thường, AM-Softmax trừ trực tiếp một biên độ góc m = 0.35 vào cosin góc giữa vector đặc trưng giọng nói và tâm cụm nhãn thật: L = -log( e^(s*(cos(theta_1) - m)) / (e^(s*(cos(theta_1) - m)) + sum e^(s*cos(theta_j))) ). Điều này buộc các biểu diễn của giọng nói thật nén qua Zalo phải co cụm cực kỳ chặt chẽ trong không gian góc, đẩy ranh giới phân tách ra xa các mẫu giả mạo. Kết quả cụ thể: trên 11.450 mẫu Zalo của tập Dev, tỷ lệ báo động nhầm tại theta=0 giảm mạnh từ 7.81% xuống còn 3.65% và EER duy trì ở mức tối ưu 1.56%–1.73%."),
 
         ("Câu hỏi 5 (Bổ sung): Kết quả thực nghiệm ở Tuần 5 đã chứng minh được Giả thuyết H1 chưa? Mức giảm EER đạt bao nhiêu phần trăm?",
          "Trả lời: Thưa Thầy, kết quả thực nghiệm hoàn toàn khẳng định Giả thuyết H1 đạt PASS vượt mức chỉ tiêu. Cụ thể, khi so sánh giữa Nhánh A (không tăng cường nén) và Nhánh B (có tăng cường nén và RawBoost), trên chuẩn ITU-T G.711 A-law, EER giảm từ 28.13% xuống 14.75% (giảm 47.55% tương đối); trên chuẩn 3GPP AMR-NB, EER giảm từ 28.06% xuống 16.70% (giảm 40.46% tương đối). Cả hai mức giảm này đều vượt xa chỉ tiêu tối thiểu 30% đề ra tại Đề cương chi tiết v4."),

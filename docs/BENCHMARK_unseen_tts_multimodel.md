@@ -1,6 +1,6 @@
 # Báo Cáo Đo Đạc & So Sánh Unseen TTS Đa Mô Hình (Multi-Model Unseen Generalization Benchmark)
 
-> **Mục tiêu**: Đánh giá thực nghiệm Giả thuyết H2 (Tính tổng quát hóa trên các công cụ sinh giọng lạ chưa từng xuất hiện trong quá trình huấn luyện) của mô hình ViTrueVoice **B_zalo V6** (`out/zalo_b_zalo_v6_local/best_model.pt`) dưới cơ chế suy luận **Multi-window Max-Pooling**.
+> **Mục tiêu**: Đánh giá thực nghiệm Giả thuyết H2 (Tính tổng quát hóa trên các công cụ sinh giọng lạ chưa từng xuất hiện trong quá trình huấn luyện) của mô hình VieTrueVoice **B_zalo V6** (`out/zalo_b_zalo_v6_local/best_model.pt`) dưới cơ chế suy luận **Multi-window Max-Pooling**.
 
 ---
 

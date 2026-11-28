@@ -1,7 +1,7 @@
 # Kế Hoạch Kỹ Thuật: Tính Năng Live Voice Cloning & Thẩm Định Đối Chứng 4 Chiều (Quad-Forensics) Trên Gradio Web
 
 > **Mã kế hoạch**: `plan-live-cloning-quad-forensics`  
-> **Phiên bản mục tiêu**: ViTrueVoice v0.5.0  
+> **Phiên bản mục tiêu**: VieTrueVoice v0.5.0  
 > **Trạng thái**: Đang chờ người dùng phê duyệt (Phase 1: Planning Approval Gate)  
 > **Tiêu chuẩn thực thi**: Zero-Persistence (Luật 91/2025/QH15), NFR1 Latency Stream, Progressive Yielding Gradio
 
@@ -19,10 +19,10 @@ Tuy nhiên, khi bảo vệ trước Hội đồng, việc **chỉ phân tích 1 
 - Hệ thống **lấy chính giọng nói vừa thu** làm giọng mẫu tham chiếu (Voice Prompt / Reference Audio).
 - Hệ thống **tự động nhân bản (clone) giọng nói đó qua 3 mô hình TTS Zero-Shot khác nhau** của dự án để nói một câu thoại ngắn (~10 từ thuần Việt).
 - Sau đó, hệ thống thẩm định cả 4 bản âm thanh và xếp cạnh nhau trên màn hình:
-  - **Bản 1**: Giọng người thật vừa thu $\rightarrow$ ViTrueVoice kết luận **NGƯỜI THẬT (Bona Fide, ~99.6%)**.
-  - **Bản 2**: Giọng clone F5-TTS (Flow Matching) $\rightarrow$ ViTrueVoice phát hiện **GIẢ MẠO (Spoof, ~99.9%)**.
-  - **Bản 3**: Giọng clone VieNeu-TTS v3 Turbo (Neural Vocoder) $\rightarrow$ ViTrueVoice phát hiện **GIẢ MẠO (Spoof, ~99.9%)**.
-  - **Bản 4**: Giọng clone VoiceStudio OmniVoice (Continuous Flow Matching) $\rightarrow$ ViTrueVoice phát hiện **GIẢ MẠO (Spoof, ~99.9%)**.
+  - **Bản 1**: Giọng người thật vừa thu $\rightarrow$ VieTrueVoice kết luận **NGƯỜI THẬT (Bona Fide, ~99.6%)**.
+  - **Bản 2**: Giọng clone F5-TTS (Flow Matching) $\rightarrow$ VieTrueVoice phát hiện **GIẢ MẠO (Spoof, ~99.9%)**.
+  - **Bản 3**: Giọng clone VieNeu-TTS v3 Turbo (Neural Vocoder) $\rightarrow$ VieTrueVoice phát hiện **GIẢ MẠO (Spoof, ~99.9%)**.
+  - **Bản 4**: Giọng clone VoiceStudio OmniVoice (Continuous Flow Matching) $\rightarrow$ VieTrueVoice phát hiện **GIẢ MẠO (Spoof, ~99.9%)**.
 
 ### 1.2 Ràng Buộc Kỹ Thuật Theo Chỉ Đạo Của Người Dùng (User Directives)
 1. **Phạm vi áp dụng (Conditional Trigger)**:
@@ -40,7 +40,7 @@ Tuy nhiên, khi bảo vệ trước Hội đồng, việc **chỉ phân tích 1 
 - Quy trình sinh giọng qua 3 mô hình TTS mất vài giây cho mỗi engine.
 - **Yêu cầu bắt buộc**: Áp dụng cơ chế **Gradio Generator `yield`**:
   - **Ngay lập tức (~66ms)**: Phân tích xong bản thu người thật $\rightarrow$ Hiển thị ngay thẻ kết quả Bona Fide + biểu đồ của người dùng. Ba ô clone bên dưới hiển thị hiệu ứng chuyển động **Loading / Shimmer Skeleton** ("Đang kết nối F5-TTS...", "Đang kết nối VieNeu-TTS...", "Đang kết nối VoiceStudio CFM...").
-  - **Sau ~3-4 giây**: F5-TTS hoàn tất clone $\rightarrow$ Chạy detector ViTrueVoice $\rightarrow$ Cập nhật ô F5-TTS (Audio Player + Phán quyết Spoof + Độ tin cậy + Biểu đồ sóng), 2 ô còn lại vẫn tiếp tục Loading.
+  - **Sau ~3-4 giây**: F5-TTS hoàn tất clone $\rightarrow$ Chạy detector VieTrueVoice $\rightarrow$ Cập nhật ô F5-TTS (Audio Player + Phán quyết Spoof + Độ tin cậy + Biểu đồ sóng), 2 ô còn lại vẫn tiếp tục Loading.
   - **Sau ~6-8 giây**: VieNeu-TTS hoàn tất clone $\rightarrow$ Cập nhật ô VieNeu-TTS.
   - **Sau ~10-12 giây**: VoiceStudio CFM hoàn tất clone $\rightarrow$ Cập nhật ô VoiceStudio CFM + Hiển thị Bảng tổng kết đối chứng 4 chiều (Quad Matrix).
 
@@ -50,11 +50,11 @@ Tuy nhiên, khi bảo vệ trước Hội đồng, việc **chỉ phân tích 1 
 
 | # | Tên Mô Hình | Kiến Trúc Cốt Lõi | Tần Số | Vị Trí Trong Dự Án | Vai Trò Trong Kịch Bản Clone |
 |---|---|---|---|---|---|
-| **1** | **F5-TTS-Vietnamese** | Diffusion Transformer + Flow Matching + Vocos | 24 kHz | `src/vitruevoice/adapters/f5_adapter.py` | Đại diện cho công cụ Seen TTS #1 (tập Train/Dev) |
-| **2** | **VieNeu-TTS v3 Turbo** | Qwen LLM + MOSS Acoustic Vocoder | 48 kHz | `src/vitruevoice/adapters/vieneu_adapter.py` | Đại diện cho công cụ Seen TTS #2 (tập Train/Dev) |
+| **1** | **F5-TTS-Vietnamese** | Diffusion Transformer + Flow Matching + Vocos | 24 kHz | `src/VieTrueVoice/adapters/f5_adapter.py` | Đại diện cho công cụ Seen TTS #1 (tập Train/Dev) |
+| **2** | **VieNeu-TTS v3 Turbo** | Qwen LLM + MOSS Acoustic Vocoder | 48 kHz | `src/VieTrueVoice/adapters/vieneu_adapter.py` | Đại diện cho công cụ Seen TTS #2 (tập Train/Dev) |
 | **3** | **VoiceStudio OmniVoice CFM** | Continuous Flow Matching (CFM) + bfloat16 | 24 kHz | `external/VoiceStudio/` & `scripts/generate_omnivoice_unseen_spoofs.py` | Đại diện cho công cụ **Unseen Zero-Shot TTS** (Kiểm chứng Giả thuyết H2) |
 
-*(Dự phòng: Nếu môi trường chạy không đủ GPU nạp VoiceStudio CFM, tự động fallback sang `Kokoro-Vietnamese` tại `external/Kokoro-Vietnamese/` hoặc `Suno-Bark` tại `src/vitruevoice/adapters/bark_adapter.py`).*
+*(Dự phòng: Nếu môi trường chạy không đủ GPU nạp VoiceStudio CFM, tự động fallback sang `Kokoro-Vietnamese` tại `external/Kokoro-Vietnamese/` hoặc `Suno-Bark` tại `src/VieTrueVoice/adapters/bark_adapter.py`).*
 
 ---
 
@@ -65,26 +65,26 @@ Tuy nhiên, khi bảo vệ trước Hội đồng, việc **chỉ phân tích 1 
 [User Mic / Upload] 
          │ (audio float32, 16kHz)
          ▼
-[1. ViTrueVoice Detector] ──(~66ms)──► YIELD 1: Bản 1 Bona Fide READY (3 ô clone LOADING)
+[1. VieTrueVoice Detector] ──(~66ms)──► YIELD 1: Bản 1 Bona Fide READY (3 ô clone LOADING)
          │
          ├─────────────────────────────────────────┐
          ▼                                         │
 [2. F5-TTS Cloner] (target text)                   │
          │ (wav float32, 24kHz)                    │
          ▼                                         │
-[ViTrueVoice Detector] ──────────────► YIELD 2: Bản 2 Spoof READY (F5-TTS)
+[VieTrueVoice Detector] ──────────────► YIELD 2: Bản 2 Spoof READY (F5-TTS)
          │                                         │
          ▼                                         │
 [3. VieNeu-TTS Cloner] (target text)               │
          │ (wav float32, 48kHz)                    │
          ▼                                         │
-[ViTrueVoice Detector] ──────────────► YIELD 3: Bản 3 Spoof READY (VieNeu-TTS)
+[VieTrueVoice Detector] ──────────────► YIELD 3: Bản 3 Spoof READY (VieNeu-TTS)
          │                                         │
          ▼                                         │
 [4. VoiceStudio CFM Cloner] (target text)          │
          │ (wav float32, 24kHz)                    │
          ▼                                         │
-[ViTrueVoice Detector] ──────────────► YIELD 4: Bản 4 Spoof READY (OmniVoice)
+[VieTrueVoice Detector] ──────────────► YIELD 4: Bản 4 Spoof READY (OmniVoice)
                                        + BẢNG ĐỐI CHỨNG TỔNG HỢP (Quad Matrix)
 ```
 
@@ -96,7 +96,7 @@ Giao diện cung cấp:
 
 ### 3.3 Quản Lý Bộ Nhớ VRAM (Tránh OOM Trên GPU 4GB)
 - Trên GPU RTX 3050 (4GB VRAM):
-  - ViTrueVoice Detector chiếm: ~300 MB VRAM.
+  - VieTrueVoice Detector chiếm: ~300 MB VRAM.
   - Các mô hình TTS sẽ được nạp tuần tự (Lazy loading), sinh xong mẫu âm thanh sẽ giải phóng cache (`torch.cuda.empty_cache()`) trước khi nạp mô hình tiếp theo.
   - Đảm bảo đỉnh VRAM luôn $< 3.2\text{ GB}$, không gây xung đột hay sập máy chủ.
 
@@ -128,7 +128,7 @@ Giao diện phân bổ 4 Thẻ Phán Quyết trực quan:
 
 ## 4. Các Tệp Tin Mã Nguồn Sẽ Được Cập Nhật / Tạo Mới
 
-1. `src/vitruevoice/live_cloner.py` (Mới): Module quản lý việc sinh giọng nối tiếp từ 3 engine TTS với bộ nhớ đệm an toàn và quản lý ngoại lệ.
+1. `src/VieTrueVoice/live_cloner.py` (Mới): Module quản lý việc sinh giọng nối tiếp từ 3 engine TTS với bộ nhớ đệm an toàn và quản lý ngoại lệ.
 2. `src/app/ui.py` (Cập nhật): 
    - Tích hợp Tab / Khối giao diện `Tab 2: Phòng Lab Thử Thách Clone Giọng Trực Tiếp (Live Voice Cloning & Quad Stress-Test)`.
    - Viết hàm generator `stream_live_cloning_forensics` hỗ trợ 4 lượt `yield`.
@@ -147,7 +147,7 @@ Theo quy định `/orchestrate`, tối thiểu 3 agent chuyên trách sẽ thự
 | # | Agent | Vai Trò & Trách Nhiệm Cụ Thể |
 |---|---|---|
 | 1 | `project-planner` (Hiện tại) | Lập kế hoạch kiến trúc chi tiết, xác định interface, cơ chế streaming yield và các ràng buộc bộ nhớ. |
-| 2 | `backend-specialist` | Xây dựng module `src/vitruevoice/live_cloner.py` kết nối 3 engine TTS (F5, VieNeu, OmniVoice) và tích hợp pipeline suy luận in-memory. |
+| 2 | `backend-specialist` | Xây dựng module `src/VieTrueVoice/live_cloner.py` kết nối 3 engine TTS (F5, VieNeu, OmniVoice) và tích hợp pipeline suy luận in-memory. |
 | 3 | `frontend-specialist` | Thiết kế giao diện Quad-Forensics trên Gradio trong `src/app/ui.py` với hiệu ứng Loading mượt mà và hiển thị tuần tự. |
 | 4 | `test-engineer` | Viết bộ kiểm thử TDD `tests/test_live_cloner.py`, đảm bảo toàn bộ 301+ bài test pass 100% trước khi hoàn tất. |
 

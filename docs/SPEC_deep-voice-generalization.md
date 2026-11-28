@@ -1,4 +1,4 @@
-# Kế Hoạch Sửa Triệt Để Lỗi Giọng Trầm ($F_0 < 120$ Hz) — ViTrueVoice v0.4.2 (Bản Tinh Chỉnh)
+# Kế Hoạch Sửa Triệt Để Lỗi Giọng Trầm ($F_0 < 120$ Hz) — VieTrueVoice v0.4.2 (Bản Tinh Chỉnh)
 
 > **Mục tiêu**: Khắc phục dứt điểm hiện tượng False Positive ("SPOOF") trên giọng nam cực trầm ($F_0 \approx 100 - 118$ Hz như `SPK_0001` và bộ `VoiCes`), giữ vững thành tích Dev Zalo EER $\le 1.8\%$ và 4 tình nguyện viên đối chứng $\ge 90\%$.
 
@@ -58,7 +58,7 @@ flowchart TD
 - **Tối ưu hóa Kernel Notebook**:
   - Giảm kích thước notebook từ 777 KB xuống **~36 KB** bằng cách loại bỏ hoàn toàn Base64 nhúng mã nguồn, thay bằng cơ chế đồng bộ trực tiếp qua `git clone --depth 1` từ kho GitHub `VieTrueVoice`.
   - Tự động nhận diện môi trường Google Colab vs Kaggle: chuyển đổi phân vùng lưu trữ sang `/content/input` tránh lỗi hệ thống tệp chỉ đọc (`Read-only file system: '/kaggle'`).
-  - Tải trực tiếp tệp âm thanh `vitruevoice_data_processed.zip` (3.26 GB) và checkpoint qua API `ApiDownloadKernelOutputRequest` trong 1 request duy nhất, triệt tiêu 100% lỗi phân trang và `HTTP 429 Too Many Requests`.
+  - Tải trực tiếp tệp âm thanh `VieTrueVoice_data_processed.zip` (3.26 GB) và checkpoint qua API `ApiDownloadKernelOutputRequest` trong 1 request duy nhất, triệt tiêu 100% lỗi phân trang và `HTTP 429 Too Many Requests`.
 
 ### Pha 3 — Kiểm Định Đa Tầng (3 Gates)
 Sử dụng `scripts/eval_v5_gate.py`:

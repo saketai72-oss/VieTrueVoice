@@ -54,6 +54,17 @@ def test_health_reports_loaded_model_and_device(client):
     assert payload["status"] == "ok"
     assert payload["model"]
     assert payload["device"] == "cpu"
+    assert payload["version"] == "0.9.4"
+
+
+def test_favicon_and_logo_served(client):
+    fav = client.get("/favicon.ico")
+    assert fav.status_code == 200
+    assert len(fav.content) > 0
+
+    svg = client.get("/static/assets/logo.svg")
+    assert svg.status_code == 200
+    assert "<svg" in svg.text
 
 
 def test_predict_returns_contract_and_logs_only_audio_hash(client, tmp_path):
@@ -73,6 +84,10 @@ def test_predict_returns_contract_and_logs_only_audio_hash(client, tmp_path):
         "confidence",
         "latency_sec",
         "audio_sha256",
+        "prob_bona_pct",
+        "prob_spoof_pct",
+        "risk_level",
+        "forensics",
     } <= payload.keys()
     assert payload["request_id"]
     assert payload["prediction"] == "BONA_FIDE"
@@ -90,6 +105,21 @@ def test_predict_returns_contract_and_logs_only_audio_hash(client, tmp_path):
     assert len(payload["window_scores"]) == 1
     assert "is_borderline" in payload
     assert isinstance(payload["is_borderline"], bool)
+    assert payload["risk_level"] in ("NORMAL", "BORDERLINE")
+    assert 0.1 <= payload["prob_bona_pct"] <= 99.9
+    assert 0.1 <= payload["prob_spoof_pct"] <= 99.9
+    assert payload["prob_bona_pct"] + payload["prob_spoof_pct"] == pytest.approx(100.0, abs=0.2)
+
+    forensics = payload["forensics"]
+    assert isinstance(forensics, dict)
+    assert {
+        "mel_spectrogram",
+        "waveform",
+        "windows",
+        "band_energy_pct",
+        "platt_curve",
+        "pooling",
+    } <= forensics.keys()
 
     log_path = tmp_path / "latency_log.json"
     entries = json.loads(log_path.read_text(encoding="utf-8"))
@@ -137,17 +167,31 @@ def test_predict_rejects_unsupported_audio_format(client):
     assert response.status_code == 415
 
 
-def test_playground_endpoint_returns_html(client):
-    response = client.get("/playground")
+def test_root_serves_brutalist_webgl_ui(client):
+    response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
     assert "<!DOCTYPE html>" in response.text
-    assert "ViTrueVoice Labs" in response.text
+    assert "XÁC THỰC GIỌNG NÓI" in response.text
+    assert "webgl-orb.js" in response.text
+    assert "charts.js" in response.text
 
-    # Verify trailing slash routing
-    response_slash = client.get("/playground/")
-    assert response_slash.status_code == 200
-    assert "text/html" in response_slash.headers.get("content-type", "")
+
+def test_old_playground_route_removed(client):
+    assert client.get("/playground").status_code == 404
+    assert client.get("/playground/").status_code == 404
+
+
+def test_samples_endpoint_lists_real_wavs(client):
+    response = client.get("/api/v1/samples")
+    assert response.status_code == 200
+    payload = response.json()
+    assert isinstance(payload, list)
+    assert len(payload) > 0
+    for item in payload:
+        assert isinstance(item, dict)
+        assert item["url"].startswith("/static/samples/")
+        assert item["url"].endswith(".wav")
 
 
 def test_predict_alias_route(client):
@@ -175,8 +219,15 @@ def test_clone_and_audit_endpoint(client, tmp_path):
     assert "bonafide" in payload
     assert "clone" in payload
     assert payload["bonafide"]["prediction"] == "BONA_FIDE"
+    assert isinstance(payload["bonafide"]["forensics"], dict)
     assert payload["clone"]["audio_base64"].startswith("data:audio/wav;base64,")
     assert payload["clone"]["prediction"] in ("BONA_FIDE", "SPOOF")
+    assert isinstance(payload["clone"]["forensics"], dict)
+    assert "delta_margin" in payload
+    assert payload["delta_margin"] == pytest.approx(
+        payload["bonafide"]["raw_score"] - payload["clone"]["raw_score"],
+        abs=1e-3,
+    )
 
     # Verify alias route
     response_alias = client.post(
@@ -200,5 +251,3 @@ def test_resolve_default_checkpoint_prefers_v094(tmp_path):
     assert resolve_default_checkpoint((v094, legacy)) == v094
     v094.unlink()
     assert resolve_default_checkpoint((v094, legacy)) == legacy
-
-

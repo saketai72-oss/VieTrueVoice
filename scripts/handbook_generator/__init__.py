@@ -1,5 +1,5 @@
 """
-Handbook generator package for ViTrueVoice v0.9.4 Defense & Study Handbook.
+Handbook generator package for VieTrueVoice v0.9.4 Defense & Study Handbook.
 """
 
 from .chapter_13_inverted import add_chapter_13_inverted

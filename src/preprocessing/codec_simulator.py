@@ -1,4 +1,4 @@
-"""Telephony and social media Codec simulator for ViTrueVoice.
+"""Telephony and social media Codec simulator for VieTrueVoice.
 
 Simulates lossy Opus compression (16-32 kbps), AMR narrowband, and PSTN/VoIP 8kHz telephony.
 Enables Hypothesis H1 evaluation: robustness under communication channel distortion.

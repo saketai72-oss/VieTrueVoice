@@ -36,7 +36,7 @@ from src.evaluation.metrics import compute_eer, compute_min_dcf
 from src.models.ssl_aasist import SSLAASIST
 from src.preprocessing.audio_loader import load_audio
 from src.preprocessing.pooling import extract_window_batch, pool_scores
-from src.training.dataset import ViTrueVoiceDataset
+from src.training.dataset import VieTrueVoiceDataset
 from src.training.losses import AMSoftmaxLoss, loss_weights_from_counts
 
 
@@ -348,7 +348,7 @@ def train_stage3_partial_ft(
         weight_decay=1e-4,
     )
 
-    dataset = ViTrueVoiceDataset(df_tr, audio_root=".", mode="augmented", train=True)
+    dataset = VieTrueVoiceDataset(df_tr, audio_root=".", mode="augmented", train=True)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
     use_amp = (device == "cuda")

@@ -50,7 +50,7 @@ def generate_experiment_matrix():
                     "Kịch bản": f"In-domain ({c})",
                     "TTS Engine": tts,
                     "EER Nhánh A (Clean only)": f"{eer_a:.2f}%",
-                    "EER Nhánh B (ViTrueVoice)": f"{eer_b:.2f}%",
+                    "EER Nhánh B (VieTrueVoice)": f"{eer_b:.2f}%",
                     "Mức giảm tương đối (ΔEER)": f"{rel_impr:+.2f}%",
                     "Kiểm chứng H1/H2": "H1 PASS" if ("g711" in c or "amr" in c) and rel_impr >= 30.0 else ("H2 (Unseen)" if tts == "VieNeu-TTS" else "In-domain")
                 })

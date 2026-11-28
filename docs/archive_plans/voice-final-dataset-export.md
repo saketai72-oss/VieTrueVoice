@@ -2,7 +2,7 @@
 ## Phân Tách Dữ Liệu Huấn Luyện (Training/Seen) và Bộ Dữ Liệu Nghiệm Thu Độc Lập (Unseen/Acceptance)
 
 > **Mã kế hoạch**: `PLAN-VOICE-FINAL-EXPORT-v1.0`  
-> **Dự án**: ViTrueVoice (v0.4.6) — Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén  
+> **Dự án**: VieTrueVoice (v0.4.6) — Hệ thống phát hiện giọng nói giả tiếng Việt qua kênh thoại nén  
 > **Thư mục đích**: `C:\Users\saket\Documents\Đồ án chuyên ngành\Voice_Final`  
 > **Đối tượng thụ hưởng**: Hội đồng Nghiệm thu Đồ án Chuyên ngành (ĐH Công nghệ TP.HCM - HUTECH) & Nhóm Kiểm toán An ninh  
 > **Trạng thái**: Sẵn sàng thực thi (Ready for Execution)
@@ -12,7 +12,7 @@
 ## 1. Executive Summary & Objective (Tóm Tắt Điều Hành & Mục Tiêu)
 
 ### 1.1. Bối Cảnh Thực Nghiệm
-Trong quá trình phát triển hệ sinh thái ViTrueVoice từ v0.1.0 đến v0.4.6, toàn bộ dữ liệu âm thanh đã trải qua nhiều giai đoạn chuẩn hóa, kiểm định 4 cổng (Label-Free Prosody Filter), mô phỏng suy giảm đa kênh (Telephony & Zalo Codecs) và phân tầng nghiêm ngặt nhằm chứng minh 2 giả thuyết khoa học cốt lõi:
+Trong quá trình phát triển hệ sinh thái VieTrueVoice từ v0.1.0 đến v0.4.6, toàn bộ dữ liệu âm thanh đã trải qua nhiều giai đoạn chuẩn hóa, kiểm định 4 cổng (Label-Free Prosody Filter), mô phỏng suy giảm đa kênh (Telephony & Zalo Codecs) và phân tầng nghiêm ngặt nhằm chứng minh 2 giả thuyết khoa học cốt lõi:
 - **Giả thuyết H1 (Seen Engine Robustness)**: Duy trì EER $\le 8.0\%$ và chống suy giảm chất lượng khi truyền tải qua các kênh viễn thông nén (Zalo AAC-LC 76k, Zalo Opus 24k, G.711 A-law, AMR-NB 12.2k).
 - **Giả thuyết H2 (Unseen Engine Generalization)**: Khả năng khái quát hóa phát hiện các kiến trúc tổng hợp giọng nói hoàn toàn chưa từng xuất hiện trong quá trình huấn luyện (Unseen TTS Zero-Shot/OOD) đạt EER $\le 15.0\%$.
 
@@ -44,7 +44,7 @@ $$\text{Target Path} = \texttt{C:\textbackslash Users\textbackslash saket\textba
 | **An Ninh Sinh Trắc Học** | Tuân thủ Nghị định 356/2025/NĐ-CP và Luật 91/2025/QH15 nhờ mã hóa băm SHA-256 và ẩn danh hóa ID. | Rò rỉ danh tính thật $\rightarrow$ Tình nguyện viên chỉ định danh qua mã giả định `SPK_xxxx`, lưu trữ Consent Form riêng biệt. |
 
 ### 2.2. Phân Tích Chống Đường Tắt Âm Học (Anti-Shortcut & Acoustic Auditing)
-Trong các phiên bản v0.4.2 và v0.4.3, ViTrueVoice đã phát hiện và xử lý triệt để nguy cơ mô hình học "đường tắt" (shortcut learning):
+Trong các phiên bản v0.4.2 và v0.4.3, VieTrueVoice đã phát hiện và xử lý triệt để nguy cơ mô hình học "đường tắt" (shortcut learning):
 1. **Shortcut Tần số cơ bản $F_0$ (Pitch Bias)**: Mô hình tiền nhiệm có xu hướng dựa dẫm vào cao độ $F_0$ để đoán nhãn spoof. Phiên bản B_zalo V6 đã khắc phục bằng kỹ thuật Data Augmentation 2 chiều (Pitch Shifting $\pm 6$ bán cung kết hợp AM-Softmax), triệt tiêu sự phụ thuộc vào cao độ.
 2. **Phase Discontinuity vs. Vocoder Smoothing**:
    - Nhóm F5-TTS và Kokoro-Vietnamese để lại vết cắt pha thô bạo (tỷ lệ năng lượng $>4$kHz thấp, $0.20\% - 0.38\%$), giúp Pass Rate đạt $>99.4\%$.
@@ -218,7 +218,7 @@ graph TD
 1. **F5-TTS, VieNeu-TTS v3 Turbo, Kokoro-Vietnamese, OmniVoice CFM**:
    - Toàn bộ **1.500 clips spoof** (375 clips/hệ thống x 4 hệ thống) đã có sẵn 100% trên đĩa cục bộ, tuân thủ hoàn hảo cấu trúc Paired Codec Quintuplets và đã được chấm điểm kiểm định trong `benchmarks/seen_vs_unseen_degradation.json` (báo cáo W06).
 2. **Suno Bark (Autoregressive Transformer + EnCodec)**:
-   - Trong phiên bản v0.4.5, lớp adapter `BarkAdapter` (`src/vitruevoice/adapters/bark_adapter.py`) đã được triển khai hoàn chỉnh và kiểm thử thành công qua mock unit test (`tests/test_bark_adapter.py`).
+   - Trong phiên bản v0.4.5, lớp adapter `BarkAdapter` (`src/VieTrueVoice/adapters/bark_adapter.py`) đã được triển khai hoàn chỉnh và kiểm thử thành công qua mock unit test (`tests/test_bark_adapter.py`).
    - Tuy nhiên, 375 tệp âm thanh thực tế của Bark chưa được kết xuất vật lý xuống ổ đĩa nhằm tiết kiệm thời gian benchmark tại thời điểm W06.
 
 ### 6.2. Giải Pháp Xử Lý Tối Ưu Cho Suno Bark
@@ -384,4 +384,4 @@ Trước khi công bố hoàn tất xuất bản dữ liệu, toàn bộ các m�
 - [ ] Tài liệu dự án (`PLAN.md`, `README.md`, `AGENTS.md`) được đồng bộ đầy đủ theo quy định STUBBORN_FACT.
 
 ---
-*Kế hoạch được phê duyệt bởi **project-planner** — ViTrueVoice Team.*
+*Kế hoạch được phê duyệt bởi **project-planner** — VieTrueVoice Team.*

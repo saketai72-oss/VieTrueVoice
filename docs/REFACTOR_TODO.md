@@ -1,4 +1,4 @@
-# Refactor TODO — ViTrueVoice
+# Refactor TODO — VieTrueVoice
 
 > Kế hoạch làm việc hiện tại cho các tác vụ tái cấu trúc và phát triển. Quy tắc chuẩn mực: `docs/GUIDE_developer.md`.
 
@@ -9,7 +9,7 @@
 - [x] Module tiền xử lý âm thanh 16kHz Mono, cắt khoảng lặng RMS phân vị 20, repeat padding 64.000 mẫu (`src/preprocessing/audio_processor.py`), EBU R128 (-23 LUFS) và Z-score.
 - [x] Thuật toán tăng cường dữ liệu RawBoost miền thời gian (`src/preprocessing/rawboost.py`) gồm ISD, SSI, LnL.
 - [x] Bộ mô phỏng nén kênh viễn thông & mạng xã hội (`TelephonyCompressor`): Opus 16–32kbps, AMR-NB 12.2kbps, G.711 A-law 64kbps, đo lường độ suy giảm $d'$ ($22.8\%–25.5\%$) và dịch chuyển ngưỡng Narrowband Upward Shift.
-- [x] Module `src/vitruevoice/`: Dual Pipeline F5-TTS (Flow Matching, Vocos, dynamic ref_text + ASR auto-fallback 0.2s) & VieNeu-TTS v3 Turbo (48kHz MOSS_48kHz/NeuCodec, sea-g2p Rust), Peak Headroom Scaling $\le 0.95$.
+- [x] Module `src/VieTrueVoice/`: Dual Pipeline F5-TTS (Flow Matching, Vocos, dynamic ref_text + ASR auto-fallback 0.2s) & VieNeu-TTS v3 Turbo (48kHz MOSS_48kHz/NeuCodec, sea-g2p Rust), Peak Headroom Scaling $\le 0.95$.
 - [x] Tuyển chọn clip đơn Dải vàng 3.5s–7.5s (`allow_stitching=False`) qua 2 tầng LOO Proximity + Output Probe Ranking.
 - [x] Bộ lọc chất lượng 4 cổng `MultiGateEvaluator`: Gate 1 ASR WER $\le 15\%$, Gate 2 ECAPA-TDNN Sim $\ge T_{\text{spk}}$, Gate 3 Sanity RMS $\ge 0.01$/Peak $\le 0.999$, Gate 4 Prosody YIN F0 dev $\le 0.30$/score $\ge 0.65$; Multi-Seed Retry.
 - [x] Sinh thành công 200 mẫu spoof gốc (106 F5-TTS + 94 VieNeu-TTS) từ 5 tình nguyện viên (`SPK_0001, 0004, 0005, 0006, 0007`).

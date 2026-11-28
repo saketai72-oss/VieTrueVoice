@@ -1,4 +1,4 @@
-"""Audio preprocessing module for ViTrueVoice.
+"""Audio preprocessing module for VieTrueVoice.
 
 Converts input audio to 16kHz mono, trims silence using RMS energy,
 fixes length to 64,000 samples (4s) via repeat padding/crop, and normalizes.

@@ -82,7 +82,7 @@ flowchart TD
 - **Agent**: `backend-specialist`
 - **Skill**: `@tdd-workflow` + `@clean-code`
 - **Task 2.1**: Viết unit test cho `PitchShiftAugment` trong `tests/test_augment.py`.
-- **Task 2.2**: Cài đặt lớp biến đổi `PitchShiftAugment` (sử dụng `torchaudio.functional.pitch_shift` in-memory) tích hợp trong luồng nạp batch `ViTrueVoiceDataset`.
+- **Task 2.2**: Cài đặt lớp biến đổi `PitchShiftAugment` (sử dụng `torchaudio.functional.pitch_shift` in-memory) tích hợp trong luồng nạp batch `VieTrueVoiceDataset`.
 - **Task 2.3**: Viết unit test cho hàm mất mát `AMSoftmaxLoss` trong `tests/test_losses.py`.
 - **Task 2.4**: Cài đặt `AMSoftmaxLoss` trong `src/training/losses.py` với cấu hình tham số chuẩn ($s=30.0, m=0.35$).
 - **VERIFY**: Chạy toàn bộ test suite, đảm bảo 100% tests mới và cũ đều pass.

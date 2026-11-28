@@ -1,4 +1,4 @@
-"""SSL-AASIST cho ViTrueVoice (back-end rút gọn).
+"""SSL-AASIST cho VieTrueVoice (back-end rút gọn).
 
 Quy ước: logits = [z_spoof, z_bonafide]; score = z_bonafide - z_spoof.
 """

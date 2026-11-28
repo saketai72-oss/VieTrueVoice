@@ -1,5 +1,5 @@
 """
-ViTrueVoice Dual-Engine Speech Synthesis & Quality Gate Framework.
+VieTrueVoice Dual-Engine Speech Synthesis & Quality Gate Framework.
 CMP436 - Synthetic Voice Detection in Compressed Telephony.
 """
 
@@ -22,9 +22,9 @@ except Exception:
     SpeakerProfiler = None
 
 try:
-    from .pipeline import ViTrueVoiceDualPipeline, PipelineMode
+    from .pipeline import VieTrueVoiceDualPipeline, PipelineMode
 except Exception:
-    ViTrueVoiceDualPipeline = None
+    VieTrueVoiceDualPipeline = None
     PipelineMode = None
 
 try:
@@ -54,7 +54,7 @@ __all__ = [
     "evaluate_dialect_consistency",
     "MultiGateEvaluator",
     "SpeakerProfiler",
-    "ViTrueVoiceDualPipeline",
+    "VieTrueVoiceDualPipeline",
     "PipelineMode",
     "DatasetPartitioner",
     "TelephonyCompressor",

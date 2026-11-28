@@ -1,4 +1,4 @@
-"""Automated spoofed audio generation script for ViTrueVoice.
+"""Automated spoofed audio generation script for VieTrueVoice.
 
 Integrates F5-TTS-Vietnamese, VieNeu-TTS, and Unseen tool pipelines.
 Implements prompt normalization and duration validation per Step 1.2 of PLAN.md.
@@ -273,17 +273,17 @@ def run_batch(
 
     try:
         from vitruevoice.batch_processor import BatchDatasetProcessor
-        from vitruevoice.pipeline import PipelineMode, ViTrueVoiceDualPipeline
+        from vitruevoice.pipeline import PipelineMode, VieTrueVoiceDualPipeline
         from vitruevoice.evaluator import MultiGateEvaluator
     except ImportError as e:
-        print(f"❌ Không thể nạp module vitruevoice từ {spk_test_src}: {e}", file=sys.stderr)
+        print(f"❌ Không thể nạp module VieTrueVoice từ {spk_test_src}: {e}", file=sys.stderr)
         return []
 
     p_mode = getattr(PipelineMode, mode.upper(), PipelineMode.ADAPTIVE)
     import torch
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     evaluator = MultiGateEvaluator(device=device)
-    pipeline = ViTrueVoiceDualPipeline(device=device, evaluator=evaluator)
+    pipeline = VieTrueVoiceDualPipeline(device=device, evaluator=evaluator)
     processor = BatchDatasetProcessor(pipeline=pipeline, evaluator=evaluator, device=device)
     all_manifest_records = []
 

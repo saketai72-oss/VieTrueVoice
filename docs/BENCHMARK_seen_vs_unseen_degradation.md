@@ -1,6 +1,6 @@
 # Báo Cáo Đo Đạc Mức Độ Suy Giảm: Seen TTS vs. Unseen TTS (Degradation Analysis)
 
-> **Mô hình đánh giá**: ViTrueVoice **B_zalo V7 Dual-Seen** (`out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`)
+> **Mô hình đánh giá**: VieTrueVoice **B_zalo V7 Dual-Seen** (`out/zalo_b_zalo_v7_dual_with_spk1/best_model.pt`)
 > **Cơ chế suy luận tiêu chuẩn**: **Multi-window Max-Pooling** (`mode="max"`, Cửa sổ 4.0s = 64.000 mẫu, bước nhảy 1.0s = 16.000 mẫu, tối đa 5 cửa sổ; suy luận mini-batch song song).
 > **Tập nghiệm thu đối chứng độc lập**: 84 mẫu âm thanh thật (Bona Fide) của 5 tình nguyện viên (`SPK_0003` .. `SPK_0007`) — **cô lập 100%** khỏi quá trình huấn luyện/tinh chỉnh.
 > **Tập thẩm định mở rộng quy mô lớn**: 15 người nói held-out độc lập từ tập Dev (`CV_*`, `VIVOSDEV*`, `VIVOSSPK*`: 10.175 clips bona fide, 1.915 clips Seen TTS, 965 clips Unseen VoiceStudio CFM).
@@ -156,7 +156,7 @@ Trong quá trình tối ưu hóa suy luận tại `plan-unseen-tts-boost.md`, c�
 
 Tuy nhiên, kết quả phân tích đánh đổi rủi ro (Risk-Benefit Trade-off) cho thấy:
 1. **Nguy cơ bùng nổ BPCER (Báo nhầm giọng thật)**: Trên các đoạn ghi âm giọng thật của tình nguyện viên có nhiều đoạn ngắt nghỉ, lấy hơi sâu hoặc âm vô thanh tự nhiên, một số cửa sổ có thể bị điểm âm cục bộ. Cơ chế phủ quyết bất đối xứng vô tình kích hoạt và hạ thấp điểm của toàn bộ clip, khiến tỷ lệ nhận diện giọng thật clean trên 5 tình nguyện viên bị tụt từ **90.48% xuống 78.57%** (BPCER tăng từ 9.52% lên 21.43%).
-2. **Quyết định kiến trúc chuẩn mực**: Hệ thống ViTrueVoice chính thức lựa chọn và duy trì **Multi-window Max-Pooling** làm tiêu chuẩn sản xuất (production standard) mặc định. Tiêu chuẩn này bảo đảm vững chắc nguyên tắc bảo vệ quyền lợi người dùng thật (Bona Fide First), duy trì Pass Rate 100% trên 4 người nói nòng cốt và 90.48% trên toàn bộ 5 người nói, trong khi vẫn đáp ứng xuất sắc mọi chỉ tiêu an ninh phòng thủ (Seen EER = 6.80% $\le 8.0\%$, Unseen EER = 14.67% $\le 15.0\%$, đạt Giả thuyết H2).
+2. **Quyết định kiến trúc chuẩn mực**: Hệ thống VieTrueVoice chính thức lựa chọn và duy trì **Multi-window Max-Pooling** làm tiêu chuẩn sản xuất (production standard) mặc định. Tiêu chuẩn này bảo đảm vững chắc nguyên tắc bảo vệ quyền lợi người dùng thật (Bona Fide First), duy trì Pass Rate 100% trên 4 người nói nòng cốt và 90.48% trên toàn bộ 5 người nói, trong khi vẫn đáp ứng xuất sắc mọi chỉ tiêu an ninh phòng thủ (Seen EER = 6.80% $\le 8.0\%$, Unseen EER = 14.67% $\le 15.0\%$, đạt Giả thuyết H2).
 
 ---
 
