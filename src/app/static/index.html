@@ -243,7 +243,14 @@
 
       <!-- Pinned Clip-Path Expanding Frame -->
       <div class="relative z-10 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div id="cinema-frame" class="vtv-cinema-frame p-6 sm:p-10 lg:p-14">
+        <div id="cinema-frame" class="vtv-cinema-frame relative p-6 sm:p-10 lg:p-14">
+          <!-- Centered Aperture Prompt (visible while frame is shrunk over marquee) -->
+          <div id="cinema-aperture-hint" class="vtv-cinema-hint pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
+            <span class="font-mono text-[10px] tracking-[0.26em] uppercase text-primary mb-1">01 // QUANG PHỔ &amp; KÊNH NÉN</span>
+            <span class="font-mono text-xs tracking-[0.18em] uppercase text-on-surface font-semibold">CUỘN ĐỂ MỞ KHUNG ↓</span>
+          </div>
+
+          <div id="cinema-inner" class="vtv-cinema-inner">
           <div class="flex flex-wrap items-center justify-between gap-3 border-b border-on-surface-variant/15 pb-5 mb-8">
             <div>
               <p class="font-mono text-[11px] tracking-[0.24em] uppercase text-primary mb-2">
@@ -330,6 +337,7 @@
           <div class="mt-8 pt-5 border-t border-on-surface-variant/15 flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] tracking-[0.18em] uppercase text-on-surface-variant">
             <span>HEAD_BLEND_A0.75 // 5 WINDOWS</span>
             <span class="text-on-surface font-semibold">TEST EER // 5.63% (15.980 MẪU)</span>
+          </div>
           </div>
         </div>
       </div>

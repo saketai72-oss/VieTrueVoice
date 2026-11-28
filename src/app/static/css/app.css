@@ -371,18 +371,18 @@ body.vtv-overlay-open #vtv-cursor {
 .vtv-marquee-track {
   display: inline-flex;
   will-change: transform;
-  animation: vtv-marquee-scroll 34s linear infinite;
+  animation: vtv-marquee-scroll 22s linear infinite;
 }
 
 .vtv-marquee-item {
   font-family: 'Be Vietnam Pro', sans-serif;
   font-weight: 900;
-  font-size: clamp(3.5rem, 11vw, 9.5rem);
-  line-height: 0.9;
+  font-size: clamp(4.2rem, 12.5vw, 11.5rem);
+  line-height: 0.92;
   letter-spacing: -0.04em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(186, 203, 190, 0.16);
-  padding-right: 2rem;
+  color: rgba(229, 225, 229, 0.16);
+  -webkit-text-stroke: 1.5px rgba(109, 255, 186, 0.42);
+  padding-right: 2.5rem;
 }
 
 @keyframes vtv-marquee-scroll {
@@ -395,15 +395,34 @@ body.vtv-overlay-open #vtv-cursor {
 }
 
 .vtv-cinema-frame {
-  clip-path: inset(10% 8% 10% 8%);
-  will-change: clip-path;
+  clip-path: inset(42% 39% 42% 39% round 12px);
+  transform: scale(0.72);
+  transform-origin: center center;
+  will-change: clip-path, transform;
   background: var(--vtv-surface-low);
   border: 1px solid var(--vtv-hairline-strong);
 }
 
-@media (max-width: 768px) {
+.vtv-cinema-inner {
+  opacity: 0;
+  will-change: opacity;
+}
+
+.vtv-cinema-hint {
+  opacity: 1;
+  will-change: opacity;
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
   .vtv-cinema-frame {
-    clip-path: inset(0% 0% 0% 0%);
+    clip-path: inset(0% 0% 0% 0% round 0px);
+    transform: none;
+  }
+  .vtv-cinema-inner {
+    opacity: 1;
+  }
+  .vtv-cinema-hint {
+    display: none;
   }
 }
 

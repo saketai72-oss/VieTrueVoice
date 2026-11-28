@@ -229,34 +229,79 @@
 
     if (reducedMotion || typeof window.gsap === 'undefined' || typeof window.ScrollTrigger === 'undefined') {
       const cf = $('cinema-frame');
-      if (cf) cf.style.clipPath = 'inset(0% 0% 0% 0%)';
+      const ci = $('cinema-inner');
+      const ch = $('cinema-aperture-hint');
+      if (cf) {
+        cf.style.clipPath = 'inset(0% 0% 0% 0% round 0px)';
+        cf.style.transform = 'none';
+      }
+      if (ci) ci.style.opacity = '1';
+      if (ch) ch.style.display = 'none';
       return;
     }
 
     window.gsap.registerPlugin(window.ScrollTrigger);
     const mm = window.gsap.matchMedia();
 
-    // Desktop Clip-Path Cinema Reveal (pinned expansion over giant marquee)
+    // Desktop Clip-Path Cinema Reveal: starts tightly shrunk over bold running marquee, expands on scroll
     mm.add('(min-width: 769px)', function () {
       const cinemaSection = $('cinema-section');
       const cinemaFrame = $('cinema-frame');
+      const cinemaInner = $('cinema-inner');
+      const cinemaHint = $('cinema-aperture-hint');
+      const marqueeBand = cinemaSection ? cinemaSection.querySelector('.vtv-marquee-band') : null;
+
       if (cinemaSection && cinemaFrame) {
-        window.gsap.fromTo(
-          cinemaFrame,
-          { clipPath: 'inset(10% 8% 10% 8%)' },
-          {
-            clipPath: 'inset(0% 0% 0% 0%)',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: cinemaSection,
-              start: 'top top',
-              end: '+=115%',
-              scrub: 0.7,
-              pin: true,
-              anticipatePin: 1,
+        const tl = window.gsap.timeline({
+          scrollTrigger: {
+            trigger: cinemaSection,
+            start: 'top top',
+            end: '+=165%',
+            scrub: 0.75,
+            pin: true,
+            anticipatePin: 1,
+          },
+        });
+
+        // Hold tiny shrunk aperture briefly (0 -> 0.14) so running marquee is clearly visible first
+        tl.to({}, { duration: 0.14 })
+          // Fade out centered aperture hint as expansion starts
+          .to(
+            cinemaHint,
+            { opacity: 0, duration: 0.16, ease: 'power1.out' },
+            0.12
+          )
+          // Expand clipped frame smoothly from tight center portal to full container
+          .fromTo(
+            cinemaFrame,
+            { clipPath: 'inset(42% 39% 42% 39% round 12px)', scale: 0.72 },
+            {
+              clipPath: 'inset(0% 0% 0% 0% round 0px)',
+              scale: 1,
+              duration: 0.68,
+              ease: 'power2.inOut',
             },
-          }
-        );
+            0.14
+          )
+          // Reveal inner comparison content smoothly as frame opens up
+          .fromTo(
+            cinemaInner,
+            { opacity: 0, y: 18 },
+            { opacity: 1, y: 0, duration: 0.42, ease: 'power2.out' },
+            0.34
+          );
+
+        if (marqueeBand) {
+          tl.fromTo(
+            marqueeBand,
+            { opacity: 1 },
+            { opacity: 0.22, duration: 0.62, ease: 'none' },
+            0.22
+          );
+        }
+
+        // Hold fully open briefly (0.82 -> 1.0) so reader views full metrics cleanly before unpinning
+        tl.to({}, { duration: 0.18 });
       }
 
       // Subtle depth compression for Sticky Stacking Cards
