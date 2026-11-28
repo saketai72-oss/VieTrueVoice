@@ -22,7 +22,8 @@ import numpy as np
 import soundfile as sf
 import torch
 
-from src.app.decision import PLATT_SCALE_K, classify_score, platt_calibrator
+from src.app.decision import classify_score, platt_calibrator
+from src.app.forensics import extract_forensic_analysis
 from src.preprocessing.pooling import extract_window_batch, pool_scores
 
 try:
@@ -43,10 +44,118 @@ SUPPORTED_TYPES = {
     "audio/opus", "audio/x-m4a", "audio/m4a",
     "audio/flac", "audio/webm",
 }
+APP_VERSION = "0.9.4"
 TARGET_SAMPLE_RATE = 16000
 TARGET_SAMPLE_COUNT = 64000  # 4.0s at 16kHz
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-PLAYGROUND_HTML_PATH = STATIC_DIR / "playground.html"
+INDEX_HTML_PATH = STATIC_DIR / "index.html"
+
+_SAMPLE_CATALOG: tuple[dict[str, str], ...] = (
+    {
+        "filename": "sample_bonafide_spk0004.wav",
+        "label": "01 // GIỌNG THẬT (SPK_0004)",
+        "category": "BONA_FIDE",
+        "codec": "Clean 16kHz PCM",
+    },
+    {
+        "filename": "sample_spoof_f5tts.wav",
+        "label": "02 // F5-TTS (GIẢ)",
+        "category": "SPOOF",
+        "codec": "Clean 16kHz (F5-TTS)",
+    },
+    {
+        "filename": "sample_spoof_voicestudio_cfm.wav",
+        "label": "03 // OMNIVOICE CFM (GIẢ)",
+        "category": "SPOOF",
+        "codec": "OmniVoice CFM 16kHz",
+    },
+    {
+        "filename": "sample_spoof_zalo_opus.wav",
+        "label": "04 // ZALO OPUS 24K (GIẢ)",
+        "category": "SPOOF",
+        "codec": "Zalo Opus 24kbps",
+    },
+    {
+        "filename": "sample_telephony_amrnb.wav",
+        "label": "05 // AMR-NB 8KHZ (GIẢ)",
+        "category": "SPOOF",
+        "codec": "PSTN AMR-NB 8kHz",
+    },
+)
+
+
+def _list_audio_samples(samples_dir: Path | None = None) -> list[dict[str, Any]]:
+    """List real audio samples in STATIC_DIR/samples with catalog metadata."""
+    target_dir = samples_dir or (STATIC_DIR / "samples")
+    catalog_by_name = {item["filename"]: item for item in _SAMPLE_CATALOG}
+
+    existing_files: list[Path] = []
+    if target_dir.exists() and target_dir.is_dir():
+        existing_files = sorted(p for p in target_dir.iterdir() if p.is_file() and p.suffix.lower() == ".wav")
+
+    results: list[dict[str, Any]] = []
+    if existing_files:
+        existing_names = {p.name for p in existing_files}
+        for item in _SAMPLE_CATALOG:
+            if item["filename"] in existing_names:
+                results.append(
+                    {
+                        **item,
+                        "url": f"/static/samples/{item['filename']}",
+                        "exists": True,
+                    }
+                )
+        for p in existing_files:
+            if p.name not in catalog_by_name:
+                is_bona = "bonafide" in p.name.lower()
+                results.append(
+                    {
+                        "filename": p.name,
+                        "url": f"/static/samples/{p.name}",
+                        "label": p.stem.replace("_", " ").upper(),
+                        "category": "BONA_FIDE" if is_bona else "SPOOF",
+                        "codec": "WAV 16kHz",
+                        "exists": True,
+                    }
+                )
+        return results
+
+    # Fallback catalog when *.wav files are absent (e.g. gitignored CI checkout)
+    return [
+        {
+            **item,
+            "url": f"/static/samples/{item['filename']}",
+            "exists": False,
+        }
+        for item in _SAMPLE_CATALOG
+    ]
+
+
+def _score_waveform(model: Any, audio_data: np.ndarray, device: str) -> tuple[np.ndarray, float, int]:
+    """Run single batched multi-window forward pass and Consensus Asymmetric Veto pooling."""
+    windows_batch = extract_window_batch(
+        audio_data,
+        win=TARGET_SAMPLE_COUNT,
+        hop=16000,
+        max_windows=5,
+        apply_dither=False,
+        dense_slicing=True,
+    ).to(device)
+    n_windows = int(windows_batch.shape[0])
+
+    with torch.inference_mode():
+        score_tensor = model.score(windows_batch)
+        if isinstance(score_tensor, torch.Tensor):
+            scores_np = score_tensor.detach().cpu().numpy()
+        else:
+            scores_np = np.asarray(score_tensor)
+        if scores_np.ndim > 1:
+            scores_np = scores_np.squeeze(-1)
+        elif scores_np.ndim == 0:
+            scores_np = np.array([scores_np.item()], dtype=np.float32)
+        raw_score = float(pool_scores(scores_np, mode="asymmetric_veto"))
+
+    return scores_np, raw_score, n_windows
 
 
 def _is_supported(filename: str | None, content_type: str | None) -> bool:
@@ -190,7 +299,7 @@ def create_app(
 
     app = FastAPI(
         title="ViTrueVoice Anti-Spoofing Inference API",
-        version="0.3.0",
+        version=APP_VERSION,
         description="Phát hiện giọng nói giả mạo tiếng Việt qua kênh thoại nén.",
     )
 
@@ -205,21 +314,25 @@ def create_app(
     STATIC_DIR.mkdir(parents=True, exist_ok=True)
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-    @app.get("/playground")
-    @app.get("/playground/")
-    def playground() -> FileResponse:
-        if not PLAYGROUND_HTML_PATH.exists():
-            raise HTTPException(status_code=404, detail="Playground HTML not found")
-        return FileResponse(PLAYGROUND_HTML_PATH, media_type="text/html")
+    @app.get("/")
+    def index() -> FileResponse:
+        if not INDEX_HTML_PATH.exists():
+            raise HTTPException(status_code=404, detail="Index HTML not found")
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html")
 
     @app.get("/health")
     def health() -> dict[str, Any]:
         return {
             "status": "ok",
+            "version": APP_VERSION,
             "model": str(ckpt_path),
             "device": device,
             "threshold": threshold,
         }
+
+    @app.get("/api/v1/samples")
+    def list_samples() -> list[dict[str, Any]]:
+        return _list_audio_samples(STATIC_DIR / "samples")
 
     @app.post("/api/v1/predict")
     @app.post("/predict")
@@ -245,35 +358,23 @@ def create_app(
             raise HTTPException(status_code=503, detail="Model is not loaded")
 
         # Multi-window extraction (STUBBORN_FACT: repeat padding <64k, single batched forward pass)
-        windows_batch = extract_window_batch(
-            audio_data,
-            win=TARGET_SAMPLE_COUNT,
-            hop=16000,
-            max_windows=5,
-            apply_dither=False,
-            dense_slicing=True,
-        ).to(device)
-        n_windows = int(windows_batch.shape[0])
+        scores_np, raw_score, n_windows = _score_waveform(model, audio_data, device)
 
-        with torch.inference_mode():
-            score_tensor = model.score(windows_batch)
-            if isinstance(score_tensor, torch.Tensor):
-                scores_np = score_tensor.detach().cpu().numpy()
-            else:
-                scores_np = np.asarray(score_tensor)
-            if scores_np.ndim > 1:
-                scores_np = scores_np.squeeze(-1)
-            elif scores_np.ndim == 0:
-                scores_np = np.array([scores_np.item()], dtype=np.float32)
-            raw_score = float(pool_scores(scores_np, mode="asymmetric_veto"))
-
-        latency_sec = time.perf_counter() - t0
         decision = classify_score(
             raw_score,
             threshold=threshold,
             calibrator=platt_calibrator,
             window_scores=scores_np,
         )
+        forensics = extract_forensic_analysis(
+            audio_data,
+            sr=TARGET_SAMPLE_RATE,
+            window_scores=scores_np,
+            raw_score=raw_score,
+            threshold=threshold,
+            pooling_mode="asymmetric_veto",
+        )
+        latency_sec = time.perf_counter() - t0
         req_id = f"req_{uuid.uuid4().hex[:12]}"
         window_scores_list = [round(float(s), 4) for s in scores_np.tolist()]
 
@@ -290,6 +391,10 @@ def create_app(
             "n_windows": n_windows,
             "window_scores": window_scores_list,
             "is_borderline": decision.is_borderline,
+            "risk_level": decision.risk_level,
+            "prob_bona_pct": forensics["platt_curve"]["prob_bona_pct"],
+            "prob_spoof_pct": forensics["platt_curve"]["prob_spoof_pct"],
+            "forensics": forensics,
         }
 
         # Anonymized audit log
@@ -337,36 +442,24 @@ def create_app(
 
         # 1. Thẩm định bản gốc Bona Fide
         t0_bona = time.perf_counter()
-        windows_bona = extract_window_batch(
-            audio_data,
-            win=TARGET_SAMPLE_COUNT,
-            hop=16000,
-            max_windows=5,
-            apply_dither=False,
-            dense_slicing=True,
-        ).to(device)
-        with torch.inference_mode():
-            score_tensor = model.score(windows_bona)
-            if isinstance(score_tensor, torch.Tensor):
-                scores_np = score_tensor.detach().cpu().numpy()
-            else:
-                scores_np = np.asarray(score_tensor)
-            if scores_np.ndim > 1:
-                scores_np = scores_np.squeeze(-1)
-            elif scores_np.ndim == 0:
-                scores_np = np.array([scores_np.item()], dtype=np.float32)
-            raw_score_bona = float(pool_scores(scores_np, mode="asymmetric_veto"))
-
-        lat_bona = time.perf_counter() - t0_bona
+        scores_np, raw_score_bona, n_win_bona = _score_waveform(model, audio_data, device)
         dec_bona = classify_score(
             raw_score_bona,
             threshold=threshold,
             calibrator=platt_calibrator,
             window_scores=scores_np,
         )
-        diff_bona = raw_score_bona - threshold
-        prob_bona = float(1.0 / (1.0 + np.exp(-PLATT_SCALE_K * diff_bona)))
-        prob_bona = max(0.001, min(0.999, prob_bona))
+        forensics_bona = extract_forensic_analysis(
+            audio_data,
+            sr=TARGET_SAMPLE_RATE,
+            window_scores=scores_np,
+            raw_score=raw_score_bona,
+            threshold=threshold,
+            pooling_mode="asymmetric_veto",
+        )
+        lat_bona = time.perf_counter() - t0_bona
+        prob_bona_pct = forensics_bona["platt_curve"]["prob_bona_pct"]
+        prob_spoof_pct = forensics_bona["platt_curve"]["prob_spoof_pct"]
         sha_bona = hashlib.sha256(raw_bytes).hexdigest()
 
         bona_dict = {
@@ -374,13 +467,17 @@ def create_app(
             "label": dec_bona.label,
             "raw_score": round(dec_bona.raw_score, 4),
             "threshold": dec_bona.threshold,
-            "prob_bona_pct": round(prob_bona * 100.0, 1),
-            "prob_spoof_pct": round((1.0 - prob_bona) * 100.0, 1),
-            "confidence": round(prob_bona * 100.0, 1) if dec_bona.is_bonafide else round((1.0 - prob_bona) * 100.0, 1),
+            "prob_bona_pct": prob_bona_pct,
+            "prob_spoof_pct": prob_spoof_pct,
+            "confidence": prob_bona_pct if dec_bona.is_bonafide else prob_spoof_pct,
             "latency_sec": round(lat_bona, 4),
             "audio_sha256": sha_bona,
             "duration_s": round(float(len(audio_data) / TARGET_SAMPLE_RATE), 2),
-            "n_windows": int(windows_bona.shape[0]),
+            "n_windows": n_win_bona,
+            "window_scores": [round(float(s), 4) for s in scores_np.tolist()],
+            "is_borderline": dec_bona.is_borderline,
+            "risk_level": dec_bona.risk_level,
+            "forensics": forensics_bona,
         }
 
         # 2. Nhân bản Zero-Shot CFM qua VoiceStudio (OmniVoice)
@@ -454,40 +551,32 @@ def create_app(
             cloned_sr = TARGET_SAMPLE_RATE
             ref_used = "Synthetic Fallback Wave"
 
-        # 3. Thẩm định bản clone CFM
-        cloned_float = (cloned_audio_int16.astype(np.float32) / 32768.0)
-        windows_clone = extract_window_batch(
-            cloned_float,
-            win=TARGET_SAMPLE_COUNT,
-            hop=16000,
-            max_windows=5,
-            apply_dither=False,
-            dense_slicing=True,
-        ).to(device)
+        # 3. Thẩm định bản clone CFM (resample to 16kHz for model & forensics if OmniVoice returned 24kHz)
+        cloned_float = cloned_audio_int16.astype(np.float32) / 32768.0
+        if cloned_sr != TARGET_SAMPLE_RATE:
+            import librosa
+            cloned_float_16k = librosa.resample(cloned_float, orig_sr=cloned_sr, target_sr=TARGET_SAMPLE_RATE).astype(np.float32)
+        else:
+            cloned_float_16k = cloned_float
 
-        with torch.inference_mode():
-            score_clone_tensor = model.score(windows_clone)
-            if isinstance(score_clone_tensor, torch.Tensor):
-                sc_np = score_clone_tensor.detach().cpu().numpy()
-            else:
-                sc_np = np.asarray(score_clone_tensor)
-            if sc_np.ndim > 1:
-                sc_np = sc_np.squeeze(-1)
-            elif sc_np.ndim == 0:
-                sc_np = np.array([sc_np.item()], dtype=np.float32)
-            raw_score_clone = float(pool_scores(sc_np, mode="asymmetric_veto"))
-
-        lat_clone = time.perf_counter() - t0_clone
+        sc_np, raw_score_clone, n_win_clone = _score_waveform(model, cloned_float_16k, device)
         dec_clone = classify_score(
             raw_score_clone,
             threshold=threshold,
             calibrator=platt_calibrator,
             window_scores=sc_np,
         )
-        diff_clone = raw_score_clone - threshold
-        prob_clone_bona = float(1.0 / (1.0 + np.exp(-PLATT_SCALE_K * diff_clone)))
-        prob_clone_bona = max(0.001, min(0.999, prob_clone_bona))
-        prob_clone_spoof = 1.0 - prob_clone_bona
+        forensics_clone = extract_forensic_analysis(
+            cloned_float_16k,
+            sr=TARGET_SAMPLE_RATE,
+            window_scores=sc_np,
+            raw_score=raw_score_clone,
+            threshold=threshold,
+            pooling_mode="asymmetric_veto",
+        )
+        lat_clone = time.perf_counter() - t0_clone
+        prob_clone_bona_pct = forensics_clone["platt_curve"]["prob_bona_pct"]
+        prob_clone_spoof_pct = forensics_clone["platt_curve"]["prob_spoof_pct"]
 
         buf = io.BytesIO()
         sf.write(buf, cloned_audio_int16, cloned_sr, format="WAV", subtype="PCM_16")
@@ -503,15 +592,19 @@ def create_app(
             "label": dec_clone.label,
             "raw_score": round(dec_clone.raw_score, 4),
             "threshold": dec_clone.threshold,
-            "prob_bona_pct": round(prob_clone_bona * 100.0, 1),
-            "prob_spoof_pct": round(prob_clone_spoof * 100.0, 1),
-            "confidence": round(prob_clone_spoof * 100.0, 1) if not dec_clone.is_bonafide else round(prob_clone_bona * 100.0, 1),
+            "prob_bona_pct": prob_clone_bona_pct,
+            "prob_spoof_pct": prob_clone_spoof_pct,
+            "confidence": prob_clone_spoof_pct if not dec_clone.is_bonafide else prob_clone_bona_pct,
             "latency_sec": round(lat_clone, 4),
             "audio_sha256": sha_clone,
-            "duration_s": round(float(len(cloned_float) / TARGET_SAMPLE_RATE), 2),
-            "n_windows": int(windows_clone.shape[0]),
+            "duration_s": round(float(len(cloned_float_16k) / TARGET_SAMPLE_RATE), 2),
+            "n_windows": n_win_clone,
+            "window_scores": [round(float(s), 4) for s in sc_np.tolist()],
+            "is_borderline": dec_clone.is_borderline,
+            "risk_level": dec_clone.risk_level,
             "audio_base64": audio_b64,
             "transcript_used": ref_used,
+            "forensics": forensics_clone,
         }
 
         # Log anonymously
@@ -547,6 +640,7 @@ def create_app(
             "status": "success",
             "target_text": target_text or DEFAULT_TARGET_TEXT,
             "transcript_used": ref_used,
+            "delta_margin": round(raw_score_bona - raw_score_clone, 4),
             "bonafide": bona_dict,
             "clone": clone_dict,
         }
@@ -559,21 +653,6 @@ def create_app(
             threshold=threshold,
         )
         app.include_router(zalo_router)
-
-        # Mount Gradio Web UI at "/" sharing the exact same model in RAM
-        try:
-            import gradio as gr
-            from src.app.ui import build_ui
-            gradio_demo = build_ui(
-                model=model,
-                device=device,
-                threshold=threshold,
-                preload=False,
-            )
-            app = gr.mount_gradio_app(app, gradio_demo, path="/")
-        except Exception as exc:
-            import logging
-            logging.getLogger(__name__).warning("Gradio mount failed: %s", exc)
 
     return app
 
