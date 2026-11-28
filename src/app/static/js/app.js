@@ -71,8 +71,8 @@
     lastClonePayload: null,
     cloneRefFile: null,
     cloneRefObjectUrl: null,
-    cloneDownloadDataUrl: null,
-    cloneDownloadFilename: 'voicestudio_cfm_clone.wav',
+    cloneElapsedTimer: null,
+    cloneStartedAt: 0,
     predictRecorder: null,
     cloneRecorder: null,
     previewAudio: null,
@@ -209,6 +209,15 @@
         easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
         orientation: 'vertical',
         smoothWheel: true,
+        // Never intercept wheel/touch events while Forensic Studio Overlay is open
+        prevent: function (node) {
+          if (state.overlayOpen) return true;
+          return Boolean(
+            node &&
+            typeof node.closest === 'function' &&
+            node.closest('#forensic-overlay, [data-lenis-prevent]')
+          );
+        },
       });
 
       if (typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined') {
@@ -481,11 +490,12 @@
     state.overlayOpen = true;
     overlay.classList.add('is-open');
     overlay.setAttribute('aria-hidden', 'false');
+    document.documentElement.classList.add('vtv-overlay-open');
     document.body.classList.add('vtv-overlay-open');
 
-    // Pause Lenis while overlay is open so native overflow-y: auto scrolls effortlessly
-    if (state.lenis && typeof state.lenis.stop === 'function') {
-      state.lenis.stop();
+    // Halt residual background momentum without invoking lenis.stop() (which swallows overlay wheel events)
+    if (state.lenis && typeof state.lenis.scrollTo === 'function') {
+      state.lenis.scrollTo(window.scrollY, { immediate: true, force: true });
     }
 
     switchTab(tabName || state.activeTab || 'predict');
@@ -506,10 +516,11 @@
     state.overlayOpen = false;
     overlay.classList.remove('is-open');
     overlay.setAttribute('aria-hidden', 'true');
+    document.documentElement.classList.remove('vtv-overlay-open');
     document.body.classList.remove('vtv-overlay-open');
 
-    if (state.lenis && typeof state.lenis.start === 'function') {
-      state.lenis.start();
+    if (state.lenis && typeof state.lenis.resize === 'function') {
+      state.lenis.resize();
     }
   }
 
@@ -864,13 +875,76 @@
     state.isBusyClone = isLoading;
     const loader = $('clone-loading');
     const btn = $('btn-run-clone-audit');
-    if (loader) loader.classList.toggle('hidden', !isLoading);
+    if (loader) loader.classList.add('hidden');
     if (btn) {
       btn.disabled = isLoading;
       btn.classList.toggle('opacity-60', isLoading);
     }
     setOrbScan(isLoading ? 1.0 : 0.0);
     if (isLoading) setOrbColor(COLORS.spoof);
+  }
+
+  function startCloneElapsedTimer() {
+    stopCloneElapsedTimer();
+    state.cloneStartedAt = performance.now();
+    const timerEl = $('clone-elapsed-timer');
+    if (timerEl) timerEl.textContent = '0.0 s';
+    state.cloneElapsedTimer = window.setInterval(function () {
+      const el = $('clone-elapsed-timer');
+      if (!el) return;
+      const elapsedSec = (performance.now() - state.cloneStartedAt) / 1000;
+      el.textContent = elapsedSec.toFixed(1) + ' s';
+    }, 100);
+  }
+
+  function stopCloneElapsedTimer() {
+    if (state.cloneElapsedTimer) {
+      window.clearInterval(state.cloneElapsedTimer);
+      state.cloneElapsedTimer = null;
+    }
+  }
+
+  function setCloneRightLoading(isRightLoading, stageLabel) {
+    const loadingBox = $('clone-fake-loading');
+    const contentBox = $('clone-fake-content');
+    const fakeCard = $('clone-fake-card');
+    const fakeBadge = $('clone-fake-badge');
+
+    if (loadingBox) loadingBox.classList.toggle('hidden', !isRightLoading);
+    if (contentBox) contentBox.classList.toggle('hidden', isRightLoading);
+
+    if (isRightLoading) {
+      if (fakeCard) {
+        fakeCard.classList.remove('vtv-verdict-bonafide', 'vtv-verdict-spoof', 'vtv-verdict-borderline');
+      }
+      if (fakeBadge) {
+        fakeBadge.textContent = stageLabel || 'CLONING...';
+        fakeBadge.className = 'px-2.5 py-1 text-xs font-bold font-mono-tech border border-[#df0042]/70 bg-[#df0042]/15 text-[#ffb3b6] animate-pulse';
+      }
+    }
+  }
+
+  function setCloneStepStatus(step1Done) {
+    const s1 = $('clone-step-1');
+    const s2 = $('clone-step-2');
+    if (s1) {
+      if (step1Done) {
+        s1.textContent = '✓ 01 // BẢN GỐC ĐÃ PHÂN TÍCH';
+        s1.className = 'border border-[#6dffba]/50 bg-[#00e599]/10 px-3 py-2 text-[#6dffba]';
+      } else {
+        s1.textContent = '01 // ĐANG PHÂN TÍCH BẢN GỐC...';
+        s1.className = 'border border-[#ffbd5d]/60 bg-[#ffbd5d]/10 px-3 py-2 text-[#ffe0bc]';
+      }
+    }
+    if (s2) {
+      if (step1Done) {
+        s2.textContent = '02 // ĐANG NHÂN BẢN OMNIVOICE CFM...';
+        s2.className = 'border border-[#df0042]/70 bg-[#df0042]/15 px-3 py-2 text-[#ffb3b6]';
+      } else {
+        s2.textContent = '02 // CHỜ NHÂN BẢN OMNIVOICE CFM';
+        s2.className = 'border border-on-surface-variant/20 bg-surface-container-low/70 px-3 py-2 text-on-surface-variant';
+      }
+    }
   }
 
   function setCloneReferenceFile(file, existingObjectUrl) {
@@ -902,13 +976,9 @@
     }
   }
 
-  function renderCloneCharts(data) {
-    if (!data || !window.ViTrueVoiceCharts) return;
-    const bona = data.bonafide || {};
-    const fake = data.clone || {};
+  function renderCloneBonaCharts(bona) {
+    if (!bona || !window.ViTrueVoiceCharts) return;
     const fb = bona.forensics || {};
-    const ff = fake.forensics || {};
-
     window.ViTrueVoiceCharts.renderWaveform($('chart-clone-bona-wave'), fb.waveform, {
       verdict: bona.prediction || 'BONA_FIDE',
       isBorderline: Boolean(bona.is_borderline),
@@ -923,7 +993,11 @@
     window.ViTrueVoiceCharts.renderWindowVetoChart($('chart-clone-bona-windows'), fb.windows, fb.pooling, bona.threshold, {
       compact: true,
     });
+  }
 
+  function renderCloneFakeCharts(fake) {
+    if (!fake || !window.ViTrueVoiceCharts) return;
+    const ff = fake.forensics || {};
     window.ViTrueVoiceCharts.renderWaveform($('chart-clone-fake-wave'), ff.waveform, {
       verdict: fake.prediction || 'SPOOF',
       isBorderline: Boolean(fake.is_borderline),
@@ -940,14 +1014,50 @@
     });
   }
 
+  function renderCloneCharts(data) {
+    if (!data || !window.ViTrueVoiceCharts) return;
+    if (data.bonafide) renderCloneBonaCharts(data.bonafide);
+    if (data.clone) renderCloneFakeCharts(data.clone);
+  }
+
+  function renderCloneBonaCard(bona) {
+    if (!bona) return;
+    const bonaProbs = computeProbabilities(bona);
+    const bonaIsReal = bona.prediction === 'BONA_FIDE';
+
+    if ($('clone-bona-card')) {
+      $('clone-bona-card').classList.remove('vtv-verdict-bonafide', 'vtv-verdict-spoof', 'vtv-verdict-borderline');
+      $('clone-bona-card').classList.add(bona.is_borderline ? 'vtv-verdict-borderline' : (bonaIsReal ? 'vtv-verdict-bonafide' : 'vtv-verdict-spoof'));
+    }
+    if ($('clone-bona-badge')) {
+      $('clone-bona-badge').textContent = bona.prediction || 'BONA_FIDE';
+      $('clone-bona-badge').className = 'px-2.5 py-1 text-xs font-bold font-mono-tech border ' +
+        (bonaIsReal ? 'border-[#6dffba]/60 bg-[#00e599]/15 text-[#6dffba]' : 'border-[#df0042]/60 bg-[#df0042]/20 text-[#ffb3b6]');
+    }
+    if ($('clone-bona-prob')) {
+      $('clone-bona-prob').textContent = 'BONA ' + bonaProbs.bonaPct.toFixed(1) + '% • SPOOF ' + bonaProbs.spoofPct.toFixed(1) + '%';
+    }
+    if ($('clone-bona-score')) {
+      const sb = Number(bona.raw_score) || 0;
+      $('clone-bona-score').textContent = (sb >= 0 ? '+' : '') + sb.toFixed(2);
+    }
+    if ($('clone-bona-latency')) $('clone-bona-latency').textContent = formatLatency(bona.latency_sec);
+    if ($('clone-bona-sha')) $('clone-bona-sha').textContent = shortHash(bona.audio_sha256);
+    if ($('clone-bona-audio') && state.cloneRefObjectUrl) {
+      $('clone-bona-audio').src = state.cloneRefObjectUrl;
+    }
+  }
+
   function renderCloneAuditResult(data) {
     state.lastClonePayload = data;
     const resultsWrap = $('clone-results');
     if (resultsWrap) resultsWrap.classList.remove('hidden');
 
+    stopCloneElapsedTimer();
+    setCloneRightLoading(false);
+
     const bona = data.bonafide || {};
     const fake = data.clone || {};
-    const bonaProbs = computeProbabilities(bona);
     const fakeProbs = computeProbabilities(fake);
 
     const delta = data.delta_margin != null
@@ -979,29 +1089,8 @@
       }
     }
 
-    // Left Card: Bona Fide
-    const bonaIsReal = bona.prediction === 'BONA_FIDE';
-    if ($('clone-bona-card')) {
-      $('clone-bona-card').classList.remove('vtv-verdict-bonafide', 'vtv-verdict-spoof', 'vtv-verdict-borderline');
-      $('clone-bona-card').classList.add(bona.is_borderline ? 'vtv-verdict-borderline' : (bonaIsReal ? 'vtv-verdict-bonafide' : 'vtv-verdict-spoof'));
-    }
-    if ($('clone-bona-badge')) {
-      $('clone-bona-badge').textContent = bona.prediction || 'BONA_FIDE';
-      $('clone-bona-badge').className = 'px-2.5 py-1 text-xs font-bold font-mono-tech border ' +
-        (bonaIsReal ? 'border-[#6dffba]/60 bg-[#00e599]/15 text-[#6dffba]' : 'border-[#df0042]/60 bg-[#df0042]/20 text-[#ffb3b6]');
-    }
-    if ($('clone-bona-prob')) {
-      $('clone-bona-prob').textContent = 'BONA ' + bonaProbs.bonaPct.toFixed(1) + '% • SPOOF ' + bonaProbs.spoofPct.toFixed(1) + '%';
-    }
-    if ($('clone-bona-score')) {
-      const sb = Number(bona.raw_score) || 0;
-      $('clone-bona-score').textContent = (sb >= 0 ? '+' : '') + sb.toFixed(2);
-    }
-    if ($('clone-bona-latency')) $('clone-bona-latency').textContent = formatLatency(bona.latency_sec);
-    if ($('clone-bona-sha')) $('clone-bona-sha').textContent = shortHash(bona.audio_sha256);
-    if ($('clone-bona-audio') && state.cloneRefObjectUrl) {
-      $('clone-bona-audio').src = state.cloneRefObjectUrl;
-    }
+    // Left Card: Bona Fide (synced with final response so delta_margin matches exactly)
+    renderCloneBonaCard(bona);
 
     // Right Card: OmniVoice CFM Clone
     const fakeIsSpoof = fake.prediction !== 'BONA_FIDE';
@@ -1024,10 +1113,8 @@
     if ($('clone-fake-latency')) $('clone-fake-latency').textContent = formatLatency(fake.latency_sec);
     if ($('clone-fake-sha')) $('clone-fake-sha').textContent = shortHash(fake.audio_sha256);
 
-    state.cloneDownloadDataUrl = fake.audio_base64 || null;
-    state.cloneDownloadFilename = fake.filename || 'voicestudio_cfm_clone.wav';
-    if ($('clone-fake-audio') && state.cloneDownloadDataUrl) {
-      $('clone-fake-audio').src = state.cloneDownloadDataUrl;
+    if ($('clone-fake-audio') && fake.audio_base64) {
+      $('clone-fake-audio').src = fake.audio_base64;
     }
 
     // Orb reflects comparative threat catch
@@ -1054,7 +1141,71 @@
     showCloneError('');
     setCloneLoading(true);
 
+    // Reveal comparison stage immediately: Left analyzes first, Right shows live cloning loader
+    const resultsWrap = $('clone-results');
+    if (resultsWrap) resultsWrap.classList.remove('hidden');
+
+    const statusBadge = $('clone-engine-status-badge');
+    if (statusBadge) {
+      statusBadge.textContent = 'STAGE 1/2 // ĐANG PHÂN TÍCH BẢN GỐC (SSL-AASIST)...';
+      statusBadge.className = 'inline-flex items-center gap-2 px-3 py-1 text-[11px] font-mono-tech uppercase tracking-widest border border-[#ffbd5d]/60 bg-[#ffbd5d]/15 text-[#ffe0bc]';
+    }
+    if ($('clone-transcript-used')) {
+      $('clone-transcript-used').textContent = customRefText || 'Đang nhận diện ASR Wav2Vec2...';
+    }
+    if ($('clone-target-text-echo')) {
+      $('clone-target-text-echo').textContent = targetText;
+    }
+    if ($('clone-delta-margin')) {
+      $('clone-delta-margin').textContent = '...';
+    }
+    if ($('clone-bona-badge')) {
+      $('clone-bona-badge').textContent = 'ĐANG QUÉT...';
+      $('clone-bona-badge').className = 'px-2.5 py-1 text-xs font-bold font-mono-tech border border-[#ffbd5d]/60 bg-[#ffbd5d]/15 text-[#ffe0bc] animate-pulse';
+    }
+
+    setCloneStepStatus(false);
+    setCloneRightLoading(true, 'CLONING...');
+    startCloneElapsedTimer();
+
+    let stage1Done = false;
+
     try {
+      // STAGE 1 (~200-400ms): Fast SSL-AASIST audit on original audio so Left Card appears first
+      const bonaForm = new FormData();
+      bonaForm.append('file', state.cloneRefFile, state.cloneRefFile.name || 'ref.wav');
+
+      const bonaResp = await fetch(ENDPOINT_PREDICT, {
+        method: 'POST',
+        body: bonaForm,
+      });
+
+      if (!bonaResp.ok) {
+        let detail = 'Lỗi phân tích bản gốc (' + bonaResp.status + ')';
+        try {
+          const errJson = await bonaResp.json();
+          if (errJson && errJson.detail) detail = errJson.detail;
+        } catch (_e) { /* ignore */ }
+        throw new Error(detail);
+      }
+
+      const bonaData = await bonaResp.json();
+      stage1Done = true;
+      state.lastClonePayload = { bonafide: bonaData, clone: null };
+
+      renderCloneBonaCard(bonaData);
+      window.requestAnimationFrame(function () {
+        renderCloneBonaCharts(bonaData);
+      });
+
+      // Transition status to Stage 2 while Right Card continues its live cloning motion
+      setCloneStepStatus(true);
+      if (statusBadge) {
+        statusBadge.textContent = 'STAGE 2/2 // BẢN GỐC ĐÃ XONG — ĐANG NHÂN BẢN OMNIVOICE CFM...';
+        statusBadge.className = 'inline-flex items-center gap-2 px-3 py-1 text-[11px] font-mono-tech uppercase tracking-widest border border-[#df0042]/70 bg-[#df0042]/15 text-[#ffb3b6]';
+      }
+
+      // STAGE 2 (~4-11s): Zero-Shot OmniVoice CFM synthesis + symmetric audit
       const formData = new FormData();
       formData.append('file', state.cloneRefFile, state.cloneRefFile.name || 'ref.wav');
       formData.append('target_text', targetText);
@@ -1077,8 +1228,18 @@
       const data = await resp.json();
       renderCloneAuditResult(data);
     } catch (err) {
+      stopCloneElapsedTimer();
+      setCloneRightLoading(false);
+      if (!stage1Done && resultsWrap) {
+        resultsWrap.classList.add('hidden');
+      } else if ($('clone-fake-badge')) {
+        $('clone-fake-badge').textContent = 'LỖI CLONE';
+        $('clone-fake-badge').className = 'px-2.5 py-1 text-xs font-bold font-mono-tech border border-[#df0042]/70 bg-[#df0042]/20 text-[#ffb3b6]';
+        if ($('clone-fake-content')) $('clone-fake-content').classList.add('hidden');
+      }
       showCloneError('Nhân bản & thẩm định thất bại: ' + (err && err.message ? err.message : String(err)));
     } finally {
+      stopCloneElapsedTimer();
       setCloneLoading(false);
     }
   }
@@ -1388,19 +1549,6 @@
 
     const btnRunClone = $('btn-run-clone-audit');
     if (btnRunClone) btnRunClone.addEventListener('click', submitCloneAndAudit);
-
-    const btnDownloadClone = $('btn-download-clone');
-    if (btnDownloadClone) {
-      btnDownloadClone.addEventListener('click', function () {
-        if (!state.cloneDownloadDataUrl) return;
-        const a = document.createElement('a');
-        a.href = state.cloneDownloadDataUrl;
-        a.download = state.cloneDownloadFilename || 'voicestudio_cfm_clone.wav';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      });
-    }
 
     // Keyboard shortcuts (Escape closes overlay)
     document.addEventListener('keydown', function (ev) {

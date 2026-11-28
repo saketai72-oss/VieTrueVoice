@@ -597,6 +597,9 @@
     role="dialog"
     aria-modal="true"
     aria-hidden="true"
+    data-lenis-prevent
+    data-lenis-prevent-wheel
+    data-lenis-prevent-touch
     aria-label="Phòng Lab Thẩm Định & Nhân Bản Giọng Nói ViTrueVoice"
   >
     <div class="min-h-screen flex flex-col">
@@ -1144,9 +1147,9 @@
             </div>
 
             <!-- Side-by-Side Matrix: Original (Left) vs OmniVoice CFM Clone (Right) -->
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
               <!-- LEFT CARD: BẢN GỐC (BONA FIDE) -->
-              <article id="clone-bona-card" class="border border-primary/40 bg-surface-container-low p-5 sm:p-6 space-y-5">
+              <article id="clone-bona-card" class="border border-primary/40 bg-surface-container-low p-5 sm:p-6 flex flex-col gap-5">
                 <div class="flex items-start justify-between gap-3 border-b border-on-surface-variant/15 pb-4">
                   <div>
                     <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-primary block">01 // BẢN GỐC (REFERENCE)</span>
@@ -1170,7 +1173,7 @@
                   </div>
                 </div>
 
-                <p id="clone-bona-prob" class="font-mono text-xs text-primary tracking-wider"></p>
+                <p id="clone-bona-prob" class="font-mono text-xs text-primary tracking-wider min-h-[1rem]"></p>
 
                 <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
                   <audio id="clone-bona-audio" controls class="vtv-audio-player"></audio>
@@ -1194,7 +1197,7 @@
               </article>
 
               <!-- RIGHT CARD: BẢN NHÂN BẢN (OMNIVOICE CFM CLONE) -->
-              <article id="clone-fake-card" class="border border-secondary/50 bg-surface-container-low p-5 sm:p-6 space-y-5">
+              <article id="clone-fake-card" class="border border-secondary/50 bg-surface-container-low p-5 sm:p-6 flex flex-col gap-5">
                 <div class="flex items-start justify-between gap-3 border-b border-on-surface-variant/15 pb-4">
                   <div>
                     <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-secondary-soft block">02 // BẢN NHÂN BẢN AI (ZERO-SHOT)</span>
@@ -1203,49 +1206,103 @@
                   <span id="clone-fake-badge" class="px-2.5 py-1 text-xs font-bold font-mono border border-secondary/70 text-secondary-soft">SPOOF</span>
                 </div>
 
-                <div class="grid grid-cols-3 gap-3 font-mono">
-                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
-                    <span class="text-[9px] text-on-surface-variant block">RAW LOGIT</span>
-                    <span id="clone-fake-score" class="text-lg font-bold text-secondary-soft">-0.00</span>
+                <!-- Live Cloning Skeleton & Motion Loader (visible while Stage 2 runs) -->
+                <div id="clone-fake-loading" class="hidden flex-1 flex flex-col justify-between gap-5" aria-live="polite">
+                  <div class="bg-surface-container-lowest border border-secondary/40 p-5 space-y-4">
+                    <div class="flex items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.16em]">
+                      <span class="inline-flex items-center gap-2 text-secondary-soft font-bold">
+                        <span class="w-2 h-2 bg-secondary animate-ping"></span>
+                        ĐANG NHÂN BẢN GIỌNG NÓI OMNIVOICE CFM...
+                      </span>
+                      <span id="clone-elapsed-timer" class="text-tertiary font-bold tabular-nums">0.0 s</span>
+                    </div>
+
+                    <div class="vtv-scan-bar vtv-scan-bar-crimson"></div>
+
+                    <!-- Animated Acoustic Synthesis Equalizer -->
+                    <div class="vtv-clone-eq py-4" aria-hidden="true">
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                      <span class="vtv-clone-eq-bar"></span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 font-mono text-[10px] uppercase tracking-[0.14em]">
+                      <div id="clone-step-1" class="border border-on-surface-variant/20 bg-surface-container-low/70 px-3 py-2 text-on-surface-variant">
+                        01 // PHÂN TÍCH BẢN GỐC (SSL-AASIST)
+                      </div>
+                      <div id="clone-step-2" class="border border-secondary/45 bg-secondary/10 px-3 py-2 text-secondary-soft">
+                        02 // ASR WAV2VEC2 → CFM → VETO AUDIT
+                      </div>
+                    </div>
                   </div>
-                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
-                    <span class="text-[9px] text-on-surface-variant block">CLONE + AUDIT</span>
-                    <span id="clone-fake-latency" class="text-lg font-bold text-on-surface">—</span>
-                  </div>
-                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
-                    <span class="text-[9px] text-on-surface-variant block">SHA-256</span>
-                    <span id="clone-fake-sha" class="text-[11px] text-on-surface-variant truncate block mt-1">—</span>
+
+                  <!-- Visual Skeleton Matching Left Card's 3 Charts -->
+                  <div class="space-y-3 flex-1 flex flex-col justify-end">
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/70 block mb-1">WAVEFORM // ĐANG TỔNG HỢP...</span>
+                      <div class="vtv-skeleton-shimmer h-[110px]"></div>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/70 block mb-1">MEL-SPECTROGRAM // ĐANG TỔNG HỢP...</span>
+                      <div class="vtv-skeleton-shimmer h-[150px]"></div>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant/70 block mb-1">WINDOW SCORES // ĐANG CHỜ SUY LUẬN...</span>
+                      <div class="vtv-skeleton-shimmer h-[150px]"></div>
+                    </div>
                   </div>
                 </div>
 
-                <p id="clone-fake-prob" class="font-mono text-xs text-secondary-soft tracking-wider"></p>
-
-                <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3 space-y-2.5">
-                  <audio id="clone-fake-audio" controls class="vtv-audio-player"></audio>
-                  <button
-                    id="btn-download-clone"
-                    type="button"
-                    data-cursor="TẢI"
-                    class="vtv-btn-ghost w-full py-2 px-3 font-mono text-[11px] font-bold tracking-[0.14em] uppercase flex items-center justify-center gap-1.5"
-                  >
-                    <span class="material-symbols-outlined text-sm">download</span>
-                    TẢI FILE CLONE (.WAV)
-                  </button>
-                </div>
-
-                <!-- Compact Forensics Charts (Clone) -->
-                <div class="space-y-3">
-                  <div>
-                    <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WAVEFORM // OMNIVOICE CLONE</span>
-                    <canvas id="chart-clone-fake-wave" data-height="110" class="vtv-canvas-hd"></canvas>
+                <!-- Completed Clone Result Content (mirrors Left Card structure 1:1) -->
+                <div id="clone-fake-content" class="flex flex-col gap-5">
+                  <div class="grid grid-cols-3 gap-3 font-mono">
+                    <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                      <span class="text-[9px] text-on-surface-variant block">RAW LOGIT</span>
+                      <span id="clone-fake-score" class="text-lg font-bold text-secondary-soft">-0.00</span>
+                    </div>
+                    <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                      <span class="text-[9px] text-on-surface-variant block">CLONE + AUDIT</span>
+                      <span id="clone-fake-latency" class="text-lg font-bold text-on-surface">—</span>
+                    </div>
+                    <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                      <span class="text-[9px] text-on-surface-variant block">SHA-256</span>
+                      <span id="clone-fake-sha" class="text-[11px] text-on-surface-variant truncate block mt-1">—</span>
+                    </div>
                   </div>
-                  <div>
-                    <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">MEL-SPECTROGRAM // OMNIVOICE CLONE</span>
-                    <canvas id="chart-clone-fake-mel" data-height="150" class="vtv-canvas-hd"></canvas>
+
+                  <p id="clone-fake-prob" class="font-mono text-xs text-secondary-soft tracking-wider min-h-[1rem]"></p>
+
+                  <div class="bg-surface-container-lowest border border-on-surface-variant/15 p-3">
+                    <audio id="clone-fake-audio" controls class="vtv-audio-player"></audio>
                   </div>
-                  <div>
-                    <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WINDOW SCORES // OMNIVOICE CLONE</span>
-                    <canvas id="chart-clone-fake-windows" data-height="150" class="vtv-canvas-hd"></canvas>
+
+                  <!-- Compact Forensics Charts (Clone) -->
+                  <div class="space-y-3">
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WAVEFORM // OMNIVOICE CLONE</span>
+                      <canvas id="chart-clone-fake-wave" data-height="110" class="vtv-canvas-hd"></canvas>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">MEL-SPECTROGRAM // OMNIVOICE CLONE</span>
+                      <canvas id="chart-clone-fake-mel" data-height="150" class="vtv-canvas-hd"></canvas>
+                    </div>
+                    <div>
+                      <span class="font-mono text-[10px] uppercase tracking-widest text-on-surface-variant block mb-1">WINDOW SCORES // OMNIVOICE CLONE</span>
+                      <canvas id="chart-clone-fake-windows" data-height="150" class="vtv-canvas-hd"></canvas>
+                    </div>
                   </div>
                 </div>
               </article>

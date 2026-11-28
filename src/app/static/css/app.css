@@ -60,7 +60,8 @@ body {
   font-family: 'Be Vietnam Pro', system-ui, sans-serif;
 }
 
-/* Lock body scroll cleanly when Forensic Studio Overlay is active */
+/* Lock background document scroll cleanly when Forensic Studio Overlay is active */
+html.vtv-overlay-open,
 body.vtv-overlay-open {
   overflow: hidden !important;
 }
@@ -480,10 +481,14 @@ body.vtv-overlay-open #vtv-cursor {
   position: fixed;
   inset: 0;
   z-index: 8000;
+  height: 100vh;
+  height: 100dvh;
   background: rgba(14, 14, 16, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   opacity: 0;
   visibility: hidden;
@@ -585,6 +590,82 @@ body.vtv-overlay-open #vtv-cursor {
   background: linear-gradient(90deg, transparent, var(--vtv-secondary), var(--vtv-tertiary), transparent);
 }
 
+/* Clone Stage-2 Equalizer & Forensic Skeleton Shimmer */
+@keyframes vtv-eq-wave {
+  0%, 100% {
+    transform: scaleY(0.18);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.vtv-clone-eq {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 64px;
+}
+
+.vtv-clone-eq-bar {
+  width: 4px;
+  height: 44px;
+  background: linear-gradient(180deg, var(--vtv-tertiary) 0%, var(--vtv-secondary) 75%, rgba(223, 0, 66, 0.25) 100%);
+  transform-origin: center;
+  animation: vtv-eq-wave 1.05s ease-in-out infinite;
+}
+
+.vtv-clone-eq-bar:nth-child(odd) {
+  animation-duration: 0.92s;
+}
+
+.vtv-clone-eq-bar:nth-child(3n) {
+  animation-duration: 1.24s;
+}
+
+.vtv-clone-eq-bar:nth-child(1) { animation-delay: 0.00s; }
+.vtv-clone-eq-bar:nth-child(2) { animation-delay: 0.08s; }
+.vtv-clone-eq-bar:nth-child(3) { animation-delay: 0.16s; }
+.vtv-clone-eq-bar:nth-child(4) { animation-delay: 0.24s; }
+.vtv-clone-eq-bar:nth-child(5) { animation-delay: 0.32s; }
+.vtv-clone-eq-bar:nth-child(6) { animation-delay: 0.40s; }
+.vtv-clone-eq-bar:nth-child(7) { animation-delay: 0.48s; }
+.vtv-clone-eq-bar:nth-child(8) { animation-delay: 0.56s; }
+.vtv-clone-eq-bar:nth-child(9) { animation-delay: 0.48s; }
+.vtv-clone-eq-bar:nth-child(10) { animation-delay: 0.40s; }
+.vtv-clone-eq-bar:nth-child(11) { animation-delay: 0.32s; }
+.vtv-clone-eq-bar:nth-child(12) { animation-delay: 0.24s; }
+.vtv-clone-eq-bar:nth-child(13) { animation-delay: 0.16s; }
+.vtv-clone-eq-bar:nth-child(14) { animation-delay: 0.08s; }
+.vtv-clone-eq-bar:nth-child(15) { animation-delay: 0.04s; }
+.vtv-clone-eq-bar:nth-child(16) { animation-delay: 0.00s; }
+
+@keyframes vtv-skeleton-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.vtv-skeleton-shimmer {
+  width: 100%;
+  border: 1px solid rgba(223, 0, 66, 0.22);
+  background: linear-gradient(
+    90deg,
+    rgba(14, 14, 16, 0.95) 0%,
+    rgba(223, 0, 66, 0.11) 45%,
+    rgba(255, 189, 93, 0.08) 55%,
+    rgba(14, 14, 16, 0.95) 100%
+  );
+  background-size: 220% 100%;
+  animation: vtv-skeleton-pulse 1.6s linear infinite;
+}
+
 /* Forensic Canvas Containers */
 .vtv-chart-card {
   background: var(--vtv-surface-lowest);
@@ -652,6 +733,10 @@ audio.vtv-audio-player {
   .vtv-scan-bar::after {
     animation: none;
     width: 100%;
+  }
+  .vtv-clone-eq-bar,
+  .vtv-skeleton-shimmer {
+    animation: none;
   }
   .vtv-cinema-frame {
     clip-path: inset(0% 0% 0% 0%);

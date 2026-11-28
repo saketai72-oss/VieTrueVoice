@@ -84,3 +84,16 @@ def test_web_ui_wires_both_real_endpoints_and_has_zero_mocks():
         assert "lh3.googleusercontent.com" not in text, (
             f"Found external placeholder image URL in {path.name}"
         )
+
+
+def test_forensic_overlay_scroll_alignment_and_progressive_clone():
+    """Overlay prevents Lenis wheel hijacking, drops clone download button, and uses 2-stage loading."""
+    index_html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    app_js = (STATIC_DIR / "js" / "app.js").read_text(encoding="utf-8")
+
+    assert "data-lenis-prevent" in index_html
+    assert "btn-download-clone" not in index_html
+    assert "clone-fake-loading" in index_html
+    assert "clone-fake-content" in index_html
+    assert "setCloneRightLoading" in app_js
+
