@@ -140,6 +140,11 @@ body.vtv-overlay-open {
   }
 }
 
+body.vtv-overlay-open #vtv-cursor {
+  opacity: 0;
+  visibility: hidden;
+}
+
 .vtv-cursor-dot {
   width: 10px;
   height: 10px;
